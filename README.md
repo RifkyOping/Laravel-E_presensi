@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" width="400" alt="Logo SMKN 1 Majene">
+</p>
+
 # E-Presensi & Sistem Terpadu SMKN 1 Majene
 
 Selamat datang di **E-Presensi & Sistem Terpadu SMKN 1 Majene** – sebuah platform digital resmi untuk memanajemen kehadiran, aktivitas belajar mengajar, serta literasi di SMKN 1 Majene secara terpusat dan modern.
@@ -32,58 +36,6 @@ Aplikasi ini dibagi menjadi beberapa modul dan hak akses (role), yaitu:
 - **Frontend:** Laravel Blade, Tailwind CSS, Alpine.js
 - **Database:** MySQL / MariaDB
 - **Autentikasi:** Laravel Breeze
-
-## ⚙️ Cara Instalasi & Menjalankan (Local Development)
-
-Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi di lingkungan lokal Anda (Windows/Linux/Mac):
-
-1. **Clone repositori ini** (atau *extract* folder jika berupa ZIP):
-   ```bash
-   git clone <url-repo-anda>
-   cd "SMKN 1 Majene/E-Presensi"
-   ```
-
-2. **Install dependensi PHP & Node.js:**
-   ```bash
-   composer install
-   npm install
-   ```
-
-3. **Siapkan file konfigurasi `.env`:**
-   Duplikat file `.env.example` lalu ubah namanya menjadi `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-
-4. **Konfigurasi Database di `.env`:**
-   Sesuaikan bagian database dengan milik lokal Anda (misalnya Laragon/XAMPP):
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=db_epresensi
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-
-5. **Generate App Key & Jalankan Migrasi:**
-   ```bash
-   php artisan key:generate
-   php artisan migrate:fresh --seed
-   ```
-   *(Jika Anda sudah memiliki seeder, perintah di atas akan langsung membuat akun bawaan).*
-
-6. **Kompilasi aset frontend (CSS/JS):**
-   ```bash
-   npm run build
-   ```
-   *(Atau jalankan `npm run dev` untuk hot-reload saat masa development).*
-
-7. **Jalankan Server Lokal Laravel:**
-   ```bash
-   php artisan serve
-   ```
-   Aplikasi dapat diakses melalui browser pada `http://localhost:8000`.
 
 ## 🛡️ Catatan Penting
 - **Akses Kamera:** Karena aplikasi ini menggunakan kamera browser (*webRTC*) untuk absensi mengajar, pastikan server berjalan di `localhost` atau menggunakan protokol `https://` agar perizinan kamera berfungsi di browser (*security policy*).
