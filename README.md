@@ -1,59 +1,93 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# E-Presensi & Sistem Terpadu SMKN 1 Majene
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Selamat datang di **E-Presensi & Sistem Terpadu SMKN 1 Majene** – sebuah platform digital resmi untuk memanajemen kehadiran, aktivitas belajar mengajar, serta literasi di SMKN 1 Majene secara terpusat dan modern.
 
-## About Laravel
+## 🚀 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Aplikasi ini dibagi menjadi beberapa modul dan hak akses (role), yaitu:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Panel Siswa
+- **Absensi Kehadiran:** Mencatat absensi kedatangan dan kepulangan menggunakan integrasi Geofencing.
+- **Literasi Al-Qur'an:** Menambahkan dan melihat riwayat catatan literasi (hafalan/tajwid) harian.
+- **Koleksi E-Book:** Akses interaktif ke perpustakaan digital (E-Book) sekolah. Siswa wajib menjawab kuis pemahaman materi agar progres membacanya meningkat.
+- **Profil Siswa:** Manajemen profil terpusat (NIS, NISN, Kelas, Jurusan, dll).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Panel Guru
+- **Absensi Kehadiran:** Sama halnya dengan siswa, guru dapat melakukan absensi datang dan pulang.
+- **Absensi Mengajar:** Jurnal mengajar harian guru yang wajib difoto secara *live* menggunakan kamera langsung (tidak bisa mengunggah dari galeri) sebagai bukti sahih kehadiran di kelas.
+- **Pemantauan Literasi Siswa:** Mengecek dan membaca catatan literasi Al-Qur'an siswa yang diajar.
 
-## Learning Laravel
+### 3. Panel Kurikulum
+- **Monitoring Mengajar:** Dasbor khusus bagi Waka Kurikulum untuk memantau jurnal mengajar guru secara real-time.
+- **Verifikasi Mengajar:** Kurikulum dapat memverifikasi catatan mengajar setiap guru (dengan status Terverifikasi Mengajar / Tidak Mengajar) dan memberikan catatan verifikasi.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 4. Panel Admin
+- **Master Data:** Manajemen akun pengguna (Admin, Guru, Siswa, dan Kurikulum) serta profil siswa.
+- **Manajemen Geofence:** Mengatur lokasi sekolah dan radius aman agar siswa hanya dapat absen jika berada di area sekolah.
+- **Manajemen E-Book:** Mengelola data buku digital dan membuat kuis/pertanyaan untuk setiap buku bacaan.
+- **Laporan Absensi:** Merekap data kehadiran siswa dan guru.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Teknologi yang Digunakan
+- **Framework:** Laravel 11.x
+- **Frontend:** Laravel Blade, Tailwind CSS, Alpine.js
+- **Database:** MySQL / MariaDB
+- **Autentikasi:** Laravel Breeze
 
-## Laravel Sponsors
+## ⚙️ Cara Instalasi & Menjalankan (Local Development)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi di lingkungan lokal Anda (Windows/Linux/Mac):
 
-### Premium Partners
+1. **Clone repositori ini** (atau *extract* folder jika berupa ZIP):
+   ```bash
+   git clone <url-repo-anda>
+   cd "SMKN 1 Majene/E-Presensi"
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+2. **Install dependensi PHP & Node.js:**
+   ```bash
+   composer install
+   npm install
+   ```
 
-## Contributing
+3. **Siapkan file konfigurasi `.env`:**
+   Duplikat file `.env.example` lalu ubah namanya menjadi `.env`:
+   ```bash
+   cp .env.example .env
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Konfigurasi Database di `.env`:**
+   Sesuaikan bagian database dengan milik lokal Anda (misalnya Laragon/XAMPP):
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=db_epresensi
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
 
-## Code of Conduct
+5. **Generate App Key & Jalankan Migrasi:**
+   ```bash
+   php artisan key:generate
+   php artisan migrate:fresh --seed
+   ```
+   *(Jika Anda sudah memiliki seeder, perintah di atas akan langsung membuat akun bawaan).*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. **Kompilasi aset frontend (CSS/JS):**
+   ```bash
+   npm run build
+   ```
+   *(Atau jalankan `npm run dev` untuk hot-reload saat masa development).*
 
-## Security Vulnerabilities
+7. **Jalankan Server Lokal Laravel:**
+   ```bash
+   php artisan serve
+   ```
+   Aplikasi dapat diakses melalui browser pada `http://localhost:8000`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🛡️ Catatan Penting
+- **Akses Kamera:** Karena aplikasi ini menggunakan kamera browser (*webRTC*) untuk absensi mengajar, pastikan server berjalan di `localhost` atau menggunakan protokol `https://` agar perizinan kamera berfungsi di browser (*security policy*).
+- **Keamanan:** Jalur registrasi mandiri untuk publik (`/register`) telah dinonaktifkan demi alasan keamanan sekolah. Pembuatan akun sepenuhnya berada di tangan Admin.
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🤝 Lisensi
+Sistem ini bersifat hak cipta milik SMKN 1 Majene.
