@@ -1,0 +1,1 @@
+<img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452&ssl=1" alt="Logo Sekolah" {{ $attributes }}>
