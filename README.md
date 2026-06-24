@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" width="400" alt="Logo SMKN 1 Majene">
+  <img src="public/images/logo.png" width="400" alt="Logo SMKN 1 Majene">
 </p>
 
 # E-Presensi & Sistem Terpadu SMKN 1 Majene
