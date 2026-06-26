@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_jadwal_set',
     ];
 
     /**  
@@ -45,7 +46,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_jadwal_set' => 'boolean',
         ];
+    }
+
+    public function jadwalMengajars()
+    {
+        return $this->hasMany(JadwalMengajar::class);
     }
 
     public function progresEbook()
@@ -68,6 +75,7 @@ class User extends Authenticatable
     public function getNisnAttribute() { return $this->siswaProfile?->nisn; }
     public function getKelasAttribute() { return $this->siswaProfile?->kelas; }
     public function getJurusanAttribute() { return $this->siswaProfile?->jurusan; }
+    public function getRombelAttribute() { return $this->siswaProfile?->rombel; }
     public function getJenisKelaminAttribute() { return $this->siswaProfile?->jenis_kelamin; }
     public function getAgamaAttribute() { return $this->siswaProfile?->agama; }
     

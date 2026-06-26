@@ -90,9 +90,6 @@
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Kelas</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Jam ke-</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Waktu</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Materi</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Metode</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Siswa</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -135,10 +132,8 @@
                         </td>
 
                         {{-- Jam ke- --}}
-                        <td class="py-3.5 px-5 text-center">
-                            <span class="inline-flex w-8 h-8 rounded-full bg-[#1e3a6e] text-white items-center justify-center font-black text-sm">
-                                {{ $item->jam_ke }}
-                            </span>
+                        <td class="py-3.5 px-5 text-center font-bold text-slate-700 text-sm">
+                            {{ $item->jam_ke }}
                         </td>
 
                         {{-- Waktu --}}
@@ -150,41 +145,10 @@
                             <span class="text-slate-400"> – {{ Carbon::parse($item->jam_selesai)->format('H:i') }}</span>
                             @endif
                         </td>
-
-                        {{-- Materi --}}
-                        <td class="py-3.5 px-5 max-w-[180px]">
-                            <span class="line-clamp-2 block text-sm text-slate-500 leading-snug">
-                                {{ $item->materi }}
-                            </span>
-                        </td>
-
-                        {{-- Metode --}}
-                        <td class="py-3.5 px-5">
-                            @php
-                                $mc = match($item->metode ?? '') {
-                                    'daring'  => 'bg-purple-50 text-purple-700 border-purple-100',
-                                    'diskusi' => 'bg-sky-50 text-sky-700 border-sky-100',
-                                    'praktik' => 'bg-teal-50 text-teal-700 border-teal-100',
-                                    default   => 'bg-slate-100 text-slate-600 border-slate-200',
-                                };
-                            @endphp
-                            <span class="inline-block px-2.5 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $mc }}">
-                                {{ $item->metode ?? 'luring' }}
-                            </span>
-                        </td>
-
-                        {{-- Jumlah Siswa --}}
-                        <td class="py-3.5 px-5 text-center">
-                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full
-                                         bg-slate-100 text-slate-700 font-black text-sm border border-slate-200">
-                                {{ $item->jumlah_siswa_hadir }}
-                            </span>
-                        </td>
-
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="py-16 text-center">
+                        <td colspan="6" class="py-16 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

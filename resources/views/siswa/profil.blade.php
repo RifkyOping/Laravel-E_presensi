@@ -52,12 +52,7 @@
                 <div class="flex flex-wrap items-center gap-2">
                     @if($siswa->siswaProfile?->kelas)
                     <span class="text-[.7rem] font-bold bg-white/15 hover:bg-white/25 text-white px-3 py-1 rounded-full border border-white/20 transition">
-                        Kelas {{ $siswa->siswaProfile->kelas }}
-                    </span>
-                    @endif
-                    @if($siswa->siswaProfile?->jurusan)
-                    <span class="text-[.7rem] font-bold bg-white/15 hover:bg-white/25 text-white px-3 py-1 rounded-full border border-white/20 transition">
-                        {{ $siswa->siswaProfile->jurusan }}
+                        Kelas {{ $siswa->siswaProfile->kelas }} {{ $siswa->siswaProfile->jurusan }} {{ $siswa->siswaProfile->rombel }}
                     </span>
                     @endif
                     @if($siswa->siswaProfile?->jenis_kelamin)
@@ -134,11 +129,11 @@
                 </div>
 
                 {{-- Kelas & Jurusan — read only --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
-                            Kelas
-                            <span class="text-slate-300 font-normal normal-case ml-1">(dikelola admin)</span>
+                            Tingkat
+                            <span class="text-slate-300 font-normal normal-case ml-1">(admin)</span>
                         </label>
                         <div class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
                             {{ $siswa->siswaProfile?->kelas ?? '—' }}
@@ -147,10 +142,19 @@
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
                             Jurusan
-                            <span class="text-slate-300 font-normal normal-case ml-1">(dikelola admin)</span>
+                            <span class="text-slate-300 font-normal normal-case ml-1">(admin)</span>
                         </label>
                         <div class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
                             {{ $siswa->siswaProfile?->jurusan ?? '—' }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+                            Rombel
+                            <span class="text-slate-300 font-normal normal-case ml-1">(admin)</span>
+                        </label>
+                        <div class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
+                            {{ $siswa->siswaProfile?->rombel ?? '—' }}
                         </div>
                     </div>
                 </div>
@@ -245,7 +249,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
-                Simpan Semua Perubahan
+                Simpan
             </button>
         </div>
     </form>

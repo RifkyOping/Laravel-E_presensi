@@ -57,16 +57,10 @@
         <input type="text" name="search" value="{{ request('search') }}"
                placeholder="Cari nama, kode, atau jurusan..."
                class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-        <select name="tingkat"
-                class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-            <option value="">Semua Tingkat</option>
-            @foreach(['X','XI','XII','Semua'] as $t)
-            <option value="{{ $t }}" {{ request('tingkat')===$t?'selected':'' }}>Kelas {{ $t }}</option>
-            @endforeach
-        </select>
+
         <select name="status"
                 class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-            <option value="">Semua Status</option>
+            <option value="">Status</option>
             <option value="aktif"    {{ request('status')==='aktif'    ?'selected':'' }}>Aktif</option>
             <option value="nonaktif" {{ request('status')==='nonaktif' ?'selected':'' }}>Nonaktif</option>
         </select>
@@ -74,7 +68,7 @@
                 class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">
             Cari
         </button>
-        @if(request()->hasAny(['search','tingkat','status']))
+        @if(request()->hasAny(['search','status']))
         <a href="{{ route('admin.mata-pelajaran.index') }}"
            class="px-4 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm rounded-xl transition text-center">
             Reset
@@ -96,8 +90,6 @@
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">No</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Kode</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Nama Mata Pelajaran</th>
-                        <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Tingkat</th>
-                        <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Jurusan</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Aksi</th>
                     </tr>
@@ -113,16 +105,7 @@
                         </td>
                         <td class="py-3.5 px-5">
                             <p class="font-semibold text-slate-800 text-sm">{{ $mp->nama }}</p>
-                            @if($mp->deskripsi)
-                            <p class="text-xs text-slate-400 mt-0.5 truncate max-w-xs">{{ $mp->deskripsi }}</p>
-                            @endif
                         </td>
-                        <td class="py-3.5 px-5">
-                            <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold bg-blue-50 text-[#1e3a6e] border border-blue-100">
-                                Kelas {{ $mp->tingkat }}
-                            </span>
-                        </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-500">{{ $mp->jurusan ?? '—' }}</td>
                         <td class="py-3.5 px-5 text-center">
                             <form method="POST" action="{{ route('admin.mata-pelajaran.toggle', $mp->id) }}">
                                 @csrf @method('PATCH')
@@ -156,7 +139,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="py-12 text-center text-slate-400 text-sm">
+                        <td colspan="5" class="py-12 text-center text-slate-400 text-sm">
                             Belum ada mata pelajaran.
                         </td>
                     </tr>

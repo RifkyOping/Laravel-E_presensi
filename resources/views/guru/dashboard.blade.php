@@ -105,3 +105,21 @@
 
 </div>
 </x-app-layout>
+
+{{-- Modal Wajib Isi Jadwal --}}
+@if(!Auth::user()->is_jadwal_set)
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl animate-up text-center border-4 border-amber-400">
+        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <span class="text-4xl">📅</span>
+        </div>
+        <h2 class="text-2xl font-black text-slate-800 mb-3">Atur Jadwal Mengajar</h2>
+        <p class="text-slate-600 mb-8 leading-relaxed">
+            Sistem E-Presensi sekarang dilengkapi <strong>Otomatisasi Jurnal Mengajar</strong>. Anda wajib mengatur jadwal mengajar mingguan Anda terlebih dahulu agar sistem dapat membuatkan jurnal harian secara otomatis.
+        </p>
+        <a href="{{ route('guru.jadwal.index') }}" class="block w-full py-3.5 px-6 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 transition-all text-lg">
+            Atur Jadwal Sekarang
+        </a>
+    </div>
+</div>
+@endif

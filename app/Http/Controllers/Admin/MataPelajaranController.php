@@ -19,13 +19,8 @@ class MataPelajaranController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('nama', 'like', '%' . $request->search . '%')
-                  ->orWhere('kode', 'like', '%' . $request->search . '%')
-                  ->orWhere('jurusan', 'like', '%' . $request->search . '%');
+                  ->orWhere('kode', 'like', '%' . $request->search . '%');
             });
-        }
-
-        if ($request->filled('tingkat')) {
-            $query->where('tingkat', $request->tingkat);
         }
 
         if ($request->filled('status')) {
@@ -61,23 +56,16 @@ class MataPelajaranController extends Controller
         $request->validate([
             'nama'      => 'required|string|max:150',
             'kode'      => 'required|string|max:20|unique:mata_pelajaran,kode',
-            'tingkat'   => 'required|in:X,XI,XII,Semua',
-            'jurusan'   => 'nullable|string|max:100',
-            'deskripsi' => 'nullable|string|max:500',
             'aktif'     => 'nullable|boolean',
         ], [
             'nama.required'    => 'Nama mata pelajaran wajib diisi.',
             'kode.required'    => 'Kode mata pelajaran wajib diisi.',
             'kode.unique'      => 'Kode mata pelajaran sudah digunakan.',
-            'tingkat.required' => 'Tingkat kelas wajib dipilih.',
         ]);
 
         MataPelajaran::create([
             'nama'      => $request->nama,
             'kode'      => strtoupper($request->kode),
-            'tingkat'   => $request->tingkat,
-            'jurusan'   => $request->jurusan,
-            'deskripsi' => $request->deskripsi,
             'aktif'     => $request->boolean('aktif', true),
         ]);
 
@@ -103,23 +91,16 @@ class MataPelajaranController extends Controller
         $request->validate([
             'nama'      => 'required|string|max:150',
             'kode'      => 'required|string|max:20|unique:mata_pelajaran,kode,' . $mataPelajaran->id,
-            'tingkat'   => 'required|in:X,XI,XII,Semua',
-            'jurusan'   => 'nullable|string|max:100',
-            'deskripsi' => 'nullable|string|max:500',
             'aktif'     => 'nullable|boolean',
         ], [
             'nama.required'    => 'Nama mata pelajaran wajib diisi.',
             'kode.required'    => 'Kode mata pelajaran wajib diisi.',
             'kode.unique'      => 'Kode mata pelajaran sudah digunakan.',
-            'tingkat.required' => 'Tingkat kelas wajib dipilih.',
         ]);
 
         $mataPelajaran->update([
             'nama'      => $request->nama,
             'kode'      => strtoupper($request->kode),
-            'tingkat'   => $request->tingkat,
-            'jurusan'   => $request->jurusan,
-            'deskripsi' => $request->deskripsi,
             'aktif'     => $request->boolean('aktif', true),
         ]);
 

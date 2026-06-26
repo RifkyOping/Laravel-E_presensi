@@ -152,7 +152,7 @@ class PengawasController extends Controller
 
         $stats = [
             'total'  => User::where('role', 'siswa')->count(),
-            'hadir'  => $absensi->count(),
+            'hadir'  => $absensi->where('status', 'hadir')->count(),
             'belum'  => $semuaSiswa->count() - $absensi->count(),
         ];
 

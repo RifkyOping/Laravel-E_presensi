@@ -127,7 +127,7 @@
         <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-800">Kehadiran Guru Hari Ini</h3>
+                    <h3 class="text-sm font-bold text-slate-800">Absensi Guru Terbaru</h3>
                     <p class="text-xs text-slate-400 mt-0.5">{{ Carbon::today()->translatedFormat('d F Y') }}</p>
                 </div>
                 <a href="{{ route('admin.absensi-guru') }}"
@@ -166,8 +166,16 @@
                             @if($a->waktu_pulang) · Pulang {{ Carbon::parse($a->waktu_pulang)->format('H:i') }} @endif
                         </p>
                     </div>
-                    <span class="text-[.68rem] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-[#1e3a6e] whitespace-nowrap">
-                        Hadir
+                    @php $cls = match($a->status) {
+                        'hadir'=>'bg-blue-50 text-[#1e3a6e] border-blue-100',
+                        'izin'=>'bg-amber-50 text-amber-700 border-amber-100',
+                        'sakit'=>'bg-slate-100 text-slate-600 border-slate-200',
+                        default=>'bg-red-50 text-red-600 border-red-100'
+                    }; @endphp
+                    <span class="text-[.68rem] font-bold px-2.5 py-1 rounded-full whitespace-nowrap {{ $cls }} border capitalize">
+                        {{ $a->status }}
+                        @if($a->status_pengajuan === 'pending') (Pending) @endif
+                        @if($a->status_pengajuan === 'rejected') (Ditolak) @endif
                     </span>
                 </div>
                 @empty

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <span class="text-sm font-bold text-slate-800">Pengaturan Zona Absensi</span>
+        <span class="text-sm font-bold text-slate-800">Pengaturan Absensi & Zona Geofencing</span>
     </x-slot>
 
 <div class="space-y-6 max-w-4xl mx-auto">
@@ -18,7 +18,7 @@
         <div class="flex items-start gap-4">
             <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 text-2xl">📍</div>
             <div>
-                <h2 class="font-black text-slate-800 text-lg">Zona Geofencing Absensi</h2>
+                <h2 class="font-black text-slate-800 text-lg">Pengaturan Absensi & Geofencing</h2>
                 <p class="text-slate-500 text-sm mt-1">
                     Tentukan titik pusat lokasi sekolah dan radius area yang diizinkan untuk melakukan absensi.
                     Siswa dan guru hanya bisa absen jika berada dalam radius yang ditentukan.
@@ -26,6 +26,46 @@
             </div>
         </div>
     </div>
+
+    <form method="POST" action="{{ route('admin.geofence.update') }}" id="form-geofence" class="space-y-6" onsubmit="return confirm('Apakah Anda yakin ingin menyimpan pengaturan ini?')">
+        @csrf
+
+        {{-- Form Jadwal Absensi --}}
+        <div class="app-card p-6 anim-up">
+            <h3 class="font-bold text-slate-800 mb-5 flex items-center gap-2">
+                <span class="w-1.5 h-5 bg-[#1e3a6e] rounded-full inline-block"></span>
+                Jadwal Absensi
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div>
+                    <label class="app-label">Datang Buka <span class="text-red-500">*</span></label>
+                    <input type="time" name="absen_datang_buka" id="input-datang-buka" class="app-input" value="{{ old('absen_datang_buka', \Carbon\Carbon::parse($setting->absen_datang_buka)->format('H:i')) }}" required>
+                </div>
+                <div>
+                    <label class="app-label">Datang Tutup <span class="text-red-500">*</span></label>
+                    <input type="time" name="absen_datang_tutup" id="input-datang-tutup" class="app-input" value="{{ old('absen_datang_tutup', \Carbon\Carbon::parse($setting->absen_datang_tutup)->format('H:i')) }}" required>
+                </div>
+                <div>
+                    <label class="app-label">Pulang Buka <span class="text-red-500">*</span></label>
+                    <input type="time" name="absen_pulang_buka" id="input-pulang-buka" class="app-input" value="{{ old('absen_pulang_buka', \Carbon\Carbon::parse($setting->absen_pulang_buka)->format('H:i')) }}" required>
+                </div>
+                <div>
+                    <label class="app-label">Pulang Tutup <span class="text-red-500">*</span></label>
+                    <input type="time" name="absen_pulang_tutup" id="input-pulang-tutup" class="app-input" value="{{ old('absen_pulang_tutup', \Carbon\Carbon::parse($setting->absen_pulang_tutup)->format('H:i')) }}" required>
+                </div>
+                <div>
+                    <label class="app-label">Status Absen <span class="text-red-500">*</span></label>
+                    <select name="status_absen" id="select-status-absen" class="app-input" required>
+                        <option value="auto" {{ old('status_absen', $setting->status_absen) == 'auto' ? 'selected' : '' }}>Otomatis</option>
+                        <option value="buka" {{ old('status_absen', $setting->status_absen) == 'buka' ? 'selected' : '' }}>Selalu Buka</option>
+                        <option value="tutup" {{ old('status_absen', $setting->status_absen) == 'tutup' ? 'selected' : '' }}>Selalu Tutup</option>
+                    </select>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">
+                * Jika status <b>Otomatis</b>, absen tidak bisa dilakukan di hari Minggu atau di luar jam buka-tutup. Absen Datang maupun Pulang akan diblokir.
+            </p>
+        </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -46,8 +86,7 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('admin.geofence.update') }}" id="form-geofence" class="space-y-4" onsubmit="return confirm('Apakah Anda yakin ingin menetapkan lokasi sekolah dan radius ini?')">
-                @csrf
+            <div class="space-y-4">
 
                 <div>
                     <label class="app-label">Nama Sekolah</label>
@@ -102,10 +141,10 @@
 
                 <div class="pt-2 border-t border-slate-100">
                     <button type="submit" class="btn-primary w-full justify-center py-2.5">
-                        💾 Simpan Pengaturan
+                        Simpan Pengaturan
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
 
         {{-- Peta Preview --}}
@@ -128,6 +167,7 @@
             </div>
         </div>
     </div>
+    </form>
 
 </div>
 
@@ -268,5 +308,28 @@
             { enableHighAccuracy: true, timeout: 10000 }
         );
     }
+
+    // Toggle readonly untuk jam absen berdasarkan status absen
+    function toggleTimeInputs() {
+        const status = document.getElementById('select-status-absen').value;
+        const isAuto = status === 'auto';
+        
+        ['input-datang-buka', 'input-datang-tutup', 'input-pulang-buka', 'input-pulang-tutup'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                // Gunakan readonly agar data tetap disubmit ke backend
+                el.readOnly = !isAuto;
+                if (!isAuto) {
+                    el.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                } else {
+                    el.classList.remove('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                }
+            }
+        });
+    }
+
+    document.getElementById('select-status-absen').addEventListener('change', toggleTimeInputs);
+    window.addEventListener('load', toggleTimeInputs);
+
 </script>
 </x-app-layout>

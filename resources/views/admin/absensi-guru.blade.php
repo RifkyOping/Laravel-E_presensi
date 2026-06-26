@@ -20,7 +20,7 @@
             </div>
             <div class="flex gap-3 flex-wrap">
                 <div class="bg-white/15 rounded-xl px-5 py-3 text-center min-w-[80px]">
-                    <p class="text-white text-2xl font-black">{{ $absensi->count() }}</p>
+                    <p class="text-white text-2xl font-black">{{ $absensi->where('status', 'hadir')->count() }}</p>
                     <p class="text-blue-300 text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
                 </div>
                 <div class="bg-white/10 rounded-xl px-5 py-3 text-center min-w-[80px]">
@@ -92,7 +92,7 @@
                 <h3 class="font-bold text-slate-800">Rekap Kehadiran</h3>
                 <p class="text-xs text-slate-400 mt-0.5">{{ $tanggal->translatedFormat('l, d F Y') }}</p>
             </div>
-            @php $pct = $semuaGuru->count() > 0 ? round(($absensi->count() / $semuaGuru->count()) * 100) : 0; @endphp
+            @php $pct = $semuaGuru->count() > 0 ? round(($absensi->where('status', 'hadir')->count() / $semuaGuru->count()) * 100) : 0; @endphp
             <div class="flex items-center gap-3">
                 <div class="text-right">
                     <p class="text-xs text-slate-400 font-semibold">Tingkat Kehadiran</p>
@@ -171,11 +171,18 @@
                         </td>
                         <td class="py-3.5 px-5 text-center">
                             @if($record)
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold
-                                         bg-blue-50 text-[#1e3a6e] border border-blue-100">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#1e3a6e]"></span>
-                                Hadir
-                            </span>
+                                @php $cls = match($record->status) {
+                                    'hadir' => 'bg-blue-50 text-[#1e3a6e] border-blue-100',
+                                    'izin'  => 'bg-amber-50 text-amber-700 border-amber-100',
+                                    'sakit' => 'bg-slate-100 text-slate-600 border-slate-200',
+                                    default => 'bg-red-50 text-red-600 border-red-100'
+                                }; @endphp
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $cls }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ match($record->status) { 'hadir'=>'bg-[#1e3a6e]', 'izin'=>'bg-amber-500', 'sakit'=>'bg-slate-400', default=>'bg-red-500' } }}"></span>
+                                    {{ $record->status }}
+                                    @if($record->status_pengajuan === 'pending') (Pending) @endif
+                                    @if($record->status_pengajuan === 'rejected') (Ditolak) @endif
+                                </span>
                             @else
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold
                                          bg-red-50 text-red-500 border border-red-100">
@@ -245,6 +252,8 @@
                             }; @endphp
                             <span class="inline-block px-2.5 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $sc }}">
                                 {{ ucfirst($r->status) }}
+                                @if($r->status_pengajuan === 'pending') (Pending) @endif
+                                @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
                             </span>
                         </td>
                     </tr>

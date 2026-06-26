@@ -44,7 +44,7 @@
             @php
                 $statusCards = [
                     ['label' => 'Izin', 'value' => $stats['guru_izin'], 'cls' => 'b-amber'],
-                    ['label' => 'Sakit', 'value' => $stats['guru_sakit'], 'cls' => 'b-blue'],
+                    ['label' => 'Sakit', 'value' => $stats['guru_sakit'], 'cls' => 'b-slate'],
                     ['label' => 'Alpha', 'value' => $stats['guru_alpha'], 'cls' => 'b-red'],
                 ];
             @endphp
@@ -65,7 +65,7 @@
             <div class="pw-card overflow-hidden animate-up delay-2">
                 <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-sm">Guru Hadir Hari Ini</h3>
+                        <h3 class="font-bold text-slate-800 text-sm">Absensi Guru Terbaru</h3>
                         <p class="text-xs text-slate-400 mt-0.5">{{ Carbon::today()->translatedFormat('d F Y') }}</p>
                     </div>
                     <a href="{{ route('pengawas.absensi-guru') }}"
@@ -88,7 +88,14 @@
                                     WITA @endif
                                 </p>
                             </div>
-                            <span class="pw-badge b-blue">Hadir</span>
+                            @php $cls = match($a->status) {
+                                'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
+                            }; @endphp
+                            <span class="pw-badge {{ $cls }} capitalize">
+                                {{ $a->status }}
+                                @if($a->status_pengajuan === 'pending') (Pending) @endif
+                                @if($a->status_pengajuan === 'rejected') (Ditolak) @endif
+                            </span>
                         </div>
                     @empty
                         <p class="px-5 py-8 text-center text-slate-400 text-sm">Belum ada guru yang absen.</p>

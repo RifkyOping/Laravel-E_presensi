@@ -29,6 +29,9 @@
                         <x-nav-link :href="route('admin.aktivitas-guru')" :active="request()->routeIs('admin.aktivitas-guru')">
                             {{ __('Aktivitas Mengajar') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.persetujuan-absensi')" :active="request()->routeIs('admin.persetujuan-absensi')">
+                            {{ __('Persetujuan Absensi') }}
+                        </x-nav-link>
                     @endif
 
                     <!-- Tambahan Menu Khusus Siswa (Desktop) -->
@@ -117,6 +120,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.aktivitas-guru')" :active="request()->routeIs('admin.aktivitas-guru')">
                     {{ __('Aktivitas Mengajar') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.persetujuan-absensi')" :active="request()->routeIs('admin.persetujuan-absensi')">
+                    {{ __('Persetujuan Absensi') }}
                 </x-responsive-nav-link>
             @endif
 

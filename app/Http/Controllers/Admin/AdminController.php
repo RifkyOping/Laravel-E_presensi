@@ -77,7 +77,11 @@ class AdminController extends Controller
 
     public function createUser()
     {
-        return view('admin.users.create');
+        $tingkats = \App\Models\Kelas::where('status', true)->select('tingkat')->distinct()->pluck('tingkat');
+        $jurusans = \App\Models\Kelas::where('status', true)->select('jurusan')->distinct()->pluck('jurusan');
+        $rombels  = \App\Models\Kelas::where('status', true)->select('rombel')->distinct()->pluck('rombel');
+
+        return view('admin.users.create', compact('tingkats', 'jurusans', 'rombels'));
     }
 
     public function storeUser(Request $request)
@@ -94,6 +98,7 @@ class AdminController extends Controller
             $rules['nisn']           = 'nullable|string|max:20|unique:siswa_profiles,nisn';
             $rules['kelas']          = 'nullable|string|max:50';
             $rules['jurusan']        = 'nullable|string|max:100';
+            $rules['rombel']         = 'nullable|string|max:50';
             $rules['jenis_kelamin']  = 'nullable|in:L,P';
             $rules['tempat_lahir']   = 'nullable|string|max:100';
             $rules['tanggal_lahir']  = 'nullable|date';
@@ -127,6 +132,7 @@ class AdminController extends Controller
                 'nisn'          => $request->nisn ?: null,
                 'kelas'         => $request->kelas,
                 'jurusan'       => $request->jurusan,
+                'rombel'        => $request->rombel,
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'tempat_lahir'  => $request->tempat_lahir,
                 'tanggal_lahir' => $request->tanggal_lahir,
@@ -226,7 +232,11 @@ class AdminController extends Controller
 
     public function editUser(User $user)
     {
-        return view('admin.users.edit', compact('user'));
+        $tingkats = \App\Models\Kelas::where('status', true)->select('tingkat')->distinct()->pluck('tingkat');
+        $jurusans = \App\Models\Kelas::where('status', true)->select('jurusan')->distinct()->pluck('jurusan');
+        $rombels  = \App\Models\Kelas::where('status', true)->select('rombel')->distinct()->pluck('rombel');
+
+        return view('admin.users.edit', compact('user', 'tingkats', 'jurusans', 'rombels'));
     }
 
     public function updateUser(Request $request, User $user)
@@ -244,6 +254,7 @@ class AdminController extends Controller
             $rules['nisn']          = 'nullable|string|max:20|unique:siswa_profiles,nisn,' . $profileId;
             $rules['kelas']         = 'nullable|string|max:50';
             $rules['jurusan']       = 'nullable|string|max:100';
+            $rules['rombel']        = 'nullable|string|max:50';
             $rules['jenis_kelamin'] = 'nullable|in:L,P';
             $rules['tempat_lahir']  = 'nullable|string|max:100';
             $rules['tanggal_lahir'] = 'nullable|date';
@@ -281,6 +292,7 @@ class AdminController extends Controller
                     'nisn'          => $request->nisn ?: null,
                     'kelas'         => $request->kelas,
                     'jurusan'       => $request->jurusan,
+                    'rombel'        => $request->rombel,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'tempat_lahir'  => $request->tempat_lahir,
                     'tanggal_lahir' => $request->tanggal_lahir,
@@ -417,6 +429,11 @@ class AdminController extends Controller
             'longitude'    => 'required|numeric|between:-180,180',
             'radius_meter' => 'required|integer|min:50|max:5000',
             'nama_sekolah' => 'required|string|max:255',
+            'absen_datang_buka'  => 'required|date_format:H:i',
+            'absen_datang_tutup' => 'required|date_format:H:i',
+            'absen_pulang_buka'  => 'required|date_format:H:i',
+            'absen_pulang_tutup' => 'required|date_format:H:i',
+            'status_absen' => 'required|in:auto,buka,tutup',
         ], [
             'latitude.required'     => 'Latitude wajib diisi.',
             'latitude.between'      => 'Latitude harus antara -90 dan 90.',
@@ -426,6 +443,12 @@ class AdminController extends Controller
             'radius_meter.min'      => 'Radius minimal 50 meter.',
             'radius_meter.max'      => 'Radius maksimal 5000 meter.',
             'nama_sekolah.required' => 'Nama sekolah wajib diisi.',
+            'absen_datang_buka.required'  => 'Jam buka absen datang wajib diisi.',
+            'absen_datang_tutup.required' => 'Jam tutup absen datang wajib diisi.',
+            'absen_pulang_buka.required'  => 'Jam buka absen pulang wajib diisi.',
+            'absen_pulang_tutup.required' => 'Jam tutup absen pulang wajib diisi.',
+            'status_absen.required' => 'Status absen wajib dipilih.',
+            'status_absen.in'       => 'Status absen tidak valid.',
         ]);
 
         $setting = SchoolSetting::get();
@@ -434,10 +457,20 @@ class AdminController extends Controller
             'longitude'    => $request->longitude,
             'radius_meter' => $request->radius_meter,
             'nama_sekolah' => $request->nama_sekolah,
+            'absen_datang_buka'  => $request->absen_datang_buka,
+            'absen_datang_tutup' => $request->absen_datang_tutup,
+            'absen_pulang_buka'  => $request->absen_pulang_buka,
+            'absen_pulang_tutup' => $request->absen_pulang_tutup,
+            'status_absen' => $request->status_absen,
         ]);
 
+        if ($request->status_absen === 'tutup') {
+            \Illuminate\Support\Facades\Artisan::call('presensi:cek-alpha');
+            \Illuminate\Support\Facades\Artisan::call('presensi:cek-lupa-pulang');
+        }
+
         return redirect()->route('admin.geofence')
-            ->with('success', 'Pengaturan zona absensi berhasil disimpan.');
+            ->with('success', 'Pengaturan absensi berhasil disimpan.');
     }
 
     // ──────────────────────────────────────────
@@ -479,7 +512,7 @@ class AdminController extends Controller
 
         $stats = [
             'total'  => User::where('role', 'siswa')->count(),
-            'hadir'  => $absensi->count(),
+            'hadir'  => $absensi->where('status', 'hadir')->count(),
             'belum'  => $semuaSiswa->count() - $absensi->count(),
         ];
 
@@ -527,5 +560,63 @@ class AdminController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    // ──────────────────────────────────────────
+    //  PERSETUJUAN IZIN / SAKIT (ADMIN)
+    // ──────────────────────────────────────────
+
+    public function persetujuanAbsensi()
+    {
+        $pengajuanSiswa = AbsensiSiswa::with('user')
+            ->where('status_pengajuan', 'pending')
+            ->orderByDesc('tanggal')
+            ->get();
+            
+        $pengajuanGuru = AbsensiGuru::with('user')
+            ->where('status_pengajuan', 'pending')
+            ->orderByDesc('tanggal')
+            ->get();
+            
+        $riwayatSiswa = AbsensiSiswa::with('user')
+            ->whereNotNull('status_pengajuan')
+            ->where('status_pengajuan', '!=', 'pending')
+            ->orderByDesc('updated_at')
+            ->take(30)
+            ->get();
+            
+        $riwayatGuru = AbsensiGuru::with('user')
+            ->whereNotNull('status_pengajuan')
+            ->where('status_pengajuan', '!=', 'pending')
+            ->orderByDesc('updated_at')
+            ->take(30)
+            ->get();
+            
+        return view('admin.persetujuan-absensi', compact('pengajuanSiswa', 'pengajuanGuru', 'riwayatSiswa', 'riwayatGuru'));
+    }
+
+    public function approvePengajuan($type, $id)
+    {
+        $model = $type === 'siswa' ? AbsensiSiswa::findOrFail($id) : AbsensiGuru::findOrFail($id);
+        
+        $model->update([
+            'status_pengajuan' => 'approved',
+            'is_notified' => false,
+        ]);
+        
+        return back()->with('success', 'Pengajuan berhasil disetujui.');
+    }
+
+    public function rejectPengajuan($type, $id)
+    {
+        $model = $type === 'siswa' ? AbsensiSiswa::findOrFail($id) : AbsensiGuru::findOrFail($id);
+        
+        $model->update([
+            'status_pengajuan' => 'rejected',
+            'status' => 'alpha',
+            'is_notified' => false,
+        ]);
+        
+        return back()->with('success', 'Pengajuan ditolak. Status kehadiran diubah menjadi Alpha.');
     }
 }

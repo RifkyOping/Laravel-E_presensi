@@ -12,14 +12,21 @@ class AbsensiSiswa extends Model
     protected $fillable = [
         'user_id',
         'tanggal',
+        'tanggal_selesai',
         'waktu_datang',
         'waktu_pulang',
         'status',
         'keterangan',
+        'latitude',
+        'longitude',
+        'file_bukti',
+        'status_pengajuan',
+        'is_notified',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
+        'tanggal_selesai' => 'date',
     ];
 
     public function user(): BelongsTo

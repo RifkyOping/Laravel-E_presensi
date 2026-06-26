@@ -79,7 +79,6 @@
                     <th>Kelas</th>
                     <th class="text-center">Jam ke-</th>
                     <th>Waktu</th>
-                    <th>Materi</th>
                     <th class="text-center">Foto</th>
                     <th class="text-center">Status</th>
                     <th class="text-center">Aksi</th>
@@ -101,16 +100,11 @@
                         <td>{{ $item->mata_pelajaran }}</td>
                         <td><span class="kur-badge b-blue">{{ $item->kelas }}</span></td>
                         <td class="text-center">
-                            <span class="inline-flex w-7 h-7 rounded-full bg-[#1e3a6e] text-white items-center justify-center font-bold text-xs">
                                 {{ $item->jam_ke }}
-                            </span>
                         </td>
                         <td class="whitespace-nowrap">
                             {{ Carbon::parse($item->jam_mulai)->format('H:i') }}
                             @if($item->jam_selesai) – {{ Carbon::parse($item->jam_selesai)->format('H:i') }} @endif
-                        </td>
-                        <td class="max-w-[160px]">
-                            <span class="line-clamp-2 block text-slate-600 text-xs">{{ $item->materi }}</span>
                         </td>
                         <td class="text-center">
                             @if($item->foto_verifikasi)
@@ -160,7 +154,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="10" class="text-center py-10 text-slate-400">Tidak ada data aktivitas mengajar.</td></tr>
+                    <tr><td colspan="9" class="text-center py-10 text-slate-400">Tidak ada data aktivitas mengajar.</td></tr>
                     @endforelse
                 </tbody>
             </table>

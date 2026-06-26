@@ -39,42 +39,32 @@
             </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full pw-tbl">
+            <table class="w-full pw-tbl text-center">
                 <thead><tr>
-                    <th>Tanggal</th><th>Guru</th><th>Mata Pelajaran</th>
-                    <th>Kelas</th><th class="text-center">Jam ke-</th>
-                    <th>Waktu</th><th>Materi</th><th>Metode</th>
-                    <th class="text-center">Siswa Hadir</th>
+                    <th class="text-center">Tanggal</th>
+                    <th class="text-center">Guru</th>
+                    <th class="text-center">Mata Pelajaran</th>
+                    <th class="text-center">Kelas</th>
+                    <th class="text-center">Jam ke-</th>
+                    <th class="text-center">Waktu</th>
                 </tr></thead>
                 <tbody>
                     @forelse($aktivitas as $item)
                     <tr>
-                        <td class="font-semibold whitespace-nowrap">{{ Carbon::parse($item->tanggal)->format('d M Y') }}</td>
-                        <td class="font-semibold text-slate-800">{{ $item->user->name }}</td>
-                        <td>{{ $item->mata_pelajaran }}</td>
-                        <td><span class="pw-badge b-blue">{{ $item->kelas }}</span></td>
-                        <td class="text-center">
-                            <span class="inline-flex w-7 h-7 rounded-full bg-[#1e3a6e] text-white items-center justify-center font-bold text-xs">
+                        <td class="font-semibold whitespace-nowrap text-center">{{ Carbon::parse($item->tanggal)->format('d M Y') }}</td>
+                        <td class="font-semibold text-slate-800 text-center">{{ $item->user->name }}</td>
+                        <td class="text-center">{{ $item->mata_pelajaran }}</td>
+                        <td class="text-center"><span class="pw-badge b-blue">{{ $item->kelas }}</span></td>
+                        <td class="text-center font-bold">
                                 {{ $item->jam_ke }}
-                            </span>
                         </td>
-                        <td class="whitespace-nowrap">
+                        <td class="whitespace-nowrap text-center">
                             {{ Carbon::parse($item->jam_mulai)->format('H:i') }}
                             @if($item->jam_selesai) – {{ Carbon::parse($item->jam_selesai)->format('H:i') }} @endif
                         </td>
-                        <td class="max-w-xs">
-                            <span class="line-clamp-2 block text-slate-600">{{ $item->materi }}</span>
-                        </td>
-                        <td>
-                            @php $mc = match($item->metode) {
-                                'daring'=>'b-purple','diskusi'=>'b-blue','praktik'=>'b-blue','ceramah'=>'b-blue',default=>'b-slate'
-                            }; @endphp
-                            <span class="pw-badge {{ $mc }} capitalize">{{ $item->metode }}</span>
-                        </td>
-                        <td class="text-center font-bold text-slate-800">{{ $item->jumlah_siswa_hadir }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="9" class="text-center py-10 text-slate-400">Tidak ada data aktivitas mengajar.</td></tr>
+                    <tr><td colspan="6" class="text-center py-10 text-slate-400">Tidak ada data aktivitas mengajar.</td></tr>
                     @endforelse
                 </tbody>
             </table>

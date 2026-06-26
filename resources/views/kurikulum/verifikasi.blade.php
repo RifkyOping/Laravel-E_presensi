@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="p-5 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+        <div class="p-5 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
             <div>
                 <p class="kur-label">Tanggal</p>
                 <p class="font-semibold text-slate-800">{{ Carbon::parse($aktivitas->tanggal)->translatedFormat('d F Y') }}</p>
@@ -48,20 +48,6 @@
                     WITA
                 </p>
             </div>
-            <div>
-                <p class="kur-label">Metode</p>
-                <span class="kur-badge b-blue capitalize">{{ $aktivitas->metode }}</span>
-            </div>
-            <div class="col-span-2 sm:col-span-4">
-                <p class="kur-label">Materi</p>
-                <p class="text-slate-700">{{ $aktivitas->materi }}</p>
-            </div>
-            @if($aktivitas->keterangan)
-            <div class="col-span-2 sm:col-span-4">
-                <p class="kur-label">Keterangan Guru</p>
-                <p class="text-slate-600 text-sm">{{ $aktivitas->keterangan }}</p>
-            </div>
-            @endif
         </div>
 
         {{-- Status verifikasi sebelumnya --}}

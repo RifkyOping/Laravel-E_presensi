@@ -37,32 +37,7 @@
                 @error('kode')<p class="text-red-500 text-xs font-semibold mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tingkat Kelas <span class="text-red-500">*</span></label>
-                    <select name="tingkat"
-                            class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white @error('tingkat') border-red-300 @enderror">
-                        <option value="">-- Pilih Tingkat --</option>
-                        @foreach(['X','XI','XII','Semua'] as $t)
-                        <option value="{{ $t }}" {{ old('tingkat')===$t?'selected':'' }}>
-                            {{ $t==='Semua' ? 'Semua Tingkat' : 'Kelas '.$t }}
-                        </option>
-                        @endforeach
-                    </select>
-                    @error('tingkat')<p class="text-red-500 text-xs font-semibold mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Jurusan <span class="text-slate-400 font-medium normal-case">(opsional)</span></label>
-                    <input type="text" name="jurusan" value="{{ old('jurusan') }}" placeholder="Contoh: TKJ, RPL, AK"
-                           class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                </div>
-            </div>
 
-            <div>
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Deskripsi <span class="text-slate-400 font-medium normal-case">(opsional)</span></label>
-                <textarea name="deskripsi" rows="3" placeholder="Deskripsi singkat tentang mata pelajaran ini..."
-                          class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm resize-none">{{ old('deskripsi') }}</textarea>
-            </div>
 
             <div class="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
                 <input type="hidden" name="aktif" value="0">

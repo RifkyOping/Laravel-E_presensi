@@ -104,6 +104,7 @@
             @endforeach
         </div>
     </div>
+    @endif
 
     {{-- Info --}}
     <div class="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">

@@ -15,6 +15,7 @@ class SiswaProfile extends Model
         'nisn',
         'kelas',
         'jurusan',
+        'rombel',
         'jenis_kelamin',
         'tempat_lahir',
         'tanggal_lahir',

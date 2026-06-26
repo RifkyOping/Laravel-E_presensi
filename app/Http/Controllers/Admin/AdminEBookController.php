@@ -18,7 +18,9 @@ class AdminEBookController extends Controller
 
     public function create()
     {
-        return view('admin.ebook.create');
+        $maxLevel = EBook::max('level');
+        $nextLevel = $maxLevel ? $maxLevel + 1 : 1;
+        return view('admin.ebook.create', compact('nextLevel'));
     }
 
     public function store(Request $request)

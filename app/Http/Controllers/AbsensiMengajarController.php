@@ -39,7 +39,13 @@ class AbsensiMengajarController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('guru.aktivitas', compact('hariIni', 'riwayat', 'tanggalRiwayat'));
+        // Ambil data unik untuk dropdown kelas
+        $tingkats = \App\Models\Kelas::where('status', true)->select('tingkat')->distinct()->pluck('tingkat');
+        $jurusans = \App\Models\Kelas::where('status', true)->select('jurusan')->distinct()->pluck('jurusan');
+        $rombels  = \App\Models\Kelas::where('status', true)->select('rombel')->distinct()->pluck('rombel');
+        $mapels   = \App\Models\MataPelajaran::where('aktif', true)->orderBy('nama')->pluck('nama');
+
+        return view('guru.aktivitas', compact('hariIni', 'riwayat', 'tanggalRiwayat', 'tingkats', 'jurusans', 'rombels', 'mapels'));
     }
 
     /**
@@ -49,36 +55,31 @@ class AbsensiMengajarController extends Controller
     {
         $request->validate([
             'mata_pelajaran'    => 'required|string|max:100',
-            'kelas'             => 'required|string|max:20',
-            'jam_ke'            => 'required|integer|min:1|max:12',
+            'tingkat'           => 'required|string',
+            'jurusan'           => 'required|string',
+            'rombel'            => 'required|string',
+            'jam_ke'            => 'required|integer|min:1',
             'jam_mulai'         => 'required',
             'jam_selesai'       => 'nullable',
-            'materi'            => 'required|string|max:500',
-            'metode'            => 'required|in:daring,luring',
-            'jumlah_siswa_hadir'=> 'required|integer|min:0',
-            'keterangan'        => 'nullable|string|max:500',
         ], [
             'mata_pelajaran.required' => 'Mata pelajaran wajib diisi.',
-            'kelas.required'          => 'Kelas wajib diisi.',
+            'tingkat.required'        => 'Tingkat wajib dipilih.',
+            'jurusan.required'        => 'Jurusan wajib dipilih.',
+            'rombel.required'         => 'Rombel wajib dipilih.',
             'jam_ke.required'         => 'Jam ke- wajib diisi.',
             'jam_mulai.required'      => 'Jam mulai wajib diisi.',
-            'materi.required'         => 'Materi wajib diisi.',
-            'metode.required'         => 'Metode mengajar wajib dipilih.',
-            'jumlah_siswa_hadir.required' => 'Jumlah siswa hadir wajib diisi.',
         ]);
+
+        $kelasStr = $request->tingkat . ' ' . $request->jurusan . ' ' . $request->rombel;
 
         AbsensiMengajar::create([
             'user_id'            => Auth::id(),
             'tanggal'            => Carbon::today()->toDateString(),
             'mata_pelajaran'     => $request->mata_pelajaran,
-            'kelas'              => $request->kelas,
+            'kelas'              => $kelasStr,
             'jam_ke'             => $request->jam_ke,
             'jam_mulai'          => $request->jam_mulai,
             'jam_selesai'        => $request->jam_selesai,
-            'materi'             => $request->materi,
-            'metode'             => $request->metode,
-            'jumlah_siswa_hadir' => $request->jumlah_siswa_hadir,
-            'keterangan'         => $request->keterangan,
         ]);
 
         return back()->with('success', 'Aktivitas mengajar berhasil dicatat!');

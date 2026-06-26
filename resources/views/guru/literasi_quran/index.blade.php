@@ -178,7 +178,7 @@
                                         ['label' => 'Nama Lengkap',      'value' => $siswa->name],
                                         ['label' => 'NIS',               'value' => $siswa->nis ?? '-'],
                                         ['label' => 'NISN',              'value' => $siswa->nisn ?? '-'],
-                                        ['label' => 'Kelas - Jurusan',   'value' => ($siswa->kelas && $siswa->jurusan) ? $siswa->kelas . ' · ' . $siswa->jurusan : ($siswa->kelas ?? '-')],
+                                        ['label' => 'Kelas - Jurusan',   'value' => ($siswa->kelas && $siswa->jurusan) ? $siswa->kelas . ' ' . $siswa->jurusan . ' ' . $siswa->rombel : ($siswa->kelas ?? '-')],
                                         ['label' => 'Jenis Kelamin',     'value' => $siswa->jenis_kelamin_lengkap],
                                         ['label' => 'Tempat, Tgl Lahir', 'value' => $siswa->tempat_tanggal_lahir],
                                         ['label' => 'Agama',             'value' => $siswa->agama ?? '-'],

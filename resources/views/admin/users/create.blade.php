@@ -107,16 +107,33 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Kelas</label>
-                        <input type="text" name="kelas" value="{{ old('kelas') }}" placeholder="Contoh: X, XI, XII"
-                               class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tingkat</label>
+                        <select name="kelas" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                            <option value="">Pilih Tingkat</option>
+                            @foreach ($tingkats as $t)
+                                <option value="{{ $t }}" {{ old('kelas') === $t ? 'selected' : '' }}>{{ $t }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Jurusan</label>
-                        <input type="text" name="jurusan" value="{{ old('jurusan') }}" placeholder="Contoh: RPL, TKJ, AKL"
-                               class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+                        <select name="jurusan" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                            <option value="">Pilih Jurusan</option>
+                            @foreach ($jurusans as $j)
+                                <option value="{{ $j }}" {{ old('jurusan') === $j ? 'selected' : '' }}>{{ $j }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Rombel</label>
+                        <select name="rombel" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                            <option value="">Pilih Rombel</option>
+                            @foreach ($rombels as $r)
+                                <option value="{{ $r }}" {{ old('rombel') === $r ? 'selected' : '' }}>{{ $r }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

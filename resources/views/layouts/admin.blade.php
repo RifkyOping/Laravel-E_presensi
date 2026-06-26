@@ -125,12 +125,18 @@
                 <span class="text-lg">📚</span> Aktivitas Mengajar
             </a>
 
+            <a href="{{ route('admin.persetujuan-absensi') }}"
+                class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
+                    {{ request()->routeIs('admin.persetujuan-absensi') ? 'active' : 'text-white/80 hover:text-white' }}">
+                <span class="text-lg">✅</span> Persetujuan Absensi
+            </a>
+
             <p class="text-[10px] font-black uppercase tracking-widest text-white/40 px-3 mt-5 mb-2">Pengaturan</p>
 
             <a href="{{ route('admin.geofence') }}"
                 class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
                     {{ request()->routeIs('admin.geofence') ? 'active' : 'text-white/80 hover:text-white' }}">
-                <span class="text-lg">📍</span> Geofence Lokasi
+                <span class="text-lg">📍</span> Pengaturan Absensi
             </a>
         </nav>
 

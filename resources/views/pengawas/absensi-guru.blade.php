@@ -51,7 +51,7 @@
             <div class="flex items-center gap-2 flex-wrap">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                    Hadir: {{ $absensi->count() }}
+                    Hadir: {{ $absensi->where('status', 'hadir')->count() }}
                 </span>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>
@@ -112,7 +112,11 @@
                                     'sakit' => 'b-slate',
                                     default => 'b-red'
                                 }; @endphp
-                                <span class="pw-badge {{ $cls }} capitalize">{{ $record->status }}</span>
+                                <span class="pw-badge {{ $cls }} capitalize">
+                                    {{ $record->status }}
+                                    @if($record->status_pengajuan === 'pending') (Pending) @endif
+                                    @if($record->status_pengajuan === 'rejected') (Ditolak) @endif
+                                </span>
                             @else
                                 <span class="pw-badge b-slate">Belum Absen</span>
                             @endif
@@ -201,7 +205,11 @@
                                 'sakit' => 'b-slate',
                                 default => 'b-red'
                             }; @endphp
-                            <span class="pw-badge {{ $cls }} capitalize">{{ $r->status }}</span>
+                            <span class="pw-badge {{ $cls }} capitalize">
+                                {{ $r->status }}
+                                @if($r->status_pengajuan === 'pending') (Pending) @endif
+                                @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
+                            </span>
                         </td>
                     </tr>
                     @empty

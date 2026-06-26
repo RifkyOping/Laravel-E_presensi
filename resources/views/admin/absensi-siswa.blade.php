@@ -108,7 +108,7 @@
         <div class="app-card overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                    <h3 class="font-bold text-slate-800 text-sm">Siswa Hadir</h3>
+                    <h3 class="font-bold text-slate-800 text-sm">Sudah Tercatat</h3>
                     <p class="text-xs text-slate-400 mt-0.5">{{ $tanggal->translatedFormat('l, d F Y') }}</p>
                 </div>
                 <span class="app-badge b-blue">{{ $siswaHadir->count() }} siswa</span>
@@ -130,7 +130,11 @@
                     @php $cls = match($rec?->status) {
                         'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
                     }; @endphp
-                    <span class="app-badge {{ $cls }} capitalize">{{ $rec?->status ?? '—' }}</span>
+                    <span class="app-badge {{ $cls }} capitalize">
+                        {{ $rec?->status ?? '—' }}
+                        @if($rec && $rec->status_pengajuan === 'pending') (Pending) @endif
+                        @if($rec && $rec->status_pengajuan === 'rejected') (Ditolak) @endif
+                    </span>
                 </div>
                 @empty
                 <p class="px-5 py-8 text-center text-slate-400 text-sm">Belum ada siswa yang absen hari ini.</p>
@@ -142,7 +146,7 @@
         <div class="app-card overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                    <h3 class="font-bold text-slate-800 text-sm">Siswa Belum Absen</h3>
+                    <h3 class="font-bold text-slate-800 text-sm">Belum Tercatat</h3>
                     <p class="text-xs text-slate-400 mt-0.5">Sampai saat ini</p>
                 </div>
                 <span class="app-badge b-red">{{ $siswaBelum->count() }} siswa</span>
@@ -193,7 +197,11 @@
                             @php $cls = match($r->status) {
                                 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
                             }; @endphp
-                            <span class="app-badge {{ $cls }} capitalize">{{ $r->status }}</span>
+                            <span class="app-badge {{ $cls }} capitalize">
+                                {{ $r->status }}
+                                @if($r->status_pengajuan === 'pending') (Pending) @endif
+                                @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
+                            </span>
                         </td>
                     </tr>
                     @empty

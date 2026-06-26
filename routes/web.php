@@ -84,6 +84,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/guru/literasi/quran/catatan',                [LiterasiQuranController::class, 'store'])->name('guru.literasi.quran.store');
     Route::put('/guru/literasi/quran/catatan/{catatan}',       [LiterasiQuranController::class, 'update'])->name('guru.literasi.quran.update');
     Route::delete('/guru/literasi/quran/catatan/{catatan}',    [LiterasiQuranController::class, 'destroy'])->name('guru.literasi.quran.destroy');
+
+    // Guru - Jadwal Mengajar
+    Route::get('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'index'])->name('guru.jadwal.index');
+    Route::post('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'store'])->name('guru.jadwal.store');
 });
 
 require __DIR__.'/auth.php';
@@ -111,9 +115,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/absensi-siswa',  [AdminController::class, 'absensiSiswa'])->name('absensi-siswa');
     Route::get('/absensi-siswa/export', [AdminController::class, 'exportAbsensiSiswa'])->name('absensi-siswa.export');
 
+    // Persetujuan Izin/Sakit
+    Route::get('/persetujuan-absensi', [AdminController::class, 'persetujuanAbsensi'])->name('persetujuan-absensi');
+    Route::post('/persetujuan-absensi/{type}/{id}/approve', [AdminController::class, 'approvePengajuan'])->name('persetujuan-absensi.approve');
+    Route::post('/persetujuan-absensi/{type}/{id}/reject', [AdminController::class, 'rejectPengajuan'])->name('persetujuan-absensi.reject');
+
     // Mata Pelajaran
     Route::resource('/mata-pelajaran', MataPelajaranController::class)->names('mata-pelajaran');
     Route::patch('/mata-pelajaran/{mataPelajaran}/toggle', [MataPelajaranController::class, 'toggleAktif'])->name('mata-pelajaran.toggle');
+
+    // Kelas
+    Route::resource('/kelas', \App\Http\Controllers\Admin\KelasController::class)->names('kelas');
+    Route::patch('/kelas/{kela}/toggle', [\App\Http\Controllers\Admin\KelasController::class, 'toggleAktif'])->name('kelas.toggle');
 
     // Pengaturan Geofence
     Route::get('/geofence',  [AdminController::class, 'geofenceSetting'])->name('geofence');

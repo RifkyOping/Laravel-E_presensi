@@ -92,7 +92,7 @@
                 <div class="pt-3 border-t border-slate-100">
                     @php $user = Auth::user(); @endphp
                     <span class="text-[.7rem] font-bold text-slate-400 uppercase tracking-wide">
-                        {{ $user->kelas ? 'Kelas ' . $user->kelas . ($user->jurusan ? ' · ' . $user->jurusan : '') : 'Lengkapi profil' }}
+                        {{ $user->kelas ? 'Kelas ' . $user->kelas . ($user->jurusan ? ' ' . $user->jurusan : '') . ($user->rombel ? ' ' . $user->rombel : '') : 'Lengkapi profil' }}
                     </span>
                 </div>
             </a>

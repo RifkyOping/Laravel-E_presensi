@@ -54,7 +54,7 @@
                         <span class="font-normal normal-case text-slate-400 ml-1">(urutan baca)</span>
                     </label>
                     <input type="number" name="level" min="1"
-                           value="{{ old('level', $ebook->level ?? '') }}"
+                           value="{{ old('level', $ebook->level ?? $nextLevel ?? '') }}"
                            placeholder="Contoh: 1"
                            class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                 </div>
