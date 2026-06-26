@@ -14,7 +14,7 @@ class LiterasiQuranController extends Controller
      */
     public function index(Request $request)
     {
-        // Daftar kelas & jurusan unik dari tabel siswa_profiles
+        // Daftar kelas, jurusan & rombel unik dari tabel siswa_profiles
         $kelasList   = \App\Models\SiswaProfile::whereNotNull('kelas')
             ->distinct()
             ->pluck('kelas')
@@ -27,15 +27,23 @@ class LiterasiQuranController extends Controller
             ->sort()
             ->values();
 
+        $rombelList  = \App\Models\SiswaProfile::whereNotNull('rombel')
+            ->distinct()
+            ->pluck('rombel')
+            ->sort()
+            ->values();
+
         $siswaList = collect();
         $selectedKelas   = $request->input('kelas');
         $selectedJurusan = $request->input('jurusan');
+        $selectedRombel  = $request->input('rombel');
 
-        if ($selectedKelas && $selectedJurusan) {
+        if ($selectedKelas && $selectedJurusan && $selectedRombel) {
             $siswaList = User::where('role', 'siswa')
-                ->whereHas('siswaProfile', function ($q) use ($selectedKelas, $selectedJurusan) {
+                ->whereHas('siswaProfile', function ($q) use ($selectedKelas, $selectedJurusan, $selectedRombel) {
                     $q->where('kelas', $selectedKelas)
-                      ->where('jurusan', $selectedJurusan);
+                      ->where('jurusan', $selectedJurusan)
+                      ->where('rombel', $selectedRombel);
                 })
                 ->orderBy('name')
                 ->with(['siswaProfile', 'catatanQuran' => function ($q) {
@@ -47,9 +55,11 @@ class LiterasiQuranController extends Controller
         return view('guru.literasi_quran.index', compact(
             'kelasList',
             'jurusanList',
+            'rombelList',
             'siswaList',
             'selectedKelas',
-            'selectedJurusan'
+            'selectedJurusan',
+            'selectedRombel'
         ));
     }
 

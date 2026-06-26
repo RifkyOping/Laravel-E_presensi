@@ -5,7 +5,7 @@
 
         {{-- Header Banner --}}
         <div
-            class="animate-up bg-gradient-to-r from-[#1e3a6e] to-[#2d5099] rounded-2xl p-7 text-white relative overflow-hidden shadow-lg">
+            class="animate-up bg-gradient-to-r from-[#1e3a6e] to-[#2d5099] rounded-2xl px-5 py-5 sm:p-7 text-white relative overflow-hidden shadow-lg">
             <div class="relative z-10">
                 <p class="text-blue-200 text-sm font-semibold">Selamat datang,</p>
                 <h2 class="text-2xl font-black mt-0.5">{{ Auth::user()->name }}</h2>
@@ -141,7 +141,31 @@
                     Lihat Semua →
                 </a>
             </div>
-            <div class="overflow-x-auto">
+            {{-- Mobile: Card List --}}
+            <div class="block sm:hidden divide-y divide-slate-100">
+                @forelse($aktivitasHariIni as $a)
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-800 text-sm">{{ $a->user->name }}</p>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ $a->mata_pelajaran }}</p>
+                            <p class="text-xs text-slate-400 mt-0.5">
+                                <span class="font-semibold">{{ $a->kelas }}</span>
+                                &nbsp;·&nbsp; Jam {{ $a->jam_ke }}
+                                &nbsp;·&nbsp; {{ Carbon::parse($a->jam_mulai)->format('H:i') }}@if($a->jam_selesai)–{{ Carbon::parse($a->jam_selesai)->format('H:i') }}@endif
+                            </p>
+                        </div>
+                        @php $mc = match($a->metode) { 'daring'=>'b-purple','diskusi'=>'b-blue','praktik'=>'b-blue','ceramah'=>'b-blue',default=>'b-slate' }; @endphp
+                        <span class="pw-badge {{ $mc }} capitalize shrink-0">{{ $a->metode }}</span>
+                    </div>
+                </div>
+                @empty
+                <p class="px-5 py-8 text-center text-slate-400 text-sm">Belum ada aktivitas mengajar hari ini.</p>
+                @endforelse
+            </div>
+
+            {{-- Desktop: Table --}}
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full pw-tbl">
                     <thead>
                         <tr>
@@ -160,25 +184,18 @@
                                 <td>{{ $a->mata_pelajaran }}</td>
                                 <td>{{ $a->kelas }}</td>
                                 <td class="text-center">
-                                    <span
-                                        class="inline-flex w-7 h-7 rounded-full bg-[#1e3a6e] text-white items-center justify-center font-bold text-xs">
-                                        {{ $a->jam_ke }}
-                                    </span>
+                                    <span class="inline-flex w-7 h-7 rounded-full bg-[#1e3a6e] text-white items-center justify-center font-bold text-xs">{{ $a->jam_ke }}</span>
                                 </td>
                                 <td class="whitespace-nowrap">{{ Carbon::parse($a->jam_mulai)->format('H:i') }}
                                     @if($a->jam_selesai)–{{ Carbon::parse($a->jam_selesai)->format('H:i') }}@endif
                                 </td>
                                 <td>
-                                    @php $mc = match ($a->metode) {
-                                        'daring' => 'b-purple', 'diskusi' => 'b-blue', 'praktik' => 'b-blue', 'ceramah' => 'b-blue', default => 'b-slate'
-                                    }; @endphp
+                                    @php $mc = match ($a->metode) { 'daring'=>'b-purple','diskusi'=>'b-blue','praktik'=>'b-blue','ceramah'=>'b-blue',default=>'b-slate' }; @endphp
                                     <span class="pw-badge {{ $mc }} capitalize">{{ $a->metode }}</span>
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-8 text-slate-400">Belum ada aktivitas mengajar hari ini.</td>
-                            </tr>
+                            <tr><td colspan="6" class="text-center py-8 text-slate-400">Belum ada aktivitas mengajar hari ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

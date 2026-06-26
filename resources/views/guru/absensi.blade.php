@@ -35,7 +35,7 @@
     @endif
 
     {{-- Tanggal --}}
-    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-6 shadow-xl"
+    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-5 py-5 sm:px-8 sm:py-6 shadow-xl"
          style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
         <div class="relative z-10">
             <p class="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-1">E-Presensi Guru — Hari Ini</p>
@@ -365,11 +365,49 @@
 
     {{-- Riwayat --}}
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100">
+        <div class="px-5 py-4 border-b border-slate-100">
             <h3 class="font-bold text-slate-800 text-sm">Riwayat Kehadiran</h3>
             <p class="text-xs text-slate-400 mt-0.5">30 hari terakhir catatan datang dan pulang Anda.</p>
         </div>
-        <div class="overflow-x-auto">
+
+        {{-- Mobile: Card List --}}
+        <div class="block sm:hidden divide-y divide-slate-100">
+            @forelse($riwayat as $absen)
+            <div class="px-4 py-3.5 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="font-semibold text-slate-700 text-sm leading-tight">
+                        {{ Carbon::parse($absen->tanggal)->format('d M Y') }}
+                    </p>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ Carbon::parse($absen->tanggal)->translatedFormat('l') }}</p>
+                    <p class="text-xs text-slate-500 mt-1">
+                        @if($absen->waktu_datang)<span class="font-semibold">Datang:</span> {{ Carbon::parse($absen->waktu_datang)->format('H:i') }}@endif
+                        @if($absen->waktu_pulang) &nbsp;·&nbsp; <span class="font-semibold">Pulang:</span> {{ Carbon::parse($absen->waktu_pulang)->format('H:i') }}@endif
+                    </p>
+                </div>
+                <div class="shrink-0 text-right">
+                    @php $sc = match($absen->status ?? 'hadir') {
+                        'hadir' => 'bg-blue-50 text-[#1e3a6e] border-blue-100',
+                        'izin'  => 'bg-amber-50 text-amber-700 border-amber-100',
+                        'sakit' => 'bg-slate-100 text-slate-600 border-slate-200',
+                        default => 'bg-red-50 text-red-600 border-red-100',
+                    }; @endphp
+                    <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border capitalize {{ $sc }}">
+                        {{ ucfirst($absen->status ?? 'hadir') }}
+                    </span>
+                    @if($absen->status_pengajuan === 'pending')
+                        <p class="text-[0.6rem] text-slate-400 font-semibold mt-0.5">Pending</p>
+                    @elseif($absen->status_pengajuan === 'rejected')
+                        <p class="text-[0.6rem] text-red-500 font-semibold mt-0.5">Ditolak</p>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div class="py-10 text-center text-slate-400 text-sm">Belum ada riwayat kehadiran.</div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: Table --}}
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
@@ -383,18 +421,10 @@
                 <tbody class="divide-y divide-slate-50">
                     @forelse($riwayat as $absen)
                     <tr class="hover:bg-slate-50/60 transition duration-150">
-                        <td class="py-3.5 px-5 font-semibold text-slate-700 text-sm">
-                            {{ Carbon::parse($absen->tanggal)->format('d M Y') }}
-                        </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-500">
-                            {{ Carbon::parse($absen->tanggal)->translatedFormat('l') }}
-                        </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-600 text-center">
-                            {{ $absen->waktu_datang ? Carbon::parse($absen->waktu_datang)->format('H:i').' WITA' : '—' }}
-                        </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-600 text-center">
-                            {{ $absen->waktu_pulang ? Carbon::parse($absen->waktu_pulang)->format('H:i').' WITA' : '—' }}
-                        </td>
+                        <td class="py-3.5 px-5 font-semibold text-slate-700 text-sm">{{ Carbon::parse($absen->tanggal)->format('d M Y') }}</td>
+                        <td class="py-3.5 px-5 text-sm text-slate-500">{{ Carbon::parse($absen->tanggal)->translatedFormat('l') }}</td>
+                        <td class="py-3.5 px-5 text-sm text-slate-600 text-center">{{ $absen->waktu_datang ? Carbon::parse($absen->waktu_datang)->format('H:i').' WITA' : '—' }}</td>
+                        <td class="py-3.5 px-5 text-sm text-slate-600 text-center">{{ $absen->waktu_pulang ? Carbon::parse($absen->waktu_pulang)->format('H:i').' WITA' : '—' }}</td>
                         <td class="py-3.5 px-5 text-center">
                             @php $sc = match($absen->status ?? 'hadir') {
                                 'hadir' => 'bg-blue-50 text-[#1e3a6e] border-blue-100',
@@ -403,26 +433,17 @@
                                 default => 'bg-red-50 text-red-600 border-red-100',
                             }; @endphp
                             <div class="flex flex-col items-center gap-1">
-                                <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border capitalize {{ $sc }}">
-                                    {{ ucfirst($absen->status ?? 'hadir') }}
-                                </span>
+                                <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border capitalize {{ $sc }}">{{ ucfirst($absen->status ?? 'hadir') }}</span>
                                 @if($absen->status_pengajuan === 'pending')
-                                    <span class="text-[0.6rem] text-slate-400 font-semibold flex items-center gap-1">
-                                        <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        Pending
-                                    </span>
+                                    <span class="text-[0.6rem] text-slate-400 font-semibold">Pending</span>
                                 @elseif($absen->status_pengajuan === 'rejected')
-                                    <span class="text-[0.6rem] text-red-500 font-semibold flex items-center gap-1">
-                                        Ditolak
-                                    </span>
+                                    <span class="text-[0.6rem] text-red-500 font-semibold">Ditolak</span>
                                 @endif
                             </div>
                         </td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="5" class="py-10 text-center text-slate-400 text-sm">Belum ada riwayat kehadiran.</td>
-                    </tr>
+                    <tr><td colspan="5" class="py-10 text-center text-slate-400 text-sm">Belum ada riwayat kehadiran.</td></tr>
                     @endforelse
                 </tbody>
             </table>

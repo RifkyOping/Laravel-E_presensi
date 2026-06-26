@@ -52,29 +52,55 @@
     </div>
 
     {{-- Filter --}}
-    <form method="GET" action="{{ route('admin.mata-pelajaran.index') }}"
-          class="bg-white rounded-xl border border-slate-200 p-5 flex flex-col sm:flex-row gap-3">
-        <input type="text" name="search" value="{{ request('search') }}"
-               placeholder="Cari nama, kode, atau jurusan..."
-               class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-
-        <select name="status"
-                class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-            <option value="">Status</option>
-            <option value="aktif"    {{ request('status')==='aktif'    ?'selected':'' }}>Aktif</option>
-            <option value="nonaktif" {{ request('status')==='nonaktif' ?'selected':'' }}>Nonaktif</option>
-        </select>
-        <button type="submit"
-                class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">
-            Cari
+    <div x-data="{ showFilter: {{ request()->hasAny(['search','status']) ? 'true' : 'false' }} }" class="bg-white rounded-xl border border-slate-200 p-6">
+        <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
+                    <svg class="w-4 h-4 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-black text-slate-700">Filter & Pencarian Mata Pelajaran</h2>
+                    <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk mencari berdasarkan nama, kode, atau status</p>
+                </div>
+            </div>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 group-hover:bg-slate-100 transition-colors">
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
         </button>
-        @if(request()->hasAny(['search','status']))
-        <a href="{{ route('admin.mata-pelajaran.index') }}"
-           class="px-4 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm rounded-xl transition text-center">
-            Reset
-        </a>
-        @endif
-    </form>
+
+        <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
+            <form method="GET" action="{{ route('admin.mata-pelajaran.index') }}" class="flex flex-col sm:flex-row gap-3">
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari nama, kode, atau jurusan..."
+                       class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+
+                <select name="status"
+                        class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                    <option value="">Status</option>
+                    <option value="aktif"    {{ request('status')==='aktif'    ?'selected':'' }}>Aktif</option>
+                    <option value="nonaktif" {{ request('status')==='nonaktif' ?'selected':'' }}>Nonaktif</option>
+                </select>
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-[#1e3a6e]/20 w-full sm:w-auto justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Cari
+                    </button>
+                    @if(request()->hasAny(['search','status']))
+                    <a href="{{ route('admin.mata-pelajaran.index') }}"
+                       class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-sm rounded-xl transition text-center w-full sm:w-auto flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Reset
+                    </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
 
     {{-- Tabel --}}
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">

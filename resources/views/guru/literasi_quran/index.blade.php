@@ -50,17 +50,24 @@
     </div>
 
     {{-- Filter Kelas & Jurusan --}}
-    <div class="bg-white rounded-2xl border border-blue-200 p-6">
-        <h2 class="text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
-            <div class="w-5 h-5 rounded bg-[#1e3a6e]/10 flex items-center justify-center">
-                <svg class="w-3 h-3 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
-                </svg>
-            </div>
-            Filter Kelas & Jurusan
-        </h2>
-        <form method="GET" action="{{ route('guru.literasi.quran') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div x-data="{ showFilter: {{ request('kelas') || request('jurusan') || request('rombel') ? 'true' : 'false' }} }" class="bg-white rounded-2xl border border-blue-200 p-6">
+        <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
+            <h2 class="text-sm font-black text-slate-700 flex items-center gap-2">
+                <div class="w-5 h-5 rounded bg-[#1e3a6e]/10 flex items-center justify-center group-hover:bg-[#1e3a6e]/20 transition-colors">
+                    <svg class="w-3 h-3 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                </div>
+                Filter Siswa
+            </h2>
+            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
+            <form method="GET" action="{{ route('guru.literasi.quran') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kelas</label>
                 <select name="kelas"
@@ -83,6 +90,17 @@
                     @endforeach
                 </select>
             </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Rombel</label>
+                <select name="rombel"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
+                               focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition">
+                    <option value="">-- Pilih Rombel --</option>
+                    @foreach($rombelList as $r)
+                        <option value="{{ $r }}" {{ $selectedRombel == $r ? 'selected' : '' }}>{{ $r }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="flex items-end">
                 <button type="submit"
                         class="w-full flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57]
@@ -94,6 +112,7 @@
                 </button>
             </div>
         </form>
+        </div>
     </div>
 
     {{-- Daftar Siswa --}}

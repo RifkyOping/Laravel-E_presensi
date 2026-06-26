@@ -513,6 +513,8 @@ class AdminController extends Controller
         $stats = [
             'total'  => User::where('role', 'siswa')->count(),
             'hadir'  => $absensi->where('status', 'hadir')->count(),
+            'izin'   => $absensi->where('status', 'izin')->count(),
+            'sakit'  => $absensi->where('status', 'sakit')->count(),
             'belum'  => $semuaSiswa->count() - $absensi->count(),
         ];
 

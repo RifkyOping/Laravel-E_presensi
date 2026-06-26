@@ -32,7 +32,7 @@
     @endif
 
     {{-- Hero --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-[#1e3a6e] to-[#2d5299] rounded-2xl px-8 py-8 shadow-xl">
+    <div class="relative overflow-hidden bg-gradient-to-br from-[#1e3a6e] to-[#2d5299] rounded-2xl px-5 py-5 sm:px-8 sm:py-8 shadow-xl">
         <div class="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
 
             {{-- Avatar --}}

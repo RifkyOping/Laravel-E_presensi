@@ -51,18 +51,26 @@
                     {{ $tanggal->translatedFormat('l, d F Y') }}
                 </p>
             </div>
-            <div class="flex gap-3 flex-wrap">
-                <div class="bg-white/15 rounded-xl px-5 py-3 text-center min-w-[80px]">
-                    <p class="text-white text-2xl font-black">{{ $stats['hadir'] }}</p>
-                    <p class="text-blue-300 text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
+            <div class="flex flex-row overflow-x-auto sm:overflow-visible flex-nowrap gap-2 sm:gap-3 w-full sm:w-auto mt-3 sm:mt-0 pb-1 sm:pb-0 snap-x">
+                <div class="bg-white/15 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl sm:text-2xl font-black">{{ $stats['hadir'] }}</p>
+                    <p class="text-blue-300 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-5 py-3 text-center min-w-[80px]">
-                    <p class="text-white/70 text-2xl font-black">{{ $stats['belum'] }}</p>
-                    <p class="text-blue-300/70 text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Belum</p>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $stats['izin'] }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Izin</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-5 py-3 text-center min-w-[80px]">
-                    <p class="text-white text-2xl font-black">{{ $stats['total'] }}</p>
-                    <p class="text-blue-300/70 text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Total</p>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $stats['sakit'] }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Sakit</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/70 text-xl sm:text-2xl font-black">{{ $stats['belum'] }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Belum</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl sm:text-2xl font-black">{{ $stats['total'] }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Total</p>
                 </div>
             </div>
         </div>

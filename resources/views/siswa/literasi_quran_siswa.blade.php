@@ -16,7 +16,7 @@
 <div class="space-y-6">
 
     {{-- Hero --}}
-    <div class="relative overflow-hidden rounded-2xl px-8 py-7 shadow-xl"
+    <div class="relative overflow-hidden rounded-2xl px-5 py-5 sm:px-8 sm:py-7 shadow-xl"
          style="background: linear-gradient(135deg, #1e3a6e 0%, #2d5299 60%, #162d57 100%);">
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>

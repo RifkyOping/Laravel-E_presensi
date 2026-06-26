@@ -7,7 +7,7 @@
 <div class="space-y-6">
 
     {{-- Welcome Strip --}}
-    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
+    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-5 py-5 sm:px-8 sm:py-7 shadow-xl"
          style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>

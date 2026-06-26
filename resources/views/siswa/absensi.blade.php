@@ -376,7 +376,45 @@
             <h3 class="font-bold text-slate-800 text-sm">Riwayat Kehadiran</h3>
             <p class="text-xs text-slate-400 mt-0.5">30 hari terakhir.</p>
         </div>
-        <div class="overflow-x-auto">
+
+        {{-- Mobile: Card List --}}
+        <div class="block sm:hidden divide-y divide-slate-100">
+            @forelse($riwayat as $r)
+            <div class="px-4 py-3.5 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="font-semibold text-slate-700 text-sm leading-tight">
+                        {{ Carbon::parse($r->tanggal)->translatedFormat('d F Y') }}
+                    </p>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ Carbon::parse($r->tanggal)->translatedFormat('l') }}</p>
+                    <p class="text-xs text-slate-500 mt-1">
+                        @if($r->waktu_datang) <span class="font-semibold">Datang:</span> {{ Carbon::parse($r->waktu_datang)->format('H:i') }} @endif
+                        @if($r->waktu_pulang) &nbsp;·&nbsp; <span class="font-semibold">Pulang:</span> {{ Carbon::parse($r->waktu_pulang)->format('H:i') }} @endif
+                    </p>
+                </div>
+                <div class="shrink-0 text-right">
+                    @php
+                        $cls = match($r->status ?? 'hadir') {
+                            'hadir' => 'bg-blue-50 text-[#1e3a6e] border-blue-100',
+                            'izin'  => 'bg-amber-50 text-amber-700 border-amber-100',
+                            'sakit' => 'bg-slate-50 text-slate-600 border-slate-200',
+                            default => 'bg-red-50 text-red-600 border-red-100',
+                        };
+                    @endphp
+                    <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border {{ $cls }} capitalize">
+                        {{ $r->status ?? 'hadir' }}
+                    </span>
+                    @if($r->status_pengajuan === 'pending')
+                        <p class="text-[0.6rem] text-slate-400 font-semibold mt-0.5">Pending</p>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div class="py-10 text-center text-slate-400 text-sm">Belum ada riwayat absensi.</div>
+            @endforelse
+        </div>
+
+        {{-- Desktop: Table --}}
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
@@ -421,9 +459,7 @@
                                         Pending
                                     </span>
                                 @elseif($r->status_pengajuan === 'rejected')
-                                    <span class="text-[0.6rem] text-red-500 font-semibold flex items-center gap-1">
-                                        Ditolak
-                                    </span>
+                                    <span class="text-[0.6rem] text-red-500 font-semibold">Ditolak</span>
                                 @endif
                             </div>
                         </td>

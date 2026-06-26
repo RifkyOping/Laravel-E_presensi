@@ -18,18 +18,26 @@
                     {{ $tanggal->translatedFormat('l, d F Y') }}
                 </p>
             </div>
-            <div class="flex gap-3 flex-wrap">
-                <div class="bg-white/15 rounded-xl px-5 py-3 text-center min-w-[80px]">
-                    <p class="text-white text-2xl font-black">{{ $absensi->where('status', 'hadir')->count() }}</p>
-                    <p class="text-blue-300 text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
+            <div class="flex flex-row overflow-x-auto sm:overflow-visible flex-nowrap gap-2 sm:gap-3 w-full sm:w-auto mt-3 sm:mt-0 pb-1 sm:pb-0 snap-x">
+                <div class="bg-white/15 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl sm:text-2xl font-black">{{ $absensi->where('status', 'hadir')->count() }}</p>
+                    <p class="text-blue-300 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-5 py-3 text-center min-w-[80px]">
-                    <p class="text-white/70 text-2xl font-black">{{ $semuaGuru->count() - $absensi->count() }}</p>
-                    <p class="text-blue-300/70 text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Belum</p>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $absensi->where('status', 'izin')->count() }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Izin</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-5 py-3 text-center min-w-[80px]">
-                    <p class="text-white text-2xl font-black">{{ $semuaGuru->count() }}</p>
-                    <p class="text-blue-300/70 text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Total</p>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $absensi->where('status', 'sakit')->count() }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Sakit</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/70 text-xl sm:text-2xl font-black">{{ $semuaGuru->count() - $absensi->count() }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Belum</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl sm:text-2xl font-black">{{ $semuaGuru->count() }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Total</p>
                 </div>
             </div>
         </div>
@@ -38,40 +46,61 @@
     </div>
 
     {{-- ── FILTER ── --}}
-    <form method="GET" action="{{ route('admin.absensi-guru') }}"
-          class="bg-white rounded-2xl border border-slate-200 p-5 grid grid-cols-1 sm:grid-cols-4 gap-4
-                 hover:border-slate-300 transition-all duration-200 shadow-sm">
-        <div>
-            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tanggal</label>
-            <input type="date" name="tanggal"
-                   value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}"
-                   class="app-input">
-        </div>
-        <div>
-            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Filter Guru</label>
-            <select name="guru_id" class="app-input">
-                <option value="">— Semua Guru —</option>
-                @foreach($semuaGuru as $g)
-                <option value="{{ $g->id }}" {{ request('guru_id')==$g->id?'selected':'' }}>{{ $g->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex items-end gap-3 sm:col-span-2">
-            <button type="submit"
-                    class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm
-                           transition duration-200 shadow-sm flex items-center gap-2 flex-shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+    <div x-data="{ showFilter: {{ request()->hasAny(['tanggal','guru_id']) && (request('tanggal') != \Carbon\Carbon::today()->format('Y-m-d') || request('guru_id')) ? 'true' : 'false' }} }" class="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-300 transition-all duration-200 shadow-sm">
+        <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
+                    <svg class="w-4 h-4 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-black text-slate-700">Filter Pencarian Guru</h2>
+                    <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk memfilter berdasarkan tanggal atau nama guru</p>
+                </div>
+            </div>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 group-hover:bg-slate-100 transition-colors">
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
-                Terapkan
-            </button>
-            <a href="{{ route('admin.absensi-guru') }}"
-               class="px-5 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600
-                      font-semibold text-sm rounded-xl transition duration-200 flex items-center gap-1.5">
-                Reset
-            </a>
+            </div>
+        </button>
+
+        <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
+            <form method="GET" action="{{ route('admin.absensi-guru') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tanggal</label>
+                    <input type="date" name="tanggal"
+                           value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}"
+                           class="app-input">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Filter Guru</label>
+                    <select name="guru_id" class="app-input">
+                        <option value="">— Semua Guru —</option>
+                        @foreach($semuaGuru as $g)
+                        <option value="{{ $g->id }}" {{ request('guru_id')==$g->id?'selected':'' }}>{{ $g->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex items-end gap-3 sm:col-span-2">
+                    <button type="submit"
+                            class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm
+                                   transition duration-200 shadow-sm flex items-center gap-2 flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                        </svg>
+                        Terapkan
+                    </button>
+                    <a href="{{ route('admin.absensi-guru') }}"
+                       class="px-5 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600
+                              font-semibold text-sm rounded-xl transition duration-200 flex items-center gap-1.5">
+                        Reset
+                    </a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
     {{-- Export Bulanan --}}
     <form method="GET" action="{{ route('admin.absensi-guru.export') }}" class="bg-emerald-50/50 rounded-2xl border border-emerald-100 p-5 flex flex-col sm:flex-row items-end gap-4 shadow-sm">
