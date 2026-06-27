@@ -1,7 +1,9 @@
 @php use Carbon\Carbon; @endphp
-<x-kurikulum-layout
-    pageTitle="{{ $aktivitas->verified_at ? 'Edit Verifikasi' : 'Verifikasi Mengajar' }}"
-    pageSubtitle="Upload foto & catatan bahwa guru benar-benar mengajar">
+<x-app-layout>
+    <x-slot name="header">
+        <h1 class="text-[.9rem] font-bold text-slate-800 leading-tight">{{ $aktivitas->verified_at ? 'Edit Verifikasi' : 'Verifikasi Mengajar' }}</h1>
+        <p class="text-[.68rem] text-slate-400 hidden sm:block">Upload foto & catatan bahwa guru benar-benar mengajar</p>
+    </x-slot>
 
 <div class="space-y-6 max-w-3xl mx-auto animate-up">
 
@@ -15,7 +17,7 @@
     </div>
 
     {{-- Info Card Aktivitas --}}
-    <div class="kur-card overflow-hidden">
+    <div class="app-card overflow-hidden">
         <div class="bg-gradient-to-r from-[#1e3a6e] to-[#2d5099] px-6 py-5 text-white">
             <p class="text-blue-200 text-xs font-semibold uppercase tracking-wide mb-1">Detail Aktivitas Mengajar</p>
             <div class="flex items-center gap-3">
@@ -33,15 +35,15 @@
 
         <div class="p-5 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
             <div>
-                <p class="kur-label">Tanggal</p>
+                <p class="app-label">Tanggal</p>
                 <p class="font-semibold text-slate-800">{{ Carbon::parse($aktivitas->tanggal)->translatedFormat('d F Y') }}</p>
             </div>
             <div>
-                <p class="kur-label">Jam ke-</p>
+                <p class="app-label">Jam ke-</p>
                 <p class="font-semibold text-slate-800">{{ $aktivitas->jam_ke }}</p>
             </div>
             <div>
-                <p class="kur-label">Waktu</p>
+                <p class="app-label">Waktu</p>
                 <p class="font-semibold text-slate-800">
                     {{ Carbon::parse($aktivitas->jam_mulai)->format('H:i') }}
                     @if($aktivitas->jam_selesai) – {{ Carbon::parse($aktivitas->jam_selesai)->format('H:i') }} @endif
@@ -69,7 +71,7 @@
           action="{{ route('kurikulum.store-verifikasi', $aktivitas->id) }}"
           enctype="multipart/form-data"
           id="form-verifikasi"
-          class="kur-card p-6 space-y-6">
+          class="app-card p-6 space-y-6">
         @csrf
         @method('PUT')
 
@@ -86,13 +88,16 @@
 
         {{-- Upload Foto --}}
         <div>
-            <label class="kur-label">
-                📷 Foto Guru Mengajar
-                <span class="normal-case font-normal text-slate-400 ml-1">(opsional · maks. 5 MB · JPG/PNG/WebP)</span>
+            <label class="app-label">
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Foto Guru Mengajar
+                    <span class="normal-case font-normal text-slate-400 ml-1">(opsional · maks. 5 MB · JPG/PNG/WebP)</span>
+                </span>
             </label>
 
             {{-- Drop zone --}}
-            <div class="foto-drop-zone" id="drop-zone" onclick="openCamera()">
+            <div class="border-2 border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-100/50 rounded-2xl p-6 text-center cursor-pointer transition duration-200 group" id="drop-zone" onclick="openCamera()">
                 <input type="file" name="foto_verifikasi" id="foto-input" accept="image/jpeg,image/png,image/webp" capture="environment" class="hidden"
                        onchange="handleFileSelect(event)">
 
@@ -125,22 +130,29 @@
             {{-- Tombol ambil foto langsung (kamera) --}}
             <div class="flex gap-3 mt-3">
                 <button type="button" onclick="openCamera()"
-                        class="btn-outline text-xs py-2 px-4 w-full">
-                    📸 Buka Kamera
+                        class="btn-outline text-xs py-2 px-4 w-full flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Buka Kamera
                 </button>
             </div>
         </div>
 
         {{-- Area kamera (tersembunyi) --}}
         <div id="camera-area" class="hidden space-y-3">
-            <div class="kur-label">📸 Kamera Langsung</div>
+            <div class="app-label">
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Kamera Langsung
+                </span>
+            </div>
             <div class="relative bg-black rounded-2xl overflow-hidden">
                 <video id="camera-video" autoplay playsinline class="w-full rounded-2xl max-h-72 object-cover"></video>
                 <canvas id="camera-canvas" class="hidden"></canvas>
             </div>
             <div class="flex gap-3">
-                <button type="button" onclick="capturePhoto()" class="btn-success flex-1 justify-center py-2.5">
-                    📷 Ambil Foto Sekarang
+                <button type="button" onclick="capturePhoto()" class="btn-primary flex-1 flex items-center justify-center gap-1.5 py-2.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Ambil Foto Sekarang
                 </button>
                 <button type="button" onclick="closeCamera()" class="btn-outline py-2.5 px-4">
                     Batalkan
@@ -150,10 +162,13 @@
 
         {{-- Status Verifikasi --}}
         <div>
-            <label for="status_verifikasi" class="kur-label">
-                ✅ Status Verifikasi <span class="text-red-500">*</span>
+            <label for="status_verifikasi" class="app-label">
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Status Verifikasi <span class="text-red-500">*</span>
+                </span>
             </label>
-            <select id="status_verifikasi" name="status_verifikasi" class="kur-input" required>
+            <select id="status_verifikasi" name="status_verifikasi" class="app-input" required>
                 <option value="">-- Pilih Status --</option>
                 <option value="mengajar" {{ old('status_verifikasi', $aktivitas->status_verifikasi) === 'mengajar' ? 'selected' : '' }}>Terverifikasi Mengajar</option>
                 <option value="tidak_mengajar" {{ old('status_verifikasi', $aktivitas->status_verifikasi) === 'tidak_mengajar' ? 'selected' : '' }}>Terverifikasi Tidak Mengajar</option>
@@ -162,22 +177,25 @@
 
         {{-- Catatan Kurikulum --}}
         <div>
-            <label for="catatan_kurikulum" class="kur-label">
-                ✏️ Catatan Kurikulum <span class="text-red-500">*</span>
-                <span class="normal-case font-normal text-slate-400 ml-1">(wajib diisi)</span>
+            <label for="catatan_kurikulum" class="app-label">
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    Catatan Kurikulum <span class="text-red-500">*</span>
+                    <span class="normal-case font-normal text-slate-400 ml-1">(wajib diisi)</span>
+                </span>
             </label>
             <textarea id="catatan_kurikulum"
                       name="catatan_kurikulum"
                       rows="4"
                       placeholder="Masukkan catatan"
-                      class="kur-input resize-none"
+                      class="app-input resize-none"
                       required minlength="5">{{ old('catatan_kurikulum', $aktivitas->catatan_kurikulum) }}</textarea>
             <p class="text-xs text-slate-400 mt-1.5">Minimal 5 karakter · Catatan ini akan tersimpan sebagai bukti verifikasi.</p>
         </div>
 
         {{-- Tombol --}}
         <div class="flex items-center gap-3 pt-2 border-t border-slate-100">
-            <button type="submit" class="btn-success py-2.5 px-6">
+            <button type="submit" class="btn-primary py-2.5 px-6">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
@@ -187,18 +205,20 @@
                 Batal
             </a>
             @if($aktivitas->verified_at)
-            <form method="POST" action="{{ route('kurikulum.hapus-verifikasi', $aktivitas->id) }}"
-                  class="ml-auto" onsubmit="return confirm('Yakin hapus verifikasi ini?')">
-                @csrf @method('DELETE')
-                <button type="submit"
-                        class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-sm transition duration-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    Hapus Verifikasi
-                </button>
-            </form>
+            <button type="button" onclick="confirmDelete()"
+                    class="ml-auto inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-sm transition duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Hapus Verifikasi
+            </button>
             @endif
         </div>
     </form>
+
+    @if($aktivitas->verified_at)
+    <form id="delete-form" method="POST" action="{{ route('kurikulum.hapus-verifikasi', $aktivitas->id) }}" class="hidden">
+        @csrf @method('DELETE')
+    </form>
+    @endif
 
 </div>
 
@@ -261,6 +281,29 @@ function closeCamera() {
     document.getElementById('camera-area').classList.add('hidden');
     document.getElementById('drop-zone').classList.remove('hidden');
 }
+
+function confirmDelete() {
+    Swal.fire({
+        title: 'Hapus Verifikasi?',
+        text: "Apakah Anda yakin ingin menghapus verifikasi ini?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-xl text-sm px-5 py-2.5 font-bold',
+            cancelButton: 'rounded-xl text-sm px-5 py-2.5 font-bold'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form').submit();
+        }
+    });
+}
 </script>
 
-</x-kurikulum-layout>
+</x-app-layout>

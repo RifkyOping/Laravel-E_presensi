@@ -1,5 +1,9 @@
 @php use Carbon\Carbon; @endphp
-<x-kurikulum-layout pageTitle="Dashboard Kurikulum">
+<x-app-layout>
+    <x-slot name="header">
+        <h1 class="text-[.9rem] font-bold text-slate-800 leading-tight">Panel Kurikulum</h1>
+        <p class="text-[.68rem] text-slate-400 hidden sm:block">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+    </x-slot>
 
 <div class="space-y-6">
 
@@ -38,7 +42,7 @@
         ];
         @endphp
         @foreach($cards as $i => $c)
-        <div class="kur-stat animate-up delay-{{ $i+1 }}">
+        <div class="stat-card animate-up delay-{{ $i+1 }}">
             <div class="flex items-start justify-end mb-3">
                 <span class="text-[.68rem] font-semibold text-slate-400 uppercase tracking-wide">{{ $c['sub'] }}</span>
             </div>
@@ -49,13 +53,13 @@
     </div>
 
     {{-- Guru Hadir Hari Ini --}}
-    <div class="kur-card overflow-hidden animate-up delay-2">
+    <div class="app-card overflow-hidden animate-up delay-2">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800 text-sm">Guru yang Sudah Absen Sekolah Hari Ini</h3>
                 <p class="text-xs text-slate-400 mt-0.5">{{ Carbon::today()->translatedFormat('d F Y') }} — guru-guru ini dapat diverifikasi mengajar</p>
             </div>
-            <span class="kur-badge b-green">{{ $guruHadirHariIni->count() }} guru</span>
+            <span class="app-badge b-green">{{ $guruHadirHariIni->count() }} guru</span>
         </div>
         <div class="divide-y divide-slate-50">
             @forelse($guruHadirHariIni as $a)
@@ -70,7 +74,7 @@
                         @if($a->waktu_pulang) · Pulang: {{ Carbon::parse($a->waktu_pulang)->format('H:i') }} WITA @endif
                     </p>
                 </div>
-                <span class="kur-badge b-blue">Hadir</span>
+                <span class="app-badge b-blue">Hadir</span>
             </div>
             @empty
             <p class="px-5 py-8 text-center text-slate-400 text-sm">Belum ada guru yang absen hari ini.</p>
@@ -82,13 +86,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {{-- Menunggu Verifikasi --}}
-        <div class="kur-card overflow-hidden animate-up delay-3">
+        <div class="app-card overflow-hidden animate-up delay-3">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-slate-800 text-sm">Menunggu Verifikasi</h3>
                     <p class="text-xs text-slate-400 mt-0.5">Aktivitas mengajar hari ini — belum difoto</p>
                 </div>
-                <span class="kur-badge b-red">{{ $menungguVerifikasi->count() }} sesi</span>
+                <span class="app-badge b-red">{{ $menungguVerifikasi->count() }} sesi</span>
             </div>
             <div class="divide-y divide-slate-50">
                 @forelse($menungguVerifikasi as $m)
@@ -115,13 +119,13 @@
         </div>
 
         {{-- Sudah Diverifikasi --}}
-        <div class="kur-card overflow-hidden animate-up delay-4">
+        <div class="app-card overflow-hidden animate-up delay-4">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-slate-800 text-sm">Sudah Diverifikasi</h3>
                     <p class="text-xs text-slate-400 mt-0.5">Aktivitas mengajar hari ini — sudah ada foto & catatan</p>
                 </div>
-                <span class="kur-badge b-teal">{{ $sudahVerifikasi->count() }} sesi</span>
+                <span class="app-badge b-teal">{{ $sudahVerifikasi->count() }} sesi</span>
             </div>
             <div class="divide-y divide-slate-50">
                 @forelse($sudahVerifikasi as $v)
@@ -189,4 +193,4 @@ function closePhotoModal() {
 }
 </script>
 
-</x-kurikulum-layout>
+</x-app-layout>

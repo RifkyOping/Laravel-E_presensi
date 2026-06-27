@@ -28,15 +28,13 @@
     </div>
 
     {{-- ── STAT CARDS ── --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
         @php
         $stats_display = [
-            ['label' => 'Total Siswa',       'value' => $stats['total_siswa'],   'sub' => 'terdaftar',  'accent' => '#1e3a6e', 'light' => '#eef2ff'],
             ['label' => 'Total Guru',         'value' => $stats['total_guru'],    'sub' => 'terdaftar',  'accent' => '#1e3a6e', 'light' => '#eef2ff'],
             ['label' => 'Guru Hadir',         'value' => $stats['guru_hadir'],    'sub' => 'hari ini',   'accent' => '#1e6e3a', 'light' => '#f0fdf4'],
-            ['label' => 'Sesi Mengajar',      'value' => $stats['guru_mengajar'], 'sub' => 'hari ini',   'accent' => '#1e3a6e', 'light' => '#eff6ff'],
-            ['label' => 'Total Mapel',        'value' => $stats['total_mapel'],   'sub' => 'tersedia',   'accent' => '#6d28d9', 'light' => '#f5f3ff'],
-            ['label' => 'Mapel Aktif',        'value' => $stats['mapel_aktif'],   'sub' => 'aktif',      'accent' => '#92400e', 'light' => '#fffbeb'],
+            ['label' => 'Total Siswa',       'value' => $stats['total_siswa'],   'sub' => 'terdaftar',  'accent' => '#6d28d9', 'light' => '#f5f3ff'],
+            ['label' => 'Siswa Hadir',       'value' => $stats['siswa_hadir'],   'sub' => 'hari ini',   'accent' => '#92400e', 'light' => '#fffbeb'],
         ];
         @endphp
 

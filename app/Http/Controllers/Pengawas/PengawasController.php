@@ -30,7 +30,8 @@ class PengawasController extends Controller
                                 ->where('status', 'sakit')->count(),
             'guru_alpha'    => AbsensiGuru::whereDate('tanggal', $today)
                                 ->where('status', 'alpha')->count(),
-            'sesi_mengajar' => AbsensiMengajar::whereDate('tanggal', $today)->count(),
+            'siswa_hadir'   => AbsensiSiswa::whereDate('tanggal', $today)
+                                ->where('status', 'hadir')->count(),
         ];
 
         // Guru yang sudah absen hari ini (5 terbaru)

@@ -51,9 +51,9 @@ class GenerateAktivitasMengajar extends Command
         // Jam dan menit saat ini, misal '07:15:00'
         $jamSekarang = $now->format('H:i') . ':00';
 
-        // Cari jadwal yang cocok
+        // Cari jadwal yang cocok (jam mulai sudah lewat atau sama dengan sekarang)
         $jadwalCocok = JadwalMengajar::where('hari', $hariIni)
-            ->whereTime('jam_mulai', $jamSekarang)
+            ->whereTime('jam_mulai', '<=', $jamSekarang)
             ->get();
 
         $jumlahDibuat = 0;

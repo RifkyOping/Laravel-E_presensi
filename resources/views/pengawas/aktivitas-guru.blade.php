@@ -1,5 +1,8 @@
 @php use Carbon\Carbon; @endphp
-<x-pengawas-layout pageTitle="Aktivitas Mengajar" pageSubtitle="Monitoring jurnal mengajar guru">
+<x-app-layout>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Aktivitas Mengajar</span>
+    </x-slot>
 
 <div class="space-y-6">
 
@@ -7,7 +10,7 @@
     @php
         $hasFilter = request()->hasAny(['tanggal','guru_id']);
     @endphp
-    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="pw-card p-6">
+    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="app-card p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -30,12 +33,12 @@
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
             <form method="GET" action="{{ route('pengawas.aktivitas-guru') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="pw-label">Tanggal</label>
-                    <input type="date" name="tanggal" class="pw-input" value="{{ request('tanggal') }}">
+                    <label class="app-label">Tanggal</label>
+                    <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal') }}">
                 </div>
                 <div>
-                    <label class="pw-label">Filter Guru</label>
-                    <select name="guru_id" class="pw-input">
+                    <label class="app-label">Filter Guru</label>
+                    <select name="guru_id" class="app-input">
                         <option value="">— Semua Guru —</option>
                         @foreach($semuaGuru as $g)
                         <option value="{{ $g->id }}" {{ request('guru_id')==$g->id?'selected':'' }}>{{ $g->name }}</option>
@@ -64,7 +67,7 @@
     </div>
 
     {{-- Tabel --}}
-    <div class="pw-card overflow-hidden">
+    <div class="app-card overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800">Jurnal Aktivitas Mengajar</h3>
@@ -95,7 +98,7 @@
 
         {{-- Desktop: Table --}}
         <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full pw-tbl text-center">
+            <table class="w-full app-tbl text-center">
                 <thead><tr>
                     <th class="text-center">Tanggal</th>
                     <th class="text-center">Guru</th>
@@ -110,7 +113,7 @@
                         <td class="font-semibold whitespace-nowrap text-center">{{ Carbon::parse($item->tanggal)->format('d M Y') }}</td>
                         <td class="font-semibold text-slate-800 text-center">{{ $item->user->name }}</td>
                         <td class="text-center">{{ $item->mata_pelajaran }}</td>
-                        <td class="text-center"><span class="pw-badge b-blue">{{ $item->kelas }}</span></td>
+                        <td class="text-center"><span class="app-badge b-blue">{{ $item->kelas }}</span></td>
                         <td class="text-center font-bold">{{ $item->jam_ke }}</td>
                         <td class="whitespace-nowrap text-center">
                             {{ Carbon::parse($item->jam_mulai)->format('H:i') }}
@@ -129,4 +132,4 @@
     </div>
 
 </div>
-</x-pengawas-layout>
+</x-app-layout>

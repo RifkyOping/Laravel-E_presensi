@@ -30,6 +30,7 @@ class AdminController extends Controller
             'guru_mengajar'  => AbsensiMengajar::whereDate('tanggal', $today)->distinct('user_id')->count(),
             'total_mapel'    => MataPelajaran::count(),
             'mapel_aktif'    => MataPelajaran::where('aktif', true)->count(),
+            'siswa_hadir'    => AbsensiSiswa::whereDate('tanggal', $today)->where('status', 'hadir')->count(),
         ];
 
         // Guru yang sudah absen sekolah hari ini

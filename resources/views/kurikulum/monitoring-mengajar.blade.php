@@ -1,5 +1,8 @@
 @php use Carbon\Carbon; @endphp
-<x-kurikulum-layout pageTitle="Monitoring Mengajar" pageSubtitle="Verifikasi kehadiran mengajar guru — tambah foto & catatan">
+<x-app-layout>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Monitoring Mengajar</span>
+    </x-slot>
 
 <div class="space-y-6">
 
@@ -27,7 +30,7 @@
     @php
         $hasFilter = request()->hasAny(['tanggal','guru_id','status_verif']);
     @endphp
-    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="kur-card p-6 animate-up">
+    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="app-card p-6 animate-up">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -50,12 +53,12 @@
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
             <form method="GET" action="{{ route('kurikulum.monitoring-mengajar') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
-                    <label class="kur-label">Tanggal</label>
-                    <input type="date" name="tanggal" class="kur-input" value="{{ request('tanggal') }}">
+                    <label class="app-label">Tanggal</label>
+                    <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal') }}">
                 </div>
                 <div>
-                    <label class="kur-label">Filter Guru</label>
-                    <select name="guru_id" class="kur-input">
+                    <label class="app-label">Filter Guru</label>
+                    <select name="guru_id" class="app-input">
                         <option value="">— Semua Guru —</option>
                         @foreach($semuaGuru as $g)
                         <option value="{{ $g->id }}" {{ request('guru_id')==$g->id?'selected':'' }}>{{ $g->name }}</option>
@@ -63,8 +66,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="kur-label">Status Verifikasi</label>
-                    <select name="status_verif" class="kur-input">
+                    <label class="app-label">Status Verifikasi</label>
+                    <select name="status_verif" class="app-input">
                         <option value="">— Semua —</option>
                         <option value="belum" {{ request('status_verif')==='belum'?'selected':'' }}>Belum Diverifikasi</option>
                         <option value="mengajar" {{ request('status_verif')==='mengajar'?'selected':'' }}>Terverifikasi Mengajar</option>
@@ -93,17 +96,17 @@
     </div>
 
     {{-- Tabel --}}
-    <div class="kur-card overflow-hidden animate-up delay-2">
+    <div class="app-card overflow-hidden animate-up delay-2">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800">Aktivitas Mengajar</h3>
                 <p class="text-xs text-slate-400 mt-0.5">{{ $aktivitas->total() }} sesi ditemukan</p>
             </div>
             <div class="flex gap-2">
-                <span class="kur-badge b-teal">
+                <span class="app-badge b-teal">
                     {{ $aktivitas->filter(fn($a) => $a->verified_at)->count() }} diverifikasi
                 </span>
-                <span class="kur-badge b-red">
+                <span class="app-badge b-red">
                     {{ $aktivitas->filter(fn($a) => !$a->verified_at)->count() }} belum
                 </span>
             </div>
@@ -137,14 +140,14 @@
                 <div class="flex items-center justify-between">
                     @if($item->verified_at)
                         @if($item->status_verifikasi === 'mengajar')
-                            <span class="kur-badge b-teal text-xs">Terverifikasi Mengajar</span>
+                            <span class="app-badge b-teal text-xs">Terverifikasi Mengajar</span>
                         @elseif($item->status_verifikasi === 'tidak_mengajar')
-                            <span class="kur-badge b-red text-xs">Tidak Mengajar</span>
+                            <span class="app-badge b-red text-xs">Tidak Mengajar</span>
                         @else
-                            <span class="kur-badge b-teal text-xs">Terverifikasi</span>
+                            <span class="app-badge b-teal text-xs">Terverifikasi</span>
                         @endif
                     @else
-                        <span class="kur-badge b-amber text-xs">Belum</span>
+                        <span class="app-badge b-amber text-xs">Belum</span>
                     @endif
                     @if($item->foto_verifikasi)
                     <img src="{{ Storage::url($item->foto_verifikasi) }}" alt="Foto"
@@ -160,7 +163,7 @@
 
         {{-- Desktop: Table --}}
         <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full kur-tbl">
+            <table class="w-full app-tbl">
                 <thead><tr>
                     <th>Tanggal</th>
                     <th>Guru</th>
@@ -185,7 +188,7 @@
                             </div>
                         </td>
                         <td>{{ $item->mata_pelajaran }}</td>
-                        <td><span class="kur-badge b-blue">{{ $item->kelas }}</span></td>
+                        <td><span class="app-badge b-blue">{{ $item->kelas }}</span></td>
                         <td class="text-center">{{ $item->jam_ke }}</td>
                         <td class="whitespace-nowrap">{{ Carbon::parse($item->jam_mulai)->format('H:i') }} @if($item->jam_selesai) – {{ Carbon::parse($item->jam_selesai)->format('H:i') }} @endif</td>
                         <td class="text-center">
@@ -201,16 +204,16 @@
                             @if($item->verified_at)
                             <div>
                                 @if($item->status_verifikasi === 'mengajar')
-                                    <span class="kur-badge b-teal block w-fit mx-auto">Terverifikasi Mengajar</span>
+                                    <span class="app-badge b-teal block w-fit mx-auto">Terverifikasi Mengajar</span>
                                 @elseif($item->status_verifikasi === 'tidak_mengajar')
-                                    <span class="kur-badge b-red block w-fit mx-auto">Terverifikasi Tidak Mengajar</span>
+                                    <span class="app-badge b-red block w-fit mx-auto">Terverifikasi Tidak Mengajar</span>
                                 @else
-                                    <span class="kur-badge b-teal block w-fit mx-auto">Terverifikasi</span>
+                                    <span class="app-badge b-teal block w-fit mx-auto">Terverifikasi</span>
                                 @endif
                                 <span class="text-[10px] text-slate-400 block mt-0.5">{{ Carbon::parse($item->verified_at)->format('H:i') }}</span>
                             </div>
                             @else
-                            <span class="kur-badge b-amber block w-fit mx-auto">Belum</span>
+                            <span class="app-badge b-amber block w-fit mx-auto">Belum</span>
                             @endif
                         </td>
                         <td class="text-center">
@@ -262,4 +265,4 @@ function closePhotoModal() {
 }
 </script>
 
-</x-kurikulum-layout>
+</x-app-layout>

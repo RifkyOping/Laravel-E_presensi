@@ -45,7 +45,7 @@
     @php
         $hasFilter = request()->hasAny(['kelas','jurusan']);
     @endphp
-    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-300 transition-all duration-200 shadow-sm">
+    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="app-card p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -68,10 +68,8 @@
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
             <form method="GET" action="{{ route('literasi.quran') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kelas</label>
-                    <select name="kelas"
-                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
-                                   focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                    <label class="app-label">Kelas</label>
+                    <select name="kelas" class="app-input">
                         <option value="">-- Pilih Kelas --</option>
                         @foreach($kelasList as $k)
                             <option value="{{ $k }}" {{ $selectedKelas == $k ? 'selected' : '' }}>{{ $k }}</option>
@@ -79,10 +77,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Jurusan</label>
-                    <select name="jurusan"
-                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
-                                   focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                    <label class="app-label">Jurusan</label>
+                    <select name="jurusan" class="app-input">
                         <option value="">-- Pilih Jurusan --</option>
                         @foreach($jurusanList as $j)
                             <option value="{{ $j }}" {{ $selectedJurusan == $j ? 'selected' : '' }}>{{ $j }}</option>
@@ -90,17 +86,14 @@
                     </select>
                 </div>
                 <div class="flex items-end gap-3">
-                    <button type="submit"
-                            class="flex-1 sm:flex-none bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm
-                                   transition duration-200 shadow-sm flex items-center justify-center gap-2 flex-shrink-0">
+                    <button type="submit" class="btn-primary flex-1 sm:flex-none">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
                         </svg>
                         Terapkan
                     </button>
                     @if($hasFilter)
-                    <a href="{{ route('literasi.quran') }}"
-                       class="px-5 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm rounded-xl transition duration-200 flex items-center justify-center gap-1.5">
+                    <a href="{{ route('literasi.quran') }}" class="btn-outline flex-1 sm:flex-none">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         Reset
                     </a>

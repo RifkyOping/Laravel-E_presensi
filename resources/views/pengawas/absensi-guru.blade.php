@@ -1,13 +1,63 @@
 @php use Carbon\Carbon; @endphp
-<x-pengawas-layout pageTitle="Absensi Guru" pageSubtitle="Monitoring kehadiran guru">
+<x-app-layout>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Absensi Guru</span>
+    </x-slot>
 
 <div class="space-y-6">
+
+    {{-- ── WELCOME STRIP ── --}}
+    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-5 py-5 sm:px-8 sm:py-7 shadow-xl"
+         style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <p class="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-1">Monitoring Kehadiran</p>
+                <h1 class="text-white text-2xl font-black leading-tight">Absensi Guru</h1>
+                <p class="text-blue-300/80 text-sm mt-1">
+                    Pantau kehadiran datang & pulang guru ·
+                    {{ $tanggal->translatedFormat('l, d F Y') }}
+                </p>
+            </div>
+            <div class="flex flex-row overflow-x-auto sm:overflow-visible flex-nowrap gap-2 sm:gap-3 w-full sm:w-auto mt-3 sm:mt-0 pb-1 sm:pb-0 snap-x">
+                @php
+                    $hadir = $absensi->where('status', 'hadir')->count();
+                    $izin = $absensi->where('status', 'izin')->count();
+                    $sakit = $absensi->where('status', 'sakit')->count();
+                    $alpha = $absensi->where('status', 'alpha')->count();
+                    $total = $semuaGuru->count();
+                    $belum = $total - $absensi->count();
+                @endphp
+                <div class="bg-white/15 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl sm:text-2xl font-black">{{ $hadir }}</p>
+                    <p class="text-blue-300 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $izin }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Izin</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $sakit }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Sakit</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white/70 text-xl sm:text-2xl font-black">{{ $belum }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Belum</p>
+                </div>
+                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl sm:text-2xl font-black">{{ $total }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
+        <div class="absolute right-24 -bottom-12 w-40 h-40 rounded-full bg-white/5 pointer-events-none"></div>
+    </div>
 
     {{-- Filter --}}
     @php
         $hasFilter = request()->hasAny(['tanggal','guru_id','status']) && (request('tanggal') != \Carbon\Carbon::today()->format('Y-m-d') || request('guru_id') || request('status'));
     @endphp
-    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="pw-card p-6">
+    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="app-card p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -30,13 +80,13 @@
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
             <form method="GET" action="{{ route('pengawas.absensi-guru') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="pw-label">Tanggal</label>
-                    <input type="date" name="tanggal" class="pw-input"
+                    <label class="app-label">Tanggal</label>
+                    <input type="date" name="tanggal" class="app-input"
                            value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
                 </div>
                 <div>
-                    <label class="pw-label">Filter Guru</label>
-                    <select name="guru_id" class="pw-input">
+                    <label class="app-label">Filter Guru</label>
+                    <select name="guru_id" class="app-input">
                         <option value="">— Semua Guru —</option>
                         @foreach($semuaGuru as $g)
                         <option value="{{ $g->id }}" {{ request('guru_id') == $g->id ? 'selected':'' }}>{{ $g->name }}</option>
@@ -44,8 +94,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="pw-label">Status</label>
-                    <select name="status" class="pw-input">
+                    <label class="app-label">Status</label>
+                    <select name="status" class="app-input">
                         <option value="">— Semua Status —</option>
                         @foreach(['hadir','izin','sakit','alpha'] as $s)
                         <option value="{{ $s }}" {{ request('status')===$s?'selected':'' }}>{{ ucfirst($s) }}</option>
@@ -74,7 +124,7 @@
     </div>
 
     {{-- Status Kehadiran Guru --}}
-    <div class="pw-card overflow-hidden">
+    <div class="app-card overflow-hidden">
         {{-- Card Header --}}
         <div class="px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -118,12 +168,12 @@
                 </div>
                 @if($record)
                     @php $cls = match($record->status) { 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red' }; @endphp
-                    <span class="pw-badge {{ $cls }} capitalize shrink-0">
+                    <span class="app-badge {{ $cls }} capitalize shrink-0">
                         {{ $record->status }}
                         @if($record->status_pengajuan==='pending') (P) @endif
                     </span>
                 @else
-                    <span class="pw-badge b-slate shrink-0">Belum</span>
+                    <span class="app-badge b-slate shrink-0">Belum</span>
                 @endif
             </div>
             @endforeach
@@ -131,7 +181,7 @@
 
         {{-- Desktop: Table --}}
         <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full pw-tbl">
+            <table class="w-full app-tbl">
                 <thead>
                     <tr>
                         <th class="w-8 text-center">No.</th>
@@ -169,13 +219,13 @@
                         <td class="text-center">
                             @if($record)
                                 @php $cls = match($record->status) { 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red' }; @endphp
-                                <span class="pw-badge {{ $cls }} capitalize">
+                                <span class="app-badge {{ $cls }} capitalize">
                                     {{ $record->status }}
                                     @if($record->status_pengajuan === 'pending') (Pending) @endif
                                     @if($record->status_pengajuan === 'rejected') (Ditolak) @endif
                                 </span>
                             @else
-                                <span class="pw-badge b-slate">Belum Absen</span>
+                                <span class="app-badge b-slate">Belum Absen</span>
                             @endif
                         </td>
                     </tr>
@@ -186,7 +236,7 @@
     </div>
 
     {{-- Riwayat Absensi Guru --}}
-    <div class="pw-card overflow-hidden">
+    <div class="app-card overflow-hidden">
         {{-- Card Header --}}
         <div class="px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -227,7 +277,7 @@
                     </p>
                 </div>
                 @php $cls = match($r->status) { 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red' }; @endphp
-                <span class="pw-badge {{ $cls }} capitalize shrink-0">
+                <span class="app-badge {{ $cls }} capitalize shrink-0">
                     {{ $r->status }}
                     @if($r->status_pengajuan==='pending') (P) @endif
                 </span>
@@ -239,10 +289,9 @@
 
         {{-- Desktop: Table --}}
         <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full pw-tbl">
+            <table class="w-full app-tbl">
                 <thead>
                     <tr>
-                        <th class="w-8 text-center">No.</th>
                         <th class="text-center">Tanggal</th>
                         <th class="text-left">Nama Guru</th>
                         <th class="text-center">Datang</th>
@@ -253,7 +302,6 @@
                 <tbody>
                     @forelse($riwayat as $i => $r)
                     <tr>
-                        <td class="text-center text-slate-400 font-medium text-xs">{{ $riwayat->firstItem() + $i }}</td>
                         <td class="whitespace-nowrap text-center">
                             <span class="font-semibold text-slate-700 text-sm">{{ Carbon::parse($r->tanggal)->format('d M Y') }}</span><br>
                             <span class="text-[.7rem] text-slate-400">{{ Carbon::parse($r->tanggal)->translatedFormat('l') }}</span>
@@ -274,7 +322,7 @@
                         </td>
                         <td class="text-center">
                             @php $cls = match($r->status) { 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red' }; @endphp
-                            <span class="pw-badge {{ $cls }} capitalize">
+                            <span class="app-badge {{ $cls }} capitalize">
                                 {{ $r->status }}
                                 @if($r->status_pengajuan === 'pending') (Pending) @endif
                                 @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
@@ -294,4 +342,4 @@
     </div>
 
 </div>
-</x-pengawas-layout>
+</x-app-layout>

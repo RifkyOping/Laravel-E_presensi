@@ -29,7 +29,7 @@
 
             {{-- Kehadiran --}}
             <a href="{{ route('absensi') }}"
-               class="group bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-3
+               class="group app-card p-6 flex flex-col gap-3
                       transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#1e3a6e]/40">
                 <div class="flex items-start justify-between">
                     <h3 class="font-bold text-slate-800 group-hover:text-[#1e3a6e] transition-colors">
@@ -52,7 +52,7 @@
 
             {{-- Literasi E-Book --}}
             <a href="{{ route('ebook.index') }}"
-               class="group bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-3
+               class="group app-card p-6 flex flex-col gap-3
                       transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#1e3a6e]/40">
                 <div class="flex items-start justify-between">
                     <h3 class="font-bold text-slate-800 group-hover:text-[#1e3a6e] transition-colors">
@@ -75,7 +75,7 @@
 
             {{-- Profil Saya --}}
             <a href="{{ route('profile.edit') }}"
-               class="group bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-3
+               class="group app-card p-6 flex flex-col gap-3
                       transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-slate-400/40">
                 <div class="flex items-start justify-between">
                     <h3 class="font-bold text-slate-800 group-hover:text-slate-600 transition-colors">

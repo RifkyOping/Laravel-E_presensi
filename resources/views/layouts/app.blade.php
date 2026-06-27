@@ -123,19 +123,24 @@
             border: 1px solid #e2e8f0;
         }
 
+        .app-tbl thead tr {
+            border-bottom: 1px solid #f1f5f9;
+            background: rgba(248, 250, 252, 0.7);
+        }
+
         .app-tbl thead th {
-            background: #f8fafc;
-            color: #64748b;
-            font-size: .71rem;
-            font-weight: 700;
-            letter-spacing: .07em;
+            color: #94a3b8;
+            font-size: .7rem;
+            font-weight: 900;
+            letter-spacing: .05em;
             text-transform: uppercase;
-            padding: .75rem 1rem;
-            border-bottom: 2px solid #e2e8f0;
+            padding: .875rem 1.5rem;
+            border: none;
+            background: transparent;
         }
 
         .app-tbl tbody tr {
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f8fafc;
             transition: background .15s;
         }
 
@@ -144,7 +149,7 @@
         }
 
         .app-tbl tbody td {
-            padding: .78rem 1rem;
+            padding: .875rem 1.25rem;
             font-size: .84rem;
             color: #334155;
         }
@@ -227,57 +232,63 @@
             background: #1e3a6e;
             color: #fff;
             border: none;
-            padding: .55rem 1.1rem;
-            border-radius: 10px;
+            padding: .625rem 1.5rem;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: .83rem;
+            font-size: .875rem;
             cursor: pointer;
-            transition: background .18s, transform .15s;
+            transition: all .2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
         }
 
         .btn-primary:hover {
             background: #162d57;
             transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .btn-outline {
             background: transparent;
-            color: #1e3a6e;
-            border: 1.5px solid #cbd5e1;
-            padding: .55rem 1rem;
-            border-radius: 10px;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: .625rem 1.25rem;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: .83rem;
+            font-size: .875rem;
             cursor: pointer;
-            transition: all .18s;
+            transition: all .2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
         }
 
         .btn-outline:hover {
-            border-color: #1e3a6e;
-            background: #f0f4ff;
+            border-color: #94a3b8;
+            background: #f8fafc;
         }
 
         .btn-danger {
             background: #fef2f2;
             color: #dc2626;
-            border: 1.5px solid #fca5a5;
-            padding: .55rem 1rem;
-            border-radius: 10px;
+            border: 1px solid #fca5a5;
+            padding: .625rem 1.25rem;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: .83rem;
+            font-size: .875rem;
             cursor: pointer;
-            transition: all .18s;
+            transition: all .2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
         }
 
@@ -637,6 +648,34 @@
                     </svg>
                     Dashboard
                 </a>
+                
+                <span class="app-section">Monitoring</span>
+                <a href="{{ route('pengawas.absensi-guru') }}"
+                    class="app-nav {{ request()->routeIs('pengawas.absensi-guru') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    Absensi Guru
+                </a>
+                
+                <a href="{{ route('pengawas.absensi-siswa') }}"
+                    class="app-nav {{ request()->routeIs('pengawas.absensi-siswa') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Absensi Siswa
+                </a>
+
+                <a href="{{ route('pengawas.aktivitas-guru') }}"
+                    class="app-nav {{ request()->routeIs('pengawas.aktivitas-guru') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    Aktivitas Mengajar
+                </a>
 
                 {{-- === KURIKULUM === --}}
             @elseif(Auth::user()->role === 'kurikulum')
@@ -794,6 +833,32 @@
             });
         });
     </script>
+
+    <!-- Web Cron: Trigger otomatis cron dari background browser (Bypass InfinityFree Bot Protection) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Mencegah spam request: Hanya jalankan 1x setiap 5 menit per perangkat
+            const lastCron = localStorage.getItem('last_cron_run');
+            const now = new Date().getTime();
+            
+            if (!lastCron || now - lastCron > 300000) { 
+                localStorage.setItem('last_cron_run', now);
+                
+                // Delay acak antara 5 hingga 25 detik agar jika 500 siswa buka web bersamaan,
+                // beban ke server InfinityFree disebar dan tidak membuat server crash (508 Limit).
+                const randomDelay = Math.floor(Math.random() * 20000) + 5000; 
+                
+                setTimeout(() => {
+                    const cronToken = '{{ env("CRON_SECRET", "rahasia123") }}';
+                    // Chain requests (dieksekusi satu-satu bergiliran) agar tidak boros koneksi TCP
+                    fetch('/cron/generate-aktivitas-mengajar?token=' + cronToken)
+                        .finally(() => fetch('/cron/cek-alpha?token=' + cronToken)
+                        .finally(() => fetch('/cron/cek-lupa-pulang?token=' + cronToken)));
+                }, randomDelay);
+            }
+        });
+    </script>
+    
     @stack('modals')
 </body>
 

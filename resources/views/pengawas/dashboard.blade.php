@@ -1,5 +1,9 @@
 @php use Carbon\Carbon; @endphp
-<x-pengawas-layout pageTitle="Dashboard Pengawas">
+<x-app-layout>
+    <x-slot name="header">
+        <h1 class="text-[.9rem] font-bold text-slate-800 leading-tight">Dashboard Pengawas</h1>
+        <p class="text-[.68rem] text-slate-400 hidden sm:block">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+    </x-slot>
 
     <div class="space-y-6">
 
@@ -24,11 +28,11 @@
                     ['label' => 'Total Guru', 'value' => $stats['total_guru'], 'sub' => 'terdaftar', 'color' => 'text-[#1e3a6e]'],
                     ['label' => 'Guru Hadir', 'value' => $stats['guru_hadir'], 'sub' => 'hari ini', 'color' => 'text-[#1e3a6e]'],
                     ['label' => 'Total Siswa', 'value' => $stats['total_siswa'], 'sub' => 'terdaftar', 'color' => 'text-violet-600'],
-                    ['label' => 'Sesi Mengajar', 'value' => $stats['sesi_mengajar'], 'sub' => 'hari ini', 'color' => 'text-amber-600'],
+                    ['label' => 'Siswa Hadir', 'value' => $stats['siswa_hadir'], 'sub' => 'hari ini', 'color' => 'text-violet-600'],
                 ];
             @endphp
             @foreach($cards as $i => $c)
-                <div class="pw-stat animate-up delay-{{ $i + 1 }}">
+                <div class="stat-card animate-up delay-{{ $i + 1 }}">
                     <div class="flex items-start justify-end mb-3">
                         <span
                             class="text-[.68rem] font-semibold text-slate-400 uppercase tracking-wide">{{ $c['sub'] }}</span>
@@ -39,30 +43,13 @@
             @endforeach
         </div>
 
-        {{-- Status Kehadiran Guru Hari Ini --}}
-        <div class="grid grid-cols-3 gap-4">
-            @php
-                $statusCards = [
-                    ['label' => 'Izin', 'value' => $stats['guru_izin'], 'cls' => 'b-amber'],
-                    ['label' => 'Sakit', 'value' => $stats['guru_sakit'], 'cls' => 'b-slate'],
-                    ['label' => 'Alpha', 'value' => $stats['guru_alpha'], 'cls' => 'b-red'],
-                ];
-            @endphp
-            @foreach($statusCards as $sc)
-                <div class="pw-card p-4 flex items-center gap-4">
-                    <div>
-                        <p class="text-2xl font-black text-slate-800">{{ $sc['value'] }}</p>
-                        <span class="pw-badge {{ $sc['cls'] }} text-xs">{{ $sc['label'] }}</span>
-                    </div>
-                </div>
-            @endforeach
-        </div>
+
 
         {{-- 2 kolom: Hadir & Belum Absen --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {{-- Guru Hadir Hari Ini --}}
-            <div class="pw-card overflow-hidden animate-up delay-2">
+            <div class="app-card overflow-hidden animate-up delay-2">
                 <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">Absensi Guru Terbaru</h3>
@@ -91,7 +78,7 @@
                             @php $cls = match($a->status) {
                                 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
                             }; @endphp
-                            <span class="pw-badge {{ $cls }} capitalize">
+                            <span class="app-badge {{ $cls }} capitalize">
                                 {{ $a->status }}
                                 @if($a->status_pengajuan === 'pending') (Pending) @endif
                                 @if($a->status_pengajuan === 'rejected') (Ditolak) @endif
@@ -104,13 +91,13 @@
             </div>
 
             {{-- Guru Belum Absen --}}
-            <div class="pw-card overflow-hidden animate-up delay-3">
+            <div class="app-card overflow-hidden animate-up delay-3">
                 <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">Guru Belum Absen</h3>
                         <p class="text-xs text-slate-400 mt-0.5">Sampai saat ini</p>
                     </div>
-                    <span class="pw-badge b-red">{{ $belumAbsen->count() }} guru</span>
+                    <span class="app-badge b-red">{{ $belumAbsen->count() }} guru</span>
                 </div>
                 <div class="divide-y divide-slate-50">
                     @forelse($belumAbsen as $g)
@@ -120,7 +107,7 @@
                                 {{ strtoupper(substr($g->name, 0, 1)) }}
                             </div>
                             <p class="font-semibold text-slate-700 text-sm truncate flex-1">{{ $g->name }}</p>
-                            <span class="pw-badge b-slate">Belum</span>
+                            <span class="app-badge b-slate">Belum</span>
                         </div>
                     @empty
                         <p class="px-5 py-8 text-center text-[#1e3a6e] font-semibold text-sm">Semua guru sudah absen!</p>
@@ -130,7 +117,7 @@
         </div>
 
         {{-- Aktivitas Mengajar Hari Ini --}}
-        <div class="pw-card overflow-hidden animate-up delay-4">
+        <div class="app-card overflow-hidden animate-up delay-4">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-slate-800 text-sm">Aktivitas Mengajar Hari Ini</h3>
@@ -155,8 +142,6 @@
                                 &nbsp;·&nbsp; {{ Carbon::parse($a->jam_mulai)->format('H:i') }}@if($a->jam_selesai)–{{ Carbon::parse($a->jam_selesai)->format('H:i') }}@endif
                             </p>
                         </div>
-                        @php $mc = match($a->metode) { 'daring'=>'b-purple','diskusi'=>'b-blue','praktik'=>'b-blue','ceramah'=>'b-blue',default=>'b-slate' }; @endphp
-                        <span class="pw-badge {{ $mc }} capitalize shrink-0">{{ $a->metode }}</span>
                     </div>
                 </div>
                 @empty
@@ -166,40 +151,35 @@
 
             {{-- Desktop: Table --}}
             <div class="hidden sm:block overflow-x-auto">
-                <table class="w-full pw-tbl">
+                <table class="w-full app-tbl text-center">
                     <thead>
                         <tr>
-                            <th>Guru</th>
-                            <th>Mata Pelajaran</th>
-                            <th>Kelas</th>
+                            <th class="text-center">Guru</th>
+                            <th class="text-center">Mata Pelajaran</th>
+                            <th class="text-center">Kelas</th>
                             <th class="text-center">Jam ke-</th>
-                            <th>Waktu</th>
-                            <th>Metode</th>
+                            <th class="text-center">Waktu</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($aktivitasHariIni as $a)
                             <tr>
-                                <td class="font-semibold text-slate-800">{{ $a->user->name }}</td>
-                                <td>{{ $a->mata_pelajaran }}</td>
-                                <td>{{ $a->kelas }}</td>
+                                <td class="font-semibold text-slate-800 text-center">{{ $a->user->name }}</td>
+                                <td class="text-center">{{ $a->mata_pelajaran }}</td>
+                                <td class="text-center">{{ $a->kelas }}</td>
                                 <td class="text-center">
-                                    <span class="inline-flex w-7 h-7 rounded-full bg-[#1e3a6e] text-white items-center justify-center font-bold text-xs">{{ $a->jam_ke }}</span>
+                                    {{ $a->jam_ke }}
                                 </td>
-                                <td class="whitespace-nowrap">{{ Carbon::parse($a->jam_mulai)->format('H:i') }}
+                                <td class="whitespace-nowrap text-center">{{ Carbon::parse($a->jam_mulai)->format('H:i') }}
                                     @if($a->jam_selesai)–{{ Carbon::parse($a->jam_selesai)->format('H:i') }}@endif
-                                </td>
-                                <td>
-                                    @php $mc = match ($a->metode) { 'daring'=>'b-purple','diskusi'=>'b-blue','praktik'=>'b-blue','ceramah'=>'b-blue',default=>'b-slate' }; @endphp
-                                    <span class="pw-badge {{ $mc }} capitalize">{{ $a->metode }}</span>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="text-center py-8 text-slate-400">Belum ada aktivitas mengajar hari ini.</td></tr>
+                            <tr><td colspan="5" class="text-center py-8 text-slate-400">Belum ada aktivitas mengajar hari ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-</x-pengawas-layout>
+</x-app-layout>

@@ -1,5 +1,8 @@
 @php use Carbon\Carbon; @endphp
-<x-pengawas-layout pageTitle="Absensi Siswa" pageSubtitle="Monitoring kehadiran siswa">
+<x-app-layout>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Absensi Siswa</span>
+    </x-slot>
 
 <div class="space-y-6">
 
@@ -7,7 +10,7 @@
     @php
         $hasFilter = request()->hasAny(['tanggal','search']) && (request('tanggal') != \Carbon\Carbon::today()->format('Y-m-d') || request('search'));
     @endphp
-    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="pw-card p-6">
+    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="app-card p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -30,12 +33,12 @@
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
             <form method="GET" action="{{ route('pengawas.absensi-siswa') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="pw-label">Tanggal</label>
-                    <input type="date" name="tanggal" class="pw-input" value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
+                    <label class="app-label">Tanggal</label>
+                    <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
                 </div>
                 <div>
-                    <label class="pw-label">Cari Nama Siswa</label>
-                    <input type="text" name="search" class="pw-input" placeholder="Ketik nama siswa..."
+                    <label class="app-label">Cari Nama Siswa</label>
+                    <input type="text" name="search" class="app-input" placeholder="Ketik nama siswa..."
                            value="{{ request('search') }}">
                 </div>
                 <div class="flex items-end gap-3 pt-2">
@@ -133,13 +136,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {{-- Siswa Hadir --}}
-        <div class="pw-card overflow-hidden">
+        <div class="app-card overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-slate-800 text-sm">Sudah Tercatat</h3>
                     <p class="text-xs text-slate-400 mt-0.5">{{ $tanggal->translatedFormat('l, d F Y') }}</p>
                 </div>
-                <span class="pw-badge b-blue">{{ $siswaHadir->count() }} siswa</span>
+                <span class="app-badge b-blue">{{ $siswaHadir->count() }} siswa</span>
             </div>
             <div class="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                 @forelse($siswaHadir as $s)
@@ -158,7 +161,7 @@
                     @php $cls = match($rec?->status) {
                         'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
                     }; @endphp
-                    <span class="pw-badge {{ $cls }} capitalize">
+                    <span class="app-badge {{ $cls }} capitalize">
                         {{ $rec?->status ?? '—' }}
                         @if($rec && $rec->status_pengajuan === 'pending') (Pending) @endif
                         @if($rec && $rec->status_pengajuan === 'rejected') (Ditolak) @endif
@@ -171,13 +174,13 @@
         </div>
 
         {{-- Siswa Belum Absen --}}
-        <div class="pw-card overflow-hidden">
+        <div class="app-card overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-slate-800 text-sm">Belum Tercatat</h3>
                     <p class="text-xs text-slate-400 mt-0.5">Sampai saat ini</p>
                 </div>
-                <span class="pw-badge b-red">{{ $siswaBelum->count() }} siswa</span>
+                <span class="app-badge b-red">{{ $siswaBelum->count() }} siswa</span>
             </div>
             <div class="divide-y divide-slate-50 max-h-96 overflow-y-auto">
                 @forelse($siswaBelum as $s)
@@ -186,7 +189,7 @@
                         {{ strtoupper(substr($s->name, 0, 1)) }}
                     </div>
                     <p class="font-semibold text-slate-700 text-sm truncate flex-1">{{ $s->name }}</p>
-                    <span class="pw-badge b-slate">Belum</span>
+                    <span class="app-badge b-slate">Belum</span>
                 </div>
                 @empty
                 <p class="px-5 py-8 text-center text-[#1e3a6e] font-semibold text-sm">Semua siswa sudah absen!</p>
@@ -196,7 +199,7 @@
     </div>
 
     {{-- Riwayat Absensi Siswa --}}
-    <div class="pw-card overflow-hidden">
+    <div class="app-card overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100">
             <h3 class="font-bold text-slate-800">Riwayat Absensi Siswa</h3>
             <p class="text-xs text-slate-400 mt-0.5">{{ $riwayat->total() }} record ditemukan</p>
@@ -217,7 +220,7 @@
                     </p>
                 </div>
                 @php $cls = match($r->status) { 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red' }; @endphp
-                <span class="pw-badge {{ $cls }} capitalize shrink-0">
+                <span class="app-badge {{ $cls }} capitalize shrink-0">
                     {{ $r->status }}
                     @if($r->status_pengajuan==='pending') (P) @endif
                 </span>
@@ -229,7 +232,7 @@
 
         {{-- Desktop: Table --}}
         <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full pw-tbl">
+            <table class="w-full app-tbl">
                 <thead><tr>
                     <th class="text-center">Tanggal</th><th class="text-left">Nama Siswa</th><th class="text-center">Waktu Datang</th>
                     <th class="text-center">Waktu Pulang</th><th class="text-center">Status</th>
@@ -248,7 +251,7 @@
                         <td class="text-center">{{ $r->waktu_pulang ? Carbon::parse($r->waktu_pulang)->format('H:i').' WITA' : '—' }}</td>
                         <td class="text-center">
                             @php $cls = match($r->status) { 'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red' }; @endphp
-                            <span class="pw-badge {{ $cls }} capitalize">
+                            <span class="app-badge {{ $cls }} capitalize">
                                 {{ $r->status }}
                                 @if($r->status_pengajuan === 'pending') (Pending) @endif
                                 @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
@@ -267,4 +270,4 @@
     </div>
 
 </div>
-</x-pengawas-layout>
+</x-app-layout>
