@@ -82,7 +82,7 @@
                     'title' => 'Absensi Guru',
                     'desc'  => 'Pantau kehadiran datang & pulang guru',
                     'stat'  => $stats['guru_hadir'] . ' hadir hari ini',
-                    'color' => '#1e6e3a',
+                    'color' => '#1e3a6e',
                 ],
                 [
                     'href'  => route('admin.aktivitas-guru'),

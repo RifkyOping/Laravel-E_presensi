@@ -88,6 +88,11 @@ Route::middleware('auth')->group(function () {
     // Guru - Jadwal Mengajar
     Route::get('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'index'])->name('guru.jadwal.index');
     Route::post('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'store'])->name('guru.jadwal.store');
+
+    // Guru - Persetujuan Absensi Siswa
+    Route::get('/guru/persetujuan-absensi', [\App\Http\Controllers\GuruPersetujuanAbsensiController::class, 'index'])->name('guru.persetujuan-absensi');
+    Route::post('/guru/persetujuan-absensi/{id}/approve', [\App\Http\Controllers\GuruPersetujuanAbsensiController::class, 'approve'])->name('guru.persetujuan-absensi.approve');
+    Route::post('/guru/persetujuan-absensi/{id}/reject', [\App\Http\Controllers\GuruPersetujuanAbsensiController::class, 'reject'])->name('guru.persetujuan-absensi.reject');
 });
 
 require __DIR__.'/auth.php';

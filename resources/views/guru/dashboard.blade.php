@@ -1,4 +1,9 @@
-@php use Carbon\Carbon; @endphp
+@php 
+    use Carbon\Carbon;
+    $pendingCount = \App\Models\AbsensiSiswa::where('guru_id', Auth::id())
+        ->where('status_pengajuan', 'pending')
+        ->count();
+@endphp
 <x-app-layout>
     <x-slot name="header">
         <span class="text-sm font-bold text-slate-800">Dashboard Guru</span>
@@ -80,12 +85,12 @@
             {{-- Literasi Al-Qur'an --}}
             <a href="{{ route('guru.literasi.quran') }}"
                class="group bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-3
-                      transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-emerald-500/40">
+                      transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#1e3a6e]/40">
                 <div class="flex items-start justify-between">
-                    <h3 class="font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">
+                    <h3 class="font-bold text-slate-800 group-hover:text-[#1e3a6e] transition-colors">
                         Literasi Al-Qur'an
                     </h3>
-                    <svg class="w-4 h-4 text-slate-300 group-hover:text-emerald-600 transition-colors flex-shrink-0"
+                    <svg class="w-4 h-4 text-slate-300 group-hover:text-[#1e3a6e] transition-colors flex-shrink-0"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -94,8 +99,36 @@
                     Pantau dan catat perkembangan hafalan, tilawah, dan tajwid siswa per kelas.
                 </p>
                 <div class="pt-3 border-t border-slate-100">
-                    <span class="text-[.7rem] font-bold text-emerald-700/70 uppercase tracking-wide">
+                    <span class="text-[.7rem] font-bold text-[#1e3a6e]/70 uppercase tracking-wide">
                         Catatan Literasi Siswa
+                    </span>
+                </div>
+            </a>
+
+            {{-- Persetujuan Izin/Sakit Siswa --}}
+            <a href="{{ route('guru.persetujuan-absensi') }}"
+               class="group bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-3
+                      transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#1e3a6e]/40 relative">
+                @if($pendingCount > 0)
+                <div class="absolute -top-3 -right-3 bg-red-500 text-white w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shadow-lg animate-bounce">
+                    {{ $pendingCount }}
+                </div>
+                @endif
+                <div class="flex items-start justify-between">
+                    <h3 class="font-bold text-slate-800 group-hover:text-[#1e3a6e] transition-colors">
+                        Persetujuan Absensi Siswa
+                    </h3>
+                    <svg class="w-4 h-4 text-slate-300 group-hover:text-[#1e3a6e] transition-colors flex-shrink-0"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+                <p class="text-sm text-slate-500 leading-relaxed flex-1">
+                    Kelola pengajuan izin dan sakit siswa yang ditujukan kepada Anda.
+                </p>
+                <div class="pt-3 border-t border-slate-100">
+                    <span class="text-[.7rem] font-bold text-[#1e3a6e]/70 uppercase tracking-wide">
+                        Persetujuan Siswa
                     </span>
                 </div>
             </a>
@@ -123,3 +156,25 @@
     </div>
 </div>
 @endif
+
+<script>
+@if($pendingCount > 0)
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'info',
+            title: 'Ada Pengajuan Baru!',
+            text: 'Terdapat {{ $pendingCount }} pengajuan izin/sakit siswa yang menunggu persetujuan Anda.',
+            confirmButtonColor: '#1e3a6e',
+            confirmButtonText: 'Lihat Sekarang',
+            showCancelButton: true,
+            cancelButtonText: 'Tutup'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('guru.persetujuan-absensi') }}";
+            }
+        });
+    }
+});
+@endif
+</script>

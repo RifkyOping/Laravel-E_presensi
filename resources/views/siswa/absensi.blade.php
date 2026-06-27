@@ -299,6 +299,15 @@
                 <input type="hidden" name="jenis_absen" value="sakit">
                 <div class="space-y-4">
                     <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tujuan Pengajuan (Guru)</label>
+                        <select name="guru_id" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm bg-white" required>
+                            <option value="">-- Pilih Guru Tujuan --</option>
+                            @foreach($semuaGuru as $guru)
+                                <option value="{{ $guru->id }}">{{ $guru->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Keterangan</label>
                         <textarea name="keterangan" rows="2" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" placeholder="Sakit apa?" required></textarea>
                     </div>
@@ -347,6 +356,15 @@
                 @csrf
                 <input type="hidden" name="jenis_absen" value="izin">
                 <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tujuan Pengajuan (Guru)</label>
+                        <select name="guru_id" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm bg-white" required>
+                            <option value="">-- Pilih Guru Tujuan --</option>
+                            @foreach($semuaGuru as $guru)
+                                <option value="{{ $guru->id }}">{{ $guru->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal Selesai Izin</label>
                         <input type="date" name="tanggal_selesai" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" required min="{{ date('Y-m-d') }}">

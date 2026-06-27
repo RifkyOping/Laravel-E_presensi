@@ -76,12 +76,12 @@
             {{-- Profil Saya --}}
             <a href="{{ route('profile.edit') }}"
                class="group app-card p-6 flex flex-col gap-3
-                      transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-slate-400/40">
+                      transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#1e3a6e]/40">
                 <div class="flex items-start justify-between">
-                    <h3 class="font-bold text-slate-800 group-hover:text-slate-600 transition-colors">
+                    <h3 class="font-bold text-slate-800 group-hover:text-[#1e3a6e] transition-colors">
                         Profil Saya
                     </h3>
-                    <svg class="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors flex-shrink-0"
+                    <svg class="w-4 h-4 text-slate-300 group-hover:text-[#1e3a6e] transition-colors flex-shrink-0"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -91,7 +91,7 @@
                 </p>
                 <div class="pt-3 border-t border-slate-100">
                     @php $user = Auth::user(); @endphp
-                    <span class="text-[.7rem] font-bold text-slate-400 uppercase tracking-wide">
+                    <span class="text-[.7rem] font-bold text-[#1e3a6e]/70 uppercase tracking-wide">
                         {{ $user->kelas ? 'Kelas ' . $user->kelas . ($user->jurusan ? ' ' . $user->jurusan : '') . ($user->rombel ? ' ' . $user->rombel : '') : 'Lengkapi profil' }}
                     </span>
                 </div>

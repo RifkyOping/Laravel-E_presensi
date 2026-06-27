@@ -22,6 +22,7 @@ class AbsensiSiswa extends Model
         'file_bukti',
         'status_pengajuan',
         'is_notified',
+        'guru_id',
     ];
 
     protected $casts = [
@@ -32,5 +33,10 @@ class AbsensiSiswa extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function guru(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'guru_id');
     }
 }

@@ -34,6 +34,13 @@
                         </x-nav-link>
                     @endif
 
+                    <!-- Tambahan Menu Khusus Guru (Desktop) -->
+                    @if (Auth::user()->role === 'guru')
+                        <x-nav-link :href="route('guru.persetujuan-absensi')" :active="request()->routeIs('guru.persetujuan-absensi')">
+                            {{ __('Persetujuan Absensi') }}
+                        </x-nav-link>
+                    @endif
+
                     <!-- Tambahan Menu Khusus Siswa (Desktop) -->
                     @if (Auth::user()->role === 'siswa')
                         <x-nav-link :href="route('absensi')" :active="request()->routeIs('absensi')">
@@ -122,6 +129,13 @@
                     {{ __('Aktivitas Mengajar') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.persetujuan-absensi')" :active="request()->routeIs('admin.persetujuan-absensi')">
+                    {{ __('Persetujuan Absensi') }}
+                </x-responsive-nav-link>
+            @endif
+
+            <!-- Tambahan Menu Khusus Guru (Mobile) -->
+            @if (Auth::user()->role === 'guru')
+                <x-responsive-nav-link :href="route('guru.persetujuan-absensi')" :active="request()->routeIs('guru.persetujuan-absensi')">
                     {{ __('Persetujuan Absensi') }}
                 </x-responsive-nav-link>
             @endif

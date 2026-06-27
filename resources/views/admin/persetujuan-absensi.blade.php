@@ -47,7 +47,12 @@
                                     <div class="w-8 h-8 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
                                         {{ strtoupper(substr($p->user->name ?? '?', 0, 1)) }}
                                     </div>
-                                    <span class="font-semibold text-slate-800">{{ $p->user->name ?? 'User Dihapus' }}</span>
+                                    <div>
+                                        <div class="font-semibold text-slate-800">{{ $p->user->name ?? 'User Dihapus' }}</div>
+                                        @if($p->guru)
+                                            <div class="text-[0.65rem] text-slate-500 mt-0.5 font-semibold">Tujuan: {{ $p->guru->name }}</div>
+                                        @endif
+                                    </div>
                                 </div>
                             </td>
                             <td class="text-center">
@@ -210,7 +215,12 @@
                                         <br><span class="text-xs text-slate-500 font-normal">s/d {{ \Carbon\Carbon::parse($r->tanggal_selesai)->translatedFormat('d M Y') }}</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">{{ $r->user->name ?? '-' }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="font-semibold text-slate-800">{{ $r->user->name ?? '-' }}</div>
+                                    @if($r->guru)
+                                        <div class="text-[0.65rem] text-slate-500 mt-0.5 font-semibold">Tujuan: {{ $r->guru->name }}</div>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-center">
                                     <span class="app-badge {{ $r->status === 'izin' ? 'b-amber' : 'b-slate' }} capitalize">{{ $r->status }}</span>
                                 </td>
