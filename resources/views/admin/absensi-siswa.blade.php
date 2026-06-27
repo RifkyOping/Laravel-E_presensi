@@ -6,26 +6,56 @@
 <div class="space-y-6">
 
     {{-- Filter Tanggal & Nama --}}
-    <form method="GET" action="{{ route('admin.absensi-siswa') }}" class="app-card p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-            <label class="app-label">Tanggal</label>
-            <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
+    @php
+        $hasFilter = request()->hasAny(['tanggal','search']) && (request('tanggal') != \Carbon\Carbon::today()->format('Y-m-d') || request('search'));
+    @endphp
+    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="app-card p-5">
+        <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
+                    <svg class="w-4 h-4 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-black text-slate-700">Filter Pencarian Siswa</h2>
+                    <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk menyesuaikan pencarian</p>
+                </div>
+            </div>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 group-hover:bg-slate-100 transition-colors">
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+        </button>
+
+        <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
+            <form method="GET" action="{{ route('admin.absensi-siswa') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="app-label">Tanggal</label>
+                    <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
+                </div>
+                <div>
+                    <label class="app-label">Cari Nama Siswa</label>
+                    <input type="text" name="search" class="app-input" placeholder="Ketik nama siswa..."
+                           value="{{ request('search') }}">
+                </div>
+                <div class="flex items-end gap-3 pt-2">
+                    <button type="submit" class="flex-1 sm:flex-none px-6 py-2.5 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
+                        Terapkan
+                    </button>
+                    @if($hasFilter)
+                    <a href="{{ route('admin.absensi-siswa') }}"
+                       class="px-6 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Reset
+                    </a>
+                    @endif
+                </div>
+            </form>
         </div>
-        <div>
-            <label class="app-label">Cari Nama Siswa</label>
-            <input type="text" name="search" class="app-input" placeholder="Ketik nama siswa..."
-                   value="{{ request('search') }}">
-        </div>
-        <div class="flex items-end gap-3">
-            <button type="submit" class="px-5 py-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold text-sm rounded-lg transition">
-                Terapkan
-            </button>
-            <a href="{{ route('admin.absensi-siswa') }}"
-               class="px-4 py-2 border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm rounded-lg transition">
-                Reset
-            </a>
-        </div>
-    </form>
+    </div>
 
     {{-- Export Bulanan --}}
     <form method="GET" action="{{ route('admin.absensi-siswa.export') }}" class="app-card p-5 flex flex-col sm:flex-row items-end gap-4 bg-emerald-50/50 border border-emerald-100">

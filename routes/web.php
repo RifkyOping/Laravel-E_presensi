@@ -162,3 +162,32 @@ Route::middleware(['auth', 'kurikulum'])->prefix('kurikulum')->name('kurikulum.'
     Route::put('/verifikasi/{aktivitas}', [KurikulumController::class, 'storeVerifikasi'])->name('store-verifikasi');
     Route::delete('/verifikasi/{aktivitas}', [KurikulumController::class, 'hapusVerifikasi'])->name('hapus-verifikasi');
 });
+
+// ──────────────────────────────────────────
+// CRON JOB ROUTES (Endpoint Terpisah)
+// ──────────────────────────────────────────
+// Route ini digunakan untuk menjalankan command khusus presensi melalui URL.
+
+Route::get('/cron/cek-alpha', function (\Illuminate\Http\Request $request) {
+    if ($request->query('token') !== env('CRON_SECRET', 'rahasia123')) abort(403, 'Akses ditolak.');
+    try {
+        \Illuminate\Support\Facades\Artisan::call('presensi:cek-alpha');
+        return response()->json(['status' => 'success', 'message' => 'Cek Alpha berhasil dijalankan.', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+    } catch (\Exception $e) { return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500); }
+});
+
+Route::get('/cron/cek-lupa-pulang', function (\Illuminate\Http\Request $request) {
+    if ($request->query('token') !== env('CRON_SECRET', 'rahasia123')) abort(403, 'Akses ditolak.');
+    try {
+        \Illuminate\Support\Facades\Artisan::call('presensi:cek-lupa-pulang');
+        return response()->json(['status' => 'success', 'message' => 'Cek Lupa Pulang berhasil dijalankan.', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+    } catch (\Exception $e) { return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500); }
+});
+
+Route::get('/cron/generate-aktivitas-mengajar', function (\Illuminate\Http\Request $request) {
+    if ($request->query('token') !== env('CRON_SECRET', 'rahasia123')) abort(403, 'Akses ditolak.');
+    try {
+        \Illuminate\Support\Facades\Artisan::call('presensi:generate-aktivitas-mengajar');
+        return response()->json(['status' => 'success', 'message' => 'Generate Aktivitas Mengajar berhasil dijalankan.', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+    } catch (\Exception $e) { return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500); }
+});

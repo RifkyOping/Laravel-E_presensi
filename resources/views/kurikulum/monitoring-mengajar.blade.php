@@ -24,7 +24,10 @@
     @endif
 
     {{-- Filter --}}
-    <div x-data="{ showFilter: {{ request('guru_id') || request('tanggal') || request('status_verif') ? 'true' : 'false' }} }" class="kur-card p-6 animate-up">
+    @php
+        $hasFilter = request()->hasAny(['tanggal','guru_id','status_verif']);
+    @endphp
+    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="kur-card p-6 animate-up">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -69,10 +72,21 @@
                     </select>
                 </div>
                 <div class="flex items-end gap-3 pt-1">
-                    <button type="submit" class="btn-primary flex-1 justify-center shadow-md">
+                    <button type="submit"
+                            class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm
+                                   transition duration-200 shadow-sm flex items-center gap-2 flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                        </svg>
                         Terapkan
                     </button>
-                    <a href="{{ route('kurikulum.monitoring-mengajar') }}" class="btn-outline justify-center">Reset</a>
+                    @if($hasFilter)
+                    <a href="{{ route('kurikulum.monitoring-mengajar') }}"
+                       class="px-5 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm rounded-xl transition duration-200 flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Reset
+                    </a>
+                    @endif
                 </div>
             </form>
         </div>
