@@ -105,16 +105,8 @@
                 <h3 class="text-xl font-bold mb-6 text-blue-200">Hubungi Kami</h3>
                 <ul class="space-y-4 text-white/80 font-medium">
                     <li class="flex items-start gap-3 hover:text-white transition">
-                        <span class="mt-0.5">📍</span>
+                        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                         <span>Jl. Pangeran Diponegoro No. 89, Kel. Baurung, Kec. Banggae Timur, Kab. Majene, Sulawesi Barat</span>
-                    </li>
-                    <li class="flex items-center gap-3 hover:text-white transition">
-                        <span>📞</span>
-                        <span>(0422) 21132</span>
-                    </li>
-                    <li class="flex items-center gap-3 hover:text-white transition">
-                        <span>📧</span>
-                        <span>smkn1majene@yahoo.co.id</span>
                     </li>
                 </ul>
             </div>
@@ -123,7 +115,7 @@
             <div class="animate-fade-in-up delay-300">
                 <h3 class="text-xl font-bold mb-6 text-blue-200">Tautan Cepat</h3>
                 <ul class="space-y-3 font-medium text-white/80">
-                    <li><a href="https://smkn1majene.sch.id/" target="_blank" class="hover:text-blue-200 hover:translate-x-2 transition inline-flex items-center gap-2"><span>🌐</span> Website Utama</a></li>
+                    <li><a href="https://smkn1majene.sch.id/" target="_blank" class="hover:text-blue-200 hover:translate-x-2 transition inline-flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> smkn1majene.sch.id </a></li>
                     <li><a href="https://web.facebook.com/smkn1majene" target="_blank" class="hover:text-blue-200 hover:translate-x-2 transition inline-flex items-center gap-2">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6c1.05 0 2.05.2 2.05.2v2.25h-1.16c-1.14 0-1.39.71-1.39 1.35V12h2.5l-.4 3h-2.1v6.8C18.56 20.87 22 16.84 22 12z"/></svg> Facebook
                     </a></li>

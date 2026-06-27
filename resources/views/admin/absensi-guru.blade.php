@@ -107,12 +107,19 @@
     {{-- Export Bulanan --}}
     <form method="GET" action="{{ route('admin.absensi-guru.export') }}" class="bg-emerald-50/50 rounded-2xl border border-emerald-100 p-5 flex flex-col sm:flex-row items-stretch sm:items-end gap-4 shadow-sm">
         <div class="flex-1 w-full">
-            <label class="block text-xs font-black text-emerald-800 uppercase tracking-wider mb-2">Export Rekap Bulanan (CSV)</label>
+            <label class="block text-xs font-black text-emerald-800 uppercase tracking-wider mb-2">Pilih Bulan</label>
             <input type="month" name="bulan" class="app-input border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500/20 bg-white w-full" value="{{ date('Y-m') }}" required>
         </div>
-        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
+        <div class="w-full sm:w-auto">
+            <label class="block text-xs font-black text-emerald-800 uppercase tracking-wider mb-2">Pemisah Kolom</label>
+            <select name="delimiter" class="app-input border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500/20 bg-white w-full h-10">
+                <option value=";">Excel ID (;)</option>
+                <option value=",">Excel EN (,)</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 h-10 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Download CSV
+            Download Rekap
         </button>
     </form>
 

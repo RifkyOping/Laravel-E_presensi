@@ -80,6 +80,9 @@ class SchoolSetting extends Model
      */
     public function isAbsensiTerbuka(string $type = 'datang', string $jenis = 'hadir'): array
     {
+        if (in_array($jenis, ['sakit', 'izin'])) {
+            return [true, 'Pengajuan selalu terbuka.'];
+        }
         if ($this->status_absen === 'buka') {
             return [true, 'Absen dibuka secara manual.'];
         }

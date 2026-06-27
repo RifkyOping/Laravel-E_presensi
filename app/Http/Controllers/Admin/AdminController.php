@@ -353,6 +353,7 @@ class AdminController extends Controller
     public function exportAbsensiGuru(Request $request)
     {
         $bulan = $request->filled('bulan') ? Carbon::parse($request->bulan) : Carbon::today();
+        $delimiter = $request->input('delimiter', ';');
         
         $riwayat = AbsensiGuru::with('user')
             ->whereYear('tanggal', $bulan->year)
@@ -368,9 +369,9 @@ class AdminController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        $callback = function () use ($riwayat) {
+        $callback = function () use ($riwayat, $delimiter) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Nama Guru', 'Tanggal', 'Jam Datang', 'Jam Pulang', 'Status Kehadiran', 'Keterangan'], ';');
+            fputcsv($file, ['No', 'Nama Guru', 'Tanggal', 'Jam Datang', 'Jam Pulang', 'Status Kehadiran', 'Keterangan'], $delimiter);
             
             $no = 1;
             foreach ($riwayat as $data) {
@@ -382,7 +383,7 @@ class AdminController extends Controller
                     $data->waktu_pulang ?? '-',
                     $data->status,
                     $data->keterangan ?? '-'
-                ], ';');
+                ], $delimiter);
             }
             fclose($file);
         };
@@ -528,6 +529,7 @@ class AdminController extends Controller
     public function exportAbsensiSiswa(Request $request)
     {
         $bulan = $request->filled('bulan') ? Carbon::parse($request->bulan) : Carbon::today();
+        $delimiter = $request->input('delimiter', ';');
         
         $riwayat = AbsensiSiswa::with('user')
             ->whereYear('tanggal', $bulan->year)
@@ -543,9 +545,9 @@ class AdminController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        $callback = function () use ($riwayat) {
+        $callback = function () use ($riwayat, $delimiter) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Nama Siswa', 'Tanggal', 'Waktu Datang', 'Waktu Pulang', 'Status Kehadiran', 'Keterangan'], ';');
+            fputcsv($file, ['No', 'Nama Siswa', 'Tanggal', 'Waktu Datang', 'Waktu Pulang', 'Status Kehadiran', 'Keterangan'], $delimiter);
             
             $no = 1;
             foreach ($riwayat as $data) {
@@ -557,7 +559,7 @@ class AdminController extends Controller
                     $data->waktu_pulang ?? '-',
                     $data->status,
                     $data->keterangan ?? '-'
-                ], ';');
+                ], $delimiter);
             }
             fclose($file);
         };
