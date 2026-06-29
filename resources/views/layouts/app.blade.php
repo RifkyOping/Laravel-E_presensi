@@ -424,6 +424,16 @@
 
 <body class="h-full bg-slate-50 text-slate-800 flex overflow-hidden">
 
+    {{-- Global Page Loader --}}
+    <div id="global-loader" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative flex justify-center items-center">
+            <div class="absolute animate-ping inline-flex h-16 w-16 rounded-full bg-[#1e3a6e] opacity-20"></div>
+            <div class="inline-flex rounded-full h-14 w-14 border-4 border-slate-200 border-t-[#1e3a6e] border-r-[#1e3a6e] animate-spin"></div>
+            <div class="absolute w-8 h-8 bg-white/50 rounded-full"></div>
+        </div>
+        <p class="mt-4 text-xs font-black text-[#1e3a6e] tracking-widest uppercase animate-pulse">Memuat...</p>
+    </div>
+
     <div id="app-overlay" onclick="closeSidebar()"></div>
 
     {{-- ════════════ SIDEBAR ════════════ --}}
@@ -868,6 +878,98 @@
     </script>
     
     @stack('modals')
+
+    {{-- Script Global Loader --}}
+    <script>
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('global-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            const loader = document.getElementById('global-loader');
+            if (loader) {
+                loader.style.display = 'flex';
+                // Force reflow
+                void loader.offsetWidth; 
+                loader.style.opacity = '1';
+            }
+        });
+    </script>
+
+    {{-- Script Pull to Refresh --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainEl = document.querySelector('main');
+            if (!mainEl) return;
+            
+            let startY = 0;
+            let currentY = 0;
+            let isRefreshing = false;
+            
+            // Buat elemen indikator
+            const ptrEl = document.createElement('div');
+            ptrEl.className = 'w-full flex justify-center items-center overflow-hidden transition-all duration-200';
+            ptrEl.style.height = '0px';
+            ptrEl.innerHTML = `
+                <div class="flex items-center justify-center text-[#1e3a6e] font-bold text-[10px] bg-white px-5 py-2.5 rounded-full shadow-md border border-slate-100 uppercase tracking-widest">
+                    <span id="ptr-text">Usap ke bawah</span>
+                </div>
+            `;
+            mainEl.prepend(ptrEl);
+
+            const ptrText = document.getElementById('ptr-text');
+
+            mainEl.addEventListener('touchstart', e => {
+                if (mainEl.scrollTop === 0 && !isRefreshing) {
+                    startY = e.touches[0].clientY;
+                }
+            }, {passive: true});
+
+            mainEl.addEventListener('touchmove', e => {
+                if (startY > 0 && !isRefreshing && mainEl.scrollTop === 0) {
+                    currentY = e.touches[0].clientY;
+                    const distance = currentY - startY;
+                    
+                    if (distance > 0) {
+                        const h = Math.min(distance * 0.4, 80);
+                        ptrEl.style.height = h + 'px';
+                        ptrEl.style.paddingTop = '1rem';
+                        ptrEl.style.paddingBottom = '1rem';
+                        
+                        if (h > 60) {
+                            ptrText.textContent = 'Lepaskan untuk memuat ulang';
+                        } else {
+                            ptrText.textContent = 'Usap ke bawah';
+                        }
+                    }
+                }
+            }, {passive: true});
+
+            mainEl.addEventListener('touchend', e => {
+                if (startY > 0 && !isRefreshing) {
+                    const distance = currentY - startY;
+                    const h = Math.min(distance * 0.4, 80);
+                    
+                    if (h > 60) {
+                        isRefreshing = true;
+                        ptrEl.style.height = '60px';
+                        ptrText.textContent = 'Memuat ulang...';
+                        window.location.reload();
+                    } else {
+                        ptrEl.style.height = '0px';
+                        ptrEl.style.paddingTop = '0px';
+                        ptrEl.style.paddingBottom = '0px';
+                    }
+                }
+                startY = 0;
+                currentY = 0;
+            }, {passive: true});
+        });
+    </script>
 </body>
 
 </html>

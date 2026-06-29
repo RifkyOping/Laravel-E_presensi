@@ -81,12 +81,12 @@
                 @endif
             @endif
 
-            <div id="gps-status" class="bg-white/20 text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
+            <button type="button" onclick="requestGPS()" id="gps-status" class="bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm">
                 <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="gps-spinner">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
                 <span id="gps-text">Mendeteksi lokasi GPS...</span>
-            </div>
+            </button>
         </div>
     </div>
 
@@ -478,8 +478,8 @@ function updateGpsStatus(ok, msg) {
     const txt  = document.getElementById('gps-text');
     txt.textContent = msg;
     spin.classList.add('hidden');
-    el.classList.remove('bg-white/20');
-    el.classList.add(ok ? 'bg-green-500/30' : 'bg-red-500/30');
+    el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm';
+    el.classList.add(ok ? '!bg-green-500/80' : '!bg-red-500/80');
 
     if (!ok) {
         if (msg.includes('Fake GPS')) {
@@ -487,7 +487,7 @@ function updateGpsStatus(ok, msg) {
             gpsErrorMsg   = 'Sistem mendeteksi indikasi penggunaan Fake GPS atau Lokasi Palsu di perangkat Anda. Harap matikan aplikasi tersebut untuk dapat melakukan absensi.';
         } else if (msg.includes('ditolak')) {
             gpsErrorTitle = 'Izin Ditolak';
-            gpsErrorMsg   = 'Anda belum mengizinkan akses lokasi. Harap ubah izin situs di browser Anda menjadi Allow/Izinkan, lalu muat ulang halaman.';
+            gpsErrorMsg   = 'Anda belum mengizinkan akses lokasi. Jika menekan peringatan lokasi tidak memunculkan notifikasi izin, harap ubah izin situs secara manual di pengaturan browser Anda (Izinkan Lokasi).';
         } else {
             gpsErrorTitle = 'GPS Gagal';
             gpsErrorMsg   = msg;
@@ -495,7 +495,16 @@ function updateGpsStatus(ok, msg) {
     }
 }
 
-window.addEventListener('load', function() {
+function requestGPS() {
+    const el   = document.getElementById('gps-status');
+    const spin = document.getElementById('gps-spinner');
+    const txt  = document.getElementById('gps-text');
+    
+    // Set UI to loading
+    el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm';
+    txt.textContent = 'Mendeteksi lokasi GPS...';
+    spin.classList.remove('hidden');
+
     if (!navigator.geolocation) {
         updateGpsStatus(false, '❌ Browser tidak mendukung GPS');
         return;
@@ -520,13 +529,15 @@ window.addEventListener('load', function() {
         },
         function(err) {
             const msg = err.code === 1
-                ? 'Izin lokasi ditolak — aktifkan GPS di browser'
+                ? 'Izin lokasi ditolak. Tekan untuk mengizinkan.'
                 : 'GPS tidak tersedia: ' + err.message;
             updateGpsStatus(false, msg);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-});
+}
+
+window.addEventListener('load', requestGPS);
 
 /* ── Submit dengan Konfirmasi (Sakit/Izin) ── */
 function confirmDatang(jenis) {

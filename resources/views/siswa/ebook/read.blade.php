@@ -101,14 +101,135 @@
                 @endphp
 
                 @if($pdfExists)
-                {{-- Embed PDF --}}
-                <div class="relative w-full bg-slate-50 border-b border-slate-100" style="height: 75vh; min-height: 500px;">
-                    <iframe src="{{ $pdfUrl }}#toolbar=0&navpanes=0&scrollbar=0"
-                            class="w-full h-full border-none"
-                            title="PDF Viewer"
-                            allowfullscreen>
-                    </iframe>
+                {{-- Universal PDF Viewer (PDF.js) --}}
+                <div class="relative w-full bg-slate-50 border-b border-slate-100 flex flex-col" style="height: 75vh; min-height: 500px;">
+                    <!-- Toolbar -->
+                    <div class="bg-slate-800 text-white px-4 py-3 flex items-center justify-between shadow z-10 flex-wrap gap-3">
+                        <div class="flex items-center gap-2">
+                            <button id="prev_page" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg text-sm transition flex items-center justify-center" title="Halaman Sebelumnya">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <span class="text-sm font-medium mx-1 whitespace-nowrap">Hal: <span id="page_num">1</span> / <span id="page_count">--</span></span>
+                            <button id="next_page" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg text-sm transition flex items-center justify-center" title="Halaman Selanjutnya">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="zoom_out" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg text-sm font-bold transition w-10 flex items-center justify-center" title="Perkecil">-</button>
+                            <span class="text-xs font-bold text-slate-300 w-12 text-center" id="zoom_val">100%</span>
+                            <button id="zoom_in" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-lg text-sm font-bold transition w-10 flex items-center justify-center" title="Perbesar">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Canvas Container -->
+                    <div class="flex-1 overflow-auto bg-slate-300 flex justify-center p-2 sm:p-6" id="canvas_container">
+                        <canvas id="pdf_render_canvas" class="shadow-2xl rounded"></canvas>
+                    </div>
                 </div>
+
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const url = '{{ $pdfUrl }}';
+                        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+                        let pdfDoc = null,
+                            pageNum = 1,
+                            pageRendering = false,
+                            pageNumPending = null,
+                            scale = 1.0,
+                            canvas = document.getElementById('pdf_render_canvas'),
+                            ctx = canvas.getContext('2d'),
+                            container = document.getElementById('canvas_container'),
+                            initialFit = true;
+
+                        function renderPage(num) {
+                            pageRendering = true;
+                            pdfDoc.getPage(num).then(function(page) {
+                                let unscaledViewport = page.getViewport({scale: 1.0});
+                                
+                                if (initialFit) {
+                                    const containerWidth = container.clientWidth - 32; 
+                                    if (unscaledViewport.width > containerWidth) {
+                                        scale = containerWidth / unscaledViewport.width;
+                                    }
+                                    initialFit = false;
+                                }
+
+                                let viewport = page.getViewport({scale: scale});
+                                
+                                // Support HiDPI-displays for better resolution on mobile/retina
+                                let outputScale = window.devicePixelRatio || 1;
+                                canvas.width = Math.floor(viewport.width * outputScale);
+                                canvas.height = Math.floor(viewport.height * outputScale);
+                                canvas.style.width = Math.floor(viewport.width) + "px";
+                                canvas.style.height =  Math.floor(viewport.height) + "px";
+
+                                let transform = outputScale !== 1 
+                                    ? [outputScale, 0, 0, outputScale, 0, 0] 
+                                    : null;
+
+                                document.getElementById('zoom_val').textContent = Math.round(scale * 100) + '%';
+
+                                const renderContext = {
+                                    canvasContext: ctx,
+                                    transform: transform,
+                                    viewport: viewport
+                                };
+                                const renderTask = page.render(renderContext);
+
+                                renderTask.promise.then(function() {
+                                    pageRendering = false;
+                                    if (pageNumPending !== null) {
+                                        renderPage(pageNumPending);
+                                        pageNumPending = null;
+                                    }
+                                });
+                            });
+                            document.getElementById('page_num').textContent = num;
+                        }
+
+                        function queueRenderPage(num) {
+                            if (pageRendering) {
+                                pageNumPending = num;
+                            } else {
+                                renderPage(num);
+                            }
+                        }
+
+                        document.getElementById('prev_page').addEventListener('click', function() {
+                            if (pageNum <= 1) return;
+                            pageNum--;
+                            queueRenderPage(pageNum);
+                        });
+
+                        document.getElementById('next_page').addEventListener('click', function() {
+                            if (pageNum >= pdfDoc.numPages) return;
+                            pageNum++;
+                            queueRenderPage(pageNum);
+                        });
+
+                        document.getElementById('zoom_in').addEventListener('click', function() {
+                            scale += 0.2;
+                            queueRenderPage(pageNum);
+                        });
+
+                        document.getElementById('zoom_out').addEventListener('click', function() {
+                            if (scale <= 0.4) return;
+                            scale -= 0.2;
+                            queueRenderPage(pageNum);
+                        });
+
+                        pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+                            pdfDoc = pdfDoc_;
+                            document.getElementById('page_count').textContent = pdfDoc.numPages;
+                            renderPage(pageNum);
+                        }).catch(function(error) {
+                            console.error('Error loading PDF:', error);
+                            container.innerHTML = '<div class="flex flex-col items-center justify-center text-center p-8 w-full"><p class="text-red-500 font-bold mb-2">Gagal memuat PDF</p><p class="text-sm text-slate-500">' + error.message + '</p></div>';
+                        });
+                    });
+                </script>
                 @else
                 {{-- File tidak ditemukan di disk --}}
                 <div class="flex flex-col items-center justify-center py-20 text-center bg-slate-50 px-8">
