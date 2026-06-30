@@ -153,6 +153,9 @@
                 <input type="hidden" name="jenis_absen" value="hadir">
                 <input type="hidden" name="latitude"  id="lat-datang">
                 <input type="hidden" name="longitude" id="lng-datang">
+                <input type="hidden" name="accuracy"  id="acc-datang">
+                <input type="hidden" name="speed"     id="spd-datang">
+                <input type="hidden" name="timestamp" id="ts-datang">
                 <button type="button" id="btn-datang" onclick="confirmDatang('{{ $jenisMasaAktif ?? 'none' }}')"
                         class="w-full {{ $sedangMasaSakitIzin ? 'bg-orange-600 hover:bg-orange-700' : 'bg-[#1e3a6e] hover:bg-[#162d57]' }} text-white font-bold py-3.5 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 hidden" id="spin-datang" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,6 +183,9 @@
                 @csrf
                 <input type="hidden" name="latitude"  id="lat-pulang">
                 <input type="hidden" name="longitude" id="lng-pulang">
+                <input type="hidden" name="accuracy"  id="acc-pulang">
+                <input type="hidden" name="speed"     id="spd-pulang">
+                <input type="hidden" name="timestamp" id="ts-pulang">
                 <button type="button" id="btn-pulang" onclick="submitAbsen('pulang')"
                         {{ ($absensiHariIni && ($absensiHariIni->waktu_pulang || in_array($absensiHariIni->status, ['sakit', 'izin']))) || !$absensiHariIni || !$absensiHariIni->waktu_datang ? 'disabled' : '' }}
                         class="w-full border border-[#1e3a6e] text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-bold py-3.5 rounded-xl text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-transparent disabled:hover:text-slate-400 flex items-center justify-center gap-2">
@@ -467,6 +473,9 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ── GPS State ── */
 let gpsLat = null;
 let gpsLng = null;
+let gpsAcc = null;
+let gpsSpeed = null;
+let gpsTimestamp = null;
 let gpsReady = false;
 
 let gpsErrorTitle = 'GPS Belum Siap';
@@ -512,18 +521,30 @@ function requestGPS() {
     navigator.geolocation.getCurrentPosition(
         function(pos) {
             const acc = pos.coords.accuracy;
+            const speed = pos.coords.speed;
             
             // --- ANTI FAKE GPS HEURISTIC ---
+            // 1. Fake GPS sering memberikan akurasi bulat sempurna tanpa desimal atau altitude kosong
             const isRoundAccuracy = Number.isInteger(acc) && (acc % 10 === 0 || acc === 65);
             const isMissingAltitude = (pos.coords.altitude === null || pos.coords.altitude === 0);
             
-            if (isRoundAccuracy && isMissingAltitude) {
+            // 2. Fake GPS sering memberikan akurasi terlalu sempurna (1-4 meter)
+            const isTooPerfectAccuracy = acc < 5;
+            
+            // 3. Fake GPS kadang mensimulasikan pergerakan (speed > 0) padahal sedang diam absen
+            const isSuspiciousSpeed = speed !== null && speed > 0;
+            
+            // Jika terdeteksi salah satu ciri mencurigakan, tandai sebagai Fake GPS
+            if ((isRoundAccuracy && isMissingAltitude) || isTooPerfectAccuracy || isSuspiciousSpeed) {
                 updateGpsStatus(false, 'Terdeteksi penggunaan Aplikasi Fake GPS / Lokasi Palsu!');
                 return;
             }
 
             gpsLat   = pos.coords.latitude;
             gpsLng   = pos.coords.longitude;
+            gpsAcc   = pos.coords.accuracy;
+            gpsSpeed = pos.coords.speed;
+            gpsTimestamp = pos.timestamp;
             gpsReady = true;
             updateGpsStatus(true, 'Lokasi asli terdeteksi (akurasi ±' + Math.round(acc) + 'm)');
         },
@@ -585,6 +606,9 @@ function submitAbsen(type) {
     // Isi hidden input
     document.getElementById('lat-' + type).value = gpsLat;
     document.getElementById('lng-' + type).value = gpsLng;
+    document.getElementById('acc-' + type).value = gpsAcc;
+    document.getElementById('spd-' + type).value = gpsSpeed;
+    document.getElementById('ts-' + type).value = gpsTimestamp;
 
     // Tampilkan loading
     const btn  = document.getElementById('btn-' + type);

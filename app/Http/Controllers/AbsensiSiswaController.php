@@ -155,6 +155,25 @@ class AbsensiSiswaController extends Controller
             $lat = (float) $request->latitude;
             $lng = (float) $request->longitude;
 
+            // --- Server-side Fake GPS & Timestamp Validation ---
+            if ($request->filled('timestamp')) {
+                $clientTimestamp = (int) $request->input('timestamp'); // in milliseconds
+                $gpsTime = Carbon::createFromTimestampMs($clientTimestamp);
+                if (now()->diffInSeconds($gpsTime) > 300) { // Lebih dari 5 menit
+                    return back()->with('error', 'Waktu lokasi tidak valid atau kadaluarsa. Silakan refresh dan coba lagi.');
+                }
+            }
+
+            if ($request->filled('accuracy')) {
+                $acc = (float) $request->input('accuracy');
+                $speed = (float) $request->input('speed');
+                
+                $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
+                if ($isRoundAccuracy || $acc < 5 || ($speed > 0)) {
+                    return back()->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
+                }
+            }
+
             $jarak = SchoolSetting::hitungJarak($setting->latitude, $setting->longitude, $lat, $lng);
 
             if ($jarak > $setting->radius_meter) {
@@ -252,6 +271,25 @@ class AbsensiSiswaController extends Controller
 
         $lat = (float) $request->latitude;
         $lng = (float) $request->longitude;
+
+        // --- Server-side Fake GPS & Timestamp Validation ---
+        if ($request->filled('timestamp')) {
+            $clientTimestamp = (int) $request->input('timestamp'); // in milliseconds
+            $gpsTime = Carbon::createFromTimestampMs($clientTimestamp);
+            if (now()->diffInSeconds($gpsTime) > 300) { // Lebih dari 5 menit
+                return redirect()->route('absensi')->with('error', 'Waktu lokasi tidak valid atau kadaluarsa. Silakan refresh dan coba lagi.');
+            }
+        }
+
+        if ($request->filled('accuracy')) {
+            $acc = (float) $request->input('accuracy');
+            $speed = (float) $request->input('speed');
+            
+            $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
+            if ($isRoundAccuracy || $acc < 5 || ($speed > 0)) {
+                return redirect()->route('absensi')->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
+            }
+        }
 
         $jarak = SchoolSetting::hitungJarak($setting->latitude, $setting->longitude, $lat, $lng);
 

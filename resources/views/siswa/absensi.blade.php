@@ -153,6 +153,9 @@
                 <input type="hidden" name="jenis_absen" value="hadir">
                 <input type="hidden" name="latitude"  id="lat-datang">
                 <input type="hidden" name="longitude" id="lng-datang">
+                <input type="hidden" name="accuracy"  id="acc-datang">
+                <input type="hidden" name="speed"     id="spd-datang">
+                <input type="hidden" name="timestamp" id="ts-datang">
                 @php
                     $labelBatalkan = $jenisMasaAktif === 'izin' ? 'Batalkan Izin & Hadir' : 'Batalkan Sakit & Hadir';
                 @endphp
@@ -199,6 +202,9 @@
                 @csrf
                 <input type="hidden" name="latitude"  id="lat-pulang">
                 <input type="hidden" name="longitude" id="lng-pulang">
+                <input type="hidden" name="accuracy"  id="acc-pulang">
+                <input type="hidden" name="speed"     id="spd-pulang">
+                <input type="hidden" name="timestamp" id="ts-pulang">
                 <button type="button" id="btn-pulang"
                         onclick="submitAbsen('pulang')"
                         {{ ($sudahPulang || !$sudahDatang || $isSakitIzin) ? 'disabled' : '' }}
@@ -509,6 +515,9 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ── GPS State ── */
 let gpsLat = null;
 let gpsLng = null;
+let gpsAcc = null;
+let gpsSpeed = null;
+let gpsTimestamp = null;
 let gpsReady = false;
 
 let gpsErrorTitle = 'GPS Belum Siap';
@@ -555,21 +564,30 @@ function requestGPS() {
     navigator.geolocation.getCurrentPosition(
         function(pos) {
             const acc = pos.coords.accuracy;
+            const speed = pos.coords.speed;
             
             // --- ANTI FAKE GPS HEURISTIC ---
-            // 1. Fake GPS sering memberikan akurasi bulat sempurna (10, 20, 50, 100, dll) tanpa desimal
-            // 2. Fake GPS sering tidak punya data altitude (null) dan speed (null/0)
+            // 1. Fake GPS sering memberikan akurasi bulat sempurna tanpa desimal atau altitude kosong
             const isRoundAccuracy = Number.isInteger(acc) && (acc % 10 === 0 || acc === 65);
             const isMissingAltitude = (pos.coords.altitude === null || pos.coords.altitude === 0);
             
-            // Jika akurasi mencurigakan DAN tidak ada ketinggian, kita tandai sebagai Fake GPS
-            if (isRoundAccuracy && isMissingAltitude) {
+            // 2. Fake GPS sering memberikan akurasi terlalu sempurna (1-4 meter)
+            const isTooPerfectAccuracy = acc < 5;
+            
+            // 3. Fake GPS kadang mensimulasikan pergerakan (speed > 0) padahal sedang diam absen
+            const isSuspiciousSpeed = speed !== null && speed > 0;
+            
+            // Jika terdeteksi salah satu ciri mencurigakan, tandai sebagai Fake GPS
+            if ((isRoundAccuracy && isMissingAltitude) || isTooPerfectAccuracy || isSuspiciousSpeed) {
                 updateGpsStatus(false, 'Terdeteksi penggunaan Aplikasi Fake GPS / Lokasi Palsu!');
                 return;
             }
 
             gpsLat   = pos.coords.latitude;
             gpsLng   = pos.coords.longitude;
+            gpsAcc   = pos.coords.accuracy;
+            gpsSpeed = pos.coords.speed;
+            gpsTimestamp = pos.timestamp;
             gpsReady = true;
             updateGpsStatus(true, 'Lokasi asli terdeteksi (akurasi ±' + Math.round(acc) + 'm)');
         },
@@ -631,6 +649,9 @@ function submitAbsen(type) {
     // Isi hidden input
     document.getElementById('lat-' + type).value = gpsLat;
     document.getElementById('lng-' + type).value = gpsLng;
+    document.getElementById('acc-' + type).value = gpsAcc;
+    document.getElementById('spd-' + type).value = gpsSpeed;
+    document.getElementById('ts-' + type).value = gpsTimestamp;
 
     // Tampilkan loading
     const btn  = document.getElementById('btn-' + type);
