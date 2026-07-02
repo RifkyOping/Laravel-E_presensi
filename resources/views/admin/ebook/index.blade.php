@@ -20,13 +20,22 @@
             <h2 class="text-xl font-black text-slate-800">Manajemen E-Book</h2>
             <p class="text-sm text-slate-400 mt-0.5">Kelola koleksi e-book beserta file PDF untuk literasi siswa.</p>
         </div>
-        <a href="{{ route('admin.ebook.create') }}"
-           class="inline-flex items-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah E-Book
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.ebook.students') }}"
+               class="inline-flex items-center gap-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Kelola Akses Suara
+            </a>
+            <a href="{{ route('admin.ebook.create') }}"
+               class="inline-flex items-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah E-Book
+            </a>
+        </div>
     </div>
 
     {{-- Table --}}

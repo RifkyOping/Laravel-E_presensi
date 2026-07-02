@@ -69,7 +69,35 @@ class EBookController extends Controller
             ['selesai' => false]
         );
 
+        if ($progres->lulus_suara && !$progres->selesai && $ebook->questions()->count() > 0) {
+            return redirect()->route('ebook.quiz.page', $ebook->id);
+        }
+
         return view('siswa.ebook.read', compact('ebook', 'progres'));
+    }
+
+    /**
+     * Halaman kuis e-book.
+     */
+    public function quizPage(EBook $ebook)
+    {
+        $user = Auth::user();
+        
+        $progres = ProgresEbook::where('user_id', $user->id)
+            ->where('e_book_id', $ebook->id)
+            ->first();
+
+        if (!$progres || !$progres->lulus_suara) {
+            return redirect()->route('ebook.read', $ebook->id)
+                ->with('error', 'Silakan selesaikan tahap membaca dan verifikasi suara terlebih dahulu.');
+        }
+
+        if ($progres->selesai) {
+            return redirect()->route('ebook.index')
+                ->with('success', 'Anda sudah menyelesaikan e-book ini.');
+        }
+
+        return view('siswa.ebook.quiz', compact('ebook', 'progres'));
     }
 
     /**
@@ -124,6 +152,36 @@ class EBookController extends Controller
             'pesan'  => $lulus
                 ? 'Selamat! Kesamaan bacaan Anda ' . $skor . '%. Lanjut ke tahap kuis.'
                 : 'Kesamaan bacaan Anda ' . $skor . '%. Minimal 60% untuk melanjutkan. Coba lagi!',
+        ]);
+    }
+
+    /**
+     * Melewati proses verifikasi suara bagi siswa yang memiliki akses (skip_voice_verification = true).
+     */
+    public function skipVoiceVerification(EBook $ebook)
+    {
+        $user = Auth::user();
+        if (!$user->skip_voice_verification) {
+            return response()->json(['error' => 'Akses ditolak.'], 403);
+        }
+
+        $progres = ProgresEbook::where('user_id', $user->id)
+            ->where('e_book_id', $ebook->id)
+            ->first();
+
+        if ($progres) {
+            $updateData = ['lulus_suara' => true, 'skor_suara' => 100];
+            if ($ebook->questions()->count() === 0) {
+                $updateData['selesai'] = true;
+                $updateData['lulus_kuis'] = true;
+                $updateData['selesai_pada'] = now();
+            }
+            $progres->update($updateData);
+        }
+
+        return response()->json([
+            'lulus' => true,
+            'pesan' => 'Verifikasi suara berhasil dilewati. Melanjutkan...'
         ]);
     }
 

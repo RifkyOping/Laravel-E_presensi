@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_jadwal_set',
+        'skip_voice_verification',
     ];
 
     /**  
@@ -47,6 +48,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_jadwal_set' => 'boolean',
+            'skip_voice_verification' => 'boolean',
         ];
     }
 

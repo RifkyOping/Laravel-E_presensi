@@ -183,4 +183,44 @@ class AdminEBookController extends Controller
         }
         return false;
     }
+
+    public function studentsVoiceAccess(\Illuminate\Http\Request $request)
+    {
+        $tab = $request->query('tab', 'semua');
+        $search = $request->query('search');
+
+        $query = \App\Models\User::where('role', 'siswa');
+
+        if ($tab === 'wajib') {
+            $query->where('skip_voice_verification', false);
+        } elseif ($tab === 'bypass') {
+            $query->where('skip_voice_verification', true);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('siswaProfile', function ($sq) use ($search) {
+                      $sq->where('nis', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $students = $query->orderBy('name')->paginate(20)->withQueryString();
+        return view('admin.ebook.students', compact('students', 'tab'));
+    }
+
+    public function toggleVoiceAccess(\App\Models\User $user)
+    {
+        if ($user->role !== 'siswa') {
+            abort(403);
+        }
+        
+        $newStatus = !$user->skip_voice_verification;
+        $user->update(['skip_voice_verification' => $newStatus]);
+        
+        $status = $newStatus ? 'dimatikan' : 'diaktifkan kembali';
+        return back()->with('success', "Verifikasi suara untuk {$user->name} berhasil {$status}.");
+    }
 }

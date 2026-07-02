@@ -64,8 +64,10 @@ Route::middleware('auth')->group(function () {
     // E-Book Literasi
     Route::get('/literasi/ebook',                      [EBookController::class, 'index'])->name('ebook.index');
     Route::get('/literasi/ebook/{ebook}',              [EBookController::class, 'read'])->name('ebook.read');
+    Route::get('/literasi/ebook/{ebook}/kuis-page',    [EBookController::class, 'quizPage'])->name('ebook.quiz.page');
     Route::get('/literasi/ebook/{ebook}/pdf',          [EBookController::class, 'streamPdf'])->name('ebook.pdf');
     Route::post('/literasi/ebook/{ebook}/voice-check', [EBookController::class, 'checkVoice'])->name('ebook.voice-check');
+    Route::post('/literasi/ebook/{ebook}/voice-skip',  [EBookController::class, 'skipVoiceVerification'])->name('ebook.voice-skip');
     Route::get('/literasi/ebook/{ebook}/kuis',         [EBookController::class, 'getKuis'])->name('ebook.kuis.get');
     Route::post('/literasi/ebook/{ebook}/kuis',        [EBookController::class, 'submitKuis'])->name('ebook.kuis.submit');
 
@@ -139,6 +141,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Manajemen E-Book Literasi
     Route::get('/ebook',                       [AdminEBookController::class, 'index'])->name('ebook.index');
+    Route::get('/ebook/students',              [AdminEBookController::class, 'studentsVoiceAccess'])->name('ebook.students');
+    Route::post('/ebook/students/{user}/toggle', [AdminEBookController::class, 'toggleVoiceAccess'])->name('ebook.students.toggle');
     Route::get('/ebook/create',                [AdminEBookController::class, 'create'])->name('ebook.create');
     Route::post('/ebook',                      [AdminEBookController::class, 'store'])->name('ebook.store');
     Route::get('/ebook/{ebook}/edit',          [AdminEBookController::class, 'edit'])->name('ebook.edit');

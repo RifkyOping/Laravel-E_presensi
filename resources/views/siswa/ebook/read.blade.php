@@ -259,117 +259,28 @@
         {{-- Verification Panel --}}
         <div class="space-y-4">
 
-            @if($progres->lulus_suara && !$progres->selesai)
-            {{-- Quiz Panel --}}
-            <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-4" id="quizPanel">
-                <h3 class="text-sm font-black text-slate-700 flex items-center gap-2">
-                    <div class="w-5 h-5 rounded bg-[#1e3a6e]/10 flex items-center justify-center">
-                        <svg class="w-3 h-3 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M4 6h16M4 12h16M4 18h16"/>
+            @if(!$progres->lulus_suara && !$progres->selesai)
+            @if(Auth::user()->skip_voice_verification)
+            {{-- Bypass Voice Recorder --}}
+            <div class="bg-white rounded-2xl border border-amber-200 p-5 space-y-4" id="voicePanel">
+                <h3 class="text-sm font-black text-amber-700 flex items-center gap-2">
+                    <div class="w-5 h-5 rounded bg-amber-100 flex items-center justify-center">
+                        <svg class="w-3 h-3 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
                     </div>
-                    Verifikasi Kuis
+                    Verifikasi Suara Dinonaktifkan
                 </h3>
                 <p class="text-xs text-slate-500 leading-relaxed">
-                    Anda telah lulus verifikasi suara. Silakan jawab pertanyaan di bawah ini untuk menuntaskan e-book.
+                    Fitur verifikasi suara dimatikan untuk akun Anda. Anda dapat langsung melanjutkan ke tahap kuis setelah selesai membaca materi e-book.
                 </p>
-                
-                <div id="quizContainer" class="space-y-4 pt-2">
-                    <div class="flex justify-center py-6 text-[#1e3a6e]">
-                        <svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                    </div>
-                </div>
-
-                <button id="btnSubmitQuiz" class="hidden w-full items-center justify-center gap-2 bg-[#1e3a6e] text-white font-bold py-3 rounded-xl text-sm transition duration-200 hover:bg-[#162d57]">
-                    Kirim Jawaban
+                <button id="btnSkipVoice"
+                        class="w-full flex items-center justify-center gap-2 bg-amber-500 text-white font-bold py-3 rounded-xl text-sm transition duration-200 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Selesai Membaca & Lanjut
                 </button>
-                <div id="hasilKuis" class="hidden"></div>
+                <div id="hasilVerifikasi" class="hidden"></div>
             </div>
-            
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    fetch('{{ route("ebook.kuis.get", $ebook->id) }}')
-                    .then(r => r.json())
-                    .then(data => {
-                        const container = document.getElementById('quizContainer');
-                        const btnSubmit = document.getElementById('btnSubmitQuiz');
-                        if (data.error) {
-                            container.innerHTML = `<p class="text-sm text-red-500">${data.error}</p>`;
-                            return;
-                        }
-                        if (data.questions && data.questions.length > 0) {
-                            let html = '';
-                            data.questions.forEach((q, idx) => {
-                                html += `
-                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                    <p class="text-sm font-bold text-slate-800 mb-3">${idx + 1}. ${q.pertanyaan}</p>
-                                    <div class="space-y-2">
-                                `;
-                                q.opsi.forEach((opsi, optIdx) => {
-                                    html += `
-                                    <label class="flex items-start gap-3 cursor-pointer group">
-                                        <div class="mt-0.5">
-                                            <input type="radio" name="jawaban[${q.id}]" value="${opsi}" class="w-4 h-4 text-[#1e3a6e] border-slate-300 focus:ring-[#1e3a6e]">
-                                        </div>
-                                        <span class="text-sm text-slate-600 group-hover:text-slate-800 transition">${opsi}</span>
-                                    </label>
-                                    `;
-                                });
-                                html += `</div></div>`;
-                            });
-                            container.innerHTML = html;
-                            btnSubmit.classList.remove('hidden');
-                            btnSubmit.classList.add('flex');
-                        } else {
-                            container.innerHTML = `<p class="text-sm text-slate-500">Soal kuis belum tersedia.</p>`;
-                        }
-                    });
-
-                    document.getElementById('btnSubmitQuiz').addEventListener('click', function() {
-                        const inputs = document.querySelectorAll('#quizContainer input[type="radio"]:checked');
-                        const answers = {};
-                        inputs.forEach(i => {
-                            const name = i.getAttribute('name'); // jawaban[id]
-                            const id = name.match(/\d+/)[0];
-                            answers[id] = i.value;
-                        });
-
-                        const numQuestions = document.querySelectorAll('#quizContainer > div').length;
-                        if (Object.keys(answers).length < numQuestions) {
-                            alert('Silakan jawab semua pertanyaan terlebih dahulu.');
-                            return;
-                        }
-
-                        this.disabled = true;
-                        this.innerHTML = 'Memproses...';
-
-                        fetch('{{ route("ebook.kuis.submit", $ebook->id) }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({ jawaban: answers })
-                        })
-                        .then(r => r.json())
-                        .then(data => {
-                            const hk = document.getElementById('hasilKuis');
-                            hk.classList.remove('hidden');
-                            if(data.lulus) {
-                                hk.innerHTML = `<div class="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl text-sm font-bold text-center">${data.pesan}</div>`;
-                                setTimeout(() => location.reload(), 2000);
-                            } else {
-                                hk.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-bold text-center">${data.pesan}</div>`;
-                                setTimeout(() => location.reload(), 3000);
-                            }
-                        });
-                    });
-                });
-            </script>
-            @endif
-            @if(!$progres->lulus_suara && !$progres->selesai)
+            @else
             {{-- Voice Recorder --}}
             <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-4" id="voicePanel">
                 <h3 class="text-sm font-black text-slate-700 flex items-center gap-2">
@@ -417,10 +328,10 @@
                 {{-- Transcript Box --}}
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">Hasil Transkripsi</label>
-                    <textarea id="transkrip" rows="4"
+                    <textarea id="transkrip" rows="4" readonly
                               placeholder="Transkripsi suara Anda akan muncul di sini secara otomatis..."
                               class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700
-                                     focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30 focus:border-[#1e3a6e] resize-none"></textarea>
+                                     focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30 focus:border-[#1e3a6e] resize-none cursor-not-allowed"></textarea>
                 </div>
 
                 <button id="btnVerify"
@@ -436,6 +347,7 @@
                 {{-- Hasil --}}
                 <div id="hasilVerifikasi" class="hidden"></div>
             </div>
+            @endif
             @endif
 
             {{-- Navigasi --}}
@@ -566,6 +478,42 @@
             requestAnimationFrame(draw);
         }
         draw();
+    }
+
+    // Skip Voice
+    const btnSkipVoice = document.getElementById('btnSkipVoice');
+    if (btnSkipVoice) {
+        btnSkipVoice.addEventListener('click', function() {
+            btnSkipVoice.disabled = true;
+            btnSkipVoice.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg> Memproses...`;
+
+            fetch('{{ route("ebook.voice-skip", $ebook->id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.lulus) {
+                    showHasil('success', data.pesan);
+                    confetti();
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showHasil('error', data.error || 'Terjadi kesalahan.');
+                    btnSkipVoice.disabled = false;
+                    btnSkipVoice.innerHTML = 'Selesai Membaca & Lanjut';
+                }
+            })
+            .catch(() => {
+                showHasil('error', 'Terjadi kesalahan jaringan.');
+                btnSkipVoice.disabled = false;
+                btnSkipVoice.innerHTML = 'Selesai Membaca & Lanjut';
+            });
+        });
     }
 
     // Verify
