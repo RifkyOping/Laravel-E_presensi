@@ -215,29 +215,64 @@
                 <p class="text-xs text-slate-400 mt-0.5">Kosongkan jika tidak ingin mengubah password.</p>
             </div>
             <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {{-- Password Baru --}}
                 <div x-data="{ show: false }">
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Password Baru</label>
+                    <label for="siswa_password_new" class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Password Baru</label>
                     <div class="relative">
-                        <input :type="show ? 'text' : 'password'" name="password" placeholder="Minimal 6 karakter"
-                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10
-                                      rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm pr-10">
+                        <input id="siswa_password_new" :type="show ? 'text' : 'password'" name="password" placeholder="Minimal 8 karakter"
+                               class="w-full border {{ $errors->has('password') ? 'border-red-400 bg-red-50' : 'border-slate-200 focus:border-[#1e3a6e]' }} focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm pr-10">
                         <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-[#1e3a6e] focus:outline-none transition-colors">
                             <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             <svg x-show="show" style="display: none;" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                         </button>
                     </div>
+                    {{-- Indikator kekuatan --}}
+                    <div x-data="{
+                        strength: 0,
+                        colors: ['bg-red-400','bg-orange-400','bg-yellow-400','bg-green-500'],
+                        labels: ['','Sangat Lemah','Lemah','Cukup Kuat','Kuat'],
+                        update(v) {
+                            let s=0;
+                            if(v.length>=8) s++;
+                            if(/[A-Z]/.test(v)) s++;
+                            if(/[0-9]/.test(v)) s++;
+                            if(/[^A-Za-z0-9]/.test(v)) s++;
+                            this.strength=s;
+                        }
+                    }" x-init="document.getElementById('siswa_password_new').addEventListener('input', e => update(e.target.value))" class="mt-2">
+                        <div class="flex gap-1 mb-1">
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="strength>=1 ? colors[strength-1] : 'bg-gray-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="strength>=2 ? colors[strength-1] : 'bg-gray-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="strength>=3 ? colors[strength-1] : 'bg-gray-200'"></div>
+                            <div class="h-1.5 flex-1 rounded-full transition-all duration-300" :class="strength>=4 ? colors[strength-1] : 'bg-gray-200'"></div>
+                        </div>
+                        <p class="text-xs font-semibold" :class="strength===0 ? 'text-gray-400' : (strength<=2 ? 'text-red-500' : (strength===3 ? 'text-yellow-500' : 'text-green-600'))" x-text="labels[strength]"></p>
+                    </div>
+                    @if($errors->has('password'))
+                        <div class="mt-2 flex items-center gap-2 text-red-600 font-semibold text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>{{ $errors->first('password') }}</span>
+                        </div>
+                    @endif
                 </div>
+
+                {{-- Konfirmasi Password --}}
                 <div x-data="{ show: false }">
                     <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Konfirmasi Password</label>
                     <div class="relative">
                         <input :type="show ? 'text' : 'password'" name="password_confirmation" placeholder="Ulangi password baru"
-                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10
-                                      rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm pr-10">
+                               class="w-full border {{ $errors->has('password_confirmation') ? 'border-red-400 bg-red-50' : 'border-slate-200 focus:border-[#1e3a6e]' }} focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm pr-10">
                         <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-[#1e3a6e] focus:outline-none transition-colors">
                             <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             <svg x-show="show" style="display: none;" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                         </button>
                     </div>
+                    @if($errors->has('password_confirmation'))
+                        <div class="mt-2 flex items-center gap-2 text-red-600 font-semibold text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>{{ $errors->first('password_confirmation') }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

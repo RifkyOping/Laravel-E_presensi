@@ -1,24 +1,29 @@
 @php use Carbon\Carbon; @endphp
 <x-app-layout>
     <x-slot name="header">
-        <h1 class="text-[.9rem] font-bold text-slate-800 leading-tight">Dashboard Pengawas</h1>
-        <p class="text-[.68rem] text-slate-400 hidden sm:block">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+        <span class="text-sm font-bold text-slate-800">Dashboard Pengawas</span>
     </x-slot>
 
     <div class="space-y-6">
 
         {{-- Header Banner --}}
-        <div
-            class="animate-up bg-gradient-to-r from-[#1e3a6e] to-[#2d5099] rounded-2xl px-5 py-5 sm:p-7 text-white relative overflow-hidden shadow-lg">
-            <div class="relative z-10">
-                <p class="text-blue-200 text-sm font-semibold">Selamat datang,</p>
-                <h2 class="text-2xl font-black mt-0.5">{{ Auth::user()->name }}</h2>
-                <p class="text-blue-200 text-sm mt-1">
-                    {{ Carbon::now()->translatedFormat('l, d F Y') }} &nbsp;·&nbsp; Panel Pengawas
-                </p>
+        <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-5 py-5 sm:px-8 sm:py-7 shadow-xl"
+             style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
+            <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <p class="text-blue-300 text-sm font-semibold mb-1">Selamat datang,</p>
+                    <h1 class="text-white text-2xl font-black leading-tight">{{ Auth::user()->name }}</h1>
+                    <p class="text-blue-300/80 text-sm mt-1">
+                        {{ Carbon::now()->translatedFormat('l, d F Y') }}
+                    </p>
+                </div>
+                <div class="flex flex-col items-start sm:items-end gap-1 shrink-0">
+                    <span class="text-white/40 text-xs uppercase tracking-widest font-bold">Pengawas</span>
+                    <span class="text-white text-sm font-semibold">E-Presensi SMKN 1 Majene</span>
+                </div>
             </div>
-            <div class="absolute -right-8 -top-8 w-48 h-48 rounded-full bg-white/10"></div>
-            <div class="absolute -right-2 -bottom-10 w-32 h-32 rounded-full bg-white/5"></div>
+            <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
+            <div class="absolute right-24 -bottom-12 w-40 h-40 rounded-full bg-white/5 pointer-events-none"></div>
         </div>
 
         {{-- Stat Cards --}}

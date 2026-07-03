@@ -7,22 +7,21 @@
 <div class="space-y-7">
 
     {{-- ── WELCOME STRIP ── --}}
-    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
+    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-5 py-5 sm:px-8 sm:py-7 shadow-xl"
          style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
-        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-                <p class="text-blue-300 text-sm font-semibold mb-1">Selamat datang kembali,</p>
+                <p class="text-blue-300 text-sm font-semibold mb-1">Selamat datang,</p>
                 <h1 class="text-white text-2xl font-black leading-tight">{{ Auth::user()->name }}</h1>
                 <p class="text-blue-300/80 text-sm mt-1">
                     {{ Carbon::now()->translatedFormat('l, d F Y') }}
                 </p>
             </div>
             <div class="flex flex-col items-start sm:items-end gap-1 shrink-0">
-                <span class="text-white/40 text-xs uppercase tracking-widest font-bold">Panel Admin</span>
+                <span class="text-white/40 text-xs uppercase tracking-widest font-bold">Admin</span>
                 <span class="text-white text-sm font-semibold">E-Presensi SMKN 1 Majene</span>
             </div>
         </div>
-        {{-- Decorative --}}
         <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
         <div class="absolute right-24 -bottom-12 w-40 h-40 rounded-full bg-white/5 pointer-events-none"></div>
     </div>
@@ -72,7 +71,7 @@
                 ],
                 [
                     'href'  => route('admin.ebook.index'),
-                    'title' => 'E-Book Literasi',
+                    'title' => 'Literasi E-Book',
                     'desc'  => 'Upload & kelola koleksi e-book untuk siswa',
                     'stat'  => \App\Models\EBook::count() . ' buku',
                     'color' => '#1e3a6e',

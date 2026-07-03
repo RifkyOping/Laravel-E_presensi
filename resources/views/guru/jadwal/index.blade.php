@@ -238,7 +238,8 @@
                     const existingData = @json($jadwal);
 
                     for (let hari in existingData) {
-                        existingData[hari].forEach(j => {
+                        // Urutkan data dari database berdasarkan jam_ke sebelum dimasukkan
+                        existingData[hari].sort((a, b) => a.jam_ke - b.jam_ke).forEach(j => {
                             // Split kelas string into parts: "X RPL 1" -> ["X", "RPL", "1"]
                             let parts = j.kelas.split(' ');
                             let t = parts[0] || '';
@@ -261,7 +262,9 @@
                 },
 
                 getJadwalByHari(hari) {
-                    return this.jadwalList.filter(j => j.hari === hari).sort((a, b) => a.jam_ke - b.jam_ke);
+                    // Hanya filter berdasarkan hari tanpa sorting dinamis, 
+                    // agar baris baru selalu di bawah dan tidak melompat saat diubah angkanya
+                    return this.jadwalList.filter(j => j.hari === hari);
                 },
 
                 tambahJadwal(hari) {

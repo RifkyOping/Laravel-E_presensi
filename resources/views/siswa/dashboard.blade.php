@@ -17,6 +17,10 @@
                     {{ Carbon::now()->translatedFormat('l, d F Y') }}
                 </p>
             </div>
+            <div class="flex flex-col items-start sm:items-end gap-1 shrink-0">
+                <span class="text-white/40 text-xs uppercase tracking-widest font-bold">Siswa</span>
+                <span class="text-white text-sm font-semibold">E-Presensi SMKN 1 Majene</span>
+            </div>
         </div>
         <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
         <div class="absolute right-24 -bottom-12 w-40 h-40 rounded-full bg-white/5 pointer-events-none"></div>
