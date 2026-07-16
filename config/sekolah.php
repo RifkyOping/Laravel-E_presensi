@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Konfigurasi data sekolah SMKN 1 Majene.
+ * Konfigurasi data sekolah UPTD SMKN 1 Majene.
  *
  * Untuk menambah atau mengurangi mata pelajaran / kelas,
  * cukup edit array di bawah ini — tidak perlu mengubah

@@ -20,34 +20,94 @@
                         <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users*')">
                             {{ __('Pengguna') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.mata-pelajaran.index')" :active="request()->routeIs('admin.mata-pelajaran*')">
+                        <x-nav-link :href="route('admin.mata-pelajaran.index')"
+                            :active="request()->routeIs('admin.mata-pelajaran*')">
                             {{ __('Mata Pelajaran') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.absensi-guru')" :active="request()->routeIs('admin.absensi-guru')">
                             {{ __('Absensi Guru') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.aktivitas-guru')" :active="request()->routeIs('admin.aktivitas-guru')">
+                        <x-nav-link :href="route('admin.aktivitas-guru')"
+                            :active="request()->routeIs('admin.aktivitas-guru')">
                             {{ __('Aktivitas Mengajar') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.persetujuan-absensi')" :active="request()->routeIs('admin.persetujuan-absensi')">
+                        <x-nav-link :href="route('admin.persetujuan-absensi')"
+                            :active="request()->routeIs('admin.persetujuan-absensi')">
                             {{ __('Persetujuan Absensi') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.jadwal-mengajar.index')" :active="request()->routeIs('admin.jadwal-mengajar*')">
+                            {{ __('Jadwal Mengajar') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.ebook.index')" :active="request()->routeIs('admin.ebook*')">
+                            {{ __('Manajemen e-Book') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.indikator.index')" :active="request()->routeIs('admin.indikator*')">
+                            {{ __('Indikator Literasi') }}
                         </x-nav-link>
                     @endif
 
                     <!-- Tambahan Menu Khusus Guru (Desktop) -->
                     @if (Auth::user()->role === 'guru')
-                        <x-nav-link :href="route('guru.persetujuan-absensi')" :active="request()->routeIs('guru.persetujuan-absensi')">
+                        <x-nav-link :href="route('guru.persetujuan-absensi')"
+                            :active="request()->routeIs('guru.persetujuan-absensi')">
                             {{ __('Persetujuan Absensi') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('guru.literasi.catatan')" :active="request()->routeIs('guru.literasi.catatan')">
+                            {{ __('Catatan Membaca') }}
                         </x-nav-link>
                     @endif
 
                     <!-- Tambahan Menu Khusus Siswa (Desktop) -->
-                    @if (Auth::user()->role === 'siswa')
+                    @if (Auth::user()->role === 'murid')
                         <x-nav-link :href="route('absensi')" :active="request()->routeIs('absensi')">
                             {{ __('Absensi') }}
                         </x-nav-link>
                         <x-nav-link :href="route('ebook.index')" :active="request()->routeIs('ebook.index')">
-                            {{ __('Literasi E-Book') }}
+                            {{ __('Literasi e-Book') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('ebook.manual.index')" :active="request()->routeIs('ebook.manual*')">
+                            {{ __('Buku Manual') }}
+                        </x-nav-link>
+                    @endif
+
+                    <!-- Tambahan Menu Khusus Pengawas (Desktop) -->
+                    @if (Auth::user()->role === 'pengawas')
+                        <x-nav-link :href="route('pengawas.dashboard')" :active="request()->routeIs('pengawas.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('pengawas.absensi-guru')" :active="request()->routeIs('pengawas.absensi-guru')">
+                            {{ __('Absensi Guru') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('pengawas.aktivitas-guru')" :active="request()->routeIs('pengawas.aktivitas-guru')">
+                            {{ __('Aktivitas Mengajar') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('pengawas.absensi-siswa')" :active="request()->routeIs('pengawas.absensi-siswa')">
+                            {{ __('Absensi Siswa') }}
+                        </x-nav-link>
+                    @endif
+
+                    <!-- Tambahan Menu Khusus Kurikulum (Desktop) -->
+                    @if (Auth::user()->role === 'kurikulum')
+                        <x-nav-link :href="route('kurikulum.dashboard')" :active="request()->routeIs('kurikulum.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('kurikulum.monitoring-mengajar')" :active="request()->routeIs('kurikulum.monitoring-mengajar')">
+                            {{ __('Monitoring Mengajar') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('kurikulum.persetujuan-rpp')" :active="request()->routeIs('kurikulum.persetujuan-rpp')">
+                            {{ __('Persetujuan RPP') }}
+                        </x-nav-link>
+                    @endif
+
+                    <!-- Tambahan Menu Khusus Piket (Desktop) -->
+                    @if (Auth::user()->is_piket_sholat)
+                        <x-nav-link :href="route('piket.sholat.index')" :active="request()->routeIs('piket.sholat*')">
+                            {{ __('Piket Sholat') }}
+                        </x-nav-link>
+                    @endif
+                    @if (Auth::user()->is_piket_mengajar)
+                        <x-nav-link :href="route('piket.mengajar.index')" :active="request()->routeIs('piket.mengajar*')">
+                            {{ __('Piket Mengajar') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -79,11 +139,11 @@
                         </x-dropdown-link>
 
                         <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?')">
+                        <form method="POST" action="{{ route('logout') }}"
+                            onsubmit="return confirm('Apakah Anda yakin ingin logout?')">
                             @csrf
 
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault();
+                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
@@ -119,34 +179,95 @@
                 <x-responsive-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users*')">
                     {{ __('Pengguna') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.mata-pelajaran.index')" :active="request()->routeIs('admin.mata-pelajaran*')">
+                <x-responsive-nav-link :href="route('admin.mata-pelajaran.index')"
+                    :active="request()->routeIs('admin.mata-pelajaran*')">
                     {{ __('Mata Pelajaran') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.absensi-guru')" :active="request()->routeIs('admin.absensi-guru')">
+                <x-responsive-nav-link :href="route('admin.absensi-guru')"
+                    :active="request()->routeIs('admin.absensi-guru')">
                     {{ __('Absensi Guru') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.aktivitas-guru')" :active="request()->routeIs('admin.aktivitas-guru')">
+                <x-responsive-nav-link :href="route('admin.aktivitas-guru')"
+                    :active="request()->routeIs('admin.aktivitas-guru')">
                     {{ __('Aktivitas Mengajar') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.persetujuan-absensi')" :active="request()->routeIs('admin.persetujuan-absensi')">
+                <x-responsive-nav-link :href="route('admin.persetujuan-absensi')"
+                    :active="request()->routeIs('admin.persetujuan-absensi')">
                     {{ __('Persetujuan Absensi') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.jadwal-mengajar.index')" :active="request()->routeIs('admin.jadwal-mengajar*')">
+                    {{ __('Jadwal Mengajar') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.ebook.index')" :active="request()->routeIs('admin.ebook*')">
+                    {{ __('Manajemen e-Book') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.indikator.index')" :active="request()->routeIs('admin.indikator*')">
+                    {{ __('Indikator Literasi') }}
                 </x-responsive-nav-link>
             @endif
 
             <!-- Tambahan Menu Khusus Guru (Mobile) -->
             @if (Auth::user()->role === 'guru')
-                <x-responsive-nav-link :href="route('guru.persetujuan-absensi')" :active="request()->routeIs('guru.persetujuan-absensi')">
+                <x-responsive-nav-link :href="route('guru.persetujuan-absensi')"
+                    :active="request()->routeIs('guru.persetujuan-absensi')">
                     {{ __('Persetujuan Absensi') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('guru.literasi.catatan')" :active="request()->routeIs('guru.literasi.catatan')">
+                    {{ __('Catatan Membaca') }}
                 </x-responsive-nav-link>
             @endif
 
             <!-- Tambahan Menu Khusus Siswa (Mobile) -->
-            @if (Auth::user()->role === 'siswa')
+            @if (Auth::user()->role === 'murid')
                 <x-responsive-nav-link :href="route('absensi')" :active="request()->routeIs('absensi')">
                     {{ __('Absensi') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('ebook.index')" :active="request()->routeIs('ebook.index')">
-                    {{ __('Literasi E-Book') }}
+                    {{ __('Literasi e-Book') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('ebook.manual.index')" :active="request()->routeIs('ebook.manual*')">
+                    {{ __('Buku Manual') }}
+                </x-responsive-nav-link>
+            @endif
+
+            <!-- Tambahan Menu Khusus Pengawas (Mobile) -->
+            @if (Auth::user()->role === 'pengawas')
+                <x-responsive-nav-link :href="route('pengawas.dashboard')" :active="request()->routeIs('pengawas.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pengawas.absensi-guru')" :active="request()->routeIs('pengawas.absensi-guru')">
+                    {{ __('Absensi Guru') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pengawas.aktivitas-guru')" :active="request()->routeIs('pengawas.aktivitas-guru')">
+                    {{ __('Aktivitas Mengajar') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pengawas.absensi-siswa')" :active="request()->routeIs('pengawas.absensi-siswa')">
+                    {{ __('Absensi Siswa') }}
+                </x-responsive-nav-link>
+            @endif
+
+            <!-- Tambahan Menu Khusus Kurikulum (Mobile) -->
+            @if (Auth::user()->role === 'kurikulum')
+                <x-responsive-nav-link :href="route('kurikulum.dashboard')" :active="request()->routeIs('kurikulum.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('kurikulum.monitoring-mengajar')" :active="request()->routeIs('kurikulum.monitoring-mengajar')">
+                    {{ __('Monitoring Mengajar') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('kurikulum.persetujuan-rpp')" :active="request()->routeIs('kurikulum.persetujuan-rpp')">
+                    {{ __('Persetujuan RPP') }}
+                </x-responsive-nav-link>
+            @endif
+
+            <!-- Tambahan Menu Khusus Piket (Mobile) -->
+            @if (Auth::user()->is_piket_sholat)
+                <x-responsive-nav-link :href="route('piket.sholat.index')" :active="request()->routeIs('piket.sholat*')">
+                    {{ __('Piket Sholat') }}
+                </x-responsive-nav-link>
+            @endif
+            @if (Auth::user()->is_piket_mengajar)
+                <x-responsive-nav-link :href="route('piket.mengajar.index')" :active="request()->routeIs('piket.mengajar*')">
+                    {{ __('Piket Mengajar') }}
                 </x-responsive-nav-link>
             @endif
         </div>
@@ -164,11 +285,11 @@
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?')">
+                <form method="POST" action="{{ route('logout') }}"
+                    onsubmit="return confirm('Apakah Anda yakin ingin logout?')">
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')"
-                        onclick="event.preventDefault();
+                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

@@ -16,8 +16,10 @@ class SchoolSetting extends Model
         'nama_sekolah',
         'absen_datang_buka',
         'absen_datang_tutup',
+        'batas_waktu_terlambat',
         'absen_pulang_buka',
         'absen_pulang_tutup',
+        'batas_pulang_cepat',
         'status_absen',
     ];
 
@@ -36,11 +38,13 @@ class SchoolSetting extends Model
             'latitude'     => -3.5432,
             'longitude'    => 118.9759,
             'radius_meter' => 200,
-            'nama_sekolah' => 'SMKN 1 Majene',
+            'nama_sekolah' => 'UPTD SMKN 1 Majene',
             'absen_datang_buka'  => '06:00:00',
             'absen_datang_tutup' => '08:00:00',
+            'batas_waktu_terlambat' => '07:15:00',
             'absen_pulang_buka'  => '15:00:00',
             'absen_pulang_tutup' => '17:00:00',
+            'batas_pulang_cepat' => '15:00:00',
             'status_absen' => 'auto',
         ]);
     }
@@ -93,18 +97,32 @@ class SchoolSetting extends Model
 
         // status_absen === 'auto'
         $now = Carbon::now();
+        
+        // Translasi hari Inggris ke Indonesia
+        $hariMap = [
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu'
+        ];
+        $hariIni = $hariMap[$now->format('l')];
 
-        // Hari minggu tutup
-        if ($now->isSunday()) {
-            return [false, 'Hari ini adalah hari Minggu, absen tutup.'];
+        $jadwal = \App\Models\JadwalAbsensi::where('hari', $hariIni)->first();
+
+        // Jika hari ini libur atau tidak ada di database jadwal (misal Sabtu/Minggu yang tidak dimasukkan)
+        if (!$jadwal || $jadwal->is_libur) {
+            return [false, "Hari ini ($hariIni) adalah hari libur, absen tutup."];
         }
 
         if ($type === 'datang') {
-            $buka  = Carbon::parse($this->absen_datang_buka);
-            $tutup = Carbon::parse($this->absen_datang_tutup);
+            $buka  = Carbon::parse($jadwal->absen_datang_buka);
+            $tutup = Carbon::parse($jadwal->absen_datang_tutup);
         } else {
-            $buka  = Carbon::parse($this->absen_pulang_buka);
-            $tutup = Carbon::parse($this->absen_pulang_tutup);
+            $buka  = Carbon::parse($jadwal->absen_pulang_buka);
+            $tutup = Carbon::parse($jadwal->absen_pulang_tutup);
         }
 
         $currentTime = $now->format('H:i:s');
@@ -122,6 +140,6 @@ class SchoolSetting extends Model
             $namaAksi = "Pengajuan Izin";
         }
 
-        return [false, "{$namaAksi} hanya bisa dilakukan antara pukul " . $buka->format('H:i') . " hingga " . $tutup->format('H:i') . " WITA."];
+        return [false, "{$namaAksi} hari ini ($hariIni) hanya bisa dilakukan antara pukul " . $buka->format('H:i') . " hingga " . $tutup->format('H:i') . " WITA."];
     }
 }

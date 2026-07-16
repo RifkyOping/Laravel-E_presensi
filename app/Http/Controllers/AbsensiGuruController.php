@@ -43,7 +43,7 @@ class AbsensiGuruController extends Controller
                 'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
                 'text'  => $isApproved 
                            ? 'Pengajuan izin/sakit Anda telah disetujui oleh Admin.' 
-                           : 'Pengajuan izin/sakit Anda ditolak oleh Admin, sehingga status Anda menjadi Alpha.',
+                           : 'Pengajuan izin/sakit Anda ditolak oleh Admin, sehingga status Anda menjadi Alpa.',
                 'icon'  => $isApproved ? 'success' : 'error'
             ]);
             
@@ -52,34 +52,25 @@ class AbsensiGuruController extends Controller
                 ->where('is_notified', false)
                 ->update(['is_notified' => true]);
         }
-        $sedangMasaSakitIzin = false;
-        $jenisMasaAktif = null; // 'sakit' atau 'izin'
-        if ($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin'])) {
-            $sedangMasaSakitIzin = true;
+        $sedangMasaCutiTugas = false;
+        $jenisMasaAktif = null; // 'cuti' atau 'tugas'
+        if ($absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas'])) {
+            $sedangMasaCutiTugas = true;
             $jenisMasaAktif = $absensiHariIni->status;
         } elseif (!$absensiHariIni) {
-            $activeIzin = AbsensiGuru::where('user_id', $user->id)
-                ->where('status', 'izin')
+            $activeCuti = AbsensiGuru::where('user_id', $user->id)
+                ->whereIn('status', ['cuti', 'tugas'])
                 ->where('status_pengajuan', 'approved')
                 ->whereDate('tanggal', '<=', $today)
                 ->whereDate('tanggal_selesai', '>=', $today)
-                ->exists();
-            if ($activeIzin) {
-                $sedangMasaSakitIzin = true;
-                $jenisMasaAktif = 'izin';
-            } else {
-                $lastAbsen = AbsensiGuru::where('user_id', $user->id)
-                    ->whereDate('tanggal', '<', $today)
-                    ->orderByDesc('tanggal')
-                    ->first();
-                if ($lastAbsen && $lastAbsen->status === 'sakit') {
-                    $sedangMasaSakitIzin = true;
-                    $jenisMasaAktif = 'sakit';
-                }
+                ->first();
+            if ($activeCuti) {
+                $sedangMasaCutiTugas = true;
+                $jenisMasaAktif = $activeCuti->status;
             }
         }
 
-        return view('guru.absensi', compact('absensiHariIni', 'riwayat', 'setting', 'sedangMasaSakitIzin', 'jenisMasaAktif'));
+        return view('guru.absensi', compact('absensiHariIni', 'riwayat', 'setting', 'sedangMasaCutiTugas', 'jenisMasaAktif'));
     }
 
     /**
@@ -101,30 +92,22 @@ class AbsensiGuruController extends Controller
                 'latitude.required'  => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi.',
                 'longitude.required' => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi.',
             ];
-        } elseif ($jenis === 'sakit') {
+        } elseif (in_array($jenis, ['cuti', 'tugas'])) {
             $rules = [
-                'keterangan' => 'required|string',
-                'file_bukti' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            ];
-            $messages = [
-                'keterangan.required' => 'Keterangan sakit wajib diisi.',
-                'file_bukti.required' => 'File bukti (surat sakit) wajib diunggah.',
-                'file_bukti.mimes'    => 'File bukti harus berupa gambar (JPG, PNG) atau PDF.',
-                'file_bukti.max'      => 'Ukuran file bukti maksimal 2MB.',
-            ];
-        } elseif ($jenis === 'izin') {
-            $rules = [
-                'tanggal_selesai' => 'required|date|after_or_equal:today',
+                'judul_pengajuan' => 'required|string|max:255',
+                'tanggal_mulai'   => 'required|date',
+                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
                 'keterangan'      => 'required|string',
-                'file_bukti'      => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+                'file_bukti'      => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ];
             $messages = [
-                'tanggal_selesai.required'       => 'Tanggal selesai izin wajib diisi.',
-                'tanggal_selesai.after_or_equal' => 'Tanggal selesai izin tidak boleh di masa lalu.',
-                'keterangan.required'            => 'Keterangan izin wajib diisi.',
-                'file_bukti.required'            => 'File bukti izin wajib diunggah.',
-                'file_bukti.mimes'               => 'File bukti harus berupa gambar (JPG, PNG) atau PDF.',
-                'file_bukti.max'                 => 'Ukuran file bukti maksimal 2MB.',
+                'judul_pengajuan.required'       => 'Judul pengajuan wajib diisi.',
+                'tanggal_mulai.required'         => 'Tanggal mulai wajib diisi.',
+                'tanggal_selesai.required'       => 'Tanggal selesai wajib diisi.',
+                'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+                'keterangan.required'            => 'Keterangan/kepentingan wajib diisi.',
+                'file_bukti.mimes'               => 'Dokumen harus berupa gambar (JPG, PNG) atau PDF.',
+                'file_bukti.max'                 => 'Ukuran dokumen maksimal 5MB.',
             ];
         }
         
@@ -177,15 +160,16 @@ class AbsensiGuruController extends Controller
             
             $existing = AbsensiGuru::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
             if ($existing) {
-                if (in_array($existing->status, ['sakit', 'izin'])) {
+                if (in_array($existing->status, ['cuti', 'tugas'])) {
                     $existing->update([
                         'status' => 'hadir',
                         'waktu_datang' => now()->format('H:i:s'),
                         'keterangan' => null,
                         'file_bukti' => null,
                         'status_pengajuan' => null,
+                        'judul_pengajuan' => null,
                     ]);
-                    return back()->with('success', 'Masa Sakit/Izin dihentikan. Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
+                    return back()->with('success', 'Masa Cuti/Tugas dihentikan. Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
                 }
                 return back()->with('error', 'Anda sudah melakukan absen hari ini.');
             }
@@ -199,16 +183,21 @@ class AbsensiGuruController extends Controller
 
             return back()->with('success', 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
             
-        } elseif ($jenis === 'sakit') {
+        } elseif (in_array($jenis, ['cuti', 'tugas'])) {
             $existing = AbsensiGuru::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
             if ($existing && $existing->status === 'hadir') {
                 return back()->with('error', 'Anda sudah absen hadir hari ini.');
             }
 
+            $tanggalMulai  = $request->tanggal_mulai;
+            $tanggalSelesai = $request->tanggal_selesai;
+
             AbsensiGuru::updateOrCreate(
-                ['user_id' => $user->id, 'tanggal' => $today->toDateString()],
+                ['user_id' => $user->id, 'tanggal' => $tanggalMulai],
                 [
-                    'status'           => 'sakit',
+                    'tanggal_selesai'  => $tanggalSelesai,
+                    'status'           => $jenis,
+                    'judul_pengajuan'  => $request->judul_pengajuan,
                     'keterangan'       => $request->keterangan,
                     'file_bukti'       => $filePath,
                     'status_pengajuan' => 'pending',
@@ -216,27 +205,8 @@ class AbsensiGuruController extends Controller
                 ]
             );
 
-            return back()->with('success', 'Pengajuan sakit Anda sedang menunggu konfirmasi admin.');
-            
-        } elseif ($jenis === 'izin') {
-            $existing = AbsensiGuru::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
-            if ($existing && $existing->status === 'hadir') {
-                return back()->with('error', 'Anda sudah absen hadir hari ini.');
-            }
-
-            AbsensiGuru::updateOrCreate(
-                ['user_id' => $user->id, 'tanggal' => $today->toDateString()],
-                [
-                    'tanggal_selesai'  => $request->tanggal_selesai,
-                    'status'           => 'izin',
-                    'keterangan'       => $request->keterangan,
-                    'file_bukti'       => $filePath,
-                    'status_pengajuan' => 'pending',
-                    'is_notified'      => true,
-                ]
-            );
-
-            return back()->with('success', "Pengajuan Izin Anda sedang menunggu konfirmasi admin.");
+            $label = $jenis === 'cuti' ? 'Cuti' : 'Tugas';
+            return back()->with('success', "Pengajuan {$label} Anda sedang menunggu konfirmasi admin.");
         }
     }
 

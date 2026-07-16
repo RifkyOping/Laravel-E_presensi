@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <span class="text-sm font-bold text-slate-800">Manajemen E-Book Literasi</span>
+        <span class="text-sm font-bold text-slate-800">Manajemen e-Book Literasi</span>
     </x-slot>
 
 <div class="space-y-6">
@@ -17,8 +17,8 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <h2 class="text-xl font-black text-slate-800">Manajemen E-Book</h2>
-            <p class="text-sm text-slate-400 mt-0.5">Kelola koleksi e-book beserta file PDF untuk literasi siswa.</p>
+            <h2 class="text-xl font-black text-slate-800">Manajemen e-Book</h2>
+            <p class="text-sm text-slate-400 mt-0.5">Kelola koleksi e-Book beserta file PDF untuk literasi siswa.</p>
         </div>
         <div class="flex gap-2">
             <a href="{{ route('admin.ebook.students') }}"
@@ -33,7 +33,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Tambah E-Book
+                Tambah e-Book
             </a>
         </div>
     </div>
@@ -45,7 +45,7 @@
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50">
                         <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider w-12">Lvl</th>
-                        <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Judul E-Book</th>
+                        <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Judul e-Book</th>
                         <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Soal Kuis</th>
                         <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">File PDF</th>
                         <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Status</th>
@@ -109,7 +109,7 @@
                                     Edit
                                 </a>
                                 <form method="POST" action="{{ route('admin.ebook.destroy', $buku->id) }}"
-                                      onsubmit="return confirm('Hapus e-book ini? File PDF juga akan dihapus.')">
+                                      onsubmit="return confirm('Hapus e-Book ini? File PDF juga akan dihapus.')">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-xs transition duration-200">
@@ -127,9 +127,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                       d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
-                            <p class="font-bold text-slate-400">Belum ada e-book.</p>
+                            <p class="font-bold text-slate-400">Belum ada e-Book.</p>
                             <a href="{{ route('admin.ebook.create') }}" class="text-sm text-[#1e3a6e] font-bold hover:underline mt-1 inline-block">
-                                Tambah E-Book Pertama
+                                Tambah e-Book Pertama
                             </a>
                         </td>
                     </tr>

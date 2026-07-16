@@ -11,10 +11,10 @@ return new class extends Migration
     {
         Schema::create('school_settings', function (Blueprint $table) {
             $table->id();
-            $table->decimal('latitude',  10, 7)->default(-3.5432);  // default SMKN 1 Majene
+            $table->decimal('latitude',  10, 7)->default(-3.5432);  // default UPTD SMKN 1 Majene
             $table->decimal('longitude', 10, 7)->default(118.9759);
             $table->integer('radius_meter')->default(200); // radius dalam meter
-            $table->string('nama_sekolah')->default('SMKN 1 Majene');
+            $table->string('nama_sekolah')->default('UPTD SMKN 1 Majene');
             $table->timestamps();
         });
 
@@ -23,7 +23,7 @@ return new class extends Migration
             'latitude'     => -3.5432,
             'longitude'    => 118.9759,
             'radius_meter' => 200,
-            'nama_sekolah' => 'SMKN 1 Majene',
+            'nama_sekolah' => 'UPTD SMKN 1 Majene',
             'created_at'   => now(),
             'updated_at'   => now(),
         ]);

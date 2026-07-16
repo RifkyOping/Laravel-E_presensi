@@ -20,11 +20,12 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'nomor_induk',
         'email',
         'password',
         'role',
-        'is_jadwal_set',
-        'skip_voice_verification',
+        'session_token',
+        'device_id',
     ];
 
     /**  
@@ -46,9 +47,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_jadwal_set' => 'boolean',
-            'skip_voice_verification' => 'boolean',
+            'password'          => 'hashed',
         ];
     }
 
@@ -72,6 +71,11 @@ class User extends Authenticatable
         return $this->hasOne(SiswaProfile::class);
     }
 
+    public function guruProfile()
+    {
+        return $this->hasOne(GuruProfile::class);
+    }
+
     // Accessors for SiswaProfile
     public function getNisAttribute() { return $this->siswaProfile?->nis; }
     public function getNisnAttribute() { return $this->siswaProfile?->nisn; }
@@ -80,6 +84,17 @@ class User extends Authenticatable
     public function getRombelAttribute() { return $this->siswaProfile?->rombel; }
     public function getJenisKelaminAttribute() { return $this->siswaProfile?->jenis_kelamin; }
     public function getAgamaAttribute() { return $this->siswaProfile?->agama; }
+
+    // Accessors for GuruProfile
+    public function getIsJadwalSetAttribute() { return $this->guruProfile?->is_jadwal_set ?? false; }
+    public function getIsPiketSholatAttribute() { return $this->guruProfile?->is_piket_sholat ?? false; }
+    public function getIsPiketMengajarAttribute() { return $this->guruProfile?->is_piket_mengajar ?? false; }
+    public function getRppFileAttribute() { return $this->guruProfile?->rpp_file; }
+    public function getRppStatusAttribute() { return $this->guruProfile?->rpp_status; }
+    public function getRppPesanAttribute() { return $this->guruProfile?->rpp_pesan; }
+
+    // Accessor for SiswaProfile skip_voice_verification
+    public function getSkipVoiceVerificationAttribute() { return $this->siswaProfile?->skip_voice_verification ?? false; }
     
     public function getJenisKelaminLengkapAttribute() {
         if ($this->jenis_kelamin === 'L') return 'Laki-Laki';

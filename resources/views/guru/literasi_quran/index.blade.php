@@ -74,7 +74,7 @@
                         class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
                                focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition">
                     <option value="">-- Pilih Kelas --</option>
-                    @foreach($kelasList as $k)
+                    @foreach($kelasList->pluck('tingkat')->unique() as $k)
                         <option value="{{ $k }}" {{ $selectedKelas == $k ? 'selected' : '' }}>{{ $k }}</option>
                     @endforeach
                 </select>
@@ -116,7 +116,7 @@
     </div>
 
     {{-- Daftar Siswa --}}
-    @if($selectedKelas && $selectedJurusan)
+    @if($selectedKelas || $selectedJurusan || $selectedRombel)
     <div class="space-y-4">
         <div>
             <h2 class="text-lg font-black text-slate-800">

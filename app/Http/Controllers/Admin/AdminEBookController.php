@@ -189,12 +189,14 @@ class AdminEBookController extends Controller
         $tab = $request->query('tab', 'semua');
         $search = $request->query('search');
 
-        $query = \App\Models\User::where('role', 'siswa');
+        $query = \App\Models\User::where('role', 'murid')
+            ->with('siswaProfile');
 
         if ($tab === 'wajib') {
-            $query->where('skip_voice_verification', false);
+            $query->whereHas('siswaProfile', fn($q) => $q->where('skip_voice_verification', false))
+                  ->orWhereDoesntHave('siswaProfile');
         } elseif ($tab === 'bypass') {
-            $query->where('skip_voice_verification', true);
+            $query->whereHas('siswaProfile', fn($q) => $q->where('skip_voice_verification', true));
         }
 
         if ($search) {
@@ -213,14 +215,20 @@ class AdminEBookController extends Controller
 
     public function toggleVoiceAccess(\App\Models\User $user)
     {
-        if ($user->role !== 'siswa') {
+        if ($user->role !== 'murid') {
             abort(403);
         }
         
-        $newStatus = !$user->skip_voice_verification;
-        $user->update(['skip_voice_verification' => $newStatus]);
+        $profile = $user->siswaProfile;
+        if (!$profile) {
+            $profile = $user->siswaProfile()->create(['skip_voice_verification' => true]);
+            $status = 'dimatikan';
+        } else {
+            $newStatus = !$profile->skip_voice_verification;
+            $profile->update(['skip_voice_verification' => $newStatus]);
+            $status = $newStatus ? 'dimatikan' : 'diaktifkan kembali';
+        }
         
-        $status = $newStatus ? 'dimatikan' : 'diaktifkan kembali';
         return back()->with('success', "Verifikasi suara untuk {$user->name} berhasil {$status}.");
     }
 }

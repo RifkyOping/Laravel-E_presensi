@@ -425,10 +425,13 @@
 <body class="h-full bg-slate-50 text-slate-800 flex overflow-hidden">
 
     {{-- Global Page Loader --}}
-    <div id="global-loader" class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center transition-opacity duration-500">
+    <div id="global-loader"
+        class="fixed inset-0 z-[99999] bg-slate-50 flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="relative flex justify-center items-center">
             <div class="absolute animate-ping inline-flex h-16 w-16 rounded-full bg-[#1e3a6e] opacity-20"></div>
-            <div class="inline-flex rounded-full h-14 w-14 border-4 border-slate-200 border-t-[#1e3a6e] border-r-[#1e3a6e] animate-spin"></div>
+            <div
+                class="inline-flex rounded-full h-14 w-14 border-4 border-slate-200 border-t-[#1e3a6e] border-r-[#1e3a6e] animate-spin">
+            </div>
             <div class="absolute w-8 h-8 bg-white/50 rounded-full"></div>
         </div>
         <p class="mt-4 text-xs font-black text-[#1e3a6e] tracking-widest uppercase animate-pulse">Memuat...</p>
@@ -502,14 +505,16 @@
                 <a href="{{ route('admin.mata-pelajaran.index') }}"
                     class="app-nav {{ request()->routeIs('admin.mata-pelajaran*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
-                        <path d="M160-391h45l23-66h104l24 66h44l-97-258h-46l-97 258Zm81-103 38-107h2l38 107h-78Zm319-70v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-499Z" />
+                        <path
+                            d="M160-391h45l23-66h104l24 66h44l-97-258h-46l-97 258Zm81-103 38-107h2l38 107h-78Zm319-70v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-499Z" />
                     </svg>
                     Mata Pelajaran
                 </a>
                 <a href="{{ route('admin.kelas.index') }}"
                     class="app-nav {{ request()->routeIs('admin.kelas*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
-                        <path d="M120-240v-80h520v80H120Zm664-40L584-480l200-200 56 56-144 144 144 144-56 56ZM120-440v-80h400v80H120Zm0-200v-80h520v80H120Z" />
+                        <path
+                            d="M120-240v-80h520v80H120Zm664-40L584-480l200-200 56 56-144 144 144 144-56 56ZM120-440v-80h400v80H120Zm0-200v-80h520v80H120Z" />
                     </svg>
                     Daftar Kelas
                 </a>
@@ -519,7 +524,21 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    Literasi E-Book 
+                    Literasi e-Book
+                </a>
+                <a href="{{ route('admin.jadwal-mengajar.index') }}"
+                    class="app-nav {{ request()->routeIs('admin.jadwal-mengajar*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Jadwal Mengajar
+                </a>
+                <a href="{{ route('admin.indikator.index') }}"
+                    class="app-nav {{ request()->routeIs('admin.indikator*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    Indikator Literasi
                 </a>
                 <span class="app-section">Monitoring</span>
                 <a href="{{ route('admin.absensi-guru') }}"
@@ -589,7 +608,8 @@
                 <a href="{{ route('guru.jadwal.index') }}"
                     class="app-nav {{ request()->routeIs('guru.jadwal.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
-                        <path d="M200-640h560v-80H200v80Zm0 0v-80 80Zm0 560q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v227q-19-9-39-15t-41-9v-43H200v400h252q7 22 16.5 42T491-80H200Zm378.5-18.5Q520-157 520-240t58.5-141.5Q637-440 720-440t141.5 58.5Q920-323 920-240T861.5-98.5Q803-40 720-40T578.5-98.5ZM787-145l28-28-75-75v-112h-40v128l87 87Z" />
+                        <path
+                            d="M200-640h560v-80H200v80Zm0 0v-80 80Zm0 560q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v227q-19-9-39-15t-41-9v-43H200v400h252q7 22 16.5 42T491-80H200Zm378.5-18.5Q520-157 520-240t58.5-141.5Q637-440 720-440t141.5 58.5Q920-323 920-240T861.5-98.5Q803-40 720-40T578.5-98.5ZM787-145l28-28-75-75v-112h-40v128l87 87Z" />
                     </svg>
                     Jadwal Mengajar
                 </a>
@@ -604,7 +624,8 @@
                 <a href="{{ route('guru.literasi.quran') }}"
                     class="app-nav {{ request()->routeIs('guru.literasi.quran') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
-                        <path d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+                        <path
+                            d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
                     </svg>
                     Literasi Al Quran
                 </a>
@@ -616,12 +637,19 @@
                     </svg>
                     Persetujuan Absensi
                 </a>
+                <a href="{{ route('guru.literasi.catatan') }}"
+                    class="app-nav {{ request()->routeIs('guru.literasi.catatan') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
+                    </svg>
+                    Catatan Membaca
+                </a>
 
                 {{-- === SISWA === --}}
-            @elseif(Auth::user()->role === 'siswa')
+            @elseif(Auth::user()->role === 'murid')
                 <span class="app-section">Menu Utama</span>
-                <a href="{{ route('siswa.dashboard') }}"
-                    class="app-nav {{ request()->routeIs('siswa.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('murid.dashboard') }}"
+                    class="app-nav {{ request()->routeIs('murid.dashboard') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -636,15 +664,60 @@
                     </svg>
                     Absensi
                 </a>
-                <a href="{{ route('ebook.index') }}" class="app-nav {{ request()->routeIs('ebook.*') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                    Literasi E-Book
-                </a>
-                <a href="{{ route('siswa.quran') }}"
-                    class="app-nav {{ request()->routeIs('siswa.quran') ? 'active' : '' }}">
+                {{-- Literasi e-Book (collapsible sub-menu) --}}
+                @php
+                    $isEbookActive = request()->routeIs('ebook.*');
+                @endphp
+                <div x-data="{ open: {{ $isEbookActive ? 'true' : 'false' }} }">
+                    {{-- Parent toggle button --}}
+                    <button @click="open = !open"
+                        class="app-nav w-full text-left {{ $isEbookActive ? 'active' : '' }}"
+                        style="justify-content: space-between;">
+                        <span class="flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            Literasi e-Book
+                        </span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                            :class="{ 'rotate-90': open }"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    {{-- Sub-menu items --}}
+                    <div x-show="open"
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 -translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-1"
+                        class="mt-1 ml-4 pl-3 border-l-2 border-slate-200 space-y-0.5"
+                        style="display: none;">
+                        <a href="{{ route('ebook.index') }}"
+                            class="app-nav text-sm {{ request()->routeIs('ebook.index') || (request()->routeIs('ebook.*') && !request()->routeIs('ebook.manual*')) ? 'active' : '' }}">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Buku Digital
+                        </a>
+                        <a href="{{ route('ebook.manual.index') }}"
+                            class="app-nav text-sm {{ request()->routeIs('ebook.manual*') ? 'active' : '' }}">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13" />
+                            </svg>
+                            Buku Manual
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{{ route('murid.quran') }}"
+                    class="app-nav {{ request()->routeIs('murid.quran') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
                         <path d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
                     </svg>
@@ -662,7 +735,7 @@
                     </svg>
                     Dashboard
                 </a>
-                
+
                 <span class="app-section">Monitoring</span>
                 <a href="{{ route('pengawas.absensi-guru') }}"
                     class="app-nav {{ request()->routeIs('pengawas.absensi-guru') ? 'active' : '' }}">
@@ -672,7 +745,7 @@
                     </svg>
                     Absensi Guru
                 </a>
-                
+
                 <a href="{{ route('pengawas.absensi-siswa') }}"
                     class="app-nav {{ request()->routeIs('pengawas.absensi-siswa') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -710,6 +783,27 @@
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Aktivitas Mengajar
+                </a>
+            @endif
+
+            {{-- === PIKET === --}}
+            @if (Auth::user()->is_piket_sholat)
+                <span class="app-section">Piket</span>
+                <a href="{{ route('piket.sholat.index') }}"
+                    class="app-nav {{ request()->routeIs('piket.sholat*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Piket Sholat
+                </a>
+            @endif
+            @if (Auth::user()->is_piket_mengajar)
+                <a href="{{ route('piket.mengajar.index') }}"
+                    class="app-nav {{ request()->routeIs('piket.mengajar*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Piket Mengajar
                 </a>
             @endif
         </nav>
@@ -850,7 +944,7 @@
 
     <!-- Web Cron: Trigger otomatis cron dari background browser (Berjalan setiap kali direfresh) -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             // Berjalan setiap kali halaman dimuat/direfresh sesuai permintaan
             // Delay 2 detik agar tidak memblokir render UI awal halaman
             setTimeout(() => {
@@ -862,12 +956,12 @@
             }, 2000);
         });
     </script>
-    
+
     @stack('modals')
 
     {{-- Script Global Loader --}}
     <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             const loader = document.getElementById('global-loader');
             if (loader) {
                 loader.style.opacity = '0';
@@ -875,12 +969,12 @@
             }
         });
 
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', function () {
             const loader = document.getElementById('global-loader');
             if (loader) {
                 loader.style.display = 'flex';
                 // Force reflow
-                void loader.offsetWidth; 
+                void loader.offsetWidth;
                 loader.style.opacity = '1';
             }
         });
@@ -888,14 +982,14 @@
 
     {{-- Script Pull to Refresh --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const mainEl = document.querySelector('main');
             if (!mainEl) return;
-            
+
             let startY = 0;
             let currentY = 0;
             let isRefreshing = false;
-            
+
             // Buat elemen indikator
             const ptrEl = document.createElement('div');
             ptrEl.className = 'w-full flex justify-center items-center overflow-hidden transition-all duration-200';
@@ -913,19 +1007,19 @@
                 if (mainEl.scrollTop === 0 && !isRefreshing) {
                     startY = e.touches[0].clientY;
                 }
-            }, {passive: true});
+            }, { passive: true });
 
             mainEl.addEventListener('touchmove', e => {
                 if (startY > 0 && !isRefreshing && mainEl.scrollTop === 0) {
                     currentY = e.touches[0].clientY;
                     const distance = currentY - startY;
-                    
+
                     if (distance > 0) {
                         const h = Math.min(distance * 0.4, 80);
                         ptrEl.style.height = h + 'px';
                         ptrEl.style.paddingTop = '1rem';
                         ptrEl.style.paddingBottom = '1rem';
-                        
+
                         if (h > 60) {
                             ptrText.textContent = 'Lepaskan untuk memuat ulang';
                         } else {
@@ -933,13 +1027,13 @@
                         }
                     }
                 }
-            }, {passive: true});
+            }, { passive: true });
 
             mainEl.addEventListener('touchend', e => {
                 if (startY > 0 && !isRefreshing) {
                     const distance = currentY - startY;
                     const h = Math.min(distance * 0.4, 80);
-                    
+
                     if (h > 60) {
                         isRefreshing = true;
                         ptrEl.style.height = '60px';
@@ -953,7 +1047,7 @@
                 }
                 startY = 0;
                 currentY = 0;
-            }, {passive: true});
+            }, { passive: true });
         });
     </script>
 </body>

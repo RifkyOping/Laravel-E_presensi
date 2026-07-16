@@ -22,7 +22,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role === 'siswa') {
+        if ($user->role === 'murid') {
             $totalCatatan = CatatanLiterasiQuran::where('siswa_id', $user->id)->count();
             return view('siswa.profil', ['siswa' => $user, 'totalCatatan' => $totalCatatan]);
         }
@@ -40,7 +40,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // ── Siswa ──────────────────────────────────────────────────
-        if ($user->role === 'siswa') {
+        if ($user->role === 'murid') {
             $request->validate([
                 'name'          => 'required|string|max:255',
                 'email'         => ['required', 'string', 'email', 'max:255',

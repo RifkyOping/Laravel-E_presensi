@@ -19,12 +19,15 @@ class EBookController extends Controller
         $user   = Auth::user();
 
         // Ambil semua progres user ini
-        $progresMap = ProgresEbook::where('user_id', $user->id)
-            ->pluck('selesai', 'e_book_id'); // [ebook_id => selesai]
+        $progresData = ProgresEbook::where('user_id', $user->id)
+            ->get()->keyBy('e_book_id');
 
         // Tentukan e-book mana yang terbuka (unlocked)
-        $ebooks = $ebooks->map(function ($ebook) use ($progresMap) {
-            $ebook->sudah_selesai = $progresMap[$ebook->id] ?? false;
+        $ebooks = $ebooks->map(function ($ebook) use ($progresData) {
+            $progres = $progresData[$ebook->id] ?? null;
+            $ebook->sudah_selesai = $progres ? $progres->selesai : false;
+            $ebook->lulus_kuis = $progres ? $progres->lulus_kuis : false;
+            $ebook->lulus_suara = $progres ? $progres->lulus_suara : false;
 
             // Level 1 selalu terbuka; level > 1 terbuka jika level sebelumnya selesai
             if ($ebook->level === 1) {
@@ -32,7 +35,7 @@ class EBookController extends Controller
             } else {
                 $prevBook = EBook::where('level', $ebook->level - 1)->first();
                 $ebook->terbuka = $prevBook
-                    ? ($progresMap[$prevBook->id] ?? false)
+                    ? ($progresData[$prevBook->id]->selesai ?? false)
                     : false;
             }
             return $ebook;
@@ -73,7 +76,12 @@ class EBookController extends Controller
             return redirect()->route('ebook.quiz.page', $ebook->id);
         }
 
-        return view('siswa.ebook.read', compact('ebook', 'progres'));
+        $catatan = \App\Models\CatatanMembaca::where('user_id', $user->id)
+            ->where('jenis_buku', 'digital')
+            ->where('buku_id', $ebook->id)
+            ->first();
+
+        return view('siswa.ebook.read', compact('ebook', 'progres', 'catatan'));
     }
 
     /**
@@ -135,11 +143,10 @@ class EBookController extends Controller
             $updateData = ['skor_suara' => $skor];
             if ($lulus) {
                 $updateData['lulus_suara'] = true;
-                // Jika ebook ini tidak punya soal, langsung selesai
+                // Jika ebook ini tidak punya soal, kita anggap lulus kuis = true
                 if ($ebook->questions()->count() === 0) {
-                    $updateData['selesai'] = true;
                     $updateData['lulus_kuis'] = true;
-                    $updateData['selesai_pada'] = now();
+                    // Selesai akan diupdate setelah mengisi indikator
                 }
             }
             $progres->update($updateData);
@@ -172,9 +179,8 @@ class EBookController extends Controller
         if ($progres) {
             $updateData = ['lulus_suara' => true, 'skor_suara' => 100];
             if ($ebook->questions()->count() === 0) {
-                $updateData['selesai'] = true;
                 $updateData['lulus_kuis'] = true;
-                $updateData['selesai_pada'] = now();
+                // Selesai akan diupdate setelah mengisi indikator
             }
             $progres->update($updateData);
         }
@@ -263,8 +269,17 @@ class EBookController extends Controller
             ];
         }
 
-        $skor = $total > 0 ? ($benar / $total) * 100 : 0;
-        $lulus = $skor >= 60; // KKM Kuis 60
+        if ($benar == 1) {
+            $skor = 30;
+        } elseif ($benar == 2) {
+            $skor = 60;
+        } elseif ($benar >= 3) {
+            $skor = 100;
+        } else {
+            $skor = 0;
+        }
+
+        $lulus = $skor >= 60; // KKM Kuis 60 (Benar 2 atau lebih)
 
         $updateData = [
             'jawaban_kuis' => $hasilJawaban,
@@ -273,8 +288,7 @@ class EBookController extends Controller
 
         if ($lulus) {
             $updateData['lulus_kuis'] = true;
-            $updateData['selesai'] = true;
-            $updateData['selesai_pada'] = now();
+            // Selesai akan diupdate setelah mengisi indikator
         } else {
             // Jika tidak lulus, reset agar bisa diulang dengan soal baru
             $updateData['jawaban_kuis'] = null;

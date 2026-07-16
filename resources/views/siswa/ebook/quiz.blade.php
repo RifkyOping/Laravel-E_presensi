@@ -7,7 +7,7 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <a href="{{ route('ebook.index') }}" class="text-slate-400 hover:text-[#1e3a6e] text-sm transition-colors">E-Book</a>
+            <a href="{{ route('ebook.index') }}" class="text-slate-400 hover:text-[#1e3a6e] text-sm transition-colors">e-Book</a>
             <span class="text-slate-300">/</span>
             <span class="text-sm font-bold text-slate-800 truncate max-w-xs">Kuis: {{ $ebook->judul }}</span>
         </div>
@@ -29,7 +29,7 @@
             <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
-            Mengalihkan ke halaman E-Book...
+            Mengalihkan ke halaman e-Book...
         </div>
     </div>
 </div>
@@ -62,10 +62,10 @@
                 </div>
                 <div>
                     <span class="inline-block text-[.65rem] font-bold bg-[#1e3a6e]/10 text-[#1e3a6e] px-2.5 py-0.5 rounded-full uppercase tracking-wide mb-1">
-                        {{ $ebook->kategori ?? 'E-Book' }} · Level {{ $ebook->level }}
+                        {{ $ebook->kategori ?? 'e-Book' }} · Level {{ $ebook->level }}
                     </span>
                     <h1 class="text-xl font-black text-slate-800 leading-tight">Kuis: {{ $ebook->judul }}</h1>
-                    <p class="text-sm text-slate-500 mt-0.5">Jawab pertanyaan berikut untuk menuntaskan e-book.</p>
+                    <p class="text-sm text-slate-500 mt-0.5">Jawab pertanyaan berikut untuk menuntaskan e-Book.</p>
                 </div>
             </div>
         </div>
@@ -128,12 +128,12 @@
                 card.style.transform = 'scale(1)';
                 card.style.opacity   = '1';
             }));
-            setTimeout(() => { window.location.href = '{{ route("ebook.index") }}'; }, 4000);
+            setTimeout(() => { window.location.href = '{{ route("e-Book.index") }}'; }, 4000);
         }
 
         // ── Quiz Logic ────────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', function () {
-            fetch('{{ route("ebook.kuis.get", $ebook->id) }}')
+            fetch('{{ route("e-Book.kuis.get", $ebook->id) }}')
                 .then(r => r.json())
                 .then(data => {
                     const container = document.getElementById('quizContainer');
@@ -191,7 +191,7 @@
                           d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg> Memproses...`;
 
-                fetch('{{ route("ebook.kuis.submit", $ebook->id) }}', {
+                fetch('{{ route("e-Book.kuis.submit", $ebook->id) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -14,42 +14,35 @@ class LiterasiQuranController extends Controller
      */
     public function index(Request $request)
     {
-        // Daftar kelas, jurusan & rombel unik dari tabel siswa_profiles
-        $kelasList   = \App\Models\SiswaProfile::whereNotNull('kelas')
-            ->distinct()
-            ->pluck('kelas')
-            ->sort()
-            ->values();
+        // Daftar kelas dari tabel kelas yang aktif
+        $kelasList = \App\Models\Kelas::where('status', true)
+            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+            ->orderBy('jurusan')
+            ->orderBy('rombel')
+            ->get();
 
-        $jurusanList = \App\Models\SiswaProfile::whereNotNull('jurusan')
-            ->distinct()
-            ->pluck('jurusan')
-            ->sort()
-            ->values();
+        $jurusanList = $kelasList->pluck('jurusan')->unique()->filter()->values();
+        $rombelList  = $kelasList->pluck('rombel')->unique()->filter()->values();
 
-        $rombelList  = \App\Models\SiswaProfile::whereNotNull('rombel')
-            ->distinct()
-            ->pluck('rombel')
-            ->sort()
-            ->values();
+        $siswaList        = collect();
+        $selectedKelas    = $request->input('kelas');
+        $selectedJurusan  = $request->input('jurusan');
+        $selectedRombel   = $request->input('rombel');
+        $selectedKelasId  = null;
 
-        $siswaList = collect();
-        $selectedKelas   = $request->input('kelas');
-        $selectedJurusan = $request->input('jurusan');
-        $selectedRombel  = $request->input('rombel');
-
-        if ($selectedKelas && $selectedJurusan && $selectedRombel) {
-            $siswaList = User::where('role', 'siswa')
+        if ($selectedKelas || $selectedJurusan || $selectedRombel) {
+            $query = User::where('role', 'murid')
                 ->whereHas('siswaProfile', function ($q) use ($selectedKelas, $selectedJurusan, $selectedRombel) {
-                    $q->where('kelas', $selectedKelas)
-                      ->where('jurusan', $selectedJurusan)
-                      ->where('rombel', $selectedRombel);
+                    if ($selectedKelas)   $q->where('kelas', $selectedKelas);
+                    if ($selectedJurusan) $q->where('jurusan', $selectedJurusan);
+                    if ($selectedRombel)  $q->where('rombel', $selectedRombel);
                 })
                 ->orderBy('name')
                 ->with(['siswaProfile', 'catatanQuran' => function ($q) {
                     $q->orderByDesc('created_at');
-                }])
-                ->get();
+                }]);
+
+            $siswaList = $query->get();
         }
 
         return view('guru.literasi_quran.index', compact(
@@ -59,7 +52,8 @@ class LiterasiQuranController extends Controller
             'siswaList',
             'selectedKelas',
             'selectedJurusan',
-            'selectedRombel'
+            'selectedRombel',
+            'selectedKelasId'
         ));
     }
 

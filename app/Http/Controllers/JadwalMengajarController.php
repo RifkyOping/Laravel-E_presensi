@@ -74,7 +74,10 @@ class JadwalMengajarController extends Controller
         }
 
         // Tandai bahwa guru sudah mengatur jadwal
-        $user->update(['is_jadwal_set' => true]);
+        $user->guruProfile()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['is_jadwal_set' => true]
+        );
 
         return redirect()->route('guru.dashboard')->with('success', 'Jadwal mengajar berhasil disimpan.');
     }

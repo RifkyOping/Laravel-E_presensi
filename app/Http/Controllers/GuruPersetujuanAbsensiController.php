@@ -53,10 +53,10 @@ class GuruPersetujuanAbsensiController extends Controller
 
         $pengajuan->update([
             'status_pengajuan' => 'rejected',
-            'status'           => 'alpha',
+            'status'           => 'alpa',
             'is_notified'      => false,
         ]);
 
-        return back()->with('success', 'Pengajuan ditolak. Status kehadiran diubah menjadi Alpha.');
+        return back()->with('success', 'Pengajuan ditolak. Status kehadiran diubah menjadi Alpa.');
     }
 }

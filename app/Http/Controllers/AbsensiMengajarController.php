@@ -98,4 +98,56 @@ class AbsensiMengajarController extends Controller
         $aktivitas->delete();
         return back()->with('success', 'Data aktivitas mengajar berhasil dihapus.');
     }
+
+    /**
+     * Catat waktu masuk (mulai) mengajar.
+     */
+    public function absenMasuk(AbsensiMengajar $aktivitas)
+    {
+        if ($aktivitas->user_id !== Auth::id()) {
+            return back()->with('error', 'Anda tidak memiliki akses ke sesi ini.');
+        }
+
+        if ($aktivitas->waktu_absen_masuk) {
+            return back()->with('error', 'Absen masuk mengajar sudah tercatat.');
+        }
+
+        $now = Carbon::now();
+        $jamMulai = Carbon::parse($aktivitas->jam_mulai);
+        
+        // Toleransi 15 menit
+        $batasToleransi = $jamMulai->copy()->addMinutes(15);
+        $kategori = $now->format('H:i:s') <= $batasToleransi->format('H:i:s') ? 'tepat_waktu' : 'terlambat';
+
+        $aktivitas->update([
+            'waktu_absen_masuk' => $now->format('H:i:s'),
+            'kategori' => $kategori,
+        ]);
+
+        return back()->with('success', 'Absen masuk mengajar berhasil dicatat pukul ' . $now->format('H:i') . ' WITA.');
+    }
+
+    /**
+     * Catat waktu keluar (selesai) mengajar.
+     */
+    public function absenKeluar(AbsensiMengajar $aktivitas)
+    {
+        if ($aktivitas->user_id !== Auth::id()) {
+            return back()->with('error', 'Anda tidak memiliki akses ke sesi ini.');
+        }
+
+        if (!$aktivitas->waktu_absen_masuk) {
+            return back()->with('error', 'Silakan absen masuk terlebih dahulu.');
+        }
+
+        if ($aktivitas->waktu_absen_keluar) {
+            return back()->with('error', 'Absen keluar mengajar sudah tercatat.');
+        }
+
+        $aktivitas->update([
+            'waktu_absen_keluar' => Carbon::now()->format('H:i:s'),
+        ]);
+
+        return back()->with('success', 'Absen keluar mengajar berhasil dicatat pukul ' . Carbon::now()->format('H:i') . ' WITA.');
+    }
 }

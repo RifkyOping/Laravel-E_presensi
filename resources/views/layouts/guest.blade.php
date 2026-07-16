@@ -38,7 +38,7 @@
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-400">Terpadu & Modern</span>
                     </h1>
                     <p class="text-lg xl:text-xl text-blue-100/90 max-w-md font-medium leading-relaxed mb-10">
-                        Platform digital resmi SMKN 1 Majene untuk pencatatan kehadiran presisi dan akses perpustakaan E-Book interaktif.
+                        Platform digital resmi SMKN 1 Majene untuk pencatatan kehadiran presisi dan akses perpustakaan e-Book interaktif.
                     </p>
                     
                     <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 w-fit">

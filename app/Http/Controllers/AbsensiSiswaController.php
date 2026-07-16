@@ -41,7 +41,7 @@ class AbsensiSiswaController extends Controller
                 'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
                 'text'  => $isApproved 
                            ? 'Pengajuan izin/sakit Anda telah disetujui oleh Admin.' 
-                           : 'Pengajuan izin/sakit Anda ditolak oleh Admin, sehingga status Anda menjadi Alpha.',
+                           : 'Pengajuan izin/sakit Anda ditolak oleh Admin, sehingga status Anda menjadi Alpa.',
                 'icon'  => $isApproved ? 'success' : 'error'
             ]);
             
@@ -323,5 +323,17 @@ class AbsensiSiswaController extends Controller
 
         return redirect()->route('absensi')
             ->with('success', 'Absen pulang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
+    }
+
+    /**
+     * Tampilkan riwayat sholat siswa.
+     */
+    public function riwayatSholat()
+    {
+        $riwayatSholat = \App\Models\AbsensiSholatSiswa::where('user_id', Auth::id())
+            ->orderByDesc('tanggal')
+            ->paginate(20);
+
+        return view('siswa.sholat', compact('riwayatSholat'));
     }
 }

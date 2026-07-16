@@ -23,7 +23,7 @@ class CekAlphaAbsensi extends Command
      *
      * @var string
      */
-    protected $description = 'Mengecek user yang belum absen setelah jam tutup dan menandainya sebagai alpha atau sakit lanjutan';
+    protected $description = 'Mengecek user yang belum absen setelah jam tutup dan menandainya sebagai alpa atau sakit lanjutan';
 
     /**
      * Execute the console command.
@@ -37,23 +37,29 @@ class CekAlphaAbsensi extends Command
         }
 
         if ($setting->status_absen === 'buka') {
-            $this->info('Absensi sedang dibuka secara manual. Cek alpha tidak akan berjalan sampai ditutup atau dikembalikan ke otomatis.');
+            $this->info('Absensi sedang dibuka secara manual. Cek alpa tidak akan berjalan sampai ditutup atau dikembalikan ke otomatis.');
+            return;
+        }
+
+        $hariIniStr = [
+            'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu', 'Sunday' => 'Minggu'
+        ][now()->format('l')];
+        $jadwal = \App\Models\JadwalAbsensi::where('hari', $hariIniStr)->first();
+
+        // Kalau hari ini diset libur atau tidak ada jadwal (misal weekend belum diset), skip
+        if (!$jadwal || $jadwal->is_libur) {
+            $this->info("Hari Libur ($hariIniStr).");
             return;
         }
 
         if ($setting->status_absen === 'auto') {
-            $tutup = Carbon::createFromTimeString($setting->absen_datang_tutup);
+            $tutup = Carbon::createFromTimeString($jadwal->absen_datang_tutup);
             // Jika saat ini belum melewati jam tutup, jangan jalankan
             if (now()->lessThan($tutup)) {
-                $this->info('Belum melewati jam tutup absensi.');
+                $this->info("Belum melewati jam tutup absensi ($jadwal->absen_datang_tutup).");
                 return;
             }
-        }
-
-        // Kalau hari minggu, skip
-        if (now()->isSunday()) {
-            $this->info('Hari Minggu libur.');
-            return;
         }
 
         $today = Carbon::today()->toDateString();
@@ -77,7 +83,7 @@ class CekAlphaAbsensi extends Command
                 } else {
                     // 2. Cek apakah sakit berlanjut (jika absen terakhir adalah sakit)
                     $lastAbsen = AbsensiSiswa::where('user_id', $siswa->id)->whereDate('tanggal', '<', $today)->orderByDesc('tanggal')->first();
-                    $status = ($lastAbsen && $lastAbsen->status === 'sakit') ? 'sakit' : 'alpha';
+                    $status = ($lastAbsen && $lastAbsen->status === 'sakit') ? 'sakit' : 'alpa';
                     $status_pengajuan = ($status === 'sakit' && $lastAbsen && $lastAbsen->status_pengajuan === 'approved') ? 'approved' : null;
                 }
                 
@@ -86,6 +92,7 @@ class CekAlphaAbsensi extends Command
                     'tanggal' => $today,
                     'status' => $status,
                     'status_pengajuan' => $status_pengajuan,
+                    'kategori' => ($status === 'alpa') ? 'alpa' : null,
                 ]);
             }
         }
@@ -109,7 +116,7 @@ class CekAlphaAbsensi extends Command
                 } else {
                     // 2. Cek apakah sakit berlanjut (jika absen terakhir adalah sakit)
                     $lastAbsen = AbsensiGuru::where('user_id', $guru->id)->whereDate('tanggal', '<', $today)->orderByDesc('tanggal')->first();
-                    $status = ($lastAbsen && $lastAbsen->status === 'sakit') ? 'sakit' : 'alpha';
+                    $status = ($lastAbsen && $lastAbsen->status === 'sakit') ? 'sakit' : 'alpa';
                     $status_pengajuan = ($status === 'sakit' && $lastAbsen && $lastAbsen->status_pengajuan === 'approved') ? 'approved' : null;
                 }
                 
@@ -118,10 +125,11 @@ class CekAlphaAbsensi extends Command
                     'tanggal' => $today,
                     'status' => $status,
                     'status_pengajuan' => $status_pengajuan,
+                    'kategori' => ($status === 'alpa') ? 'alpa' : null,
                 ]);
             }
         }
 
-        $this->info("Proses cek alpha berhasil untuk tanggal $today.");
+        $this->info("Proses cek alpa berhasil untuk tanggal $today.");
     }
 }

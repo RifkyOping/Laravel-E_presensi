@@ -28,7 +28,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'nomor_induk' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,20 +42,20 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Cek apakah email terdaftar
-        $user = \App\Models\User::where('email', $this->input('email'))->first();
+        // Cek apakah NISN/NIP terdaftar
+        $user = \App\Models\User::where('nomor_induk', $this->input('nomor_induk'))->first();
 
         if (!$user) {
-            // Email tidak ditemukan sama sekali
+            // NISN/NIP tidak ditemukan sama sekali
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'Email tidak terdaftar.',
+                'nomor_induk' => 'NISN/NIP tidak terdaftar.',
             ]);
         }
 
-        // Email ditemukan, cek password
-        if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Akun ditemukan, cek password (selalu gunakan remember=true agar sesi tidak mudah habis)
+        if (!Auth::attempt($this->only('nomor_induk', 'password'), true)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -82,7 +82,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'nomor_induk' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -94,6 +94,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->string('nomor_induk')) . '|' . $this->ip());
     }
 }

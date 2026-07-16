@@ -102,7 +102,7 @@
             <a href="{{ route('admin.ebook.index') }}"
                 class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
                     {{ request()->routeIs('admin.ebook*') ? 'active' : 'text-white/80 hover:text-white' }}">
-                <span class="text-lg">📱</span> E-Book Literasi
+                <span class="text-lg">📱</span> e-Book Literasi
             </a>
 
             <p class="text-[10px] font-black uppercase tracking-widest text-white/40 px-3 mt-5 mb-2">Monitoring</p>

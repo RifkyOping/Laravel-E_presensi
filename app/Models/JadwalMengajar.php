@@ -20,4 +20,9 @@ class JadwalMengajar extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function absensiKelas()
+    {
+        return $this->hasMany(AbsensiKelasSiswa::class);
+    }
 }

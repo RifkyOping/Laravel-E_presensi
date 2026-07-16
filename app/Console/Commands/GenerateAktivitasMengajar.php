@@ -44,16 +44,15 @@ class GenerateAktivitasMengajar extends Command
 
         $hariIni = $mapHari[$hariInggris] ?? '';
 
-        if ($hariIni === 'Minggu' || $hariIni === '') {
-            return; // Tidak ada jadwal hari Minggu
+        if ($hariIni === 'Sabtu' || $hariIni === 'Minggu' || $hariIni === '') {
+            return; // Tidak ada jadwal hari Sabtu & Minggu
         }
 
         // Jam dan menit saat ini, misal '07:15:00'
         $jamSekarang = $now->format('H:i') . ':00';
 
-        // Cari jadwal yang cocok (jam mulai sudah lewat atau sama dengan sekarang)
+        // Cari semua jadwal untuk hari ini (tanpa menunggu jam mulai)
         $jadwalCocok = JadwalMengajar::where('hari', $hariIni)
-            ->whereTime('jam_mulai', '<=', $jamSekarang)
             ->get();
 
         $jumlahDibuat = 0;

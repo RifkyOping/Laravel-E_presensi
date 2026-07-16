@@ -20,10 +20,12 @@ class SiswaProfile extends Model
         'tempat_lahir',
         'tanggal_lahir',
         'agama',
+        'skip_voice_verification',
     ];
 
     protected $casts = [
-        'tanggal_lahir' => 'date',
+        'tanggal_lahir'             => 'date',
+        'skip_voice_verification'   => 'boolean',
     ];
 
     public function user()

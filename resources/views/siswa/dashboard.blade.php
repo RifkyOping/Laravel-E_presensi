@@ -54,7 +54,7 @@
                 </div>
             </a>
 
-            {{-- Literasi E-Book --}}
+            {{-- Literasi e-Book --}}
             <a href="{{ route('ebook.index') }}"
                class="group app-card p-6 flex flex-col gap-3
                       transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#1e3a6e]/40">
@@ -68,11 +68,11 @@
                     </svg>
                 </div>
                 <p class="text-sm text-slate-500 leading-relaxed flex-1">
-                    Akses koleksi e-book bertingkat dengan verifikasi suara untuk setiap levelnya.
+                    Akses koleksi e-Book bertingkat dengan verifikasi suara untuk setiap levelnya.
                 </p>
                 <div class="pt-3 border-t border-slate-100">
                     <span class="text-[.7rem] font-bold text-[#1e3a6e]/70 uppercase tracking-wide">
-                        E-Book & Modul
+                        e-Book & Modul
                     </span>
                 </div>
             </a>

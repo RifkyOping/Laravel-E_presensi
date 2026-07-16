@@ -23,7 +23,7 @@ class CekLupaPulangAbsensi extends Command
      *
      * @var string
      */
-    protected $description = 'Mengecek user yang sudah absen datang tapi tidak absen pulang setelah jam pulang ditutup, lalu mengubah statusnya menjadi alpha';
+    protected $description = 'Mengecek user yang sudah absen datang tapi tidak absen pulang setelah jam pulang ditutup, lalu mengubah kategorinya menjadi lupa absen pulang';
 
     /**
      * Execute the console command.
@@ -41,19 +41,25 @@ class CekLupaPulangAbsensi extends Command
             return;
         }
 
-        if ($setting->status_absen === 'auto') {
-            $tutup = Carbon::createFromTimeString($setting->absen_pulang_tutup);
-            // Jika saat ini belum melewati jam tutup pulang, jangan jalankan
-            if (now()->lessThan($tutup)) {
-                $this->info('Belum melewati jam tutup absensi pulang.');
-                return;
-            }
+        $hariIniStr = [
+            'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu', 'Sunday' => 'Minggu'
+        ][now()->format('l')];
+        $jadwal = \App\Models\JadwalAbsensi::where('hari', $hariIniStr)->first();
+
+        // Kalau hari ini diset libur atau tidak ada jadwal (misal weekend belum diset), skip
+        if (!$jadwal || $jadwal->is_libur) {
+            $this->info("Hari Libur ($hariIniStr).");
+            return;
         }
 
-        // Kalau hari minggu, skip
-        if (now()->isSunday()) {
-            $this->info('Hari Minggu libur.');
-            return;
+        if ($setting->status_absen === 'auto') {
+            $tutup = Carbon::createFromTimeString($jadwal->absen_pulang_tutup);
+            // Jika saat ini belum melewati jam tutup pulang, jangan jalankan
+            if (now()->lessThan($tutup)) {
+                $this->info("Belum melewati jam tutup absensi pulang ($jadwal->absen_pulang_tutup).");
+                return;
+            }
         }
 
         $today = Carbon::today()->toDateString();
@@ -65,7 +71,8 @@ class CekLupaPulangAbsensi extends Command
             ->get();
             
         foreach ($siswaAbsens as $absen) {
-            $absen->update(['status' => 'alpha']);
+            $newKategori = ($absen->kategori === 'terlambat') ? 'terlambat dan lupa absen pulang' : 'lupa absen pulang';
+            $absen->update(['kategori' => $newKategori]);
         }
 
         // 2. Proses Guru
@@ -75,9 +82,10 @@ class CekLupaPulangAbsensi extends Command
             ->get();
             
         foreach ($guruAbsens as $absen) {
-            $absen->update(['status' => 'alpha']);
+            $newKategori = ($absen->kategori === 'terlambat') ? 'terlambat dan lupa absen pulang' : 'lupa absen pulang';
+            $absen->update(['kategori' => $newKategori]);
         }
 
-        $this->info("Proses cek lupa pulang berhasil untuk tanggal $today. Total di-alpha-kan: " . ($siswaAbsens->count() + $guruAbsens->count()));
+        $this->info("Proses cek lupa pulang berhasil untuk tanggal $today. Total diupdate: " . ($siswaAbsens->count() + $guruAbsens->count()));
     }
 }

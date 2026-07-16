@@ -24,7 +24,7 @@ class AdminController extends Controller
         $today = Carbon::today();
 
         $stats = [
-            'total_siswa'    => User::where('role', 'siswa')->count(),
+            'total_siswa'    => User::where('role', 'murid')->count(),
             'total_guru'     => User::where('role', 'guru')->count(),
             'guru_hadir'     => AbsensiGuru::whereDate('tanggal', $today)->whereNotNull('waktu_datang')->count(),
             'guru_mengajar'  => AbsensiMengajar::whereDate('tanggal', $today)->distinct('user_id')->count(),
@@ -78,28 +78,29 @@ class AdminController extends Controller
 
     public function createUser()
     {
-        $tingkats = \App\Models\Kelas::where('status', true)->select('tingkat')->distinct()->pluck('tingkat');
-        $jurusans = \App\Models\Kelas::where('status', true)->select('jurusan')->distinct()->pluck('jurusan');
-        $rombels  = \App\Models\Kelas::where('status', true)->select('rombel')->distinct()->pluck('rombel');
+        $kelasList = \App\Models\Kelas::where('status', true)
+            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+            ->orderBy('jurusan')
+            ->orderBy('rombel')
+            ->get();
 
-        return view('admin.users.create', compact('tingkats', 'jurusans', 'rombels'));
+        return view('admin.users.create', compact('kelasList'));
     }
 
     public function storeUser(Request $request)
     {
         $rules = [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-            'role'     => 'required|in:siswa,guru,admin,pengawas,kurikulum',
+            'name'        => 'required|string|max:255',
+            'nomor_induk' => 'required|string|max:255|unique:users,nomor_induk',
+            'email'       => 'nullable|email|unique:users,email',
+            'password'    => 'required|min:6|confirmed',
+            'role'        => 'required|in:murid,guru,admin,pengawas,kurikulum',
         ];
 
-        if ($request->role === 'siswa') {
+        if ($request->role === 'murid') {
             $rules['nis']            = 'nullable|string|max:20|unique:siswa_profiles,nis';
             $rules['nisn']           = 'nullable|string|max:20|unique:siswa_profiles,nisn';
-            $rules['kelas']          = 'nullable|string|max:50';
-            $rules['jurusan']        = 'nullable|string|max:100';
-            $rules['rombel']         = 'nullable|string|max:50';
+            $rules['kelas_id']       = 'nullable|exists:kelas,id';
             $rules['jenis_kelamin']  = 'nullable|in:L,P';
             $rules['tempat_lahir']   = 'nullable|string|max:100';
             $rules['tanggal_lahir']  = 'nullable|date';
@@ -119,21 +120,30 @@ class AdminController extends Controller
         ]);
 
         $data = [
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'name'        => $request->name,
+            'nomor_induk' => $request->nomor_induk,
+            'email'       => $request->email,
+            'password'    => Hash::make($request->password),
+            'role'        => $request->role,
         ];
 
         $user = User::create($data);
 
-        if ($request->role === 'siswa') {
+        if ($request->role === 'guru') {
+            $user->guruProfile()->create([
+                'is_piket_sholat'   => $request->has('is_piket_sholat'),
+                'is_piket_mengajar' => $request->has('is_piket_mengajar'),
+            ]);
+        }
+
+        if ($request->role === 'murid') {
+            $kelas = $request->kelas_id ? \App\Models\Kelas::find($request->kelas_id) : null;
             $user->siswaProfile()->create([
                 'nis'           => $request->nis ?: null,
                 'nisn'          => $request->nisn ?: null,
-                'kelas'         => $request->kelas,
-                'jurusan'       => $request->jurusan,
-                'rombel'        => $request->rombel,
+                'kelas'         => $kelas ? $kelas->tingkat : null,
+                'jurusan'       => $kelas ? $kelas->jurusan : null,
+                'rombel'        => $kelas ? $kelas->rombel : null,
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'tempat_lahir'  => $request->tempat_lahir,
                 'tanggal_lahir' => $request->tanggal_lahir,
@@ -144,20 +154,22 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', "Akun {$request->name} berhasil dibuat.");
     }
 
-    public function downloadTemplateImport()
+    public function downloadTemplateImport(Request $request)
     {
+        $delimiter = $request->query('delimiter', ',');
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="template_import_user.csv"',
         ];
 
-        $callback = function () {
+        $callback = function () use ($delimiter) {
             $file = fopen('php://output', 'w');
             // Header kolom
-            fputcsv($file, ['name', 'email', 'role', 'password']);
+            fputcsv($file, ['name', 'email', 'role', 'password', 'kelas'], $delimiter);
             // Contoh data
-            fputcsv($file, ['Siswa Contoh 1', 'siswa1@smkn1majene.sch.id', 'siswa', '12345678']);
-            fputcsv($file, ['Guru Contoh 1', 'guru1@smkn1majene.sch.id', 'guru', '12345678']);
+            fputcsv($file, ['Murid Contoh 1', 'murid1@smkn1majene.sch.id', 'murid', '12345678', 'X RPL 1'], $delimiter);
+            fputcsv($file, ['Guru Contoh 1', 'guru1@smkn1majene.sch.id', 'guru', '12345678', ''], $delimiter);
             fclose($file);
         };
 
@@ -199,7 +211,7 @@ class AdminController extends Controller
             $password = isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : '12345678';
 
             // Validasi role dan email
-            if (!in_array($role, ['siswa', 'guru', 'admin', 'pengawas', 'kurikulum'])) {
+            if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas', 'kurikulum'])) {
                 $gagal++;
                 continue;
             }
@@ -216,8 +228,18 @@ class AdminController extends Controller
                 'password' => Hash::make($password),
             ]);
 
-            if ($role === 'siswa') {
-                $user->siswaProfile()->create([]);
+            if ($role === 'murid') {
+                $kelasStr = isset($row[4]) ? trim($row[4]) : null;
+                $profileData = [];
+                if ($kelasStr) {
+                    $parts = explode(' ', $kelasStr);
+                    $profileData['kelas'] = $parts[0] ?? null;
+                    $profileData['rombel'] = end($parts) ?: null;
+                    if (count($parts) > 2) {
+                        $profileData['jurusan'] = implode(' ', array_slice($parts, 1, -1));
+                    }
+                }
+                $user->siswaProfile()->create($profileData);
             }
 
             $berhasil++;
@@ -233,29 +255,30 @@ class AdminController extends Controller
 
     public function editUser(User $user)
     {
-        $tingkats = \App\Models\Kelas::where('status', true)->select('tingkat')->distinct()->pluck('tingkat');
-        $jurusans = \App\Models\Kelas::where('status', true)->select('jurusan')->distinct()->pluck('jurusan');
-        $rombels  = \App\Models\Kelas::where('status', true)->select('rombel')->distinct()->pluck('rombel');
+        $kelasList = \App\Models\Kelas::where('status', true)
+            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+            ->orderBy('jurusan')
+            ->orderBy('rombel')
+            ->get();
 
-        return view('admin.users.edit', compact('user', 'tingkats', 'jurusans', 'rombels'));
+        return view('admin.users.edit', compact('user', 'kelasList'));
     }
 
     public function updateUser(Request $request, User $user)
     {
         $rules = [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email,' . $user->id,
-            'role'     => 'required|in:siswa,guru,admin,pengawas,kurikulum',
-            'password' => 'nullable|min:6|confirmed',
+            'name'        => 'required|string|max:255',
+            'nomor_induk' => 'required|string|max:255|unique:users,nomor_induk,' . $user->id,
+            'email'       => 'nullable|email|unique:users,email,' . $user->id,
+            'role'        => 'required|in:murid,guru,admin,pengawas,kurikulum',
+            'password'    => 'nullable|min:6|confirmed',
         ];
 
-        if ($request->role === 'siswa') {
+        if ($request->role === 'murid') {
             $profileId = $user->siswaProfile ? $user->siswaProfile->id : null;
             $rules['nis']           = 'nullable|string|max:20|unique:siswa_profiles,nis,' . $profileId;
             $rules['nisn']          = 'nullable|string|max:20|unique:siswa_profiles,nisn,' . $profileId;
-            $rules['kelas']         = 'nullable|string|max:50';
-            $rules['jurusan']       = 'nullable|string|max:100';
-            $rules['rombel']        = 'nullable|string|max:50';
+            $rules['kelas_id']      = 'nullable|exists:kelas,id';
             $rules['jenis_kelamin'] = 'nullable|in:L,P';
             $rules['tempat_lahir']  = 'nullable|string|max:100';
             $rules['tanggal_lahir'] = 'nullable|date';
@@ -274,9 +297,10 @@ class AdminController extends Controller
         ]);
 
         $data = [
-            'name'  => $request->name,
-            'email' => $request->email,
-            'role'  => $request->role,
+            'name'        => $request->name,
+            'nomor_induk' => $request->nomor_induk,
+            'email'       => $request->email,
+            'role'        => $request->role,
         ];
 
         if ($request->filled('password')) {
@@ -285,15 +309,26 @@ class AdminController extends Controller
 
         $user->update($data);
 
-        if ($request->role === 'siswa') {
+        if ($request->role === 'guru') {
+            $user->guruProfile()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'is_piket_sholat'   => $request->has('is_piket_sholat'),
+                    'is_piket_mengajar' => $request->has('is_piket_mengajar'),
+                ]
+            );
+        }
+
+        if ($request->role === 'murid') {
+            $kelas = $request->kelas_id ? \App\Models\Kelas::find($request->kelas_id) : null;
             $user->siswaProfile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'nis'           => $request->nis ?: null,
                     'nisn'          => $request->nisn ?: null,
-                    'kelas'         => $request->kelas,
-                    'jurusan'       => $request->jurusan,
-                    'rombel'        => $request->rombel,
+                    'kelas'         => $kelas ? $kelas->tingkat : null,
+                    'jurusan'       => $kelas ? $kelas->jurusan : null,
+                    'rombel'        => $kelas ? $kelas->rombel : null,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'tempat_lahir'  => $request->tempat_lahir,
                     'tanggal_lahir' => $request->tanggal_lahir,
@@ -301,7 +336,7 @@ class AdminController extends Controller
                 ]
             );
         } else {
-            // Jika role diubah dari siswa ke role lain, hapus profilnya
+            // Jika role diubah dari murid ke role lain, hapus profilnya
             if ($user->siswaProfile) {
                 $user->siswaProfile()->delete();
             }
@@ -316,6 +351,14 @@ class AdminController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users')->with('success', "Akun {$name} berhasil dihapus.");
+    }
+
+    public function resetDevice(User $user)
+    {
+        $name = $user->name;
+        $user->update(['device_id' => null]);
+
+        return redirect()->route('admin.users')->with('success', "Perangkat untuk akun {$name} berhasil direset.");
     }
 
     // ──────────────────────────────────────────
@@ -371,7 +414,7 @@ class AdminController extends Controller
 
         $callback = function () use ($riwayat, $delimiter) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Nama Guru', 'Tanggal', 'Jam Datang', 'Jam Pulang', 'Status Kehadiran', 'Keterangan'], $delimiter);
+            fputcsv($file, ['No', 'Nama Guru', 'Tanggal', 'Jam Datang', 'Jam Pulang', 'Status Kehadiran', 'Kategori', 'Keterangan'], $delimiter);
             
             $no = 1;
             foreach ($riwayat as $data) {
@@ -382,6 +425,7 @@ class AdminController extends Controller
                     $data->waktu_datang ?? '-',
                     $data->waktu_pulang ?? '-',
                     $data->status,
+                    $data->kategori ?? '-',
                     $data->keterangan ?? '-'
                 ], $delimiter);
             }
@@ -411,7 +455,79 @@ class AdminController extends Controller
 
         $aktivitas = $query->paginate(20)->withQueryString();
 
-        return view('admin.aktivitas-guru', compact('semuaGuru', 'aktivitas', 'tanggal'));
+        // Cari JadwalMengajar yang cocok per record aktivitas (untuk tombol detail absen kelas)
+        // Match berdasarkan user_id + kelas + jam_ke
+        $jadwalIds = [];
+        foreach ($aktivitas as $item) {
+            $jadwal = \App\Models\JadwalMengajar::where('user_id', $item->user_id)
+                ->where('kelas', $item->kelas)
+                ->where('jam_ke', $item->jam_ke)
+                ->whereHas('absensiKelas', function ($q) use ($item) {
+                    $q->whereDate('tanggal', $item->tanggal);
+                })
+                ->first();
+            $jadwalIds[$item->id] = $jadwal ? $jadwal->id : null;
+        }
+
+        return view('admin.aktivitas-guru', compact('semuaGuru', 'aktivitas', 'tanggal', 'jadwalIds'));
+    }
+
+    // ──────────────────────────────────────────
+    //  REKAP ABSENSI KELAS (diinput oleh Guru)
+    // ──────────────────────────────────────────
+
+    public function rekapAbsensiKelas(Request $request)
+    {
+        $semuaGuru = User::where('role', 'guru')->orderBy('name')->get();
+        $tanggal   = $request->filled('tanggal') ? Carbon::parse($request->tanggal) : Carbon::today();
+
+        // Ambil jadwal yang sudah punya data absensi kelas pada tanggal ini
+        $query = \App\Models\JadwalMengajar::with(['user'])
+            ->whereHas('absensiKelas', function ($q) use ($tanggal) {
+                $q->whereDate('tanggal', $tanggal);
+            })
+            ->withCount(['absensiKelas as total_hadir' => function ($q) use ($tanggal) {
+                $q->whereDate('tanggal', $tanggal)->where('status', 'hadir');
+            }])
+            ->withCount(['absensiKelas as total_alpa' => function ($q) use ($tanggal) {
+                $q->whereDate('tanggal', $tanggal)->where('status', 'alpa');
+            }])
+            ->withCount(['absensiKelas as total_sakit' => function ($q) use ($tanggal) {
+                $q->whereDate('tanggal', $tanggal)->where('status', 'sakit');
+            }])
+            ->withCount(['absensiKelas as total_izin' => function ($q) use ($tanggal) {
+                $q->whereDate('tanggal', $tanggal)->where('status', 'izin');
+            }])
+            ->withCount(['absensiKelas as total_siswa' => function ($q) use ($tanggal) {
+                $q->whereDate('tanggal', $tanggal);
+            }]);
+
+        if ($request->filled('guru_id')) {
+            $query->where('user_id', $request->guru_id);
+        }
+
+        if ($request->filled('kelas')) {
+            $query->where('kelas', 'like', '%' . $request->kelas . '%');
+        }
+
+        $jadwals = $query->orderBy('jam_ke')->paginate(20)->withQueryString();
+
+        return view('admin.rekap-absensi-kelas', compact('semuaGuru', 'jadwals', 'tanggal'));
+    }
+
+    public function rekapAbsensiKelasDetail(\App\Models\JadwalMengajar $jadwal, Request $request)
+    {
+        $tanggal = $request->filled('tanggal') ? Carbon::parse($request->tanggal) : Carbon::today();
+
+        $absensi = \App\Models\AbsensiKelasSiswa::with('siswa.siswaProfile')
+            ->where('jadwal_mengajar_id', $jadwal->id)
+            ->whereDate('tanggal', $tanggal)
+            ->orderBy('status')
+            ->get();
+
+        $jadwal->load('user');
+
+        return view('admin.rekap-absensi-kelas-detail', compact('jadwal', 'absensi', 'tanggal'));
     }
 
     // ──────────────────────────────────────────
@@ -421,7 +537,8 @@ class AdminController extends Controller
     public function geofenceSetting()
     {
         $setting = SchoolSetting::get();
-        return view('admin.geofence', compact('setting'));
+        $jadwalAbsensi = \App\Models\JadwalAbsensi::all();
+        return view('admin.geofence', compact('setting', 'jadwalAbsensi'));
     }
 
     public function updateGeofence(Request $request)
@@ -431,11 +548,14 @@ class AdminController extends Controller
             'longitude'    => 'required|numeric|between:-180,180',
             'radius_meter' => 'required|integer|min:1|max:500',
             'nama_sekolah' => 'required|string|max:255',
-            'absen_datang_buka'  => 'required|date_format:H:i',
-            'absen_datang_tutup' => 'required|date_format:H:i',
-            'absen_pulang_buka'  => 'required|date_format:H:i',
-            'absen_pulang_tutup' => 'required|date_format:H:i',
             'status_absen' => 'required|in:auto,buka,tutup',
+            'jadwal'       => 'required|array',
+            'jadwal.*.absen_datang_buka'  => 'required|date_format:H:i',
+            'jadwal.*.absen_datang_tutup' => 'required|date_format:H:i',
+            'jadwal.*.absen_pulang_buka'  => 'required|date_format:H:i',
+            'jadwal.*.absen_pulang_tutup' => 'required|date_format:H:i',
+            'jadwal.*.batas_waktu_terlambat' => 'required|date_format:H:i',
+            'jadwal.*.batas_pulang_cepat' => 'required|date_format:H:i',
         ], [
             'latitude.required'     => 'Latitude wajib diisi.',
             'latitude.between'      => 'Latitude harus antara -90 dan 90.',
@@ -445,26 +565,34 @@ class AdminController extends Controller
             'radius_meter.min'      => 'Radius minimal 1 meter.',
             'radius_meter.max'      => 'Radius maksimal 500 meter.',
             'nama_sekolah.required' => 'Nama sekolah wajib diisi.',
-            'absen_datang_buka.required'  => 'Jam buka absen datang wajib diisi.',
-            'absen_datang_tutup.required' => 'Jam tutup absen datang wajib diisi.',
-            'absen_pulang_buka.required'  => 'Jam buka absen pulang wajib diisi.',
-            'absen_pulang_tutup.required' => 'Jam tutup absen pulang wajib diisi.',
             'status_absen.required' => 'Status absen wajib dipilih.',
             'status_absen.in'       => 'Status absen tidak valid.',
+            'jadwal.*.absen_datang_buka.required' => 'Jam buka absen datang wajib diisi.',
+            'jadwal.*.absen_datang_tutup.required' => 'Jam tutup absen datang wajib diisi.',
+            'jadwal.*.absen_pulang_buka.required' => 'Jam buka absen pulang wajib diisi.',
+            'jadwal.*.absen_pulang_tutup.required' => 'Jam tutup absen pulang wajib diisi.',
         ]);
 
-        $setting = SchoolSetting::get();
+        $setting = SchoolSetting::first();
         $setting->update([
             'latitude'     => $request->latitude,
             'longitude'    => $request->longitude,
             'radius_meter' => $request->radius_meter,
             'nama_sekolah' => $request->nama_sekolah,
-            'absen_datang_buka'  => $request->absen_datang_buka,
-            'absen_datang_tutup' => $request->absen_datang_tutup,
-            'absen_pulang_buka'  => $request->absen_pulang_buka,
-            'absen_pulang_tutup' => $request->absen_pulang_tutup,
             'status_absen' => $request->status_absen,
         ]);
+
+        foreach ($request->jadwal as $hari => $data) {
+            \App\Models\JadwalAbsensi::where('hari', $hari)->update([
+                'absen_datang_buka'     => $data['absen_datang_buka'],
+                'absen_datang_tutup'    => $data['absen_datang_tutup'],
+                'batas_waktu_terlambat' => $data['batas_waktu_terlambat'],
+                'absen_pulang_buka'     => $data['absen_pulang_buka'],
+                'absen_pulang_tutup'    => $data['absen_pulang_tutup'],
+                'batas_pulang_cepat'    => $data['batas_pulang_cepat'],
+                'is_libur'              => isset($data['is_libur']) ? true : false,
+            ]);
+        }
 
         if ($request->status_absen === 'tutup') {
             \Illuminate\Support\Facades\Artisan::call('presensi:cek-alpha');
@@ -486,7 +614,7 @@ class AdminController extends Controller
             : Carbon::today();
 
         // Semua siswa (dengan opsional filter nama)
-        $siswaQuery = User::where('role', 'siswa')->orderBy('name');
+        $siswaQuery = User::where('role', 'murid')->orderBy('name');
         if ($request->filled('search')) {
             $siswaQuery->where('name', 'like', '%' . $request->search . '%');
         }
@@ -513,7 +641,7 @@ class AdminController extends Controller
         $riwayat = $riwayatQuery->paginate(20)->withQueryString();
 
         $stats = [
-            'total'  => User::where('role', 'siswa')->count(),
+            'total'  => User::where('role', 'murid')->count(),
             'hadir'  => $absensi->where('status', 'hadir')->count(),
             'izin'   => $absensi->where('status', 'izin')->count(),
             'sakit'  => $absensi->where('status', 'sakit')->count(),
@@ -602,26 +730,61 @@ class AdminController extends Controller
 
     public function approvePengajuan($type, $id)
     {
-        $model = $type === 'siswa' ? AbsensiSiswa::findOrFail($id) : AbsensiGuru::findOrFail($id);
-        
-        $model->update([
-            'status_pengajuan' => 'approved',
-            'is_notified' => false,
-        ]);
+        if ($type === 'murid') {
+            $model = AbsensiSiswa::findOrFail($id);
+            $model->update([
+                'status_pengajuan' => 'approved',
+                'is_notified' => false,
+            ]);
+        } else {
+            // Guru
+            $model = AbsensiGuru::findOrFail($id);
+            $model->update([
+                'status_pengajuan' => 'approved',
+                'is_notified' => false,
+            ]);
+
+            // Jika status adalah cuti atau tugas, otomatis isi presensi
+            // untuk setiap tanggal dari tanggal mulai s/d tanggal selesai
+            if (in_array($model->status, ['cuti', 'tugas']) && $model->tanggal_selesai) {
+                $start = \Carbon\Carbon::parse($model->tanggal);
+                $end   = \Carbon\Carbon::parse($model->tanggal_selesai);
+
+                $current = $start->copy()->addDay(); // hari pertama sudah ada record
+                while ($current->lte($end)) {
+                    AbsensiGuru::updateOrCreate(
+                        [
+                            'user_id' => $model->user_id,
+                            'tanggal' => $current->toDateString(),
+                        ],
+                        [
+                            'tanggal_selesai'  => $model->tanggal_selesai,
+                            'status'           => $model->status,
+                            'judul_pengajuan'  => $model->judul_pengajuan,
+                            'keterangan'       => $model->keterangan,
+                            'file_bukti'       => $model->file_bukti,
+                            'status_pengajuan' => 'approved',
+                            'is_notified'      => true,
+                        ]
+                    );
+                    $current->addDay();
+                }
+            }
+        }
         
         return back()->with('success', 'Pengajuan berhasil disetujui.');
     }
 
     public function rejectPengajuan($type, $id)
     {
-        $model = $type === 'siswa' ? AbsensiSiswa::findOrFail($id) : AbsensiGuru::findOrFail($id);
+        $model = $type === 'murid' ? AbsensiSiswa::findOrFail($id) : AbsensiGuru::findOrFail($id);
         
         $model->update([
             'status_pengajuan' => 'rejected',
-            'status' => 'alpha',
+            'status' => 'alpa',
             'is_notified' => false,
         ]);
         
-        return back()->with('success', 'Pengajuan ditolak. Status kehadiran diubah menjadi Alpha.');
+        return back()->with('success', 'Pengajuan ditolak. Status kehadiran diubah menjadi Alpa.');
     }
 }

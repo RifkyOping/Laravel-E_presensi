@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="public/images/logo.png" width="400" alt="Logo SMKN 1 Majene">
+  <img src="public/images/logo.png" width="400" alt="Logo UPTD SMKN 1 Majene">
 </p>
 
-# E-Presensi & Sistem Terpadu SMKN 1 Majene
+# E-Presensi & Sistem Terpadu UPTD SMKN 1 Majene
 
-Selamat datang di **E-Presensi & Sistem Terpadu SMKN 1 Majene** – sebuah platform digital resmi untuk memanajemen kehadiran, aktivitas belajar mengajar, serta literasi di SMKN 1 Majene secara terpusat dan modern.
+Selamat datang di **E-Presensi & Sistem Terpadu UPTD SMKN 1 Majene** – sebuah platform digital resmi untuk memanajemen kehadiran, aktivitas belajar mengajar, serta literasi di UPTD SMKN 1 Majene secara terpusat dan modern.
 
 ## 🚀 Fitur Utama
 
@@ -42,4 +42,4 @@ Aplikasi ini dibagi menjadi beberapa modul dan hak akses (role), yaitu:
 - **Keamanan:** Jalur registrasi mandiri untuk publik (`/register`) telah dinonaktifkan demi alasan keamanan sekolah. Pembuatan akun sepenuhnya berada di tangan Admin.
 
 ## 🤝 Lisensi
-Sistem ini bersifat hak cipta milik SMKN 1 Majene.
+Sistem ini bersifat hak cipta milik UPTD SMKN 1 Majene.

@@ -7,7 +7,7 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <a href="{{ route('admin.ebook.index') }}" class="text-slate-400 hover:text-[#1e3a6e] text-sm transition-colors">Manajemen E-Book</a>
+            <a href="{{ route('admin.ebook.index') }}" class="text-slate-400 hover:text-[#1e3a6e] text-sm transition-colors">Manajemen e-Book</a>
             <span class="text-slate-300">/</span>
             <span class="text-sm font-bold text-slate-800">Akses Suara Siswa</span>
         </div>

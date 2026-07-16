@@ -21,15 +21,15 @@ class PengawasController extends Controller
 
         $stats = [
             'total_guru'    => User::where('role', 'guru')->count(),
-            'total_siswa'   => User::where('role', 'siswa')->count(),
+            'total_siswa'   => User::where('role', 'murid')->count(),
             'guru_hadir'    => AbsensiGuru::whereDate('tanggal', $today)
                                 ->whereNotNull('waktu_datang')->count(),
             'guru_izin'     => AbsensiGuru::whereDate('tanggal', $today)
                                 ->where('status', 'izin')->count(),
             'guru_sakit'    => AbsensiGuru::whereDate('tanggal', $today)
                                 ->where('status', 'sakit')->count(),
-            'guru_alpha'    => AbsensiGuru::whereDate('tanggal', $today)
-                                ->where('status', 'alpha')->count(),
+            'guru_alpa'    => AbsensiGuru::whereDate('tanggal', $today)
+                                ->where('status', 'alpa')->count(),
             'siswa_hadir'   => AbsensiSiswa::whereDate('tanggal', $today)
                                 ->where('status', 'hadir')->count(),
         ];
@@ -125,7 +125,7 @@ class PengawasController extends Controller
             : Carbon::today();
 
         // Semua siswa (dengan opsional filter nama)
-        $siswaQuery = User::where('role', 'siswa')->orderBy('name');
+        $siswaQuery = User::where('role', 'murid')->orderBy('name');
         if ($request->filled('search')) {
             $siswaQuery->where('name', 'like', '%' . $request->search . '%');
         }
@@ -152,11 +152,11 @@ class PengawasController extends Controller
         $riwayat = $riwayatQuery->paginate(20)->withQueryString();
 
         $stats = [
-            'total'  => User::where('role', 'siswa')->count(),
+            'total'  => User::where('role', 'murid')->count(),
             'hadir'  => $absensi->where('status', 'hadir')->count(),
             'izin'   => $absensi->where('status', 'izin')->count(),
             'sakit'  => $absensi->where('status', 'sakit')->count(),
-            'belum'  => User::where('role', 'siswa')->count() - $absensi->count(),
+            'belum'  => User::where('role', 'murid')->count() - $absensi->count(),
         ];
 
         return view('pengawas.absensi-siswa', compact(

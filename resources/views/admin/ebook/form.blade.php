@@ -1,6 +1,6 @@
 @php
     $isEdit = isset($ebook);
-    $title  = $isEdit ? 'Edit E-Book: ' . $ebook->judul : 'Tambah E-Book Baru';
+    $title  = $isEdit ? 'Edit e-Book: ' . $ebook->judul : 'Tambah e-Book Baru';
     $action = $isEdit ? route('admin.ebook.update', $ebook->id) : route('admin.ebook.store');
 @endphp
 
@@ -61,18 +61,18 @@
 
                 <div>
                     <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
-                        Judul E-Book <span class="text-red-500">*</span>
+                        Judul e-Book <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="judul"
                            value="{{ old('judul', $ebook->judul ?? '') }}"
-                           placeholder="Judul e-book..."
+                           placeholder="Judul e-Book..."
                            class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                 </div>
 
                 <div>
                     <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Deskripsi Singkat</label>
                     <textarea name="deskripsi" rows="2"
-                              placeholder="Deskripsi singkat e-book (max 500 karakter)..."
+                              placeholder="Deskripsi singkat e-Book (max 500 karakter)..."
                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm resize-none">{{ old('deskripsi', $ebook->deskripsi ?? '') }}</textarea>
                 </div>
 
@@ -99,7 +99,7 @@
                                     after:border after:rounded-full after:h-5 after:w-5 after:transition-all
                                     peer-checked:bg-[#1e3a6e]"></div>
                     </label>
-                    <span class="text-sm font-semibold text-slate-700">E-Book Aktif (tampil ke siswa)</span>
+                    <span class="text-sm font-semibold text-slate-700">e-Book Aktif (tampil ke siswa)</span>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
                                   d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    File PDF E-Book
+                    File PDF e-Book
                 </h3>
             </div>
             <div class="px-6 py-6 space-y-4">
@@ -191,7 +191,7 @@
             </a>
             <button type="submit"
                     class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm">
-                {{ $isEdit ? 'Perbarui E-Book' : 'Simpan E-Book' }}
+                {{ $isEdit ? 'Perbarui e-Book' : 'Simpan e-Book' }}
             </button>
         </div>
     </form>

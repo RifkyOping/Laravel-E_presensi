@@ -6,7 +6,7 @@
             </h2>
             
             <!-- Tombol Kembali -->
-            <a href="{{ route('siswa.dashboard') }}" class="inline-flex items-center gap-2 text-sm font-bold text-[#24417c] bg-white border-2 border-[#24417c] px-4 py-2 rounded-full hover:bg-[#24417c] hover:text-white transition duration-300">
+            <a href="{{ route('murid.dashboard') }}" class="inline-flex items-center gap-2 text-sm font-bold text-[#24417c] bg-white border-2 border-[#24417c] px-4 py-2 rounded-full hover:bg-[#24417c] hover:text-white transition duration-300">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>

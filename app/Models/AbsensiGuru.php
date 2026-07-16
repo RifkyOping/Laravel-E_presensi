@@ -20,6 +20,7 @@ class AbsensiGuru extends Model
         'file_bukti',
         'status_pengajuan',
         'is_notified',
+        'judul_pengajuan',
     ];
 
     protected $casts = [
