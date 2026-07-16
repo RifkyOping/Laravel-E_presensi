@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\CatatanMembaca;
-use App\Models\EBook;
-use App\Models\BukuManual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,8 +13,9 @@ class CatatanMembacaController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
-            'jenis_buku' => 'required|in:digital,manual',
+            'jenis_buku' => 'required|in:digital,manual', // Pastikan 'digital' atau 'manual'
             'buku_id'    => 'required|integer',
             'catatan'    => 'required|string|max:2000',
         ], [
@@ -26,14 +25,16 @@ class CatatanMembacaController extends Controller
 
         $user = Auth::user();
 
-        // Upsert: 1 catatan per user per buku
+        // Menyimpan atau memperbarui catatan (1 catatan per user per buku)
         CatatanMembaca::updateOrCreate(
             [
-                'user_id'   => $user->id,
+                'user_id'    => $user->id,
                 'jenis_buku' => $request->jenis_buku,
-                'buku_id'   => $request->buku_id,
+                'buku_id'    => $request->buku_id,
             ],
-            ['catatan' => $request->catatan]
+            [
+                'catatan' => $request->catatan
+            ]
         );
 
         return back()->with('success_catatan', 'Catatan progres berhasil disimpan.');

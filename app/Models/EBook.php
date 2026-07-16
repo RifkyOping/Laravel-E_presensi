@@ -35,4 +35,10 @@ class EBook extends Model
     {
         return $query->where('aktif', true);
     }
+
+    public function catatan()
+    {
+        // EBook memiliki banyak catatan
+        return $this->hasMany(CatatanMembaca::class, 'e_book_id');
+    }
 }

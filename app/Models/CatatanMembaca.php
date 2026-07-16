@@ -19,4 +19,8 @@ class CatatanMembaca extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function eBook()
+    {
+        return $this->belongsTo(EBook::class, 'e_book_id');
+    }
 }

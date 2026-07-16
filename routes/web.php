@@ -139,6 +139,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/guru/absen-kelas/{jadwal}', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'show'])->name('guru.absen-kelas.show');
     Route::post('/guru/absen-kelas/{jadwal}', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'store'])->name('guru.absen-kelas.store');
     Route::post('/guru/upload-rpp', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'uploadRpp'])->name('guru.upload-rpp');
+
+    Route::post('/siswa/ebook/{id}/catatan', [CatatanMembacaController::class, 'simpanCatatanEbook'])->name('siswa.ebook.catatan.store');
+    Route::post('/catatan/store', [App\Http\Controllers\CatatanMembacaController::class, 'store'])->name('catatan.store');
 });
 
 require __DIR__ . '/auth.php';

@@ -81,8 +81,10 @@
         {{-- Main Layout: PDF + Voice Panel --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-            {{-- PDF Viewer --}}
-            <div class="lg:col-span-2">
+            {{-- KIRI: PDF Viewer & Form Catatan --}}
+            <div class="lg:col-span-2 space-y-5">
+
+                {{-- PDF Viewer Box --}}
                 <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
                     <div class="border-b border-slate-100 px-5 py-3 flex items-center justify-between">
                         <span class="text-sm font-bold text-slate-700 flex items-center gap-2">
@@ -115,7 +117,6 @@
                             {{-- Universal PDF Viewer (PDF.js) --}}
                             <div class="relative w-full bg-slate-50 border-b border-slate-100 flex flex-col"
                                 style="height: 75vh; min-height: 500px;">
-                                <!-- Toolbar -->
                                 <div
                                     class="bg-slate-800 text-white px-4 py-3 flex items-center justify-between shadow z-10 flex-wrap gap-3">
                                     <div class="flex items-center gap-2">
@@ -150,7 +151,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Canvas Container -->
                                 <div class="flex-1 overflow-auto bg-slate-300 flex justify-center p-2 sm:p-6"
                                     id="canvas_container">
                                     <canvas id="pdf_render_canvas" class="shadow-2xl rounded"></canvas>
@@ -287,11 +287,35 @@
                         </div>
                     @endif
                 </div>
+
+                {{-- Form Catatan --}}
+<form action="{{ route('catatan.store') }}" method="POST">
+    @csrf
+
+    {{-- Hidden Inputs agar validasi controller terpenuhi --}}
+    <input type="hidden" name="jenis_buku" value="digital">
+    <input type="hidden" name="buku_id" value="{{ $ebook->id }}">
+
+    <textarea name="catatan" rows="5" maxlength="2000"
+              class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none transition text-sm placeholder-slate-400"
+              placeholder="Tuliskan catatan progres membacamu di sini...">{{ $catatan?->catatan ?? '' }}</textarea>
+
+    <div class="flex justify-between items-center mt-3">
+        <p class="text-xs text-slate-400">Maksimal 2000 karakter.</p>
+        <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#1e3a6e] hover:bg-[#162d57] transition shadow-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Simpan Catatan
+        </button>
+    </div>
+</form>
+                </div>
+
             </div>
 
-            {{-- Verification Panel --}}
+            {{-- KANAN: Panel Sidebar Suara & Navigasi --}}
             <div class="space-y-4">
 
+                {{-- Verification Panel --}}
                 @if(!$progres->lulus_suara && !$progres->selesai)
                     @if(Auth::user()->skip_voice_verification)
                         {{-- Bypass Voice Recorder --}}
