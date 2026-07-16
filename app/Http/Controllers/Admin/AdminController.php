@@ -84,7 +84,11 @@ class AdminController extends Controller
             ->orderBy('rombel')
             ->get();
 
-        return view('admin.users.create', compact('kelasList'));
+        $tingkats  = $kelasList->pluck('tingkat')->unique()->values();
+        $jurusans  = $kelasList->pluck('jurusan')->unique()->values();
+        $rombels   = $kelasList->pluck('rombel')->unique()->values();
+
+        return view('admin.users.create', compact('kelasList', 'tingkats', 'jurusans', 'rombels'));
     }
 
     public function storeUser(Request $request)
@@ -261,7 +265,11 @@ class AdminController extends Controller
             ->orderBy('rombel')
             ->get();
 
-        return view('admin.users.edit', compact('user', 'kelasList'));
+        $tingkats  = $kelasList->pluck('tingkat')->unique()->values();
+        $jurusans  = $kelasList->pluck('jurusan')->unique()->values();
+        $rombels   = $kelasList->pluck('rombel')->unique()->values();
+
+        return view('admin.users.edit', compact('user', 'kelasList', 'tingkats', 'jurusans', 'rombels'));
     }
 
     public function updateUser(Request $request, User $user)

@@ -1,291 +1,108 @@
-<x-app-layout pageTitle="Atur Jadwal Mengajar" pageSubtitle="Tetapkan jadwal tetap mingguan Anda">
+<x-app-layout pageTitle="Jadwal Mengajar" pageSubtitle="Jadwal mengajar mingguan Anda yang ditetapkan oleh Admin">
 
-    <div class="max-w-5xl mx-auto space-y-6" x-data="jadwalApp()">
+    <div class="max-w-5xl mx-auto space-y-6">
+
+        @if(session('success'))
+        <div class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 font-semibold px-5 py-3.5 rounded-xl text-sm">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
+        </div>
+        @endif
 
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">Jadwal Mengajar Mingguan</h2>
-                    <p class="text-sm text-slate-500 mt-1">Sistem akan secara otomatis membuatkan jurnal absensi
-                        mengajar Anda setiap harinya tepat pada Jam Mulai kelas.</p>
+                    <p class="text-sm text-slate-500 mt-1">Jadwal ini ditetapkan oleh Admin. Hubungi Admin jika ada perubahan jadwal.</p>
                 </div>
-                @if(!auth()->user()->is_jadwal_set)
-                    <div
-                        class="bg-amber-50 text-amber-700 px-4 py-2 rounded-lg text-sm font-semibold border border-amber-200">
-                        ⚠️ Anda wajib mengatur jadwal perdana
-                    </div>
-                @endif
             </div>
 
-            <form action="{{ route('guru.jadwal.store') }}" method="POST" id="formJadwal">
-                @csrf
+            {{-- Tabs --}}
+            @php
+                $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                $activeHari = request('hari', 'Senin');
+            @endphp
 
-                {{-- Tabs --}}
-                <div class="-mx-1 overflow-x-auto pb-1 mb-6 border-b border-slate-200">
-                    <div class="flex gap-2 px-1 min-w-max">
-                        <template x-for="hari in days" :key="hari">
-                            <button type="button" @click="activeTab = hari"
-                                :class="activeTab === hari ? 'bg-[#1e3a6e] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                                class="px-4 py-2 rounded-xl font-semibold text-sm transition-colors duration-200 whitespace-nowrap flex-shrink-0"
-                                x-text="hari">
-                            </button>
-                        </template>
-                    </div>
+            <div class="-mx-1 overflow-x-auto pb-1 mb-6 border-b border-slate-200">
+                <div class="flex gap-2 px-1 min-w-max">
+                    @foreach($hariList as $hari)
+                        <a href="{{ route('guru.jadwal.index', ['hari' => $hari]) }}"
+                           class="px-4 py-2 rounded-xl font-semibold text-sm transition-colors duration-200 whitespace-nowrap flex-shrink-0
+                               {{ $activeHari === $hari ? 'bg-[#1e3a6e] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                            {{ $hari }}
+                        </a>
+                    @endforeach
                 </div>
+            </div>
 
-                {{-- Tab Contents --}}
-                <div class="min-h-[300px]">
-                    <template x-for="hari in days" :key="hari">
-                        <div x-show="activeTab === hari" class="space-y-4">
+            {{-- Content per Hari --}}
+            @php $jadwalHariIni = $jadwal[$activeHari] ?? []; @endphp
 
-                            {{-- Data Kosong --}}
-                            <div x-show="getJadwalByHari(hari).length === 0"
-                                class="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                                <p class="text-slate-500 font-medium mb-3">Tidak ada jadwal di hari <span
-                                        x-text="hari"></span></p>
-                                <button type="button" @click="tambahJadwal(hari)"
-                                    class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50">
-                                    + Tambah Jam Mengajar
-                                </button>
+            @if(count($jadwalHariIni) === 0)
+                <div class="text-center py-16 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                    <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-slate-500 font-semibold">Tidak ada jadwal di hari <strong>{{ $activeHari }}</strong></p>
+                    <p class="text-slate-400 text-sm mt-1">Hubungi Admin jika jadwal belum diatur.</p>
+                </div>
+            @else
+                {{-- Mobile: Card --}}
+                <div class="block sm:hidden space-y-3">
+                    @foreach($jadwalHariIni as $j)
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Jam ke-{{ $j->jam_ke }}</span>
+                                <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                    {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }}
+                                    @if($j->jam_selesai) – {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }} @endif
+                                </span>
                             </div>
-
-                            {{-- Mobile: Card per item --}}
-                            <div x-show="getJadwalByHari(hari).length > 0" class="block sm:hidden space-y-3">
-                                <template x-for="(item, index) in getJadwalByHari(hari)" :key="item.id">
-                                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-                                        <input type="hidden" :name="`jadwal[${item.id}][hari]`" :value="hari">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Sesi</span>
-                                            <button type="button" @click="hapusJadwal(item.id)" class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
-                                        </div>
-                                        {{-- Mata Pelajaran --}}
-                                        <div>
-                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Mata Pelajaran</label>
-                                            <select :name="`jadwal[${item.id}][mata_pelajaran]`" x-model="item.mata_pelajaran" required class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                <option value="">Mapel</option>
-                                                @foreach($mapels as $mapel) <option value="{{$mapel}}">{{$mapel}}</option> @endforeach
-                                            </select>
-                                        </div>
-                                        {{-- Kelas 3 kolom --}}
-                                        <div class="grid grid-cols-3 gap-2">
-                                            <div>
-                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Tingkat</label>
-                                                <select :name="`jadwal[${item.id}][tingkat]`" x-model="item.tingkat" required class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                    <option value="">-</option>
-                                                    @foreach($tingkats as $t) <option value="{{$t}}">{{$t}}</option> @endforeach
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Jurusan</label>
-                                                <select :name="`jadwal[${item.id}][jurusan]`" x-model="item.jurusan" required class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                    <option value="">-</option>
-                                                    @foreach($jurusans as $j) <option value="{{$j}}">{{$j}}</option> @endforeach
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Rombel</label>
-                                                <select :name="`jadwal[${item.id}][rombel]`" x-model="item.rombel" required class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                    <option value="">-</option>
-                                                    @foreach($rombels as $r) <option value="{{$r}}">{{$r}}</option> @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        {{-- Jam --}}
-                                        <div class="grid grid-cols-3 gap-2">
-                                            <div>
-                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Jam Ke-</label>
-                                                <input type="number" :name="`jadwal[${item.id}][jam_ke]`" x-model="item.jam_ke" required min="1" class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e] text-center">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Mulai</label>
-                                                <input type="time" :name="`jadwal[${item.id}][jam_mulai]`" x-model="item.jam_mulai" required class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Selesai</label>
-                                                <input type="time" :name="`jadwal[${item.id}][jam_selesai]`" x-model="item.jam_selesai" class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                                <button type="button" @click="tambahJadwal(hari)" class="w-full px-4 py-2.5 text-[#1e3a6e] bg-blue-50 border border-blue-100 rounded-xl text-sm font-semibold hover:bg-blue-100 transition">
-                                    + Tambah Baris
-                                </button>
-                            </div>
-
-                            {{-- Desktop: Table --}}
-                            <div x-show="getJadwalByHari(hari).length > 0" class="hidden sm:block overflow-x-auto">
-                                <table class="w-full text-left text-sm border-collapse">
-                                    <thead>
-                                        <tr class="bg-slate-50 text-slate-600">
-                                            <th class="p-3 font-semibold rounded-tl-lg">Mata Pelajaran</th>
-                                            <th class="p-3 font-semibold">Tingkat</th>
-                                            <th class="p-3 font-semibold">Jurusan</th>
-                                            <th class="p-3 font-semibold">Rombel</th>
-                                            <th class="p-3 font-semibold w-24 text-center">Jam Ke-</th>
-                                            <th class="p-3 font-semibold w-32">Jam Mulai</th>
-                                            <th class="p-3 font-semibold w-32">Jam Selesai</th>
-                                            <th class="p-3 font-semibold rounded-tr-lg w-16 text-center">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template x-for="(item, index) in getJadwalByHari(hari)" :key="item.id">
-                                            <tr class="border-b border-slate-100 group">
-                                                <td class="p-2">
-                                                    <input type="hidden" :name="`jadwal[${item.id}][hari]`"
-                                                        :value="hari">
-                                                    <select :name="`jadwal[${item.id}][mata_pelajaran]`"
-                                                        x-model="item.mata_pelajaran" required
-                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                        <option value="">Mapel</option>
-                                                        @foreach($mapels as $mapel) <option value="{{$mapel}}">
-                                                        {{$mapel}}</option> @endforeach
-                                                    </select>
-                                                </td>
-                                                <td class="p-2">
-                                                    <select :name="`jadwal[${item.id}][tingkat]`" x-model="item.tingkat"
-                                                        required
-                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                        <option value="">Tingkat</option>
-                                                        @foreach($tingkats as $t) <option value="{{$t}}">{{$t}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td class="p-2">
-                                                    <select :name="`jadwal[${item.id}][jurusan]`" x-model="item.jurusan"
-                                                        required
-                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                        <option value="">Jurusan</option>
-                                                        @foreach($jurusans as $j) <option value="{{$j}}">{{$j}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td class="p-2">
-                                                    <select :name="`jadwal[${item.id}][rombel]`" x-model="item.rombel"
-                                                        required
-                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                        <option value="">Rombel</option>
-                                                        @foreach($rombels as $r) <option value="{{$r}}">{{$r}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td class="p-2">
-                                                    <input type="number" :name="`jadwal[${item.id}][jam_ke]`"
-                                                        x-model="item.jam_ke" required min="1"
-                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e] text-center">
-                                                </td>
-                                                <td class="p-2">
-                                                    <input type="time" :name="`jadwal[${item.id}][jam_mulai]`"
-                                                        x-model="item.jam_mulai" required
-                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                </td>
-                                                <td class="p-2">
-                                                    <input type="time" :name="`jadwal[${item.id}][jam_selesai]`"
-                                                        x-model="item.jam_selesai"
-                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
-                                                </td>
-                                                <td class="p-2 text-center">
-                                                    <button type="button" @click="hapusJadwal(item.id)"
-                                                        class="text-red-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                                <div class="mt-4">
-                                    <button type="button" @click="tambahJadwal(hari)"
-                                        class="px-4 py-2 text-[#1e3a6e] bg-blue-50 border border-blue-100 rounded-lg text-sm font-semibold hover:bg-blue-100 transition">
-                                        + Tambah Baris
-                                    </button>
-                                </div>
-                            </div>
-
+                            <p class="font-bold text-slate-800">{{ $j->mata_pelajaran }}</p>
+                            <p class="text-sm text-slate-500">{{ $j->kelas }}</p>
                         </div>
-                    </template>
+                    @endforeach
                 </div>
 
-                <div class="mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <p class="text-xs text-slate-500">
-                        Catatan: Jika Anda Guru BK atau Kepala Sekolah dan tidak memiliki jadwal tetap, biarkan kosong lalu tekan Simpan.
-                    </p>
-                    <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        Simpan
-                    </button>
+                {{-- Desktop: Table --}}
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600">
+                                <th class="p-3 font-semibold rounded-tl-lg w-16 text-center">Jam Ke-</th>
+                                <th class="p-3 font-semibold">Mata Pelajaran</th>
+                                <th class="p-3 font-semibold">Kelas</th>
+                                <th class="p-3 font-semibold rounded-tr-lg w-40 text-center">Jam</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($jadwalHariIni as $j)
+                                <tr class="hover:bg-slate-50 transition duration-150">
+                                    <td class="p-3 text-center">
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#1e3a6e] text-white font-bold text-sm">
+                                            {{ $j->jam_ke }}
+                                        </span>
+                                    </td>
+                                    <td class="p-3 font-semibold text-slate-800">{{ $j->mata_pelajaran }}</td>
+                                    <td class="p-3 text-slate-600">{{ $j->kelas }}</td>
+                                    <td class="p-3 text-center text-slate-600 font-medium">
+                                        {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }}
+                                        @if($j->jam_selesai) – {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }} @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            </form>
+            @endif
+
+            <div class="mt-6 pt-4 border-t border-slate-100">
+                <p class="text-xs text-slate-400 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Jika ada perubahan jadwal, hubungi Admin untuk pembaruan.
+                </p>
+            </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('jadwalApp', () => ({
-                days: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
-                activeTab: 'Senin',
-                jadwalList: [],
-                counter: 0,
-
-                init() {
-                    // Load data existing dari server
-                    const existingData = @json($jadwal);
-
-                    for (let hari in existingData) {
-                        // Urutkan data dari database berdasarkan jam_ke sebelum dimasukkan
-                        existingData[hari].sort((a, b) => a.jam_ke - b.jam_ke).forEach(j => {
-                            // Split kelas string into parts: "X RPL 1" -> ["X", "RPL", "1"]
-                            let parts = j.kelas.split(' ');
-                            let t = parts[0] || '';
-                            let r = parts[parts.length - 1] || '';
-                            let jur = parts.slice(1, -1).join(' ') || '';
-
-                            this.jadwalList.push({
-                                id: ++this.counter,
-                                hari: hari,
-                                mata_pelajaran: j.mata_pelajaran,
-                                tingkat: t,
-                                jurusan: jur,
-                                rombel: r,
-                                jam_ke: j.jam_ke,
-                                jam_mulai: j.jam_mulai.substring(0, 5), // potong detik (H:i)
-                                jam_selesai: j.jam_selesai ? j.jam_selesai.substring(0, 5) : ''
-                            });
-                        });
-                    }
-                },
-
-                getJadwalByHari(hari) {
-                    // Hanya filter berdasarkan hari tanpa sorting dinamis, 
-                    // agar baris baru selalu di bawah dan tidak melompat saat diubah angkanya
-                    return this.jadwalList.filter(j => j.hari === hari);
-                },
-
-                tambahJadwal(hari) {
-                    this.jadwalList.push({
-                        id: ++this.counter,
-                        hari: hari,
-                        mata_pelajaran: '',
-                        tingkat: '',
-                        jurusan: '',
-                        rombel: '',
-                        jam_ke: 1,
-                        jam_mulai: '',
-                        jam_selesai: ''
-                    });
-                },
-
-                hapusJadwal(id) {
-                    this.jadwalList = this.jadwalList.filter(j => j.id !== id);
-                }
-            }));
-        });
-    </script>
 
 </x-app-layout>

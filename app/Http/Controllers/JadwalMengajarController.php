@@ -27,13 +27,7 @@ class JadwalMengajarController extends Controller
             $jadwal[$j->hari][] = $j;
         }
 
-        // Ambil opsi kelas
-        $tingkats = \App\Models\Kelas::where('status', true)->select('tingkat')->distinct()->pluck('tingkat');
-        $jurusans = \App\Models\Kelas::where('status', true)->select('jurusan')->distinct()->pluck('jurusan');
-        $rombels  = \App\Models\Kelas::where('status', true)->select('rombel')->distinct()->pluck('rombel');
-        $mapels   = \App\Models\MataPelajaran::where('aktif', true)->orderBy('nama')->pluck('nama');
-
-        return view('guru.jadwal.index', compact('jadwal', 'tingkats', 'jurusans', 'rombels', 'mapels'));
+        return view('guru.jadwal.index', compact('jadwal'));
     }
 
     public function store(Request $request)

@@ -62,6 +62,9 @@
                         <x-nav-link :href="route('absensi')" :active="request()->routeIs('absensi')">
                             {{ __('Absensi') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('murid.sholat')" :active="request()->routeIs('murid.sholat')">
+                            {{ __('Riwayat Sholat') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('ebook.index')" :active="request()->routeIs('ebook.index')">
                             {{ __('Literasi e-Book') }}
                         </x-nav-link>
@@ -221,6 +224,9 @@
             @if (Auth::user()->role === 'murid')
                 <x-responsive-nav-link :href="route('absensi')" :active="request()->routeIs('absensi')">
                     {{ __('Absensi') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('murid.sholat')" :active="request()->routeIs('murid.sholat')">
+                    {{ __('Riwayat Sholat') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('ebook.index')" :active="request()->routeIs('ebook.index')">
                     {{ __('Literasi e-Book') }}

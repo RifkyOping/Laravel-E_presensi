@@ -174,6 +174,34 @@
             </div>
         </div>
 
+        {{-- Profil Guru --}}
+        <div id="profilGuru" class="{{ in_array(old('role', $user->role), ['guru']) ? '' : 'hidden' }}
+                                      bg-white rounded-xl border border-blue-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-blue-100 bg-blue-50/50">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px] font-black">G</span>
+                    Pengaturan Guru
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Centang untuk mengaktifkan tugas piket guru ini.</p>
+            </div>
+            <div class="px-6 py-6 space-y-4">
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="is_piket_sholat" value="1"
+                           {{ old('is_piket_sholat', $user->guruProfile?->is_piket_sholat) ? 'checked' : '' }}
+                           class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Sholat</span>
+                    <span class="text-xs text-slate-400">(Dapat menginput absen sholat siswa)</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="is_piket_mengajar" value="1"
+                           {{ old('is_piket_mengajar', $user->guruProfile?->is_piket_mengajar) ? 'checked' : '' }}
+                           class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Mengajar</span>
+                    <span class="text-xs text-slate-400">(Dapat memverifikasi aktivitas mengajar)</span>
+                </label>
+            </div>
+        </div>
+
         <div class="flex justify-end gap-3 pt-2">
             <a href="{{ route('admin.users') }}"
                class="px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm transition">
@@ -189,8 +217,10 @@
 
 <script>
 document.getElementById('roleSelect').addEventListener('change', function () {
-    const panel = document.getElementById('profilSiswa');
-    panel.classList.toggle('hidden', this.value !== 'siswa');
+    const panelSiswa = document.getElementById('profilSiswa');
+    const panelGuru  = document.getElementById('profilGuru');
+    panelSiswa.classList.toggle('hidden', this.value !== 'siswa');
+    panelGuru.classList.toggle('hidden', this.value !== 'guru');
 });
 </script>
 </x-app-layout>

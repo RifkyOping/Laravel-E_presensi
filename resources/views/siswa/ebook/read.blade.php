@@ -531,7 +531,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg> Memproses...`;
 
-                    fetch('{{ route("e-Book.voice-skip", $ebook->id) }}', {
+                    fetch('{{ route("ebook.voice-skip", $ebook->id) }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -572,7 +572,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg> Memverifikasi...`;
 
-                    fetch('{{ route("e-Book.voice-check", $ebook->id) }}', {
+                    fetch('{{ route("ebook.voice-check", $ebook->id) }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

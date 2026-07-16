@@ -126,7 +126,7 @@ Route::middleware('auth')->group(function () {
     // Guru - Catatan Membaca (Digital/Manual)
     Route::get('/guru/literasi/catatan-membaca', [\App\Http\Controllers\Guru\CatatanLiterasiController::class, 'index'])->name('guru.literasi.catatan');
 
-    // Guru - Jadwal Mengajar
+    // Guru - Jadwal Mengajar (read-only, dikelola oleh admin)
     Route::get('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'index'])->name('guru.jadwal.index');
 
     // Guru - Persetujuan Absensi Siswa

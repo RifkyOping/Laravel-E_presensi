@@ -146,7 +146,7 @@
             </div>
             @else
             @php
-                $labelBatalkanGuru = $jenisMasaAktif === 'izin' ? 'Batalkan Izin & Hadir' : 'Batalkan Sakit & Hadir';
+                $labelBatalkanGuru = $jenisMasaAktif === 'cuti' ? 'Batalkan Cuti & Hadir' : 'Batalkan Tugas & Hadir';
             @endphp
             <form method="POST" action="{{ route('guru.absensi.datang') }}" class="mt-auto" id="form-datang">
                 @csrf
@@ -157,11 +157,11 @@
                 <input type="hidden" name="speed"     id="spd-datang">
                 <input type="hidden" name="timestamp" id="ts-datang">
                 <button type="button" id="btn-datang" onclick="confirmDatang('{{ $jenisMasaAktif ?? 'none' }}')"
-                        class="w-full {{ $sedangMasaSakitIzin ? 'bg-orange-600 hover:bg-orange-700' : 'bg-[#1e3a6e] hover:bg-[#162d57]' }} text-white font-bold py-3.5 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2">
+                        class="w-full {{ $sedangMasaCutiTugas ? 'bg-orange-600 hover:bg-orange-700' : 'bg-[#1e3a6e] hover:bg-[#162d57]' }} text-white font-bold py-3.5 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 hidden" id="spin-datang" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    @if($sedangMasaSakitIzin)
+                    @if($sedangMasaCutiTugas)
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         {{ $labelBatalkanGuru }}
                     @else
@@ -209,55 +209,43 @@
         </div>
 
     </div>
-    {{-- Opsi Sakit & Izin --}}
+    {{-- Opsi Cuti & Tugas --}}
     @php
-        $disableSakitIzin = false;
-        $statusSakitIzin  = '';
+        $disableCutiTugas = false;
+        $statusCutiTugas  = '';
         if ($absensiHariIni && $absensiHariIni->status !== 'alpha') {
-            $disableSakitIzin = true;
+            $disableCutiTugas = true;
             if ($absensiHariIni->status === 'hadir') {
-                $statusSakitIzin = 'Anda sudah absen hadir hari ini.';
+                $statusCutiTugas = 'Anda sudah absen hadir hari ini.';
             } elseif ($absensiHariIni->status_pengajuan === 'pending') {
-                $statusSakitIzin = 'Menunggu Konfirmasi Admin';
-            } elseif (in_array($absensiHariIni->status, ['sakit', 'izin'])) {
-                $statusSakitIzin = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
+                $statusCutiTugas = 'Menunggu Konfirmasi Admin';
+            } elseif (in_array($absensiHariIni->status, ['cuti', 'tugas'])) {
+                $statusCutiTugas = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
             }
-        } elseif ($sedangMasaSakitIzin && !$absensiHariIni) {
-            $disableSakitIzin = true;
-            $statusSakitIzin  = 'Sedang dalam masa Izin (multi-hari)';
+        } elseif ($sedangMasaCutiTugas && !$absensiHariIni) {
+            $disableCutiTugas = true;
+            $statusCutiTugas  = 'Sedang dalam masa ' . ucfirst($jenisMasaAktif);
         }
     @endphp
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 relative">
-        @if($disableSakitIzin)
+    <div class="grid grid-cols-1 gap-4 mt-4 relative">
+        @if($disableCutiTugas)
             <div class="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-xl flex items-center justify-center">
                 <span class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-xl flex items-center gap-2">
                     @if($absensiHariIni && $absensiHariIni->status_pengajuan === 'pending')
                         <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     @endif
-                    {{ $statusSakitIzin }}
+                    {{ $statusCutiTugas }}
                 </span>
             </div>
         @endif
-        <button type="button" x-data @click="$dispatch('open-modal-sakit')" class="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between hover:border-slate-300 hover:shadow-md transition">
+        <button type="button" x-data @click="$dispatch('open-modal-pengajuan')" class="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between hover:border-slate-300 hover:shadow-md transition">
             <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
                 <div class="text-left">
-                    <h4 class="font-bold text-slate-800">Absen Sakit</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Lapor tidak enak badan hari ini</p>
-                </div>
-            </div>
-            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
-        <button type="button" x-data @click="$dispatch('open-modal-izin')" class="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between hover:border-slate-300 hover:shadow-md transition">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                </div>
-                <div class="text-left">
-                    <h4 class="font-bold text-slate-800">Pengajuan Izin</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Izin acara keluarga, dll s/d tanggal tertentu</p>
+                    <h4 class="font-bold text-slate-800">Pengajuan Cuti / Tugas</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">Lapor cuti atau tugas dinas luar (DL)</p>
                 </div>
             </div>
             <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -265,8 +253,8 @@
     </div>
 
     @push('modals')
-    {{-- Modal Sakit --}}
-    <div x-data="{ open: false }" @open-modal-sakit.window="open = true" @keydown.escape.window="open = false" class="relative z-[100]">
+    {{-- Modal Pengajuan --}}
+    <div x-data="{ open: false }" @open-modal-pengajuan.window="open = true" @keydown.escape.window="open = false" class="relative z-[100]">
         <!-- Backdrop -->
         <div x-show="open" style="display: none;" 
              x-transition:enter="transition ease-out duration-300"
@@ -288,80 +276,47 @@
                  x-transition:leave-end="opacity-0 scale-95 translate-y-8"
                  class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden pointer-events-auto" @click.stop>
                 <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 class="font-bold text-slate-800">Absen Sakit Hari Ini</h3>
+                    <h3 class="font-bold text-slate-800">Pengajuan Cuti / Tugas</h3>
                     <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
             <form action="{{ route('guru.absensi.datang') }}" method="POST" enctype="multipart/form-data" class="p-6">
                 @csrf
-                <input type="hidden" name="jenis_absen" value="sakit">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Keterangan</label>
-                        <textarea name="keterangan" rows="2" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" placeholder="Sakit apa?" required></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Jenis Pengajuan</label>
+                        <select name="jenis_absen" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" required>
+                            <option value="" disabled selected>Pilih jenis pengajuan...</option>
+                            <option value="cuti">Cuti (Sakit, Melahirkan, dll)</option>
+                            <option value="tugas">Tugas Luar / Dinas (DL)</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">File Surat Keterangan Dokter</label>
-                        <input type="file" name="file_bukti" accept=".jpg,.jpeg,.png,.pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200" required>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Judul Pengajuan</label>
+                        <input type="text" name="judul_pengajuan" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" placeholder="Contoh: Cuti Sakit / Rapat MGMP" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tgl Mulai</label>
+                            <input type="date" name="tanggal_mulai" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" required value="{{ date('Y-m-d') }}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tgl Selesai</label>
+                            <input type="date" name="tanggal_selesai" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Keterangan / Alasan</label>
+                        <textarea name="keterangan" rows="2" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" placeholder="Tuliskan keterangan detail di sini..." required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">File Lampiran (Surat)</label>
+                        <input type="file" name="file_bukti" accept=".jpg,.jpeg,.png,.pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200">
                     </div>
                 </div>
                 <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
-                    <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm">Kirim</button>
-                </div>
-            </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal Izin --}}
-    <div x-data="{ open: false }" @open-modal-izin.window="open = true" @keydown.escape.window="open = false" class="relative z-[100]">
-        <!-- Backdrop -->
-        <div x-show="open" style="display: none;" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="open = false"></div>
-             
-        <!-- Modal Panel -->
-        <div x-show="open" style="display: none;" class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
-            <div x-show="open"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 scale-95 translate-y-8"
-                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                 x-transition:leave-end="opacity-0 scale-95 translate-y-8"
-                 class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden pointer-events-auto" @click.stop>
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 class="font-bold text-slate-800">Pengajuan Izin</h3>
-                    <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            <form action="{{ route('guru.absensi.datang') }}" method="POST" enctype="multipart/form-data" class="p-6">
-                @csrf
-                <input type="hidden" name="jenis_absen" value="izin">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal Selesai Izin</label>
-                        <input type="date" name="tanggal_selesai" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" required min="{{ date('Y-m-d') }}">
-                        <p class="text-[0.65rem] text-slate-400 mt-1">Sistem akan mencatat Anda Izin sejak hari ini hingga tanggal tersebut.</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Alasan/Keterangan</label>
-                        <textarea name="keterangan" rows="2" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm" placeholder="Izin ada keperluan apa?" required></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">File Surat Izin</label>
-                        <input type="file" name="file_bukti" accept=".jpg,.jpeg,.png,.pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200" required>
-                    </div>
-                </div>
-                <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
-                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm">Kirim</button>
+                    <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm">Kirim Pengajuan</button>
                 </div>
             </form>
             </div>
