@@ -17,6 +17,8 @@ class IndikatorLiterasiController extends Controller
         $user = Auth::user();
 
         // Validasi akses
+        $isSelesai = false;
+        
         if ($jenis === 'digital') {
             $buku = EBook::findOrFail($id);
             $progres = ProgresEbook::where('user_id', $user->id)->where('e_book_id', $buku->id)->first();
@@ -27,7 +29,7 @@ class IndikatorLiterasiController extends Controller
             }
             
             if ($progres->selesai) {
-                return redirect()->route('ebook.index')->with('success', 'Anda sudah menyelesaikan buku ini.');
+                $isSelesai = true;
             }
 
             $judulBuku = $buku->judul;
@@ -35,7 +37,7 @@ class IndikatorLiterasiController extends Controller
             $buku = BukuManual::where('user_id', $user->id)->where('id', $id)->firstOrFail();
             
             if ($buku->status_selesai) {
-                return redirect()->route('ebook.manual.index')->with('success', 'Anda sudah menyelesaikan buku ini.');
+                $isSelesai = true;
             }
 
             $judulBuku = $buku->judul;
@@ -56,7 +58,16 @@ class IndikatorLiterasiController extends Controller
             }
         }
 
-        return view('siswa.ebook.indikator', compact('buku', 'jenis', 'judulBuku', 'indikators'));
+        $jawabanSiswa = [];
+        if ($isSelesai) {
+            $jawabanSiswa = \App\Models\JawabanIndikator::where('user_id', $user->id)
+                ->where('jenis_buku', $jenis)
+                ->where('buku_id', $buku->id)
+                ->get()
+                ->keyBy('indikator_id');
+        }
+
+        return view('siswa.ebook.indikator', compact('buku', 'jenis', 'judulBuku', 'indikators', 'isSelesai', 'jawabanSiswa'));
     }
 
     public function store(Request $request, $jenis, $id)

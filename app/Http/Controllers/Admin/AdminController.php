@@ -137,6 +137,7 @@ class AdminController extends Controller
             $user->guruProfile()->create([
                 'is_piket_sholat'   => $request->has('is_piket_sholat'),
                 'is_piket_mengajar' => $request->has('is_piket_mengajar'),
+                'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
             ]);
         }
 
@@ -323,6 +324,7 @@ class AdminController extends Controller
                 [
                     'is_piket_sholat'   => $request->has('is_piket_sholat'),
                     'is_piket_mengajar' => $request->has('is_piket_mengajar'),
+                    'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
                 ]
             );
         }

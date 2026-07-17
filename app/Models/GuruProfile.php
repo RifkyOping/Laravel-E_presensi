@@ -17,12 +17,14 @@ class GuruProfile extends Model
         'rpp_pesan',
         'is_piket_sholat',
         'is_piket_mengajar',
+        'is_guru_bahasa',
     ];
 
     protected $casts = [
         'is_jadwal_set'     => 'boolean',
         'is_piket_sholat'   => 'boolean',
         'is_piket_mengajar' => 'boolean',
+        'is_guru_bahasa'    => 'boolean',
     ];
 
     public function user()

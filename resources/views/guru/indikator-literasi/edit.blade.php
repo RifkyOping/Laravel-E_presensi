@@ -5,7 +5,7 @@
 
     <div class="max-w-2xl space-y-6">
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.indikator.index') }}" class="text-slate-400 hover:text-slate-700 transition">
+            <a href="{{ route('guru.indikator.index') }}" class="text-slate-400 hover:text-slate-700 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
             <h2 class="text-xl font-black text-slate-800">Edit Pertanyaan Indikator Literasi</h2>
@@ -16,7 +16,7 @@
                 <h3 class="font-bold text-slate-800">Detail Pertanyaan</h3>
                 <p class="text-xs text-slate-400 mt-0.5">Ubah kolom di bawah ini jika diperlukan</p>
             </div>
-            <form action="{{ route('admin.indikator.update', $indikator->id) }}" method="POST" class="px-6 py-6 space-y-5">
+            <form action="{{ route('guru.indikator.update', $indikator->id) }}" method="POST" class="px-6 py-6 space-y-5">
                 @csrf
                 @method('PUT')
                 
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
-                    <a href="{{ route('admin.indikator.index') }}"
+                    <a href="{{ route('guru.indikator.index') }}"
                        class="px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm transition">
                         Batal
                     </a>

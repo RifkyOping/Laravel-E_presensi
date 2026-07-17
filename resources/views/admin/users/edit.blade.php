@@ -43,18 +43,25 @@
                         <input type="email" name="email" value="{{ old('email', $user->email) }}"
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Nomor Induk (NISN/NIP) <span class="text-red-500">*</span></label>
+                        <input type="text" name="nomor_induk" value="{{ old('nomor_induk', $user->nomor_induk) }}"
+                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Role <span class="text-red-500">*</span></label>
-                    <select name="role" id="roleSelect"
-                            class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                        <option value="siswa"     {{ old('role',$user->role)==='siswa'     ?'selected':'' }}>Siswa</option>
-                        <option value="guru"      {{ old('role',$user->role)==='guru'      ?'selected':'' }}>Guru</option>
-                        <option value="pengawas"  {{ old('role',$user->role)==='pengawas'  ?'selected':'' }}>Pengawas</option>
-                        <option value="kurikulum" {{ old('role',$user->role)==='kurikulum' ?'selected':'' }}>Kurikulum</option>
-                        <option value="admin"     {{ old('role',$user->role)==='admin'     ?'selected':'' }}>Admin</option>
-                    </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Role <span class="text-red-500">*</span></label>
+                        <select name="role" id="roleSelect"
+                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                            <option value="murid"     {{ old('role',$user->role)==='murid'     ?'selected':'' }}>Murid</option>
+                            <option value="guru"      {{ old('role',$user->role)==='guru'      ?'selected':'' }}>Guru</option>
+                            <option value="pengawas"  {{ old('role',$user->role)==='pengawas'  ?'selected':'' }}>Pengawas</option>
+                            <option value="kurikulum" {{ old('role',$user->role)==='kurikulum' ?'selected':'' }}>Kurikulum</option>
+                            <option value="admin"     {{ old('role',$user->role)==='admin'     ?'selected':'' }}>Admin</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -84,8 +91,8 @@
             </div>
         </div>
 
-        {{-- Profil Siswa --}}
-        <div id="profilSiswa" class="{{ old('role', $user->role) === 'siswa' ? '' : 'hidden' }}
+        {{-- Profil Murid (hanya muncul jika role=murid) --}}
+        <div id="profilSiswa" class="{{ old('role', $user->role) === 'murid' ? '' : 'hidden' }}
                                       bg-white rounded-xl border border-emerald-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-emerald-100 bg-emerald-50/50">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -192,12 +199,17 @@
                     <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Sholat</span>
                     <span class="text-xs text-slate-400">(Dapat menginput absen sholat siswa)</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer group">
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
                     <input type="checkbox" name="is_piket_mengajar" value="1"
                            {{ old('is_piket_mengajar', $user->guruProfile?->is_piket_mengajar) ? 'checked' : '' }}
-                           class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
                     <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Mengajar</span>
-                    <span class="text-xs text-slate-400">(Dapat memverifikasi aktivitas mengajar)</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_guru_bahasa" value="1"
+                           {{ old('is_guru_bahasa', $user->guruProfile?->is_guru_bahasa) ? 'checked' : '' }}
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Guru B. Indonesia (Literasi)</span>
                 </label>
             </div>
         </div>
@@ -218,9 +230,10 @@
 <script>
 document.getElementById('roleSelect').addEventListener('change', function () {
     const panelSiswa = document.getElementById('profilSiswa');
-    const panelGuru  = document.getElementById('profilGuru');
-    panelSiswa.classList.toggle('hidden', this.value !== 'siswa');
-    panelGuru.classList.toggle('hidden', this.value !== 'guru');
+    const panelGuru = document.getElementById('profilGuru');
+
+    if(panelSiswa) panelSiswa.classList.toggle('hidden', this.value !== 'murid');
+    if(panelGuru) panelGuru.classList.toggle('hidden', this.value !== 'guru');
 });
 </script>
 </x-app-layout>

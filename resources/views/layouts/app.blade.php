@@ -533,13 +533,6 @@
                     </svg>
                     Jadwal Mengajar
                 </a>
-                <a href="{{ route('admin.indikator.index') }}"
-                    class="app-nav {{ request()->routeIs('admin.indikator*') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                    Indikator Literasi
-                </a>
                 <span class="app-section">Monitoring</span>
                 <a href="{{ route('admin.absensi-guru') }}"
                     class="app-nav {{ request()->routeIs('admin.absensi-guru') ? 'active' : '' }}">
@@ -636,6 +629,22 @@
                     </svg>
                     Literasi e-Book
                 </a>
+                @if(Auth::user()->is_guru_bahasa)
+                <a href="{{ route('guru.literasi.jawaban-indikator') }}"
+                    class="app-nav {{ request()->routeIs('guru.literasi.jawaban-indikator') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    Review Jawaban E-Book
+                </a>
+                <a href="{{ route('guru.indikator.index') }}"
+                    class="app-nav {{ request()->routeIs('guru.indikator*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    Manajemen Indikator
+                </a>
+                @endif
                 <a href="{{ route('guru.persetujuan-absensi') }}"
                     class="app-nav {{ request()->routeIs('guru.persetujuan-absensi') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

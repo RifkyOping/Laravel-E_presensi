@@ -40,19 +40,26 @@
                         <input type="email" name="email" value="{{ old('email') }}" placeholder="email@contoh.com"
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Nomor Induk (NISN/NIP) <span class="text-red-500">*</span></label>
+                        <input type="text" name="nomor_induk" value="{{ old('nomor_induk') }}" placeholder="NISN atau NIP"
+                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Role <span class="text-red-500">*</span></label>
-                    <select name="role" id="roleSelect"
-                            class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                        <option value="">-- Pilih Role --</option>
-                        <option value="siswa"    {{ old('role')==='siswa'    ?'selected':'' }}>Siswa</option>
-                        <option value="guru"     {{ old('role')==='guru'     ?'selected':'' }}>Guru</option>
-                        <option value="pengawas" {{ old('role')==='pengawas' ?'selected':'' }}>Pengawas</option>
-                        <option value="kurikulum" {{ old('role')==='kurikulum' ?'selected':'' }}>Kurikulum</option>
-                        <option value="admin"    {{ old('role')==='admin'    ?'selected':'' }}>Admin</option>
-                    </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Role <span class="text-red-500">*</span></label>
+                        <select name="role" id="roleSelect"
+                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                            <option value="">-- Pilih Role --</option>
+                            <option value="murid"    {{ old('role')==='murid'    ?'selected':'' }}>Murid</option>
+                            <option value="guru"     {{ old('role')==='guru'     ?'selected':'' }}>Guru</option>
+                            <option value="pengawas" {{ old('role')==='pengawas' ?'selected':'' }}>Pengawas</option>
+                            <option value="kurikulum" {{ old('role')==='kurikulum' ?'selected':'' }}>Kurikulum</option>
+                            <option value="admin"    {{ old('role')==='admin'    ?'selected':'' }}>Admin</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -82,8 +89,8 @@
             </div>
         </div>
 
-        {{-- Profil Siswa (hanya muncul jika role=siswa) --}}
-        <div id="profilSiswa" class="{{ old('role') === 'siswa' ? '' : 'hidden' }}
+        {{-- Profil Murid (hanya muncul jika role=murid) --}}
+        <div id="profilSiswa" class="{{ old('role') === 'murid' ? '' : 'hidden' }}
                                       bg-white rounded-xl border border-emerald-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-emerald-100 bg-emerald-50/50">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -188,7 +195,7 @@
 <script>
 document.getElementById('roleSelect').addEventListener('change', function () {
     const panel = document.getElementById('profilSiswa');
-    panel.classList.toggle('hidden', this.value !== 'siswa');
+    panel.classList.toggle('hidden', this.value !== 'murid');
 });
 </script>
 </x-app-layout>

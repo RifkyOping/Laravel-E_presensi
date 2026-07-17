@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\IndikatorLiterasi;
@@ -8,15 +8,22 @@ use Illuminate\Http\Request;
 
 class IndikatorLiterasiController extends Controller
 {
+    public function __construct()
+    {
+        if (!auth()->check() || !auth()->user()->is_guru_bahasa) {
+            abort(403, 'Akses ditolak.');
+        }
+    }
+
     public function index()
     {
         $indikators = IndikatorLiterasi::all();
-        return view('admin.indikator-literasi.index', compact('indikators'));
+        return view('guru.indikator-literasi.index', compact('indikators'));
     }
 
     public function create()
     {
-        return view('admin.indikator-literasi.create');
+        return view('guru.indikator-literasi.create');
     }
 
     public function store(Request $request)
@@ -31,12 +38,12 @@ class IndikatorLiterasiController extends Controller
             'aktif' => $request->has('aktif') ? true : false,
         ]);
 
-        return redirect()->route('admin.indikator.index')->with('success', 'Pertanyaan Indikator berhasil ditambahkan.');
+        return redirect()->route('guru.indikator.index')->with('success', 'Pertanyaan Indikator berhasil ditambahkan.');
     }
 
     public function edit(IndikatorLiterasi $indikator)
     {
-        return view('admin.indikator-literasi.edit', compact('indikator'));
+        return view('guru.indikator-literasi.edit', compact('indikator'));
     }
 
     public function update(Request $request, IndikatorLiterasi $indikator)
@@ -51,12 +58,12 @@ class IndikatorLiterasiController extends Controller
             'aktif' => $request->has('aktif') ? true : false,
         ]);
 
-        return redirect()->route('admin.indikator.index')->with('success', 'Pertanyaan Indikator berhasil diperbarui.');
+        return redirect()->route('guru.indikator.index')->with('success', 'Pertanyaan Indikator berhasil diperbarui.');
     }
 
     public function destroy(IndikatorLiterasi $indikator)
     {
         $indikator->delete();
-        return redirect()->route('admin.indikator.index')->with('success', 'Pertanyaan Indikator berhasil dihapus.');
+        return redirect()->route('guru.indikator.index')->with('success', 'Pertanyaan Indikator berhasil dihapus.');
     }
 }

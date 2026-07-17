@@ -125,7 +125,10 @@
                                 <div class="w-8 h-8 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-black text-xs flex-shrink-0">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
-                                <span class="font-semibold text-slate-800 text-sm">{{ $user->name }}</span>
+                                <div>
+                                    <span class="font-semibold text-slate-800 text-sm block">{{ $user->name }}</span>
+                                    <span class="text-xs text-slate-400 font-medium">No. Induk: {{ $user->nomor_induk ?? '-' }}</span>
+                                </div>
                             </div>
                         </td>
                         <td class="py-3.5 px-5 text-sm text-slate-500">{{ $user->email }}</td>

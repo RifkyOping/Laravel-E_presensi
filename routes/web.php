@@ -6,11 +6,12 @@ use App\Http\Controllers\AbsensiGuruController;
 use App\Http\Controllers\AbsensiMengajarController;
 use App\Http\Controllers\EBookController;
 use App\Http\Controllers\LiterasiQuranController;
+use App\Http\Controllers\Guru\IndikatorLiterasiController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminEBookController;
 use App\Http\Controllers\Admin\MataPelajaranController;
 use App\Http\Controllers\Admin\AdminJadwalMengajarController;
-use App\Http\Controllers\Admin\IndikatorLiterasiController;
+use App\Http\Controllers\Admin\IndikatorLiterasiController as AdminIndikatorController;
 use App\Http\Controllers\Pengawas\PengawasController;
 use App\Http\Controllers\Kurikulum\KurikulumController;
 use App\Http\Controllers\Piket\PiketSholatController;
@@ -127,6 +128,13 @@ Route::middleware('auth')->group(function () {
     // Guru - Catatan Membaca (Digital/Manual)
     Route::get('/guru/literasi/catatan-membaca', [\App\Http\Controllers\Guru\CatatanLiterasiController::class, 'index'])->name('guru.literasi.catatan');
 
+    // Guru - Review Jawaban Indikator E-Book
+    Route::get('/guru/literasi/jawaban-indikator', [\App\Http\Controllers\Guru\ReviewIndikatorController::class, 'index'])->name('guru.literasi.jawaban-indikator');
+    Route::post('/guru/literasi/jawaban-indikator/nilai', [\App\Http\Controllers\Guru\ReviewIndikatorController::class, 'storeNilai'])->name('guru.literasi.jawaban-indikator.nilai');
+
+    // Guru - Manajemen Pertanyaan Indikator Literasi
+    Route::resource('/guru/literasi/manajemen-indikator', IndikatorLiterasiController::class)->names('guru.indikator');
+
     // Guru - Jadwal Mengajar (read-only, dikelola oleh admin)
     Route::get('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'index'])->name('guru.jadwal.index');
 
@@ -200,9 +208,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/ebook/{ebook}', [AdminEBookController::class, 'update'])->name('ebook.update');
     Route::delete('/ebook/{ebook}', [AdminEBookController::class, 'destroy'])->name('ebook.destroy');
     Route::patch('/ebook/{ebook}/toggle', [AdminEBookController::class, 'toggleAktif'])->name('ebook.toggle');
-
-    // Pertanyaan Indikator Literasi
-    Route::resource('/indikator', IndikatorLiterasiController::class)->names('indikator');
 
     // Manajemen Jadwal Mengajar
     Route::get('/jadwal-mengajar', [AdminJadwalMengajarController::class, 'index'])->name('jadwal-mengajar.index');

@@ -89,6 +89,7 @@ class User extends Authenticatable
     public function getIsJadwalSetAttribute() { return $this->guruProfile?->is_jadwal_set ?? false; }
     public function getIsPiketSholatAttribute() { return $this->guruProfile?->is_piket_sholat ?? false; }
     public function getIsPiketMengajarAttribute() { return $this->guruProfile?->is_piket_mengajar ?? false; }
+    public function getIsGuruBahasaAttribute() { return $this->guruProfile?->is_guru_bahasa ?? false; }
     public function getRppFileAttribute() { return $this->guruProfile?->rpp_file; }
     public function getRppStatusAttribute() { return $this->guruProfile?->rpp_status; }
     public function getRppPesanAttribute() { return $this->guruProfile?->rpp_pesan; }

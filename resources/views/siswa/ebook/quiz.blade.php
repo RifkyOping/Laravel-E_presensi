@@ -29,7 +29,7 @@
             <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
-            Mengalihkan ke halaman e-Book...
+            Mengalihkan ke pertanyaan indikator...
         </div>
     </div>
 </div>
@@ -128,12 +128,12 @@
                 card.style.transform = 'scale(1)';
                 card.style.opacity   = '1';
             }));
-            setTimeout(() => { window.location.href = '{{ route("e-Book.index") }}'; }, 4000);
+            setTimeout(() => { window.location.href = '{{ route("ebook.indikator.show", ["jenis" => "digital", "id" => $ebook->id]) }}'; }, 4000);
         }
 
         // ── Quiz Logic ────────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', function () {
-            fetch('{{ route("e-Book.kuis.get", $ebook->id) }}')
+            fetch('{{ route("ebook.kuis.get", $ebook->id) }}')
                 .then(r => r.json())
                 .then(data => {
                     const container = document.getElementById('quizContainer');
@@ -191,7 +191,7 @@
                           d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg> Memproses...`;
 
-                fetch('{{ route("e-Book.kuis.submit", $ebook->id) }}', {
+                fetch('{{ route("ebook.kuis.submit", $ebook->id) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

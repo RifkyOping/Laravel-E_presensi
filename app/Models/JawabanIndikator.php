@@ -12,6 +12,8 @@ class JawabanIndikator extends Model
         'buku_id',
         'indikator_id',
         'jawaban',
+        'nilai_guru',
+        'catatan_guru',
     ];
 
     public function user()
