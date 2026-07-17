@@ -122,7 +122,7 @@
                         {{-- Tanggal --}}
                         <td class="py-3.5 px-5">
                             <p class="text-sm font-semibold text-slate-700 whitespace-nowrap">
-                                {{ Carbon::parse($item->tanggal)->format('d M Y') }}
+                                {{ Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}
                             </p>
                             <p class="text-xs text-slate-400">
                                 {{ Carbon::parse($item->tanggal)->translatedFormat('l') }}

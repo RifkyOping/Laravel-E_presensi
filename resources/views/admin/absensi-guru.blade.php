@@ -263,7 +263,7 @@
                     <tr class="hover:bg-slate-50/60 transition duration-150">
                         <td class="py-3.5 px-6 text-center">
                             <p class="text-sm font-semibold text-slate-700 whitespace-nowrap">
-                                {{ Carbon::parse($r->tanggal)->format('d M Y') }}
+                                {{ Carbon::parse($r->tanggal)->translatedFormat('d M Y') }}
                             </p>
                             <p class="text-xs text-slate-400">{{ Carbon::parse($r->tanggal)->translatedFormat('l') }}</p>
                         </td>

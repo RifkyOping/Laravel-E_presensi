@@ -389,6 +389,48 @@
                     @endif
                 @endif
 
+                {{-- Catatan Progres Membaca --}}
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100 flex-shrink-0">
+                            <svg class="w-4 h-4 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-slate-700">Catatan Progres Membaca</h3>
+                            <p class="text-[0.65rem] text-slate-400 font-medium">Laporan perkembangan bacaanmu.</p>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        @if(session('success_catatan'))
+                        <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-xs font-medium px-3 py-2 rounded-xl flex items-center gap-2">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            {{ session('success_catatan') }}
+                        </div>
+                        @endif
+                        @error('catatan')
+                        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs font-medium px-3 py-2 rounded-xl">{{ $message }}</div>
+                        @enderror
+
+                        <form action="{{ route('catatan.store') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="jenis_buku" value="digital">
+                            <input type="hidden" name="buku_id" value="{{ $ebook->id }}">
+                            <textarea name="catatan" rows="4" maxlength="2000"
+                                      class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none transition text-sm placeholder-slate-400"
+                                      placeholder="Tuliskan catatan progres membacamu di sini...">{{ $catatan?->catatan }}</textarea>
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 gap-3">
+                                <p class="text-xs text-slate-400">Maks. 2000 karakter.</p>
+                                <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#1e3a6e] hover:bg-[#162d57] transition shadow-sm flex items-center justify-center gap-2">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 {{-- Navigasi --}}
                 <div class="bg-white rounded-2xl border border-slate-200 p-5">
                     <p class="text-xs font-black text-slate-400 uppercase tracking-wide mb-3">Navigasi</p>

@@ -196,7 +196,7 @@
                     <span class="shrink-0 text-xs font-bold text-[#24417c]/70 bg-[#24417c]/10 px-2 py-0.5 rounded-lg">Jam ke-{{ $item->jam_ke }}</span>
                 </div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-semibold">
-                    <span>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</span>
+                    <span>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</span>
                     <span>{{ \Carbon\Carbon::parse($item->jam_mulai)->format('H:i') }}{{ $item->jam_selesai ? ' – '.\Carbon\Carbon::parse($item->jam_selesai)->format('H:i') : '' }}</span>
                 </div>
             </div>
@@ -220,7 +220,7 @@
                 <tbody class="divide-y-2 divide-[#24417c]/10">
                     @forelse ($riwayat as $item)
                     <tr class="hover:bg-[#24417c]/5 transition duration-200">
-                        <td class="py-3.5 px-4 font-bold text-[#24417c] whitespace-nowrap text-sm">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
+                        <td class="py-3.5 px-4 font-bold text-[#24417c] whitespace-nowrap text-sm">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</td>
                         <td class="py-3.5 px-4 font-bold text-[#24417c] text-sm">{{ $item->mata_pelajaran }}</td>
                         <td class="py-3.5 px-4 font-medium text-[#24417c] text-sm">{{ $item->kelas }}</td>
                         <td class="py-3.5 px-4 font-bold text-[#24417c] text-sm">{{ $item->jam_ke }}</td>

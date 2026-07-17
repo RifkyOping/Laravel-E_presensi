@@ -124,7 +124,7 @@
                             &nbsp;·&nbsp; Jam {{ $item->jam_ke }}
                             &nbsp;·&nbsp; {{ Carbon::parse($item->jam_mulai)->format('H:i') }}{{ $item->jam_selesai ? ' – '.Carbon::parse($item->jam_selesai)->format('H:i') : '' }}
                         </p>
-                        <p class="text-[.65rem] text-slate-400 mt-1">{{ Carbon::parse($item->tanggal)->format('d M Y') }}</p>
+                        <p class="text-[.65rem] text-slate-400 mt-1">{{ Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</p>
                     </div>
                     <a href="{{ route('kurikulum.verifikasi', $item->id) }}"
                        class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-semibold text-xs transition">
@@ -178,7 +178,7 @@
                 <tbody>
                     @forelse($aktivitas as $item)
                     <tr>
-                        <td class="font-semibold whitespace-nowrap">{{ Carbon::parse($item->tanggal)->format('d M Y') }}</td>
+                        <td class="font-semibold whitespace-nowrap">{{ Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</td>
                         <td>
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">

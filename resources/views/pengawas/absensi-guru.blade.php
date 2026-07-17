@@ -247,7 +247,7 @@
                 <div class="flex items-center gap-2 flex-wrap">
                     @if(request('tanggal'))
                         <span class="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">
-                            {{ Carbon::parse(request('tanggal'))->format('d M Y') }}
+                            {{ Carbon::parse(request('tanggal'))->translatedFormat('d M Y') }}
                         </span>
                     @endif
                     @if(request('status'))
@@ -269,7 +269,7 @@
                         <p class="font-semibold text-slate-800 text-sm truncate">{{ $r->user->name }}</p>
                     </div>
                     <p class="text-xs text-slate-400">
-                        {{ Carbon::parse($r->tanggal)->format('d M Y') }} ({{ Carbon::parse($r->tanggal)->translatedFormat('l') }})
+                        {{ Carbon::parse($r->tanggal)->translatedFormat('d M Y') }} ({{ Carbon::parse($r->tanggal)->translatedFormat('l') }})
                     </p>
                     <p class="text-xs text-slate-500 mt-0.5">
                         @if($r->waktu_datang)Datang: {{ Carbon::parse($r->waktu_datang)->format('H:i') }}@endif
@@ -303,7 +303,7 @@
                     @forelse($riwayat as $i => $r)
                     <tr>
                         <td class="whitespace-nowrap text-center">
-                            <span class="font-semibold text-slate-700 text-sm">{{ Carbon::parse($r->tanggal)->format('d M Y') }}</span><br>
+                            <span class="font-semibold text-slate-700 text-sm">{{ Carbon::parse($r->tanggal)->translatedFormat('d M Y') }}</span><br>
                             <span class="text-[.7rem] text-slate-400">{{ Carbon::parse($r->tanggal)->translatedFormat('l') }}</span>
                         </td>
                         <td class="text-left">

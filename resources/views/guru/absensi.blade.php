@@ -337,7 +337,7 @@
             <div class="px-4 py-3.5 flex items-center justify-between gap-3">
                 <div class="min-w-0">
                     <p class="font-semibold text-slate-700 text-sm leading-tight">
-                        {{ Carbon::parse($absen->tanggal)->format('d M Y') }}
+                        {{ Carbon::parse($absen->tanggal)->translatedFormat('d M Y') }}
                     </p>
                     <p class="text-xs text-slate-400 mt-0.5">{{ Carbon::parse($absen->tanggal)->translatedFormat('l') }}</p>
                     <p class="text-xs text-slate-500 mt-1">
@@ -382,7 +382,7 @@
                 <tbody class="divide-y divide-slate-50">
                     @forelse($riwayat as $absen)
                     <tr class="hover:bg-slate-50/60 transition duration-150">
-                        <td class="py-3.5 px-5 font-semibold text-slate-700 text-sm">{{ Carbon::parse($absen->tanggal)->format('d M Y') }}</td>
+                        <td class="py-3.5 px-5 font-semibold text-slate-700 text-sm">{{ Carbon::parse($absen->tanggal)->translatedFormat('d M Y') }}</td>
                         <td class="py-3.5 px-5 text-sm text-slate-500">{{ Carbon::parse($absen->tanggal)->translatedFormat('l') }}</td>
                         <td class="py-3.5 px-5 text-sm text-slate-600 text-center">{{ $absen->waktu_datang ? Carbon::parse($absen->waktu_datang)->format('H:i').' WITA' : '—' }}</td>
                         <td class="py-3.5 px-5 text-sm text-slate-600 text-center">{{ $absen->waktu_pulang ? Carbon::parse($absen->waktu_pulang)->format('H:i').' WITA' : '—' }}</td>

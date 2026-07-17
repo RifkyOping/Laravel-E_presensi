@@ -225,7 +225,7 @@
                         {{ \Carbon\Carbon::now()->format('H:i') }} WITA
                     </span>
                     <span class="text-[.67rem] text-slate-400">
-                        {{ \Carbon\Carbon::now()->format('d M Y') }}
+                        {{ \Carbon\Carbon::now()->translatedFormat('d M Y') }}
                     </span>
                 </div>
                 <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-sm shadow">

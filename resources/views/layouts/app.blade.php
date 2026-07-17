@@ -629,6 +629,13 @@
                     </svg>
                     Literasi Al Quran
                 </a>
+                <a href="{{ route('guru.literasi.catatan') }}"
+                    class="app-nav {{ request()->routeIs('guru.literasi.catatan') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
+                    </svg>
+                    Literasi e-Book
+                </a>
                 <a href="{{ route('guru.persetujuan-absensi') }}"
                     class="app-nav {{ request()->routeIs('guru.persetujuan-absensi') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -636,13 +643,6 @@
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Persetujuan Absensi
-                </a>
-                <a href="{{ route('guru.literasi.catatan') }}"
-                    class="app-nav {{ request()->routeIs('guru.literasi.catatan') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
-                    </svg>
-                    Catatan Membaca
                 </a>
 
                 {{-- === SISWA === --}}

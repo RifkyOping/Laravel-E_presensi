@@ -213,7 +213,7 @@
                         <div class="w-7 h-7 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">{{ strtoupper(substr($r->user->name, 0, 1)) }}</div>
                         <p class="font-semibold text-slate-800 text-sm truncate">{{ $r->user->name }}</p>
                     </div>
-                    <p class="text-xs text-slate-400">{{ Carbon::parse($r->tanggal)->format('d M Y') }}</p>
+                    <p class="text-xs text-slate-400">{{ Carbon::parse($r->tanggal)->translatedFormat('d M Y') }}</p>
                     <p class="text-xs text-slate-500 mt-0.5">
                         @if($r->waktu_datang)Datang: {{ Carbon::parse($r->waktu_datang)->format('H:i') }}@endif
                         @if($r->waktu_pulang) &nbsp;·&nbsp; Pulang: {{ Carbon::parse($r->waktu_pulang)->format('H:i') }}@endif
@@ -240,7 +240,7 @@
                 <tbody>
                     @forelse($riwayat as $r)
                     <tr>
-                        <td class="text-center font-semibold whitespace-nowrap">{{ Carbon::parse($r->tanggal)->format('d M Y') }}</td>
+                        <td class="text-center font-semibold whitespace-nowrap">{{ Carbon::parse($r->tanggal)->translatedFormat('d M Y') }}</td>
                         <td class="text-left">
                             <div class="flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">{{ strtoupper(substr($r->user->name, 0, 1)) }}</div>

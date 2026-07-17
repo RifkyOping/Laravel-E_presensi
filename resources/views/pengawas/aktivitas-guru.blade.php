@@ -88,7 +88,7 @@
                             &nbsp;·&nbsp; {{ Carbon::parse($item->jam_mulai)->format('H:i') }}@if($item->jam_selesai)–{{ Carbon::parse($item->jam_selesai)->format('H:i') }}@endif
                         </p>
                     </div>
-                    <span class="shrink-0 text-xs font-semibold text-slate-400">{{ Carbon::parse($item->tanggal)->format('d M Y') }}</span>
+                    <span class="shrink-0 text-xs font-semibold text-slate-400">{{ Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</span>
                 </div>
             </div>
             @empty
@@ -110,7 +110,7 @@
                 <tbody>
                     @forelse($aktivitas as $item)
                     <tr>
-                        <td class="font-semibold whitespace-nowrap text-center">{{ Carbon::parse($item->tanggal)->format('d M Y') }}</td>
+                        <td class="font-semibold whitespace-nowrap text-center">{{ Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</td>
                         <td class="font-semibold text-slate-800 text-center">{{ $item->user->name }}</td>
                         <td class="text-center">{{ $item->mata_pelajaran }}</td>
                         <td class="text-center"><span class="app-badge b-blue">{{ $item->kelas }}</span></td>

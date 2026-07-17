@@ -140,7 +140,7 @@
                                 {{ $user->role }}
                             </span>
                         </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-400">{{ $user->created_at->format('d M Y') }}</td>
+                        <td class="py-3.5 px-5 text-sm text-slate-400">{{ $user->created_at->translatedFormat('d M Y') }}</td>
                         <td class="py-3.5 px-5">
                             <div class="flex items-center justify-center gap-2">
                                 <form method="POST" action="{{ route('admin.users.reset-device', $user->id) }}"
