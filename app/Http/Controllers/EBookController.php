@@ -81,7 +81,18 @@ class EBookController extends Controller
             ->where('buku_id', $ebook->id)
             ->first();
 
-        return view('siswa.ebook.read', compact('ebook', 'progres', 'catatan'));
+        $jawabanSiswa = \App\Models\JawabanIndikator::where('user_id', $user->id)
+            ->where('jenis_buku', 'digital')
+            ->where('buku_id', $ebook->id)
+            ->whereNotNull('nilai_guru')
+            ->get();
+            
+        $rataNilai = null;
+        if ($jawabanSiswa->count() > 0) {
+            $rataNilai = round($jawabanSiswa->avg('nilai_guru'), 1);
+        }
+
+        return view('siswa.ebook.read', compact('ebook', 'progres', 'catatan', 'rataNilai'));
     }
 
     /**

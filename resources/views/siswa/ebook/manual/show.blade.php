@@ -43,6 +43,11 @@
                                     Selesai Dibaca
                                 </span>
                             @endif
+                            @if(isset($rataNilai) && $rataNilai !== null)
+                                <span class="inline-block px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-black uppercase tracking-wider mb-2 border border-purple-200 ml-2">
+                                    Nilai Rata-rata: {{ $rataNilai }}
+                                </span>
+                            @endif
                             <h2 class="text-2xl font-black text-slate-800">{{ $buku->judul }}</h2>
                             <p class="text-lg font-medium text-slate-500 mt-1">oleh {{ $buku->penulis }}</p>
                         </div>
@@ -79,6 +84,16 @@
                                 <a href="{{ route('ebook.indikator.show', ['jenis' => 'manual', 'id' => $buku->id]) }}"
                                    class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-yellow-500 hover:bg-yellow-600 transition-colors shadow-sm shadow-yellow-500/30">
                                     Isi Indikator
+                                </a>
+                            @elseif(isset($rataNilai) && $rataNilai !== null)
+                                <a href="{{ route('ebook.indikator.show', ['jenis' => 'manual', 'id' => $buku->id]) }}"
+                                   class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-purple-500 hover:bg-purple-600 transition-colors shadow-sm shadow-purple-500/30">
+                                    Lihat Penilaian Guru
+                                </a>
+                            @else
+                                <a href="{{ route('ebook.indikator.show', ['jenis' => 'manual', 'id' => $buku->id]) }}"
+                                   class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-500 hover:bg-slate-600 transition-colors shadow-sm shadow-slate-500/30">
+                                    Lihat Jawaban Indikator
                                 </a>
                             @endif
                         </div>

@@ -123,7 +123,18 @@ class BukuManualController extends Controller
             ->where('buku_id', $buku->id)
             ->first();
 
-        return view('siswa.ebook.manual.show', compact('buku', 'catatan'));
+        $jawabanSiswa = \App\Models\JawabanIndikator::where('user_id', $user->id)
+            ->where('jenis_buku', 'manual')
+            ->where('buku_id', $buku->id)
+            ->whereNotNull('nilai_guru')
+            ->get();
+            
+        $rataNilai = null;
+        if ($jawabanSiswa->count() > 0) {
+            $rataNilai = round($jawabanSiswa->avg('nilai_guru'), 1);
+        }
+
+        return view('siswa.ebook.manual.show', compact('buku', 'catatan', 'rataNilai'));
     }
 
     public function edit($id)
