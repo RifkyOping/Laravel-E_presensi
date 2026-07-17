@@ -18,8 +18,7 @@ class MataPelajaranController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('nama', 'like', '%' . $request->search . '%')
-                  ->orWhere('kode', 'like', '%' . $request->search . '%');
+                $q->where('nama', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -55,17 +54,13 @@ class MataPelajaranController extends Controller
     {
         $request->validate([
             'nama'      => 'required|string|max:150',
-            'kode'      => 'required|string|max:20|unique:mata_pelajaran,kode',
             'aktif'     => 'nullable|boolean',
         ], [
             'nama.required'    => 'Nama mata pelajaran wajib diisi.',
-            'kode.required'    => 'Kode mata pelajaran wajib diisi.',
-            'kode.unique'      => 'Kode mata pelajaran sudah digunakan.',
         ]);
 
         MataPelajaran::create([
             'nama'      => $request->nama,
-            'kode'      => strtoupper($request->kode),
             'aktif'     => $request->boolean('aktif', true),
         ]);
 
@@ -90,17 +85,13 @@ class MataPelajaranController extends Controller
     {
         $request->validate([
             'nama'      => 'required|string|max:150',
-            'kode'      => 'required|string|max:20|unique:mata_pelajaran,kode,' . $mataPelajaran->id,
             'aktif'     => 'nullable|boolean',
         ], [
             'nama.required'    => 'Nama mata pelajaran wajib diisi.',
-            'kode.required'    => 'Kode mata pelajaran wajib diisi.',
-            'kode.unique'      => 'Kode mata pelajaran sudah digunakan.',
         ]);
 
         $mataPelajaran->update([
             'nama'      => $request->nama,
-            'kode'      => strtoupper($request->kode),
             'aktif'     => $request->boolean('aktif', true),
         ]);
 

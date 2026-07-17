@@ -13,7 +13,6 @@ class MataPelajaran extends Model
 
     protected $fillable = [
         'nama',
-        'kode',
         'aktif',
     ];
 

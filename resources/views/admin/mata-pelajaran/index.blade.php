@@ -62,7 +62,7 @@
                 </div>
                 <div>
                     <h2 class="text-sm font-black text-slate-700">Filter & Pencarian Mata Pelajaran</h2>
-                    <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk mencari berdasarkan nama, kode, atau status</p>
+                    <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk mencari berdasarkan nama atau status</p>
                 </div>
             </div>
             <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 group-hover:bg-slate-100 transition-colors">
@@ -75,7 +75,7 @@
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
             <form method="GET" action="{{ route('admin.mata-pelajaran.index') }}" class="flex flex-col sm:flex-row gap-3">
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Cari nama, kode, atau jurusan..."
+                       placeholder="Cari nama mata pelajaran..."
                        class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
 
                 <select name="status"
@@ -114,7 +114,6 @@
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">No</th>
-                        <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Kode</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Nama Mata Pelajaran</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Aksi</th>
@@ -124,11 +123,6 @@
                     @forelse($mapel as $i => $mp)
                     <tr class="hover:bg-slate-50/60 transition duration-150">
                         <td class="py-3.5 px-5 text-sm text-slate-400 font-semibold">{{ $mapel->firstItem() + $i }}</td>
-                        <td class="py-3.5 px-5">
-                            <span class="inline-block bg-[#1e3a6e] text-white text-[.68rem] font-black px-2.5 py-1 rounded-lg tracking-widest">
-                                {{ $mp->kode }}
-                            </span>
-                        </td>
                         <td class="py-3.5 px-5">
                             <p class="font-semibold text-slate-800 text-sm">{{ $mp->nama }}</p>
                         </td>
@@ -165,7 +159,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-12 text-center text-slate-400 text-sm">
+                        <td colspan="4" class="py-12 text-center text-slate-400 text-sm">
                             Belum ada mata pelajaran.
                         </td>
                     </tr>

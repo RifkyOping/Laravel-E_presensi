@@ -67,7 +67,7 @@
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100 space-y-4" style="display: none;">
             {{-- Tabs --}}
             <div class="flex flex-wrap gap-2">
-                @foreach(['semua'=>'Semua','siswa'=>'Siswa','guru'=>'Guru','pengawas'=>'Pengawas','admin'=>'Admin'] as $key=>$label)
+                @foreach(['semua'=>'Semua','murid'=>'Murid','guru'=>'Guru','pengawas'=>'Pengawas','admin'=>'Admin'] as $key=>$label)
                 <a href="{{ route('admin.users', ['tab'=>$key,'search'=>request('search')]) }}"
                    class="px-4 py-1.5 rounded-lg font-semibold text-sm border transition duration-200
                           {{ $tab===$key ? 'bg-[#1e3a6e] text-white border-[#1e3a6e]' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-[#1e3a6e] hover:text-[#1e3a6e]' }}">

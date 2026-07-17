@@ -11,7 +11,7 @@
         </a>
         <div>
             <h2 class="text-xl font-black text-slate-800">Edit: {{ $mataPelajaran->nama }}</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Kode: <strong>{{ $mataPelajaran->kode }}</strong> &middot;
+            <p class="text-xs text-slate-400 mt-0.5">
                 <span class="{{ $mataPelajaran->aktif ? 'text-green-600' : 'text-slate-400' }} font-semibold">
                     {{ $mataPelajaran->aktif ? 'Aktif' : 'Nonaktif' }}
                 </span>
@@ -33,15 +33,6 @@
                 @error('nama')<p class="text-red-500 text-xs font-semibold mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <div>
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
-                    Kode <span class="text-red-500">*</span>
-                    <span class="font-normal normal-case text-slate-400 ml-1">(maks. 20 karakter)</span>
-                </label>
-                <input type="text" name="kode" value="{{ old('kode', $mataPelajaran->kode) }}" placeholder="Contoh: MTK" maxlength="20"
-                       class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm uppercase @error('kode') border-red-300 @enderror">
-                @error('kode')<p class="text-red-500 text-xs font-semibold mt-1">{{ $message }}</p>@enderror
-            </div>
 
 
 

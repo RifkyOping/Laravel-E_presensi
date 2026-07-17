@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/literasi/ebook/{ebook}', [EBookController::class, 'read'])->name('ebook.read');
     Route::get('/literasi/ebook/{ebook}/kuis-page', [EBookController::class, 'quizPage'])->name('ebook.quiz.page');
     Route::get('/literasi/ebook/{ebook}/pdf', [EBookController::class, 'streamPdf'])->name('ebook.pdf');
+    Route::post('/literasi/ebook/{ebook}/voice-save', [EBookController::class, 'saveVoiceProgress'])->name('ebook.voice-save');
     Route::post('/literasi/ebook/{ebook}/voice-check', [EBookController::class, 'checkVoice'])->name('ebook.voice-check');
     Route::post('/literasi/ebook/{ebook}/voice-skip', [EBookController::class, 'skipVoiceVerification'])->name('ebook.voice-skip');
     Route::get('/literasi/ebook/{ebook}/kuis', [EBookController::class, 'getKuis'])->name('ebook.kuis.get');

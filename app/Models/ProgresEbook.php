@@ -12,6 +12,7 @@ class ProgresEbook extends Model
         'user_id',
         'e_book_id',
         'selesai',
+        'akumulasi_teks',
         'skor_suara',
         'lulus_suara',
         'lulus_kuis',

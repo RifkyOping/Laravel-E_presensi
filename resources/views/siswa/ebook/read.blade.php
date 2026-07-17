@@ -370,7 +370,8 @@
                                 <textarea id="transkrip" rows="4" readonly
                                     placeholder="Transkripsi suara Anda akan muncul di sini secara otomatis..."
                                     class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700
-                                             focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30 focus:border-[#1e3a6e] resize-none cursor-not-allowed"></textarea>
+                                             focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30 focus:border-[#1e3a6e] resize-none cursor-not-allowed">{{ $progres->akumulasi_teks ?? '' }}</textarea>
+                                <div id="autoSaveIndicator" class="text-xs font-semibold text-slate-400 mt-1 h-4 flex items-center"></div>
                             </div>
 
                             <button id="btnVerify" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#1e3a6e] to-[#2d5299]
@@ -479,6 +480,26 @@
                 recognition.continuous = true;
                 recognition.interimResults = true;
 
+                let autoSaveTimer = null;
+                function autoSaveTranscript(text) {
+                    const indicator = document.getElementById('autoSaveIndicator');
+                    if (indicator) indicator.innerHTML = '<span class="text-amber-500">Menyimpan...</span>';
+                    
+                    fetch('{{ route("ebook.voice-save", $ebook->id) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({ teks_suara: text }),
+                    }).then(() => {
+                        if (indicator) indicator.innerHTML = '<span class="text-green-500">Tersimpan otomatis</span>';
+                        setTimeout(() => { if (indicator) indicator.innerHTML = ''; }, 2000);
+                    }).catch(() => {
+                        if (indicator) indicator.innerHTML = '<span class="text-red-500">Gagal menyimpan</span>';
+                    });
+                }
+
                 recognition.onresult = function (event) {
                     if (!transkripEl) return;
                     let interimTranscript = '';
@@ -487,6 +508,9 @@
                     for (let i = event.resultIndex; i < event.results.length; ++i) {
                         if (event.results[i].isFinal) {
                             finalTranscript += event.results[i][0].transcript + ' ';
+                            // Trigger autosave when a sentence/phrase is final
+                            clearTimeout(autoSaveTimer);
+                            autoSaveTimer = setTimeout(() => autoSaveTranscript(transkripEl.dataset.final), 1000);
                         } else {
                             interimTranscript += event.results[i][0].transcript;
                         }
@@ -508,8 +532,8 @@
             function startRecording() {
                 if (!transkripEl) return;
                 isRecording = true;
-                transkripEl.dataset.final = '';
-                transkripEl.value = '';
+                // Preserve existing text instead of clearing it
+                transkripEl.dataset.final = transkripEl.value.trim() ? transkripEl.value.trim() + ' ' : '';
                 recognition.start();
 
                 btnRecord.disabled = true;
@@ -530,8 +554,13 @@
                     btnStop.disabled = true;
                     waveCanvas.classList.add('hidden');
                     vizText.classList.remove('hidden');
-                    vizText.textContent = 'Rekaman selesai. Periksa transkripsi di bawah.';
-                    document.getElementById('btnRecordText').textContent = 'Rekam Ulang';
+                    vizText.textContent = 'Rekaman dijeda. Klik Lanjutkan Rekam untuk meneruskan.';
+                    document.getElementById('btnRecordText').textContent = 'Lanjutkan Rekam';
+                }
+                
+                // Final autosave when manually stopped
+                if (transkripEl && typeof autoSaveTranscript === 'function') {
+                    autoSaveTranscript(transkripEl.dataset.final || transkripEl.value);
                 }
             }
 

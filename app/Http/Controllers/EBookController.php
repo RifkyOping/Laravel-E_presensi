@@ -109,6 +109,26 @@ class EBookController extends Controller
     }
 
     /**
+     * Simpan teks suara secara bertahap (Auto-save)
+     */
+    public function saveVoiceProgress(Request $request, EBook $ebook)
+    {
+        $request->validate([
+            'teks_suara' => 'required|string',
+        ]);
+
+        $progres = ProgresEbook::where('user_id', Auth::id())
+            ->where('e_book_id', $ebook->id)
+            ->first();
+
+        if ($progres) {
+            $progres->update(['akumulasi_teks' => $request->teks_suara]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Terima suara dari browser, bandingkan dengan konten teks e-book.
      * Kembalikan skor kesamaan (Jaccard / simple word overlap).
      */
@@ -118,7 +138,17 @@ class EBookController extends Controller
             'teks_suara' => 'required|string|min:10',
         ]);
 
+        $progres  = ProgresEbook::where('user_id', Auth::id())
+                      ->where('e_book_id', $ebook->id)
+                      ->first();
+
+        // Update teks terbaru saat verifikasi akhir
+        if ($progres) {
+            $progres->update(['akumulasi_teks' => $request->teks_suara]);
+        }
+
         $referensi = strtolower($ebook->konten_teks ?? '');
+        // Gunakan akumulasi_teks jika request teks_suara kosong? Tidak, request teks_suara membawa seluruh progres terbaru dari frontend.
         $suara     = strtolower($request->teks_suara);
 
         $wordsRef   = array_filter(str_word_count($referensi, 1));
@@ -135,9 +165,6 @@ class EBookController extends Controller
         }
 
         $lulus    = $skor >= 60; // threshold 60%
-        $progres  = ProgresEbook::where('user_id', Auth::id())
-                      ->where('e_book_id', $ebook->id)
-                      ->first();
 
         if ($progres) {
             $updateData = ['skor_suara' => $skor];

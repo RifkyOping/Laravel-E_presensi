@@ -27,16 +27,6 @@
                 @error('nama')<p class="text-red-500 text-xs font-semibold mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <div>
-                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
-                    Kode <span class="text-red-500">*</span>
-                    <span class="font-normal normal-case text-slate-400 ml-1">(maks. 20 karakter, huruf besar)</span>
-                </label>
-                <input type="text" name="kode" value="{{ old('kode') }}" placeholder="Contoh: MTK, IPA, B.ING" maxlength="20"
-                       class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm uppercase @error('kode') border-red-300 @enderror">
-                @error('kode')<p class="text-red-500 text-xs font-semibold mt-1">{{ $message }}</p>@enderror
-            </div>
-
 
 
             <div class="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">

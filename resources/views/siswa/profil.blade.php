@@ -44,12 +44,12 @@
             </div>
 
             {{-- Info --}}
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 text-center sm:text-left">
                 <p class="text-blue-300 text-[.65rem] font-bold uppercase tracking-[.15em] mb-1">Profil Saya</p>
                 <h1 class="text-white text-2xl font-black leading-tight truncate">{{ $siswa->name }}</h1>
                 <p class="text-blue-200/70 text-xs mt-0.5 mb-3">{{ $siswa->email }}</p>
 
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                     @if($siswa->siswaProfile?->kelas)
                     <span class="text-[.7rem] font-bold bg-white/15 hover:bg-white/25 text-white px-3 py-1 rounded-full border border-white/20 transition">
                         Kelas {{ $siswa->siswaProfile->kelas }} {{ $siswa->siswaProfile->jurusan }} {{ $siswa->siswaProfile->rombel }}
