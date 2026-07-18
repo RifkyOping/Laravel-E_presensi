@@ -445,12 +445,12 @@
         {{-- Brand --}}
         <div class="flex items-center gap-3 px-4 py-5 border-b border-slate-100">
             <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo SMKN 1 Majene" class="w-full h-full object-contain"
+                <img src="{{ asset('images/logo.png') }}" alt="Logo UPTD SMKN 1 Majene" class="w-full h-full object-contain"
                     onerror="this.src='https://smkn1majene.sch.id/wp-content/uploads/2019/01/cropped-logo-smk-baru-e1554162985390.png'">
             </div>
             <div class="min-w-0">
                 <p class="font-black text-slate-800 text-sm leading-tight">E-Presensi</p>
-                <p class="text-slate-400 text-xs font-medium">SMKN 1 Majene</p>
+                <p class="text-slate-400 text-xs font-medium">UPTD SMKN 1 Majene</p>
             </div>
         </div>
 
@@ -667,6 +667,7 @@
                     </svg>
                     Absensi
                 </a>
+                @if(Auth::user()->siswaProfile && strtolower(Auth::user()->siswaProfile->agama) === 'islam')
                 <a href="{{ route('murid.sholat') }}"
                     class="app-nav {{ request()->routeIs('murid.sholat') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -675,6 +676,7 @@
                     </svg>
                     Riwayat Sholat
                 </a>
+                @endif
                 {{-- Literasi e-Book (collapsible sub-menu) --}}
                 @php
                     $isEbookActive = request()->routeIs('ebook.*');
@@ -730,6 +732,16 @@
                     </svg>
                     Literasi Keagamaan
                 </a>
+
+                @if(Auth::user()->siswaProfile && strtolower(Auth::user()->siswaProfile->agama) === 'islam')
+                <a href="{{ route('murid.baca-quran.index') }}"
+                    class="app-nav {{ request()->routeIs('murid.baca-quran.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"></path>
+                    </svg>
+                    Baca Al-Qur'an
+                </a>
+                @endif
 
                 {{-- === PENGAWAS (fallback jika masih pakai x-app-layout) === --}}
             @elseif(Auth::user()->role === 'pengawas')
@@ -915,7 +927,7 @@
         {{-- Footer --}}
         <footer
             class="flex-shrink-0 py-3 px-8 text-center text-[.7rem] text-slate-400 border-t border-slate-200 bg-white">
-            © {{ date('Y') }} E-Presensi SMKN 1 Majene
+            © {{ date('Y') }} E-Presensi UPTD SMKN 1 Majene
         </footer>
     </div>
 

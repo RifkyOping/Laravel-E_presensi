@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $pageTitle ?? 'Panel Pengawas' }} — E-Presensi SMKN 1 Majene</title>
+    <title>{{ $pageTitle ?? 'Panel Pengawas' }} — E-Presensi UPTD SMKN 1 Majene</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -113,11 +113,11 @@
         {{-- Brand --}}
         <div class="flex items-center gap-3 px-4 py-5 border-b border-slate-100">
             <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo SMKN 1 Majene" class="w-full h-full object-contain" onerror="this.src='https://smkn1majene.sch.id/wp-content/uploads/2019/01/cropped-logo-smk-baru-e1554162985390.png'">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo UPTD SMKN 1 Majene" class="w-full h-full object-contain" onerror="this.src='https://smkn1majene.sch.id/wp-content/uploads/2019/01/cropped-logo-smk-baru-e1554162985390.png'">
             </div>
             <div class="min-w-0">
                 <p class="font-black text-slate-800 text-sm leading-tight">E-Presensi</p>
-                <p class="text-slate-400 text-xs font-medium">SMKN 1 Majene</p>
+                <p class="text-slate-400 text-xs font-medium">UPTD SMKN 1 Majene</p>
             </div>
         </div>
 
@@ -241,7 +241,7 @@
 
         {{-- Footer --}}
         <footer class="flex-shrink-0 py-3 px-8 text-center text-[.7rem] text-slate-400 border-t border-slate-200 bg-white">
-            © {{ date('Y') }} E-Presensi SMKN 1 Majene — Panel Pengawas
+            © {{ date('Y') }} E-Presensi UPTD SMKN 1 Majene — Panel Pengawas
         </footer>
     </div>
 

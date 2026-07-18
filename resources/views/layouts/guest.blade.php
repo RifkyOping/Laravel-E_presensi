@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'SMKN 1 MAJENE') }}</title>
+        <title>{{ config('app.name', 'UPTD SMKN 1 Majene') }}</title>
         <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
 
         <!-- Fonts -->
@@ -27,7 +27,7 @@
                 <!-- Content Top -->
                 <div class="relative z-10 flex items-center gap-3 mb-10">
                     <a href="/" class="transition-transform hover:scale-105 duration-300">
-                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo SMKN 1 Majene" class="h-12 bg-white p-2.5 rounded-lg shadow-xl">
+                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo UPTD SMKN 1 Majene" class="h-12 bg-white p-2.5 rounded-lg shadow-xl">
                     </a>
                 </div>
 
@@ -67,7 +67,7 @@
                 <!-- Mobile Logo -->
                 <div class="lg:hidden mb-10 relative z-10 w-full max-w-md flex justify-center">
                     <a href="/" class="transition-transform hover:scale-105 duration-300">
-                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo SMKN 1 Majene" class="h-12 shadow-sm bg-white p-2 rounded-lg">
+                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo UPTD SMKN 1 Majene" class="h-12 shadow-sm bg-white p-2 rounded-lg">
                     </a>
                 </div>
 

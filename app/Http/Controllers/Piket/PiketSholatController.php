@@ -40,7 +40,8 @@ class PiketSholatController extends Controller
                 ->whereHas('siswaProfile', function ($q) use ($tingkat, $jurusan, $rombel) {
                     $q->where('kelas', $tingkat)
                       ->where('jurusan', $jurusan)
-                      ->where('rombel', $rombel);
+                      ->where('rombel', $rombel)
+                      ->whereRaw('LOWER(agama) = ?', ['islam']);
                 })
                 ->with('siswaProfile')
                 ->orderBy('name')

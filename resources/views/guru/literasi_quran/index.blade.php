@@ -39,7 +39,7 @@
                 <span class="inline-block text-[.65rem] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2"
                       style="background:rgba(255,255,255,.15);color:#bfdbfe;">Program Literasi · Guru</span>
                 <h1 class="text-white text-2xl font-black leading-tight">Literasi Keagamaan</h1>
-                <p class="text-blue-200/70 text-sm mt-1">Pantau dan catat perkembangan literasi keagamaan setiap siswa.</p>
+                <p class="text-blue-200/70 text-sm mt-1">Pantau dan catat perkembangan literasi keagamaan setiap murid.</p>
             </div>
             <div class="text-right opacity-20 select-none">
                 <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@
     </div>
 
     {{-- Filter Kelas & Jurusan --}}
-    <div x-data="{ showFilter: {{ request('kelas') || request('jurusan') || request('rombel') ? 'true' : 'false' }} }" class="bg-white rounded-2xl border border-blue-200 p-6">
+    <div x-data="{ showFilter: {{ request('kelas_id') ? 'true' : 'false' }} }" class="bg-white rounded-2xl border border-blue-200 p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <h2 class="text-sm font-black text-slate-700 flex items-center gap-2">
                 <div class="w-5 h-5 rounded bg-[#1e3a6e]/10 flex items-center justify-center group-hover:bg-[#1e3a6e]/20 transition-colors">
@@ -61,7 +61,7 @@
                               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
                     </svg>
                 </div>
-                Filter Siswa
+                Filter Murid
             </h2>
             <svg class="w-5 h-5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -70,36 +70,16 @@
 
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
             <form method="GET" action="{{ route('guru.literasi.quran') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
+            <div class="sm:col-span-3">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kelas</label>
-                <select name="kelas"
+                <select name="kelas_id"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
                                focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition">
-                    <option value="">-- Pilih Kelas --</option>
-                    @foreach($kelasList->pluck('tingkat')->unique() as $k)
-                        <option value="{{ $k }}" {{ $selectedKelas == $k ? 'selected' : '' }}>{{ $k }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Jurusan</label>
-                <select name="jurusan"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
-                               focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition">
-                    <option value="">-- Pilih Jurusan --</option>
-                    @foreach($jurusanList as $j)
-                        <option value="{{ $j }}" {{ $selectedJurusan == $j ? 'selected' : '' }}>{{ $j }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Rombel</label>
-                <select name="rombel"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
-                               focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition">
-                    <option value="">-- Pilih Rombel --</option>
-                    @foreach($rombelList as $r)
-                        <option value="{{ $r }}" {{ $selectedRombel == $r ? 'selected' : '' }}>{{ $r }}</option>
+                    <option value="">-- Semua Kelas --</option>
+                    @foreach($kelasList as $k)
+                        <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>
+                            {{ $k->tingkat }} {{ $k->jurusan }} {{ $k->rombel }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -110,21 +90,21 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    Tampilkan Siswa
+                    Tampilkan Murid
                 </button>
             </div>
         </form>
         </div>
     </div>
 
-    {{-- Daftar Siswa --}}
-    @if($selectedKelas || $selectedJurusan || $selectedRombel)
+    {{-- Daftar Murid --}}
+    @if($selectedKelasId)
     <div class="space-y-4">
         <div>
             <h2 class="text-lg font-black text-slate-800">
-                Daftar Siswa — Kelas {{ $selectedKelas }} · {{ $selectedJurusan }}
+                Daftar Murid — Kelas {{ $selectedKelasModel->tingkat }} {{ $selectedKelasModel->jurusan }} {{ $selectedKelasModel->rombel }}
             </h2>
-            <p class="text-sm text-slate-400 mt-0.5">{{ $siswaList->count() }} siswa ditemukan</p>
+            <p class="text-sm text-slate-400 mt-0.5">{{ $siswaList->count() }} murid ditemukan</p>
         </div>
 
         @if($siswaList->isEmpty())
@@ -133,8 +113,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                       d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <p class="font-bold text-slate-400">Tidak ada siswa di kelas {{ $selectedKelas }} {{ $selectedJurusan }}</p>
-            <p class="text-sm text-slate-400 mt-1">Pastikan data kelas & jurusan sudah diisi pada profil siswa.</p>
+            <p class="font-bold text-slate-400">Tidak ada murid di kelas {{ $selectedKelasModel->tingkat }} {{ $selectedKelasModel->jurusan }} {{ $selectedKelasModel->rombel }}</p>
+            <p class="text-sm text-slate-400 mt-1">Pastikan data kelas & jurusan sudah diisi pada profil murid.</p>
         </div>
         @else
 
@@ -142,7 +122,7 @@
             @foreach($siswaList as $idx => $siswa)
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
 
-                {{-- Row Siswa --}}
+                {{-- Row Murid --}}
                 <div class="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-slate-50/70 transition-colors select-none"
                      onclick="toggleSiswa({{ $siswa->id }})">
 
@@ -181,14 +161,14 @@
                 <div id="siswa-{{ $siswa->id }}" class="hidden border-t border-slate-100">
                     <div class="p-6 space-y-5">
 
-                        {{-- Kartu Profil Siswa --}}
+                        {{-- Kartu Profil Murid --}}
                         <div class="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl border border-blue-100 p-5">
                             <h4 class="text-xs font-black text-[#1e3a6e] uppercase tracking-wide mb-4 flex items-center gap-2">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                                Profil Siswa
+                                Profil Murid
                             </h4>
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                                 @php
@@ -260,7 +240,7 @@
 
                             @if($siswa->catatanQuran->isEmpty())
                             <div class="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                <p class="text-sm text-slate-400 font-medium">Belum ada catatan untuk siswa ini.</p>
+                                <p class="text-sm text-slate-400 font-medium">Belum ada catatan untuk murid ini.</p>
                             </div>
                             @else
                             <div class="space-y-2.5">
@@ -350,8 +330,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
-        <p class="font-bold text-slate-400 text-lg">Pilih Kelas & Jurusan</p>
-        <p class="text-sm text-slate-400 mt-1">Gunakan dropdown di atas untuk menampilkan daftar siswa.</p>
+        <p class="font-bold text-slate-400 text-lg">Pilih Kelas</p>
+        <p class="text-sm text-slate-400 mt-1">Gunakan dropdown di atas untuk menampilkan daftar murid.</p>
     </div>
     @endif
 

@@ -21,39 +21,34 @@ class LiterasiQuranController extends Controller
             ->orderBy('rombel')
             ->get();
 
-        $jurusanList = $kelasList->pluck('jurusan')->unique()->filter()->values();
-        $rombelList  = $kelasList->pluck('rombel')->unique()->filter()->values();
+        $siswaList = collect();
+        $selectedKelasId = $request->input('kelas_id');
+        $selectedKelasModel = null;
 
-        $siswaList        = collect();
-        $selectedKelas    = $request->input('kelas');
-        $selectedJurusan  = $request->input('jurusan');
-        $selectedRombel   = $request->input('rombel');
-        $selectedKelasId  = null;
+        if ($selectedKelasId) {
+            $selectedKelasModel = \App\Models\Kelas::find($selectedKelasId);
+            
+            if ($selectedKelasModel) {
+                $query = User::where('role', 'murid')
+                    ->whereHas('siswaProfile', function ($q) use ($selectedKelasModel) {
+                        $q->where('kelas', $selectedKelasModel->tingkat)
+                          ->where('jurusan', $selectedKelasModel->jurusan)
+                          ->where('rombel', $selectedKelasModel->rombel);
+                    })
+                    ->orderBy('name')
+                    ->with(['siswaProfile', 'catatanQuran' => function ($q) {
+                        $q->orderByDesc('created_at');
+                    }]);
 
-        if ($selectedKelas || $selectedJurusan || $selectedRombel) {
-            $query = User::where('role', 'murid')
-                ->whereHas('siswaProfile', function ($q) use ($selectedKelas, $selectedJurusan, $selectedRombel) {
-                    if ($selectedKelas)   $q->where('kelas', $selectedKelas);
-                    if ($selectedJurusan) $q->where('jurusan', $selectedJurusan);
-                    if ($selectedRombel)  $q->where('rombel', $selectedRombel);
-                })
-                ->orderBy('name')
-                ->with(['siswaProfile', 'catatanQuran' => function ($q) {
-                    $q->orderByDesc('created_at');
-                }]);
-
-            $siswaList = $query->get();
+                $siswaList = $query->get();
+            }
         }
 
         return view('guru.literasi_quran.index', compact(
             'kelasList',
-            'jurusanList',
-            'rombelList',
             'siswaList',
-            'selectedKelas',
-            'selectedJurusan',
-            'selectedRombel',
-            'selectedKelasId'
+            'selectedKelasId',
+            'selectedKelasModel'
         ));
     }
 

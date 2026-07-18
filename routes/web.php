@@ -82,6 +82,11 @@ Route::middleware('auth')->group(function () {
     // Riwayat Sholat Murid
     Route::get('/murid/sholat', [AbsensiSiswaController::class, 'riwayatSholat'])->name('murid.sholat');
 
+    // Baca Al-Qur'an (Pure Arabic)
+    Route::get('/murid/baca-quran', [\App\Http\Controllers\QuranController::class, 'index'])->name('murid.baca-quran.index');
+    Route::get('/murid/baca-quran/surah/{nomor}', [\App\Http\Controllers\QuranController::class, 'show'])->name('murid.baca-quran.show');
+    Route::get('/murid/baca-quran/juz/{nomor}', [\App\Http\Controllers\QuranController::class, 'juz'])->name('murid.baca-quran.juz');
+
     // E-Book Literasi
     Route::get('/literasi/ebook/pilih', function () {
         return view('siswa.ebook.pilih');
