@@ -185,12 +185,12 @@
                         </div>
                     @endforelse
                 </div>
-           </div>
+            </div>
     
-            {{-- Sesi Me ngajar --}}
-           <div cla ss="bg-white rounded-xl border border-slate-200 overflow-hidden">
-               <div  class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                   <di  v>
+            {{-- Sesi Mengajar --}}
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <div>
                         <h3 class="text-sm font-bold text-slate-800">Sesi Mengajar Hari Ini</h3>
                         <p class="text-xs text-slate-400 mt-0.5">{{ Carbon::today()->translatedFormat('d F Y') }}</p>
                     </div>
@@ -201,12 +201,12 @@
             </div>
     
                                
-              <div cla  ss="divide-y divide-slate-50">
+              <div class="divide-y divide-slate-50">
                   @forelse($aktivitasHariIni as $a)
-                      <div cla  ss="px-6 py-3.5 flex items-center gap-3">
-                          <div   class="w-9 h-9 rounded-lg bg-slate-100 text-[#1e3a6e] flex items-center justify-center font-black text-sm flex-shrink-0 border border-slate-200">
+                      <div class="px-6 py-3.5 flex items-center gap-3">
+                          <div class="w-9 h-9 rounded-lg bg-slate-100 text-[#1e3a6e] flex items-center justify-center font-black text-sm flex-shrink-0 border border-slate-200">
                               {{ $a->jam_ke }}
-                          </di  v>
+                          </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-semibold text-slate-800 truncate">{{ $a->user->name }}</p>
                                 <p class="text-xs text-slate-400 truncate">

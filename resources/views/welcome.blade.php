@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>E-Presensi | SMKN 1 Majene</title>
+    <title>E-Presensi | UPTD SMKN 1 Majene</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     
     <!-- Fonts -->
@@ -34,7 +34,7 @@
     <header class="w-full py-6 px-4 sm:px-6 lg:px-8 border-b-2 border-[#24417c]/10">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="font-black text-2xl tracking-tighter">
-                <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo SMKN 1 Majene" class="h-10 w-auto">
+                <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo UPTD SMKN 1 Majene" class="h-10 w-auto">
             </div>
             
             @if (Route::has('login'))
@@ -64,7 +64,7 @@
             
             <h1 class="animate-fade-in-up delay-100 text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter mb-6 drop-shadow-sm">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#24417c] to-blue-500">E-PRESENSI</span> <br> 
-                <span class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#24417c]/80">SMKN 1 MAJENE</span>
+                <span class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#24417c]/80">UPTD SMKN 1 MAJENE</span>
             </h1>
             
             <p class="animate-fade-in-up delay-200 mt-6 text-lg sm:text-2xl max-w-3xl mx-auto leading-relaxed font-medium mb-10">
@@ -91,7 +91,7 @@
             <!-- Kolom 1: Tentang -->
             <div class="animate-fade-in-up delay-100">
                 <div class="flex items-center gap-3 mb-6">
-                    <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo SMKN 1 Majene" class="h-12 bg-white p-2 rounded-lg shadow-md">
+                    <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo UPTD SMKN 1 Majene" class="h-12 bg-white p-2 rounded-lg shadow-md">
                 </div>
                 <p class="text-white/80 leading-relaxed font-medium">
                     Kreatif, Inovatif, & Profesional.<br>

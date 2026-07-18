@@ -400,6 +400,21 @@
                             <div id="hasilVerifikasi" class="hidden"></div>
                         </div>
                     @endif
+                @elseif($progres->lulus_suara && !$progres->selesai)
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-sm">
+                        <h3 class="text-sm font-black text-slate-700">Tahap Selanjutnya</h3>
+                        @if($ebook->questions()->count() > 0 && !$progres->lulus_kuis)
+                            <p class="text-xs text-slate-500">Anda telah berhasil melewati verifikasi suara. Silakan lanjutkan ke tahap kuis.</p>
+                            <a href="{{ route('ebook.quiz.page', $ebook->id) }}" class="w-full flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold py-3 rounded-xl text-sm transition duration-200">
+                                Mulai Kuis
+                            </a>
+                        @else
+                            <p class="text-xs text-slate-500">Silakan isi pertanyaan indikator literasi untuk menyelesaikan e-book ini.</p>
+                            <a href="{{ route('ebook.indikator.show', ['jenis' => 'digital', 'id' => $ebook->id]) }}" class="w-full flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold py-3 rounded-xl text-sm transition duration-200">
+                                Isi Pertanyaan Indikator
+                            </a>
+                        @endif
+                    </div>
                 @endif
 
                 {{-- Catatan Progres Membaca --}}

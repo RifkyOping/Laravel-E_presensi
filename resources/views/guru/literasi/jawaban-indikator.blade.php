@@ -71,7 +71,7 @@
                             <p class="text-xs text-gray-500 mt-0.5">
                                 {{ $siswa->siswaProfile?->kelas }} {{ $siswa->siswaProfile?->jurusan }} {{ $siswa->siswaProfile?->rombel }}
                             </p>
-                            <p class="text-[0.65rem] text-gray-400 font-medium">NIS: {{ $siswa->siswaProfile?->nis ?? '-' }}</p>
+                            <p class="text-[0.65rem] text-gray-400 font-medium">No. Induk: {{ $siswa->nomor_induk ?? '-' }}</p>
                         </div>
                         @if($isDinilai)
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-[0.65rem] font-black uppercase tracking-wider flex-shrink-0">

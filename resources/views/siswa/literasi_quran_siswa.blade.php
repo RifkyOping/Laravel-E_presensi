@@ -9,7 +9,7 @@
             <span class="text-slate-300">/</span>
             <a href="{{ route('ebook.index') }}" class="text-slate-400 hover:text-emerald-600 text-sm transition-colors">Literasi</a>
             <span class="text-slate-300">/</span>
-            <span class="text-sm font-bold text-slate-800">Literasi Al-Qur'an Saya</span>
+            <span class="text-sm font-bold text-slate-800">Literasi Keagamaan Saya</span>
         </div>
     </x-slot>
 
@@ -21,7 +21,7 @@
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <span class="inline-block text-[.65rem] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2"
-                      style="background:rgba(255,255,255,.15);color:#bfdbfe;">Literasi Al-Qur'an Saya</span>
+                      style="background:rgba(255,255,255,.15);color:#bfdbfe;">Literasi Keagamaan Saya</span>
                 <h1 class="text-white text-2xl font-black leading-tight">{{ $siswa->name }}</h1>
                 <div class="flex flex-wrap gap-2 mt-2">
                     @if($siswa->kelas)
@@ -40,7 +40,11 @@
         </div>
         <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
         <div class="absolute right-20 -bottom-10 w-36 h-36 rounded-full bg-white/5 pointer-events-none"></div>
-        <div class="absolute bottom-3 left-8 text-white/10 text-5xl font-black select-none" style="font-family:serif;">﷽</div>
+        <div class="absolute bottom-3 left-8 text-white/10 select-none">
+            <svg class="w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+        </div>
     </div>
 
     @if($catatan->isEmpty())
@@ -54,7 +58,7 @@
         </div>
         <p class="font-bold text-slate-500 text-lg">Belum ada catatan dari guru</p>
         <p class="text-sm text-slate-400 mt-1 max-w-sm mx-auto">
-            Catatan literasi Al-Qur'an akan muncul di sini setelah guru mencatatnya untuk Anda.
+            Catatan literasi keagamaan akan muncul di sini setelah guru mencatatnya untuk Anda.
         </p>
     </div>
     @else
@@ -113,7 +117,7 @@
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <p class="text-xs text-[#1e3a6e]/80 font-medium leading-relaxed">
-            Catatan di halaman ini dibuat oleh guru pembimbing literasi Al-Qur'an Anda. Untuk pertanyaan mengenai catatan, silakan konsultasikan langsung dengan guru yang bersangkutan.
+            Catatan di halaman ini dibuat oleh guru pembimbing literasi keagamaan Anda. Untuk pertanyaan mengenai catatan, silakan konsultasikan langsung dengan guru yang bersangkutan.
         </p>
     </div>
 

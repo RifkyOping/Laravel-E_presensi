@@ -291,6 +291,7 @@
             });
         });
     </script>
+    <x-npsn-modal />
 </body>
 </html>
 

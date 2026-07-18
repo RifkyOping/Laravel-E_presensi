@@ -7,7 +7,7 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <span class="text-sm font-bold text-slate-800">Literasi Al-Qur'an</span>
+            <span class="text-sm font-bold text-slate-800">Literasi Keagamaan</span>
         </div>
     </x-slot>
 
@@ -38,11 +38,13 @@
             <div>
                 <span class="inline-block text-[.65rem] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2"
                       style="background:rgba(255,255,255,.15);color:#bfdbfe;">Program Literasi · Guru</span>
-                <h1 class="text-white text-2xl font-black leading-tight">Literasi Al-Qur'an</h1>
-                <p class="text-blue-200/70 text-sm mt-1">Pantau dan catat perkembangan literasi Al-Qur'an setiap siswa.</p>
+                <h1 class="text-white text-2xl font-black leading-tight">Literasi Keagamaan</h1>
+                <p class="text-blue-200/70 text-sm mt-1">Pantau dan catat perkembangan literasi keagamaan setiap siswa.</p>
             </div>
             <div class="text-right opacity-20 select-none">
-                <span class="text-white text-5xl font-black" style="font-family:serif;">﷽</span>
+                <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
             </div>
         </div>
         <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
@@ -154,11 +156,8 @@
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-slate-800 text-sm truncate">{{ $siswa->name }}</p>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
-                            @if($siswa->nis)
-                            <span class="text-[.65rem] text-slate-400 font-medium">NIS: {{ $siswa->nis }}</span>
-                            @endif
-                            @if($siswa->nisn)
-                            <span class="text-[.65rem] text-slate-400 font-medium">NISN: {{ $siswa->nisn }}</span>
+                            @if($siswa->nomor_induk)
+                            <span class="text-[.65rem] text-slate-400 font-medium">No. Induk: {{ $siswa->nomor_induk }}</span>
                             @endif
                             @if($siswa->jenis_kelamin)
                             <span class="text-[.65rem] text-slate-400 font-medium">{{ $siswa->jenis_kelamin_lengkap }}</span>
@@ -195,8 +194,7 @@
                                 @php
                                     $profilItems = [
                                         ['label' => 'Nama Lengkap',      'value' => $siswa->name],
-                                        ['label' => 'NIS',               'value' => $siswa->nis ?? '-'],
-                                        ['label' => 'NISN',              'value' => $siswa->nisn ?? '-'],
+                                        ['label' => 'No. Induk',              'value' => $siswa->nomor_induk ?? '-'],
                                         ['label' => 'Kelas - Jurusan',   'value' => ($siswa->kelas && $siswa->jurusan) ? $siswa->kelas . ' ' . $siswa->jurusan . ' ' . $siswa->rombel : ($siswa->kelas ?? '-')],
                                         ['label' => 'Jenis Kelamin',     'value' => $siswa->jenis_kelamin_lengkap],
                                         ['label' => 'Tempat, Tgl Lahir', 'value' => $siswa->tempat_tanggal_lahir],
@@ -231,7 +229,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                                     <div class="sm:col-span-3">
                                         <textarea name="catatan" rows="2" required
-                                                  placeholder="Catatan perkembangan literasi Al-Qur'an..."
+                                                  placeholder="Catatan perkembangan literasi keagamaan..."
                                                   class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700
                                                          focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 resize-none transition"></textarea>
                                     </div>

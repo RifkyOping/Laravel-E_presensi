@@ -13,7 +13,7 @@
                 <h2 class="font-bold text-slate-800 text-lg">Daftar RPP Guru</h2>
                 <p class="text-slate-500 text-sm">Menampilkan guru yang sudah mengunggah RPP</p>
             </div>
-            <form method="GET" action="{{ route('kurikulum.persetujuan-rpp') }}" class="flex items-center gap-3 w-full md:w-auto">
+            <form method="GET" action="{{ route('piket.persetujuan-rpp') }}" class="flex items-center gap-3 w-full md:w-auto">
                 <select name="status" class="w-full md:w-auto rounded-xl border-slate-200 text-sm focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
                     <option value="">Semua Status</option>
                     <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
@@ -81,14 +81,14 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     @if($guru->rpp_status === 'pending')
                                         <div class="flex items-center justify-center gap-2">
-                                            <form id="form-approve-{{ $guru->id }}" method="POST" action="{{ route('kurikulum.persetujuan-rpp.approve', $guru->id) }}" class="hidden">
+                                            <form id="form-approve-{{ $guru->id }}" method="POST" action="{{ route('piket.persetujuan-rpp.approve', $guru->id) }}" class="hidden">
                                                 @csrf
                                             </form>
                                             <button type="button" onclick="confirmApprove('{{ $guru->id }}', '{{ addslashes($guru->name) }}')" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition tooltip" title="Setujui">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                             </button>
 
-                                            <form id="form-reject-{{ $guru->id }}" method="POST" action="{{ route('kurikulum.persetujuan-rpp.reject', $guru->id) }}" class="hidden">
+                                            <form id="form-reject-{{ $guru->id }}" method="POST" action="{{ route('piket.persetujuan-rpp.reject', $guru->id) }}" class="hidden">
                                                 @csrf
                                                 <input type="hidden" name="pesan" id="reject-pesan-{{ $guru->id }}">
                                             </form>

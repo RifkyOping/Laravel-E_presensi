@@ -152,11 +152,8 @@
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-slate-800 text-sm truncate">{{ $siswa->name }}</p>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
-                            @if($siswa->nis)
-                            <span class="text-[.65rem] text-slate-400 font-medium">NIS: {{ $siswa->nis }}</span>
-                            @endif
-                            @if($siswa->nisn)
-                            <span class="text-[.65rem] text-slate-400 font-medium">NISN: {{ $siswa->nisn }}</span>
+                            @if($siswa->nomor_induk)
+                            <span class="text-[.65rem] text-slate-400 font-medium">No. Induk: {{ $siswa->nomor_induk }}</span>
                             @endif
                             @if($siswa->jenis_kelamin)
                             <span class="text-[.65rem] text-slate-400 font-medium">{{ $siswa->jenis_kelamin_lengkap }}</span>
@@ -194,8 +191,7 @@
                                 @php
                                     $profilItems = [
                                         ['label' => 'Nama Lengkap',        'value' => $siswa->name],
-                                        ['label' => 'NIS',                  'value' => $siswa->nis ?? '-'],
-                                        ['label' => 'NISN',                 'value' => $siswa->nisn ?? '-'],
+                                        ['label' => 'No. Induk',                 'value' => $siswa->nomor_induk ?? '-'],
                                         ['label' => 'Kelas',                'value' => ($siswa->kelas && $siswa->jurusan) ? $siswa->kelas . ' ' . $siswa->jurusan . ' ' . $siswa->rombel : ($siswa->kelas ?? '-')],
                                         ['label' => 'Jenis Kelamin',        'value' => $siswa->jenis_kelamin_lengkap],
                                         ['label' => 'Tempat, Tgl Lahir',    'value' => $siswa->tempat_tanggal_lahir],

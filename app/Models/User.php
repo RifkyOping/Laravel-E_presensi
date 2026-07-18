@@ -77,8 +77,6 @@ class User extends Authenticatable
     }
 
     // Accessors for SiswaProfile
-    public function getNisAttribute() { return $this->siswaProfile?->nis; }
-    public function getNisnAttribute() { return $this->siswaProfile?->nisn; }
     public function getKelasAttribute() { return $this->siswaProfile?->kelas; }
     public function getJurusanAttribute() { return $this->siswaProfile?->jurusan; }
     public function getRombelAttribute() { return $this->siswaProfile?->rombel; }
@@ -89,6 +87,7 @@ class User extends Authenticatable
     public function getIsJadwalSetAttribute() { return $this->guruProfile?->is_jadwal_set ?? false; }
     public function getIsPiketSholatAttribute() { return $this->guruProfile?->is_piket_sholat ?? false; }
     public function getIsPiketMengajarAttribute() { return $this->guruProfile?->is_piket_mengajar ?? false; }
+    public function getIsPiketRppAttribute() { return $this->guruProfile?->is_piket_rpp ?? false; }
     public function getIsGuruBahasaAttribute() { return $this->guruProfile?->is_guru_bahasa ?? false; }
     public function getRppFileAttribute() { return $this->guruProfile?->rpp_file; }
     public function getRppStatusAttribute() { return $this->guruProfile?->rpp_status; }

@@ -113,18 +113,15 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 gap-5">
                     <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NIS</label>
-                        <input type="text" name="nis" value="{{ old('nis', $siswa->siswaProfile?->nis) }}" placeholder="Nomor Induk Siswa"
-                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10
-                                      rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NISN</label>
-                        <input type="text" name="nisn" value="{{ old('nisn', $siswa->siswaProfile?->nisn) }}" placeholder="Nomor Induk Siswa Nasional"
-                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10
-                                      rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+                            Nomor Induk / NISN
+                            <span class="text-slate-300 font-normal normal-case ml-1">(admin)</span>
+                        </label>
+                        <div class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
+                            {{ $siswa->nomor_induk ?? '—' }}
+                        </div>
                     </div>
                 </div>
 

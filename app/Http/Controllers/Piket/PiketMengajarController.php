@@ -98,4 +98,48 @@ class PiketMengajarController extends Controller
 
         return back()->with('success', 'Verifikasi berhasil dihapus.');
     }
+
+    // ─────────────────────────────────────────────────
+    //  PERSETUJUAN RPP GURU
+    // ─────────────────────────────────────────────────
+    public function persetujuanRpp(Request $request)
+    {
+        $query = User::where('role', 'guru')
+                     ->whereHas('guruProfile', function ($q) {
+                         $q->whereNotNull('rpp_file');
+                     })
+                     ->with('guruProfile');
+        
+        if ($request->filled('status')) {
+            $query->whereHas('guruProfile', function ($q) use ($request) {
+                $q->where('rpp_status', $request->status);
+            });
+        }
+
+        $gurus = $query->orderBy('name')->paginate(20)->withQueryString();
+
+        return view('piket.persetujuan-rpp', compact('gurus'));
+    }
+
+    public function approveRpp(User $user)
+    {
+        $user->guruProfile()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['rpp_status' => 'disetujui', 'rpp_pesan' => null]
+        );
+        return back()->with('success', 'RPP milik ' . $user->name . ' telah disetujui.');
+    }
+
+    public function rejectRpp(Request $request, User $user)
+    {
+        $request->validate([
+            'pesan' => 'required|string|max:500'
+        ]);
+
+        $user->guruProfile()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['rpp_status' => 'ditolak', 'rpp_pesan' => $request->pesan]
+        );
+        return back()->with('success', 'RPP milik ' . $user->name . ' telah ditolak.');
+    }
 }

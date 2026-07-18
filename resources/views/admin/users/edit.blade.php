@@ -44,13 +44,10 @@
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Nomor Induk (NISN/NIP) <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NISN / NIP <span class="text-red-500">*</span></label>
                         <input type="text" name="nomor_induk" value="{{ old('nomor_induk', $user->nomor_induk) }}"
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Role <span class="text-red-500">*</span></label>
                         <select name="role" id="roleSelect"
@@ -102,17 +99,8 @@
             </div>
             <div class="px-6 py-6 space-y-5">
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NIS</label>
-                        <input type="text" name="nis" value="{{ old('nis', $user->siswaProfile?->nis) }}" placeholder="Contoh: 12345"
-                               class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NISN</label>
-                        <input type="text" name="nisn" value="{{ old('nisn', $user->siswaProfile?->nisn) }}" placeholder="Contoh: 0012345678"
-                               class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                    </div>
+                <div class="grid grid-cols-1 sm:grid-cols-1 gap-5">
+                    <!-- Deleted NISN field -->
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -192,18 +180,26 @@
                 <p class="text-xs text-slate-400 mt-0.5">Centang untuk mengaktifkan tugas piket guru ini.</p>
             </div>
             <div class="px-6 py-6 space-y-4">
-                <label class="flex items-center gap-3 cursor-pointer group">
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
                     <input type="checkbox" name="is_piket_sholat" value="1"
                            {{ old('is_piket_sholat', $user->guruProfile?->is_piket_sholat) ? 'checked' : '' }}
-                           class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
-                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Sholat</span>
-                    <span class="text-xs text-slate-400">(Dapat menginput absen sholat siswa)</span>
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Sholat</span>
+                        <span class="text-xs text-slate-400">(Dapat menginput absen sholat siswa)</span>
+                    </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
                     <input type="checkbox" name="is_piket_mengajar" value="1"
                            {{ old('is_piket_mengajar', $user->guruProfile?->is_piket_mengajar) ? 'checked' : '' }}
                            class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
-                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Mengajar</span>
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Verifikasi Aktivitas Mengajar</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_piket_rpp" value="1"
+                           {{ old('is_piket_rpp', $user->guruProfile?->is_piket_rpp) ? 'checked' : '' }}
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Verifikasi RPP</span>
                 </label>
                 <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
                     <input type="checkbox" name="is_guru_bahasa" value="1"

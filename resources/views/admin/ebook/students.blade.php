@@ -93,7 +93,7 @@
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50">
                         <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Nama Siswa</th>
-                        <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">NIS</th>
+                        <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Nomor Induk</th>
                         <th class="text-center px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Verifikasi Suara</th>
                         <th class="text-right px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -105,7 +105,7 @@
                             <p class="font-bold text-slate-800">{{ $siswa->name }}</p>
                         </td>
                         <td class="px-5 py-4">
-                            <p class="text-slate-600 font-medium">{{ $siswa->nis ?? '-' }}</p>
+                            <p class="text-slate-600 font-medium">{{ $siswa->nomor_induk ?? '-' }}</p>
                         </td>
                         <td class="px-5 py-4 text-center">
                             @if($siswa->skip_voice_verification)

@@ -127,7 +127,13 @@
                                 </div>
                                 <div>
                                     <span class="font-semibold text-slate-800 text-sm block">{{ $user->name }}</span>
-                                    <span class="text-xs text-slate-400 font-medium">No. Induk: {{ $user->nomor_induk ?? '-' }}</span>
+                                    @if($user->role === 'murid')
+                                        <span class="text-xs text-slate-400 font-medium">NISN: {{ $user->nomor_induk ?? '-' }}</span>
+                                    @elseif($user->role === 'guru')
+                                        <span class="text-xs text-slate-400 font-medium">NIP: {{ $user->nomor_induk ?? '-' }}</span>
+                                    @else
+                                        <span class="text-xs text-slate-400 font-medium">ID: {{ $user->nomor_induk ?? '-' }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </td>

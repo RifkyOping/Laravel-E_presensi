@@ -17,6 +17,7 @@ class GuruProfile extends Model
         'rpp_pesan',
         'is_piket_sholat',
         'is_piket_mengajar',
+        'is_piket_rpp',
         'is_guru_bahasa',
     ];
 
@@ -24,6 +25,7 @@ class GuruProfile extends Model
         'is_jadwal_set'     => 'boolean',
         'is_piket_sholat'   => 'boolean',
         'is_piket_mengajar' => 'boolean',
+        'is_piket_rpp'      => 'boolean',
         'is_guru_bahasa'    => 'boolean',
     ];
 

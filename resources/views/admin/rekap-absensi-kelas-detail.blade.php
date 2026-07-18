@@ -130,7 +130,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="font-bold text-slate-800 truncate">{{ $item->siswa->name ?? '-' }}</p>
-                    <p class="text-xs text-slate-400 font-medium">NIS: {{ $item->siswa->siswaProfile?->nis ?? '-' }}</p>
+                    <p class="text-xs text-slate-400 font-medium">No. Induk: {{ $item->siswa->nomor_induk ?? '-' }}</p>
                 </div>
                 <div class="flex flex-col items-end gap-1">
                     <span class="inline-flex items-center gap-1.5 {{ $badgeClass }} border font-bold text-xs px-3 py-1.5 rounded-full flex-shrink-0">

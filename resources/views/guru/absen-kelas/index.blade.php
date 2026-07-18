@@ -43,7 +43,7 @@
             $rppFile = auth()->user()->rpp_file;
             $statusData = match($rppStatus) {
                 'kosong' => ['Belum Upload', 'bg-red-50 text-red-700 border-red-200', 'Mulai absen kelas dikunci. Silakan unggah RPP terlebih dahulu.'],
-                'pending' => ['Menunggu Persetujuan', 'bg-amber-50 text-amber-700 border-amber-200', 'RPP Anda sedang menunggu persetujuan Kurikulum. Mulai absen kelas masih dikunci.'],
+                'pending' => ['Menunggu Persetujuan', 'bg-amber-50 text-amber-700 border-amber-200', 'RPP Anda sedang menunggu persetujuan Guru Piket. Anda sudah dapat mulai mengisi absen kelas.'],
                 'disetujui' => ['Disetujui', 'bg-emerald-50 text-emerald-700 border-emerald-200', 'RPP disetujui. Anda dapat mulai mengisi absen kelas.'],
                 'ditolak' => ['Ditolak', 'bg-red-50 text-red-700 border-red-200', 'RPP Anda ditolak. Silakan perbaiki dan unggah ulang.'],
                 default => ['Belum Upload', 'bg-slate-50 text-slate-700 border-slate-200', 'Silakan unggah RPP Anda.'],
@@ -99,7 +99,19 @@
         </div>
 
         {{-- Daftar Jadwal Hari Ini --}}
-        @if($jadwals->isEmpty())
+        {{-- Daftar Jadwal Hari Ini --}}
+        @if(auth()->user()->rpp_status === 'kosong')
+            <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
+                <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-700 text-lg">Jadwal Mengajar Dikunci</h3>
+                <p class="text-slate-400 text-sm mt-2">Silakan unggah file RPP Anda terlebih dahulu untuk melihat jadwal mengajar dan melakukan absensi kelas.</p>
+            </div>
+        @elseif($jadwals->isEmpty())
             <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
                 <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,13 +182,13 @@
                                 </svg>
                                 Lihat Rekap
                             </a>
-                        @elseif(auth()->user()->rpp_status !== 'disetujui')
+                        @elseif(!in_array(auth()->user()->rpp_status, ['pending', 'disetujui']))
                             <button type="button" disabled
                                class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold bg-slate-100 text-slate-400 cursor-not-allowed">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                RPP Belum Disetujui
+                                RPP Ditolak
                             </button>
                         @else
                             <a href="{{ route('guru.absen-kelas.show', $jadwal->id) }}"

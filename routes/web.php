@@ -215,6 +215,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/jadwal-mengajar/import', [AdminJadwalMengajarController::class, 'import'])->name('jadwal-mengajar.import');
     Route::get('/jadwal-mengajar/{user}/edit', [AdminJadwalMengajarController::class, 'edit'])->name('jadwal-mengajar.edit');
     Route::post('/jadwal-mengajar/{user}', [AdminJadwalMengajarController::class, 'update'])->name('jadwal-mengajar.update');
+
 });
 
 // ──────────────────────────────────────────
@@ -237,10 +238,6 @@ Route::middleware(['auth', 'kurikulum'])->prefix('kurikulum')->name('kurikulum.'
     Route::put('/verifikasi/{aktivitas}', [KurikulumController::class, 'storeVerifikasi'])->name('store-verifikasi');
     Route::delete('/verifikasi/{aktivitas}', [KurikulumController::class, 'hapusVerifikasi'])->name('hapus-verifikasi');
 
-    // Persetujuan RPP
-    Route::get('/persetujuan-rpp', [KurikulumController::class, 'persetujuanRpp'])->name('persetujuan-rpp');
-    Route::post('/persetujuan-rpp/{user}/approve', [KurikulumController::class, 'approveRpp'])->name('persetujuan-rpp.approve');
-    Route::post('/persetujuan-rpp/{user}/reject', [KurikulumController::class, 'rejectRpp'])->name('persetujuan-rpp.reject');
 });
 
 // ──────────────────────────────────────────
@@ -256,6 +253,11 @@ Route::middleware(['auth'])->prefix('piket')->name('piket.')->group(function () 
     Route::get('/mengajar/verifikasi/{aktivitas}', [PiketMengajarController::class, 'verifikasi'])->name('mengajar.verifikasi');
     Route::put('/mengajar/verifikasi/{aktivitas}', [PiketMengajarController::class, 'storeVerifikasi'])->name('mengajar.store-verifikasi');
     Route::delete('/mengajar/verifikasi/{aktivitas}', [PiketMengajarController::class, 'hapusVerifikasi'])->name('mengajar.hapus-verifikasi');
+
+    // Piket Persetujuan RPP
+    Route::get('/persetujuan-rpp', [PiketMengajarController::class, 'persetujuanRpp'])->name('persetujuan-rpp');
+    Route::post('/persetujuan-rpp/{user}/approve', [PiketMengajarController::class, 'approveRpp'])->name('persetujuan-rpp.approve');
+    Route::post('/persetujuan-rpp/{user}/reject', [PiketMengajarController::class, 'rejectRpp'])->name('persetujuan-rpp.reject');
 });
 
 // ──────────────────────────────────────────

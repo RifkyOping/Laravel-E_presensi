@@ -41,13 +41,10 @@
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Nomor Induk (NISN/NIP) <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NISN / NIP <span class="text-red-500">*</span></label>
                         <input type="text" name="nomor_induk" value="{{ old('nomor_induk') }}" placeholder="NISN atau NIP"
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Role <span class="text-red-500">*</span></label>
                         <select name="role" id="roleSelect"
@@ -95,25 +92,11 @@
             <div class="px-6 py-4 border-b border-emerald-100 bg-emerald-50/50">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[10px] font-black">S</span>
-                    Profil Siswa
+                    Data Akademik Siswa
                 </h3>
                 <p class="text-xs text-slate-400 mt-0.5">Data lengkap profil siswa.</p>
             </div>
             <div class="px-6 py-6 space-y-5">
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NIS</label>
-                        <input type="text" name="nis" value="{{ old('nis') }}" placeholder="Nomor Induk Siswa"
-                               class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NISN</label>
-                        <input type="text" name="nisn" value="{{ old('nisn') }}" placeholder="Nomor Induk Siswa Nasional"
-                               class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                    </div>
-                </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tingkat</label>
@@ -179,7 +162,45 @@
             </div>
         </div>
 
-        <div class="flex justify-end gap-3 pt-2">
+        {{-- Profil Guru (hanya muncul jika role=guru) --}}
+        <div id="profilGuru" class="{{ old('role') === 'guru' ? '' : 'hidden' }}
+                                      bg-white rounded-xl border border-blue-200 overflow-hidden mt-5">
+            <div class="px-6 py-4 border-b border-blue-100 bg-blue-50/50">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px] font-black">G</span>
+                    Pengaturan Guru
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Centang untuk mengaktifkan tugas khusus guru ini.</p>
+            </div>
+            <div class="px-6 py-6 space-y-4">
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_piket_sholat" value="1"
+                           {{ old('is_piket_sholat') ? 'checked' : '' }}
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Sholat</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_piket_mengajar" value="1"
+                           {{ old('is_piket_mengajar') ? 'checked' : '' }}
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Verifikasi Aktivitas Mengajar</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_piket_rpp" value="1"
+                           {{ old('is_piket_rpp') ? 'checked' : '' }}
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Verifikasi RPP</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_guru_bahasa" value="1"
+                           {{ old('is_guru_bahasa') ? 'checked' : '' }}
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Guru B. Indonesia (Literasi)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4">
             <a href="{{ route('admin.users') }}"
                class="px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm transition">
                 Batal
@@ -194,8 +215,11 @@
 
 <script>
 document.getElementById('roleSelect').addEventListener('change', function () {
-    const panel = document.getElementById('profilSiswa');
-    panel.classList.toggle('hidden', this.value !== 'murid');
+    const panelSiswa = document.getElementById('profilSiswa');
+    const panelGuru = document.getElementById('profilGuru');
+
+    if (panelSiswa) panelSiswa.classList.toggle('hidden', this.value !== 'murid');
+    if (panelGuru) panelGuru.classList.toggle('hidden', this.value !== 'guru');
 });
 </script>
 </x-app-layout>

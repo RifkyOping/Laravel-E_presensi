@@ -17,10 +17,21 @@
                     </svg>
                     Catatan Progres Membaca
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">Pantau perkembangan bacaan buku digital maupun manual siswa.</p>
+                <p class="text-sm text-slate-500 mt-1">Pantau perkembangan bacaan buku digital maupun manual murid.</p>
             </div>
             
             <form method="GET" action="{{ route('guru.literasi.catatan') }}" class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                {{-- Filter Kelas --}}
+                <select name="kelas_id" class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+                    <option value="">Semua Kelas</option>
+                    @foreach($kelasList as $kelas)
+                        <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                            {{ $kelas->tingkat }} {{ $kelas->jurusan }} {{ $kelas->rombel }}
+                        </option>
+                    @endforeach
+                </select>
+
+                {{-- Filter Jenis Buku --}}
                 <select name="jenis" class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     <option value="">Semua Jenis Buku</option>
                     <option value="digital" {{ request('jenis') == 'digital' ? 'selected' : '' }}>Buku Digital</option>

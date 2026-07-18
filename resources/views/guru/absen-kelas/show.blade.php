@@ -120,7 +120,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="font-bold text-slate-800 truncate">{{ $siswa->name }}</p>
-                            <p class="text-xs text-slate-400 font-medium">NIS: {{ $siswa->siswaProfile?->nis ?? '-' }}</p>
+                            <p class="text-xs text-slate-400 font-medium">No. Induk: {{ $siswa->nomor_induk ?? '-' }}</p>
                         </div>
                         @if($absensi)
                             @php
@@ -178,7 +178,7 @@
                                 <div class="min-w-0">
                                     <p class="font-bold text-slate-800 text-sm leading-tight">{{ $siswa->name }}</p>
                                     <p class="text-xs text-slate-400 font-medium">
-                                        NIS: {{ $siswa->siswaProfile?->nis ?? '-' }}
+                                        No. Induk: {{ $siswa->nomor_induk ?? '-' }}
                                     </p>
                                 </div>
                             </div>

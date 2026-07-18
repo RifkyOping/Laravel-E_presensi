@@ -102,8 +102,6 @@ class AdminController extends Controller
         ];
 
         if ($request->role === 'murid') {
-            $rules['nis']            = 'nullable|string|max:20|unique:siswa_profiles,nis';
-            $rules['nisn']           = 'nullable|string|max:20|unique:siswa_profiles,nisn';
             $rules['kelas_id']       = 'nullable|exists:kelas,id';
             $rules['jenis_kelamin']  = 'nullable|in:L,P';
             $rules['tempat_lahir']   = 'nullable|string|max:100';
@@ -112,15 +110,16 @@ class AdminController extends Controller
         }
 
         $request->validate($rules, [
-            'name.required'      => 'Nama wajib diisi.',
-            'email.required'     => 'Email wajib diisi.',
-            'email.unique'       => 'Email sudah terdaftar.',
-            'password.required'  => 'Password wajib diisi.',
-            'password.min'       => 'Password minimal 6 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'role.required'      => 'Role wajib dipilih.',
-            'nis.unique'         => 'NIS sudah terdaftar.',
-            'nisn.unique'        => 'NISN sudah terdaftar.',
+            'name.required'        => 'Nama lengkap wajib diisi.',
+            'nomor_induk.required' => 'Nomor induk (NISN/NIP) wajib diisi.',
+            'nomor_induk.unique'   => 'Nomor induk ini sudah terdaftar.',
+            'email.required'       => 'Email wajib diisi.',
+            'email.unique'         => 'Email sudah terdaftar.',
+            'password.required'    => 'Password wajib diisi.',
+            'password.min'         => 'Password minimal 6 karakter.',
+            'password.confirmed'   => 'Konfirmasi password tidak cocok.',
+            'role.required'        => 'Role wajib dipilih.',
+            'role.in'              => 'Role yang dipilih tidak valid.',
         ]);
 
         $data = [
@@ -137,6 +136,7 @@ class AdminController extends Controller
             $user->guruProfile()->create([
                 'is_piket_sholat'   => $request->has('is_piket_sholat'),
                 'is_piket_mengajar' => $request->has('is_piket_mengajar'),
+                'is_piket_rpp'      => $request->has('is_piket_rpp'),
                 'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
             ]);
         }
@@ -144,8 +144,6 @@ class AdminController extends Controller
         if ($request->role === 'murid') {
             $kelas = $request->kelas_id ? \App\Models\Kelas::find($request->kelas_id) : null;
             $user->siswaProfile()->create([
-                'nis'           => $request->nis ?: null,
-                'nisn'          => $request->nisn ?: null,
                 'kelas'         => $kelas ? $kelas->tingkat : null,
                 'jurusan'       => $kelas ? $kelas->jurusan : null,
                 'rombel'        => $kelas ? $kelas->rombel : null,
@@ -285,8 +283,6 @@ class AdminController extends Controller
 
         if ($request->role === 'murid') {
             $profileId = $user->siswaProfile ? $user->siswaProfile->id : null;
-            $rules['nis']           = 'nullable|string|max:20|unique:siswa_profiles,nis,' . $profileId;
-            $rules['nisn']          = 'nullable|string|max:20|unique:siswa_profiles,nisn,' . $profileId;
             $rules['kelas_id']      = 'nullable|exists:kelas,id';
             $rules['jenis_kelamin'] = 'nullable|in:L,P';
             $rules['tempat_lahir']  = 'nullable|string|max:100';
@@ -295,14 +291,15 @@ class AdminController extends Controller
         }
 
         $request->validate($rules, [
-            'name.required'      => 'Nama wajib diisi.',
-            'email.required'     => 'Email wajib diisi.',
-            'email.unique'       => 'Email sudah digunakan.',
-            'role.required'      => 'Role wajib dipilih.',
-            'password.min'       => 'Password minimal 6 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'nis.unique'         => 'NIS sudah digunakan.',
-            'nisn.unique'        => 'NISN sudah digunakan.',
+            'name.required'        => 'Nama lengkap wajib diisi.',
+            'nomor_induk.required' => 'Nomor induk (NISN/NIP) wajib diisi.',
+            'nomor_induk.unique'   => 'Nomor induk ini sudah digunakan.',
+            'email.required'       => 'Email wajib diisi.',
+            'email.unique'         => 'Email sudah digunakan.',
+            'role.required'        => 'Role wajib dipilih.',
+            'role.in'              => 'Role yang dipilih tidak valid.',
+            'password.min'         => 'Password minimal 6 karakter.',
+            'password.confirmed'   => 'Konfirmasi password tidak cocok.',
         ]);
 
         $data = [
@@ -324,6 +321,7 @@ class AdminController extends Controller
                 [
                     'is_piket_sholat'   => $request->has('is_piket_sholat'),
                     'is_piket_mengajar' => $request->has('is_piket_mengajar'),
+                    'is_piket_rpp'      => $request->has('is_piket_rpp'),
                     'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
                 ]
             );
@@ -334,8 +332,6 @@ class AdminController extends Controller
             $user->siswaProfile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'nis'           => $request->nis ?: null,
-                    'nisn'          => $request->nisn ?: null,
                     'kelas'         => $kelas ? $kelas->tingkat : null,
                     'jurusan'       => $kelas ? $kelas->jurusan : null,
                     'rombel'        => $kelas ? $kelas->rombel : null,

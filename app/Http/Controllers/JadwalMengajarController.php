@@ -20,7 +20,6 @@ class JadwalMengajarController extends Controller
             'Rabu'   => [],
             'Kamis'  => [],
             'Jumat'  => [],
-            'Sabtu'  => [],
         ];
 
         foreach ($jadwalRaw as $j) {
@@ -35,7 +34,7 @@ class JadwalMengajarController extends Controller
         // Validasi struktur dinamis
         $request->validate([
             'jadwal' => 'nullable|array',
-            'jadwal.*.hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+            'jadwal.*.hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat',
             'jadwal.*.mata_pelajaran' => 'required|string',
             'jadwal.*.tingkat' => 'required|string',
             'jadwal.*.jurusan' => 'required|string',

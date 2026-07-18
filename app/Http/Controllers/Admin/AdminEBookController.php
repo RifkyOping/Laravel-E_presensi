@@ -202,10 +202,7 @@ class AdminEBookController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhereHas('siswaProfile', function ($sq) use ($search) {
-                      $sq->where('nis', 'like', "%{$search}%");
-                  });
+                  ->orWhere('nomor_induk', 'like', "%{$search}%");
             });
         }
 

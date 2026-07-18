@@ -60,9 +60,10 @@ class AbsensiKelasController extends Controller
             abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
         }
 
-        // Cek apakah RPP sudah disetujui
-        if (($guru->guruProfile?->rpp_status ?? null) !== 'disetujui') {
-            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena RPP Anda belum disetujui oleh Kurikulum.');
+        // Cek apakah RPP sudah diupload (pending atau disetujui)
+        $rppStatus = $guru->guruProfile?->rpp_status ?? null;
+        if (!in_array($rppStatus, ['pending', 'disetujui'])) {
+            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
         }
 
         // Ambil murid berdasarkan rombel/kelas yang sesuai dengan jadwal
@@ -98,6 +99,12 @@ class AbsensiKelasController extends Controller
         // Pastikan guru ini yang punya jadwal ini
         if ($jadwal->user_id !== $guru->id) {
             abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
+        }
+
+        // Cek apakah RPP sudah diupload (pending atau disetujui)
+        $rppStatus = $guru->guruProfile?->rpp_status ?? null;
+        if (!in_array($rppStatus, ['pending', 'disetujui'])) {
+            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
         }
 
         // Cek jika sudah pernah disubmit hari ini
@@ -161,6 +168,6 @@ class AbsensiKelasController extends Controller
             ]
         );
 
-        return back()->with('success', 'File RPP berhasil diunggah dan sedang menunggu persetujuan dari Kurikulum.');
+        return back()->with('success', 'File RPP berhasil diunggah dan sedang menunggu persetujuan dari Guru Piket.');
     }
 }

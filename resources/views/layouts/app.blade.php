@@ -529,10 +529,12 @@
                 <a href="{{ route('admin.jadwal-mengajar.index') }}"
                     class="app-nav {{ request()->routeIs('admin.jadwal-mengajar*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Jadwal Mengajar
                 </a>
+
                 <span class="app-section">Monitoring</span>
                 <a href="{{ route('admin.absensi-guru') }}"
                     class="app-nav {{ request()->routeIs('admin.absensi-guru') ? 'active' : '' }}">
@@ -598,6 +600,14 @@
                     </svg>
                     Absensi
                 </a>
+                <a href="{{ route('guru.absen-kelas.index') }}"
+                    class="app-nav {{ request()->routeIs('guru.absen-kelas.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Absen Kelas
+                </a>
                 <a href="{{ route('guru.jadwal.index') }}"
                     class="app-nav {{ request()->routeIs('guru.jadwal.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
@@ -616,35 +626,19 @@
                 </a>
                 <a href="{{ route('guru.literasi.quran') }}"
                     class="app-nav {{ request()->routeIs('guru.literasi.quran') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
-                        <path
-                            d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
-                    Literasi Al Quran
+                    Literasi Keagamaan
                 </a>
                 <a href="{{ route('guru.literasi.catatan') }}"
                     class="app-nav {{ request()->routeIs('guru.literasi.catatan') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
                     </svg>
                     Literasi e-Book
                 </a>
-                @if(Auth::user()->is_guru_bahasa)
-                <a href="{{ route('guru.literasi.jawaban-indikator') }}"
-                    class="app-nav {{ request()->routeIs('guru.literasi.jawaban-indikator') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                    Review Jawaban E-Book
-                </a>
-                <a href="{{ route('guru.indikator.index') }}"
-                    class="app-nav {{ request()->routeIs('guru.indikator*') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                    Manajemen Indikator
-                </a>
-                @endif
                 <a href="{{ route('guru.persetujuan-absensi') }}"
                     class="app-nav {{ request()->routeIs('guru.persetujuan-absensi') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -673,9 +667,11 @@
                     </svg>
                     Absensi
                 </a>
-                <a href="{{ route('murid.sholat') }}" class="app-nav {{ request()->routeIs('murid.sholat') ? 'active' : '' }}">
+                <a href="{{ route('murid.sholat') }}"
+                    class="app-nav {{ request()->routeIs('murid.sholat') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Riwayat Sholat
                 </a>
@@ -685,8 +681,7 @@
                 @endphp
                 <div x-data="{ open: {{ $isEbookActive ? 'true' : 'false' }} }">
                     {{-- Parent toggle button --}}
-                    <button @click="open = !open"
-                        class="app-nav w-full text-left {{ $isEbookActive ? 'active' : '' }}"
+                    <button @click="open = !open" class="app-nav w-full text-left {{ $isEbookActive ? 'active' : '' }}"
                         style="justify-content: space-between;">
                         <span class="flex items-center gap-3">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -695,23 +690,20 @@
                             </svg>
                             Literasi e-Book
                         </span>
-                        <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200"
-                            :class="{ 'rotate-90': open }"
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-90': open }"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
 
                     {{-- Sub-menu items --}}
-                    <div x-show="open"
-                        x-transition:enter="transition ease-out duration-150"
+                    <div x-show="open" x-transition:enter="transition ease-out duration-150"
                         x-transition:enter-start="opacity-0 -translate-y-1"
                         x-transition:enter-end="opacity-100 translate-y-0"
                         x-transition:leave="transition ease-in duration-100"
                         x-transition:leave-start="opacity-100 translate-y-0"
                         x-transition:leave-end="opacity-0 -translate-y-1"
-                        class="mt-1 ml-4 pl-3 border-l-2 border-slate-200 space-y-0.5"
-                        style="display: none;">
+                        class="mt-1 ml-4 pl-3 border-l-2 border-slate-200 space-y-0.5" style="display: none;">
                         <a href="{{ route('ebook.index') }}"
                             class="app-nav text-sm {{ request()->routeIs('ebook.index') || (request()->routeIs('ebook.*') && !request()->routeIs('ebook.manual*')) ? 'active' : '' }}">
                             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -733,10 +725,10 @@
 
                 <a href="{{ route('murid.quran') }}"
                     class="app-nav {{ request()->routeIs('murid.quran') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
-                        <path d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                     </svg>
-                    Literasi Al-Qur'an
+                    Literasi Keagamaan
                 </a>
 
                 {{-- === PENGAWAS (fallback jika masih pakai x-app-layout) === --}}
@@ -802,24 +794,56 @@
             @endif
 
             {{-- === PIKET === --}}
-            @if (Auth::user()->is_piket_sholat)
+            @if (Auth::user()->is_piket_sholat || Auth::user()->is_piket_mengajar || Auth::user()->is_guru_bahasa || Auth::user()->is_piket_rpp)
                 <span class="app-section">Piket</span>
-                <a href="{{ route('piket.sholat.index') }}"
-                    class="app-nav {{ request()->routeIs('piket.sholat*') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Piket Sholat
-                </a>
-            @endif
-            @if (Auth::user()->is_piket_mengajar)
-                <a href="{{ route('piket.mengajar.index') }}"
-                    class="app-nav {{ request()->routeIs('piket.mengajar*') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Piket Mengajar
-                </a>
+                @if (Auth::user()->is_piket_sholat)
+                    <a href="{{ route('piket.sholat.index') }}"
+                        class="app-nav {{ request()->routeIs('piket.sholat*') ? 'active' : '' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Absen Sholat
+                    </a>
+                @endif
+                @if (Auth::user()->is_piket_mengajar)
+                    <a href="{{ route('piket.mengajar.index') }}"
+                        class="app-nav {{ request()->routeIs('piket.mengajar*') ? 'active' : '' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Verifikasi Aktivitas
+                    </a>
+                @endif
+                @if (Auth::user()->is_piket_rpp)
+                    <a href="{{ route('piket.persetujuan-rpp') }}"
+                        class="app-nav {{ request()->routeIs('piket.persetujuan-rpp*') ? 'active' : '' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Verifikasi RPP
+                    </a>
+                @endif
+                @if(Auth::user()->is_guru_bahasa)
+                    <a href="{{ route('guru.literasi.jawaban-indikator') }}"
+                        class="app-nav {{ request()->routeIs('guru.literasi.jawaban-indikator') ? 'active' : '' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Review Jawaban E-Book
+                    </a>
+                    <a href="{{ route('guru.indikator.index') }}"
+                        class="app-nav {{ request()->routeIs('guru.indikator*') ? 'active' : '' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Manajemen Indikator
+                    </a>
+                @endif
             @endif
         </nav>
 
@@ -1065,6 +1089,7 @@
             }, { passive: true });
         });
     </script>
+    <x-npsn-modal />
 </body>
 
 </html>

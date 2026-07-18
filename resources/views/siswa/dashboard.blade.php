@@ -91,7 +91,7 @@
                     </svg>
                 </div>
                 <p class="text-sm text-slate-500 leading-relaxed flex-1">
-                    Lihat data identitas diri: NIS, NISN, kelas, jurusan, dan informasi pribadi lainnya.
+                    Lihat data identitas diri: kelas, jurusan, dan informasi pribadi lainnya.
                 </p>
                 <div class="pt-3 border-t border-slate-100">
                     @php $user = Auth::user(); @endphp

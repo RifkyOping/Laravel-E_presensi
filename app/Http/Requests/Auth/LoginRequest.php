@@ -42,15 +42,15 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Cek apakah NISN/NIP terdaftar
+        // Cek apakah Nomor Induk/NIP terdaftar
         $user = \App\Models\User::where('nomor_induk', $this->input('nomor_induk'))->first();
 
         if (!$user) {
-            // NISN/NIP tidak ditemukan sama sekali
+            // Nomor Induk/NIP tidak ditemukan sama sekali
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'nomor_induk' => 'NISN/NIP tidak terdaftar.',
+                'nomor_induk' => 'Nomor Induk/NIP tidak terdaftar.',
             ]);
         }
 

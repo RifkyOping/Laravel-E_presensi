@@ -32,7 +32,7 @@ class ProfileController extends Controller
 
     /**
      * Update the user's profile information.
-     * Siswa → update semua field (nama, email, NIS, NISN, password, dll)
+     * Siswa → update semua field (nama, email, password, dll)
      * Others → standard name + email update
      */
     public function update(Request $request): RedirectResponse
@@ -45,10 +45,6 @@ class ProfileController extends Controller
                 'name'          => 'required|string|max:255',
                 'email'         => ['required', 'string', 'email', 'max:255',
                                     Rule::unique('users', 'email')->ignore($user->id)],
-                'nis'           => ['nullable', 'string', 'max:20',
-                                    Rule::unique('siswa_profiles', 'nis')->ignore($user->siswaProfile?->id)],
-                'nisn'          => ['nullable', 'string', 'max:20',
-                                    Rule::unique('siswa_profiles', 'nisn')->ignore($user->siswaProfile?->id)],
                 'jenis_kelamin' => 'nullable|in:L,P',
                 'tempat_lahir'  => 'nullable|string|max:100',
                 'tanggal_lahir' => 'nullable|date|before:today',
@@ -58,8 +54,6 @@ class ProfileController extends Controller
                 'name.required'        => 'Nama lengkap wajib diisi.',
                 'email.required'       => 'Email wajib diisi.',
                 'email.unique'         => 'Email ini sudah digunakan akun lain.',
-                'nis.unique'           => 'NIS ini sudah digunakan siswa lain.',
-                'nisn.unique'          => 'NISN ini sudah digunakan siswa lain.',
                 'tanggal_lahir.before' => 'Tanggal lahir tidak valid.',
                 'password.min'         => 'Password minimal 6 karakter.',
                 'password.confirmed'   => 'Konfirmasi password tidak cocok.',
@@ -85,8 +79,6 @@ class ProfileController extends Controller
             $user->siswaProfile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'nis'           => $request->nis,
-                    'nisn'          => $request->nisn,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'tempat_lahir'  => $request->tempat_lahir,
                     'tanggal_lahir' => $request->tanggal_lahir,

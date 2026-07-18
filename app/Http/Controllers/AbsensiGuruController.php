@@ -158,12 +158,19 @@ class AbsensiGuruController extends Controller
                 return back()->with('error', "Anda berada di luar area {$setting->nama_sekolah}. Jarak Anda: {$jarakTampil} m (batas: {$setting->radius_meter} m).");
             }
             
+            $kategori = null;
+            $jadwal = \App\Models\JadwalAbsensi::where('hari', \Carbon\Carbon::parse($today)->translatedFormat('l'))->first();
+            if ($jadwal && now()->format('H:i:s') > \Carbon\Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i:s')) {
+                $kategori = 'terlambat';
+            }
+
             $existing = AbsensiGuru::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
             if ($existing) {
                 if (in_array($existing->status, ['cuti', 'tugas'])) {
                     $existing->update([
                         'status' => 'hadir',
                         'waktu_datang' => now()->format('H:i:s'),
+                        'kategori' => $kategori,
                         'keterangan' => null,
                         'file_bukti' => null,
                         'status_pengajuan' => null,
@@ -179,6 +186,7 @@ class AbsensiGuruController extends Controller
                 'tanggal'      => $today,
                 'waktu_datang' => now()->format('H:i:s'),
                 'status'       => 'hadir',
+                'kategori'     => $kategori,
             ]);
 
             return back()->with('success', 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
@@ -277,8 +285,19 @@ class AbsensiGuruController extends Controller
             return back()->with('error', 'Anda sudah melakukan absen pulang hari ini.');
         }
 
+        $jadwal = \App\Models\JadwalAbsensi::where('hari', \Carbon\Carbon::parse($today)->translatedFormat('l'))->first();
+        $kategori = $absensi->kategori;
+        if ($jadwal && now()->format('H:i:s') < \Carbon\Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i:s')) {
+            if ($kategori === 'terlambat') {
+                $kategori = 'terlambat dan pulang cepat';
+            } else {
+                $kategori = 'pulang cepat';
+            }
+        }
+
         $absensi->update([
             'waktu_pulang' => Carbon::now()->format('H:i:s'),
+            'kategori' => $kategori,
         ]);
 
         return back()->with('success', 'Absen pulang berhasil dicatat pada pukul ' . Carbon::now()->format('H:i') . ' WITA.');

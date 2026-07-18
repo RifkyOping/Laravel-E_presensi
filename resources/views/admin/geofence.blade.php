@@ -43,48 +43,77 @@
 
             {{-- Form Jadwal Absensi --}}
             <div class="app-card p-6 anim-up">
-                <h3 class="font-bold text-slate-800 mb-5 flex items-center gap-2">
-                    <span class="w-1.5 h-5 bg-[#1e3a6e] rounded-full inline-block"></span>
-                    Jadwal Absensi
-                </h3>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">
                     <div>
-                        <label class="app-label">Datang Buka <span class="text-red-500">*</span></label>
-                        <input type="time" name="absen_datang_buka" id="input-datang-buka" class="app-input"
-                            value="{{ old('absen_datang_buka', \Carbon\Carbon::parse($setting->absen_datang_buka)->format('H:i')) }}"
-                            required>
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <span class="w-1.5 h-5 bg-[#1e3a6e] rounded-full inline-block"></span>
+                            Jadwal Absensi Harian
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Atur jam buka/tutup absen untuk setiap harinya. Tandai libur untuk akhir pekan.</p>
                     </div>
-                    <div>
-                        <label class="app-label">Datang Tutup <span class="text-red-500">*</span></label>
-                        <input type="time" name="absen_datang_tutup" id="input-datang-tutup" class="app-input"
-                            value="{{ old('absen_datang_tutup', \Carbon\Carbon::parse($setting->absen_datang_tutup)->format('H:i')) }}"
-                            required>
-                    </div>
-                    <div>
-                        <label class="app-label">Pulang Buka <span class="text-red-500">*</span></label>
-                        <input type="time" name="absen_pulang_buka" id="input-pulang-buka" class="app-input"
-                            value="{{ old('absen_pulang_buka', \Carbon\Carbon::parse($setting->absen_pulang_buka)->format('H:i')) }}"
-                            required>
-                    </div>
-                    <div>
-                        <label class="app-label">Pulang Tutup <span class="text-red-500">*</span></label>
-                        <input type="time" name="absen_pulang_tutup" id="input-pulang-tutup" class="app-input"
-                            value="{{ old('absen_pulang_tutup', \Carbon\Carbon::parse($setting->absen_pulang_tutup)->format('H:i')) }}"
-                            required>
-                    </div>
-                    <div>
-                        <label class="app-label">Status Absen <span class="text-red-500">*</span></label>
-                        <select name="status_absen" id="select-status-absen" class="app-input" required>
-                            <option value="auto" {{ old('status_absen', $setting->status_absen) == 'auto' ? 'selected' : '' }}>Otomatis</option>
-                            <option value="buka" {{ old('status_absen', $setting->status_absen) == 'buka' ? 'selected' : '' }}>Selalu Buka</option>
-                            <option value="tutup" {{ old('status_absen', $setting->status_absen) == 'tutup' ? 'selected' : '' }}>Selalu Tutup</option>
+                    <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                        <label class="app-label !mb-0 text-sm font-bold whitespace-nowrap">Sistem Absen</label>
+                        <select name="status_absen" id="select-status-absen" class="app-input w-48 !py-1.5 !text-sm border-slate-300" required>
+                            <option value="auto" {{ old('status_absen', $setting->status_absen) == 'auto' ? 'selected' : '' }}>Otomatis (Ikuti Jadwal)</option>
+                            <option value="buka" {{ old('status_absen', $setting->status_absen) == 'buka' ? 'selected' : '' }}>Paksa Selalu Buka</option>
+                            <option value="tutup" {{ old('status_absen', $setting->status_absen) == 'tutup' ? 'selected' : '' }}>Paksa Selalu Tutup</option>
                         </select>
                     </div>
                 </div>
-                <p class="text-xs text-slate-500 mt-3">
-                    * Jika status <b>Otomatis</b>, absen tidak bisa dilakukan di hari Minggu atau di luar jam
-                    buka-tutup. Absen Datang maupun Pulang akan diblokir.
-                </p>
+
+                <div class="overflow-x-auto custom-scrollbar pb-2">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-black tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 rounded-l-xl">Hari</th>
+                                <th class="px-4 py-3 text-center">Status</th>
+                                <th class="px-2 py-3 text-center" title="Jam Buka Absen Kedatangan">Masuk Buka</th>
+                                <th class="px-2 py-3 text-center text-amber-600" title="Batas waktu agar tidak Terlambat">Batas Datang</th>
+                                <th class="px-2 py-3 text-center text-red-500" title="Jam Tutup Absen Kedatangan">Masuk Tutup</th>
+                                <th class="px-2 py-3 text-center" title="Jam Buka Absen Kepulangan (Batas Cepat)">Pulang Buka</th>
+                                <th class="px-2 py-3 text-center text-amber-600" title="Batas waktu agar dianggap Cepat Pulang (Jika absen sebelum ini dianggap cepat)">Batas Pulang</th>
+                                <th class="px-2 py-3 rounded-r-xl text-center text-red-500" title="Jam Tutup Absen Kepulangan">Pulang Tutup</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($jadwalAbsensi as $jadwal)
+                            <tr class="hover:bg-slate-50/50 transition schedule-row" data-libur="{{ $jadwal->is_libur ? '1' : '0' }}">
+                                <td class="px-4 py-3 font-bold text-slate-700">{{ $jadwal->hari }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="jadwal[{{ $jadwal->hari }}][is_libur]" value="1" class="sr-only peer status-libur-checkbox" {{ $jadwal->is_libur ? 'checked' : '' }}>
+                                        <div class="w-9 h-5 bg-blue-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
+                                        <span class="ml-2 text-xs font-bold peer-checked:text-red-500 text-blue-600 toggle-text w-10 text-left">{{ $jadwal->is_libur ? 'Libur' : 'Masuk' }}</span>
+                                    </label>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_datang_buka]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input" value="{{ \Carbon\Carbon::parse($jadwal->absen_datang_buka)->format('H:i') }}" required>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][batas_waktu_terlambat]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-amber-200 focus:border-amber-500 focus:ring-amber-200 bg-amber-50" value="{{ \Carbon\Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i') }}" required>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_datang_tutup]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-red-200 focus:border-red-500 focus:ring-red-200 bg-red-50" value="{{ \Carbon\Carbon::parse($jadwal->absen_datang_tutup)->format('H:i') }}" required>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_pulang_buka]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input" value="{{ \Carbon\Carbon::parse($jadwal->absen_pulang_buka)->format('H:i') }}" required>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][batas_pulang_cepat]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-amber-200 focus:border-amber-500 focus:ring-amber-200 bg-amber-50" value="{{ \Carbon\Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i') }}" required>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_pulang_tutup]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-red-200 focus:border-red-500 focus:ring-red-200 bg-red-50" value="{{ \Carbon\Carbon::parse($jadwal->absen_pulang_tutup)->format('H:i') }}" required>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <style>
+                    .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+                    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+                </style>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -426,22 +455,48 @@
         function toggleTimeInputs() {
             const status = document.getElementById('select-status-absen').value;
             const isAuto = status === 'auto';
-
-            ['input-datang-buka', 'input-datang-tutup', 'input-pulang-buka', 'input-pulang-tutup'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    // Gunakan readonly agar data tetap disubmit ke backend
-                    el.readOnly = !isAuto;
-                    if (!isAuto) {
-                        el.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
-                    } else {
-                        el.classList.remove('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
-                    }
+            
+            const timeInputs = document.querySelectorAll('.time-input');
+            timeInputs.forEach(el => {
+                // If it's not auto, we disable them visually
+                el.readOnly = !isAuto;
+                if (!isAuto) {
+                    el.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                } else {
+                    el.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
                 }
             });
+            
+            // Handle libur toggles
+            if(isAuto) {
+                document.querySelectorAll('.status-libur-checkbox').forEach(cb => {
+                    const row = cb.closest('tr');
+                    const inputs = row.querySelectorAll('.time-input');
+                    const labelText = cb.parentElement.querySelector('.toggle-text');
+                    
+                    if(cb.checked) {
+                        labelText.textContent = 'Libur';
+                        inputs.forEach(el => {
+                            el.classList.add('opacity-40', 'cursor-not-allowed');
+                            el.readOnly = true;
+                        });
+                    } else {
+                        labelText.textContent = 'Masuk';
+                        inputs.forEach(el => {
+                            el.classList.remove('opacity-40', 'cursor-not-allowed');
+                            el.readOnly = false;
+                        });
+                    }
+                });
+            }
         }
 
         document.getElementById('select-status-absen').addEventListener('change', toggleTimeInputs);
+        
+        document.querySelectorAll('.status-libur-checkbox').forEach(cb => {
+            cb.addEventListener('change', toggleTimeInputs);
+        });
+
         window.addEventListener('load', toggleTimeInputs);
 
     </script>

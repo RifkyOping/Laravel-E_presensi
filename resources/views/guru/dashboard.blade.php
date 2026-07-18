@@ -82,13 +82,13 @@
                 </div>
             </a>
 
-            {{-- Literasi Al-Qur'an --}}
+            {{-- Literasi Keagamaan --}}
             <a href="{{ route('guru.literasi.quran') }}"
                class="group bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-3
                       transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#1e3a6e]/40">
                 <div class="flex items-start justify-between">
                     <h3 class="font-bold text-slate-800 group-hover:text-[#1e3a6e] transition-colors">
-                        Literasi Al-Qur'an
+                        Literasi Keagamaan
                     </h3>
                     <svg class="w-4 h-4 text-slate-300 group-hover:text-[#1e3a6e] transition-colors flex-shrink-0"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@
                     </svg>
                 </div>
                 <p class="text-sm text-slate-500 leading-relaxed flex-1">
-                    Pantau dan catat perkembangan hafalan, tilawah, dan tajwid siswa per kelas.
+                    Pantau dan catat perkembangan literasi keagamaan siswa per kelas.
                 </p>
                 <div class="pt-3 border-t border-slate-100">
                     <span class="text-[.7rem] font-bold text-[#1e3a6e]/70 uppercase tracking-wide">

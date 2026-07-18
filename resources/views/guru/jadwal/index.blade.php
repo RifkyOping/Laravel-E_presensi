@@ -19,7 +19,7 @@
 
             {{-- Tabs --}}
             @php
-                $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
                 $activeHari = request('hari', 'Senin');
             @endphp
 
