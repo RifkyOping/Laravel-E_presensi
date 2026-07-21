@@ -11,10 +11,10 @@
          style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <p class="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-1">Monitoring Absensi Siswa Per Kelas</p>
+                <p class="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-1">Monitoring Absensi Murid Per Kelas</p>
                 <h1 class="text-white text-2xl font-black leading-tight">Rekap Absensi Kelas</h1>
                 <p class="text-blue-300/80 text-sm mt-1">
-                    Data absensi siswa yang diinput oleh guru per sesi mengajar
+                    Data absensi murid yang diinput oleh guru per sesi mengajar
                     @if(request('tanggal')) · {{ Carbon::parse(request('tanggal'))->translatedFormat('d F Y') }} @else · {{ $tanggal->translatedFormat('d F Y') }} @endif
                 </p>
             </div>
@@ -93,7 +93,7 @@
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800">Sesi Kelas yang Sudah Diabsen</h3>
-                <p class="text-xs text-slate-400 mt-0.5">{{ $jadwals->total() }} sesi ditemukan · Klik "Detail" untuk melihat daftar siswa</p>
+                <p class="text-xs text-slate-400 mt-0.5">{{ $jadwals->total() }} sesi ditemukan · Klik "Detail" untuk melihat daftar murid</p>
             </div>
             <span class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600">
                 Hal {{ $jadwals->currentPage() }} / {{ $jadwals->lastPage() }}

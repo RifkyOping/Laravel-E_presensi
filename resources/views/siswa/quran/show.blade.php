@@ -92,6 +92,14 @@ function quranReaderApp(nomor) {
 
         init() {
             this.fetchSurah();
+            
+            // Simpan posisi scroll sebelum halaman dimuat ulang (refresh)
+            window.addEventListener('beforeunload', () => {
+                const mainEl = document.querySelector('main');
+                if (mainEl) {
+                    sessionStorage.setItem(`scroll_quran_surah_${this.nomor}`, mainEl.scrollTop);
+                }
+            });
         },
 
         async fetchSurah() {
@@ -106,6 +114,15 @@ function quranReaderApp(nomor) {
                     this.surah = data.data;
                     document.getElementById('headerSurahName').textContent = this.surah.namaLatin;
                     document.title = `Surah ${this.surah.namaLatin} - Baca Al-Qur'an`;
+                    
+                    // Kembalikan posisi scroll setelah DOM selesai dirender
+                    setTimeout(() => {
+                        const savedScroll = sessionStorage.getItem(`scroll_quran_surah_${this.nomor}`);
+                        const mainEl = document.querySelector('main');
+                        if (savedScroll && mainEl) {
+                            mainEl.scrollTo(0, parseInt(savedScroll, 10));
+                        }
+                    }, 100);
                 } else {
                     throw new Error('API returned error');
                 }

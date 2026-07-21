@@ -113,7 +113,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
                             Nomor Induk / NISN
@@ -121,6 +121,15 @@
                         </label>
                         <div class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
                             {{ $siswa->nomor_induk ?? '—' }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+                            Agama
+                            <span class="text-slate-300 font-normal normal-case ml-1">(admin)</span>
+                        </label>
+                        <div class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
+                            {{ $siswa->siswaProfile?->agama ?? '—' }}
                         </div>
                     </div>
                 </div>
@@ -182,17 +191,7 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Agama</label>
-                    <select name="agama"
-                            class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10
-                                   rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                        <option value="">-- Pilih Agama --</option>
-                        @foreach(['Islam','Kristen','Katolik','Hindu','Buddha','Konghucu'] as $ag)
-                        <option value="{{ $ag }}" {{ old('agama', $siswa->siswaProfile?->agama) === $ag ? 'selected' : '' }}>{{ $ag }}</option>
-                        @endforeach
-                    </select>
-                </div>
+
 
             </div>
         </div>

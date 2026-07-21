@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $pageTitle ?? 'Panel Pengawas' }} — E-Presensi UPTD SMKN 1 Majene</title>
+    <title>{{ $pageTitle ?? 'Panel Pengawas' }} — E-Presensi {{ \App\Models\SchoolSetting::get()->nama_sekolah }}</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -113,11 +113,11 @@
         {{-- Brand --}}
         <div class="flex items-center gap-3 px-4 py-5 border-b border-slate-100">
             <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo UPTD SMKN 1 Majene" class="w-full h-full object-contain" onerror="this.src='https://smkn1majene.sch.id/wp-content/uploads/2019/01/cropped-logo-smk-baru-e1554162985390.png'">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo {{ \App\Models\SchoolSetting::get()->nama_sekolah }}" class="w-full h-full object-contain" onerror="this.src='https://smkn1majene.sch.id/wp-content/uploads/2019/01/cropped-logo-smk-baru-e1554162985390.png'">
             </div>
             <div class="min-w-0">
                 <p class="font-black text-slate-800 text-sm leading-tight">E-Presensi</p>
-                <p class="text-slate-400 text-xs font-medium">UPTD SMKN 1 Majene</p>
+                <p class="text-slate-400 text-xs font-medium">{{ \App\Models\SchoolSetting::get()->nama_sekolah }}</p>
             </div>
         </div>
 
@@ -167,7 +167,7 @@
                 Aktivitas Mengajar
             </a>
 
-            <span class="pw-section">Monitoring Siswa</span>
+            <span class="pw-section">Monitoring Murid</span>
 
             <a href="{{ route('pengawas.absensi-siswa') }}"
                class="pw-nav {{ request()->routeIs('pengawas.absensi-siswa') ? 'active' : '' }}">
@@ -175,7 +175,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                Absensi Siswa
+                Absensi Murid
             </a>
         </nav>
 
@@ -241,7 +241,7 @@
 
         {{-- Footer --}}
         <footer class="flex-shrink-0 py-3 px-8 text-center text-[.7rem] text-slate-400 border-t border-slate-200 bg-white">
-            © {{ date('Y') }} E-Presensi UPTD SMKN 1 Majene — Panel Pengawas
+            &copy; {{ date('Y') }} E-Presensi {{ \App\Models\SchoolSetting::get()->nama_sekolah }} — Panel Pengawas
         </footer>
     </div>
 
@@ -292,6 +292,28 @@
         });
     </script>
     <x-npsn-modal />
+    <script>
+        // Fitur Restore Scroll Sidebar
+        document.addEventListener("DOMContentLoaded", function() {
+            const sidebarEl = document.getElementById('pw-sidebar');
+            if (sidebarEl) {
+                const sidebarScrollKey = 'sidebar_scroll_' + window.location.pathname;
+                
+                // Restore
+                const savedSidebarScroll = sessionStorage.getItem(sidebarScrollKey);
+                if (savedSidebarScroll) {
+                    setTimeout(() => {
+                        sidebarEl.scrollTo(0, parseInt(savedSidebarScroll, 10));
+                    }, 50);
+                }
+
+                // Simpan
+                window.addEventListener('beforeunload', () => {
+                    sessionStorage.setItem(sidebarScrollKey, sidebarEl.scrollTop);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
 

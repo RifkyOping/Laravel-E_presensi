@@ -445,12 +445,13 @@
         {{-- Brand --}}
         <div class="flex items-center gap-3 px-4 py-5 border-b border-slate-100">
             <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo UPTD SMKN 1 Majene" class="w-full h-full object-contain"
+                <img src="{{ asset('images/logo.png') }}"
+                    alt="Logo {{ \App\Models\SchoolSetting::get()->nama_sekolah }}" class="w-full h-full object-contain"
                     onerror="this.src='https://smkn1majene.sch.id/wp-content/uploads/2019/01/cropped-logo-smk-baru-e1554162985390.png'">
             </div>
             <div class="min-w-0">
                 <p class="font-black text-slate-800 text-sm leading-tight">E-Presensi</p>
-                <p class="text-slate-400 text-xs font-medium">UPTD SMKN 1 Majene</p>
+                <p class="text-slate-400 text-xs font-medium">{{ \App\Models\SchoolSetting::get()->nama_sekolah }}</p>
             </div>
         </div>
 
@@ -550,7 +551,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
-                    Absensi Siswa
+                    Absensi Murid
                 </a>
                 <a href="{{ route('admin.aktivitas-guru') }}"
                     class="app-nav {{ request()->routeIs('admin.aktivitas-guru') ? 'active' : '' }}">
@@ -608,6 +609,14 @@
                     </svg>
                     Absen Kelas
                 </a>
+                <a href="{{ route('guru.buku-kemajuan') }}"
+                    class="app-nav {{ request()->routeIs('guru.buku-kemajuan*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
+                    </svg>
+                    Monitoring Kelas
+                </a>
                 <a href="{{ route('guru.jadwal.index') }}"
                     class="app-nav {{ request()->routeIs('guru.jadwal.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
@@ -627,7 +636,9 @@
                 <a href="{{ route('guru.literasi.quran') }}"
                     class="app-nav {{ request()->routeIs('guru.literasi.quran') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                        </path>
                     </svg>
                     Literasi Keagamaan
                 </a>
@@ -668,14 +679,14 @@
                     Absensi
                 </a>
                 @if(Auth::user()->siswaProfile && strtolower(Auth::user()->siswaProfile->agama) === 'islam')
-                <a href="{{ route('murid.sholat') }}"
-                    class="app-nav {{ request()->routeIs('murid.sholat') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Riwayat Sholat
-                </a>
+                    <a href="{{ route('murid.sholat') }}"
+                        class="app-nav {{ request()->routeIs('murid.sholat') ? 'active' : '' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Riwayat Sholat
+                    </a>
                 @endif
                 {{-- Literasi e-Book (collapsible sub-menu) --}}
                 @php
@@ -728,19 +739,23 @@
                 <a href="{{ route('murid.quran') }}"
                     class="app-nav {{ request()->routeIs('murid.quran') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                        </path>
                     </svg>
                     Literasi Keagamaan
                 </a>
 
                 @if(Auth::user()->siswaProfile && strtolower(Auth::user()->siswaProfile->agama) === 'islam')
-                <a href="{{ route('murid.baca-quran.index') }}"
-                    class="app-nav {{ request()->routeIs('murid.baca-quran.*') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"></path>
-                    </svg>
-                    Baca Al-Qur'an
-                </a>
+                    <a href="{{ route('murid.baca-quran.index') }}"
+                        class="app-nav {{ request()->routeIs('murid.baca-quran.*') ? 'active' : '' }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253">
+                            </path>
+                        </svg>
+                        Baca Al-Qur'an
+                    </a>
                 @endif
 
                 {{-- === PENGAWAS (fallback jika masih pakai x-app-layout) === --}}
@@ -771,7 +786,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
-                    Absensi Siswa
+                    Absensi Murid
                 </a>
 
                 <a href="{{ route('pengawas.aktivitas-guru') }}"
@@ -927,7 +942,7 @@
         {{-- Footer --}}
         <footer
             class="flex-shrink-0 py-3 px-8 text-center text-[.7rem] text-slate-400 border-t border-slate-200 bg-white">
-            © {{ date('Y') }} E-Presensi UPTD SMKN 1 Majene
+            &copy; {{ date('Y') }} E-Presensi {{ \App\Models\SchoolSetting::get()->nama_sekolah }}
         </footer>
     </div>
 
@@ -1102,6 +1117,52 @@
         });
     </script>
     <x-npsn-modal />
+
+    <script>
+        // Fitur Restore Scroll Global untuk seluruh halaman dan sidebar
+        document.addEventListener("DOMContentLoaded", function () {
+            const mainEl = document.querySelector('main');
+            const sidebarEl = document.getElementById('app-sidebar');
+
+            // --- Restore & Save Sidebar Scroll ---
+            if (sidebarEl) {
+                const sidebarScrollKey = 'sidebar_scroll_' + window.location.pathname;
+
+                // Restore
+                const savedSidebarScroll = sessionStorage.getItem(sidebarScrollKey);
+                if (savedSidebarScroll) {
+                    setTimeout(() => {
+                        sidebarEl.scrollTo(0, parseInt(savedSidebarScroll, 10));
+                    }, 50);
+                }
+
+                // Simpan
+                window.addEventListener('beforeunload', () => {
+                    sessionStorage.setItem(sidebarScrollKey, sidebarEl.scrollTop);
+                });
+            }
+
+            if (!mainEl) return;
+
+            const scrollKey = 'global_scroll_' + window.location.pathname;
+
+            // Pengecualian: jangan timpa halaman yang memiliki sistem auto-scroll bawaannya sendiri
+            if (!window.location.pathname.includes('/baca-quran/surah') && !window.location.pathname.includes('/baca-quran/juz')) {
+                // Restore
+                const savedScroll = sessionStorage.getItem(scrollKey);
+                if (savedScroll) {
+                    setTimeout(() => {
+                        mainEl.scrollTo(0, parseInt(savedScroll, 10));
+                    }, 50); // Jeda singkat agar DOM sempat dimuat
+                }
+
+                // Simpan
+                window.addEventListener('beforeunload', () => {
+                    sessionStorage.setItem(scrollKey, mainEl.scrollTop);
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

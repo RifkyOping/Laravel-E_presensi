@@ -205,19 +205,29 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
+        <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">1. Download Template CSV</label>
+            <div class="flex gap-2">
+                <select id="templateDelimiterUser" class="flex-1 text-sm border-slate-200 rounded-xl focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
+                    <option value=",">Format Excel EN (,)</option>
+                    <option value=";">Format Excel ID (;)</option>
+                </select>
+                <button type="button" onclick="window.location.href='{{ route('admin.users.template-import') }}?delimiter=' + document.getElementById('templateDelimiterUser').value"
+                        class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-[#1e3a6e] font-bold rounded-xl text-sm transition flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Download
+                </button>
+            </div>
+        </div>
         <form action="{{ route('admin.users.import') }}" method="POST" enctype="multipart/form-data" class="p-6">
             @csrf
             <div class="mb-5">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">Upload File CSV</label>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">2. Upload File CSV</label>
                 <input type="file" name="file_csv" accept=".csv" required
                        class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#1e3a6e] hover:file:bg-blue-100">
                 <p class="text-xs text-slate-400 mt-2">Maksimal ukuran file 2MB.</p>
             </div>
-            <div class="flex items-center justify-between">
-                <a href="{{ route('admin.users.template-import') }}" class="text-sm font-semibold text-[#1e3a6e] hover:underline flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Download Template
-                </a>
+            <div class="flex items-center justify-end">
                 <div class="flex gap-2">
                     <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm transition">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition">Import</button>

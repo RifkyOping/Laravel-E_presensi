@@ -63,7 +63,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div x-data="{ show: false }">
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Password Baru <span class="text-slate-400 font-normal normal-case">(opsional)</span></label>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Password Baru</span></label>
                         <div class="relative">
                             <input :type="show ? 'text' : 'password'" name="password" placeholder="Kosongkan jika tidak diubah"
                                    class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm pr-10">
@@ -94,7 +94,7 @@
             <div class="px-6 py-4 border-b border-emerald-100 bg-emerald-50/50">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[10px] font-black">S</span>
-                    Profil Siswa
+                    Profil Murid
                 </h3>
             </div>
             <div class="px-6 py-6 space-y-5">
@@ -103,31 +103,20 @@
                     <!-- Deleted NISN field -->
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 gap-5">
                     <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tingkat</label>
-                        <select name="kelas" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                            <option value="">Pilih Tingkat</option>
-                            @foreach ($tingkats as $t)
-                                <option value="{{ $t }}" {{ old('kelas', $user->siswaProfile?->kelas) === $t ? 'selected' : '' }}>{{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Jurusan</label>
-                        <select name="jurusan" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                            <option value="">Pilih Jurusan</option>
-                            @foreach ($jurusans as $j)
-                                <option value="{{ $j }}" {{ old('jurusan', $user->siswaProfile?->jurusan) === $j ? 'selected' : '' }}>{{ $j }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Rombel</label>
-                        <select name="rombel" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                            <option value="">Pilih Rombel</option>
-                            @foreach ($rombels as $r)
-                                <option value="{{ $r }}" {{ old('rombel', $user->siswaProfile?->rombel) === $r ? 'selected' : '' }}>{{ $r }}</option>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Kelas</label>
+                        <select name="kelas_id" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                            <option value="">Pilih Kelas</option>
+                            @foreach ($kelasList as $kelasOption)
+                                @php
+                                    $isSelected = ($user->siswaProfile?->kelas === $kelasOption->tingkat &&
+                                                   $user->siswaProfile?->jurusan === $kelasOption->jurusan &&
+                                                   $user->siswaProfile?->rombel === $kelasOption->rombel);
+                                @endphp
+                                <option value="{{ $kelasOption->id }}" {{ $isSelected ? 'selected' : '' }}>
+                                    {{ $kelasOption->tingkat }} {{ $kelasOption->jurusan }} {{ $kelasOption->rombel }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -186,7 +175,7 @@
                            class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
                     <div class="flex flex-col">
                         <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Sholat</span>
-                        <span class="text-xs text-slate-400">(Dapat menginput absen sholat siswa)</span>
+                        <span class="text-xs text-slate-400">(Dapat menginput absen sholat murid)</span>
                     </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">

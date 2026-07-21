@@ -44,7 +44,6 @@ class SiswaProfilController extends Controller
             'jenis_kelamin' => $request->jenis_kelamin,
             'tempat_lahir'  => $request->tempat_lahir,
             'tanggal_lahir' => $request->tanggal_lahir,
-            'agama'         => $request->agama,
         ];
 
         if ($request->filled('password')) {

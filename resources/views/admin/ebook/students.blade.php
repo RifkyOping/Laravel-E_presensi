@@ -9,7 +9,7 @@
             <span class="text-slate-300">/</span>
             <a href="{{ route('admin.ebook.index') }}" class="text-slate-400 hover:text-[#1e3a6e] text-sm transition-colors">Manajemen e-Book</a>
             <span class="text-slate-300">/</span>
-            <span class="text-sm font-bold text-slate-800">Akses Suara Siswa</span>
+            <span class="text-sm font-bold text-slate-800">Akses Suara Murid</span>
         </div>
     </x-slot>
 
@@ -27,8 +27,8 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <h2 class="text-xl font-black text-slate-800">Kelola Akses Suara Siswa</h2>
-            <p class="text-sm text-slate-400 mt-0.5">Matikan wajib verifikasi suara bagi siswa yang memiliki kendala perangkat.</p>
+            <h2 class="text-xl font-black text-slate-800">Kelola Akses Suara Murid</h2>
+            <p class="text-sm text-slate-400 mt-0.5">Matikan wajib verifikasi suara bagi murid yang memiliki kendala perangkat.</p>
         </div>
     </div>
 
@@ -42,7 +42,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-sm font-black text-slate-700">Filter & Pencarian Siswa</h2>
+                    <h2 class="text-sm font-black text-slate-700">Filter & Pencarian Murid</h2>
                     <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk menyesuaikan pencarian dan status</p>
                 </div>
             </div>
@@ -92,7 +92,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50">
-                        <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Nama Siswa</th>
+                        <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Nama Murid</th>
                         <th class="text-left px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Nomor Induk</th>
                         <th class="text-center px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Verifikasi Suara</th>
                         <th class="text-right px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Aksi</th>
@@ -142,7 +142,7 @@
                     @empty
                     <tr>
                         <td colspan="4" class="px-5 py-10 text-center">
-                            <p class="font-bold text-slate-400">Belum ada data siswa.</p>
+                            <p class="font-bold text-slate-400">Belum ada data murid.</p>
                         </td>
                     </tr>
                     @endforelse

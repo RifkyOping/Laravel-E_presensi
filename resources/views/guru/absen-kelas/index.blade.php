@@ -1,6 +1,8 @@
 @php use Carbon\Carbon; @endphp
 <x-app-layout>
-    <x-slot name="title">Absen Kelas</x-slot>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Absen Kelas</span>
+    </x-slot>
 
     @php
         $pageTitle    = 'Absen Kelas';
@@ -14,7 +16,7 @@
             <div>
                 <h2 class="text-2xl font-black text-slate-800">Absen Kelas Hari Ini</h2>
                 <p class="text-slate-500 text-sm mt-1 font-medium">
-                    {{ Carbon::now()->translatedFormat('l, d F Y') }} &mdash; {{ $hariIni }}
+                    {{ Carbon::now()->translatedFormat('l, d F Y') }}
                 </p>
             </div>
         </div>

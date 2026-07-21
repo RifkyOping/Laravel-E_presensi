@@ -83,8 +83,20 @@ class AbsensiKelasController extends Controller
 
         $sudahDiabsen = $absensiHariIni->isNotEmpty();
 
+        // Cari atau buat Jurnal/Aktivitas Mengajar untuk kelas ini hari ini
+        $aktivitas = \App\Models\AbsensiMengajar::firstOrCreate([
+            'user_id' => $guru->id,
+            'tanggal' => $today,
+            'kelas'   => $jadwal->kelas,
+            'jam_ke'  => $jadwal->jam_ke,
+        ], [
+            'mata_pelajaran' => $jadwal->mata_pelajaran,
+            'jam_mulai'      => $jadwal->jam_mulai,
+            'jam_selesai'    => $jadwal->jam_selesai,
+        ]);
+
         return view('guru.absen-kelas.show', compact(
-            'jadwal', 'siswas', 'absensiHariIni', 'sudahDiabsen', 'today'
+            'jadwal', 'siswas', 'absensiHariIni', 'sudahDiabsen', 'today', 'aktivitas'
         ));
     }
 
@@ -117,9 +129,12 @@ class AbsensiKelasController extends Controller
         }
 
         $request->validate([
+            'materi'               => 'required|string',
             'absensi'              => 'required|array',
             'absensi.*.status'     => 'required|in:hadir,alpa,sakit,izin',
             'absensi.*.keterangan' => 'nullable|string|max:255',
+        ], [
+            'materi.required' => 'Materi pembelajaran harus diisi sebelum menyimpan absensi kelas.',
         ]);
 
         $records = [];
@@ -131,6 +146,7 @@ class AbsensiKelasController extends Controller
                 'tanggal'            => $today,
                 'status'             => $data['status'],
                 'keterangan'         => $data['keterangan'] ?? null,
+                'materi'             => $request->materi,
                 'created_at'         => now(),
                 'updated_at'         => now(),
             ];
@@ -138,8 +154,74 @@ class AbsensiKelasController extends Controller
 
         AbsensiKelasSiswa::insert($records);
 
-        return redirect()->route('guru.absen-kelas.index')
-            ->with('success', "Absensi kelas {$jadwal->kelas} – {$jadwal->mata_pelajaran} berhasil disimpan.");
+        return redirect()->route('guru.absen-kelas.show', $jadwal->id)
+            ->with('success', "Absensi kelas {$jadwal->kelas} - {$jadwal->mata_pelajaran} berhasil disimpan.");
+    }
+
+    /**
+     * Download rekap absensi kelas hari ini.
+     */
+    public function export(Request $request, JadwalMengajar $jadwal)
+    {
+        $guru  = Auth::user();
+        $today = Carbon::today()->toDateString();
+
+        if ($jadwal->user_id !== $guru->id) {
+            abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
+        }
+
+        $absensiHariIni = AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
+            ->where('tanggal', $today)
+            ->with('siswa')
+            ->get();
+
+        if ($absensiHariIni->isEmpty()) {
+            return back()->with('error', 'Belum ada data absensi untuk diunduh.');
+        }
+
+        $materi = $absensiHariIni->first()->materi ?? '-';
+        $fileName = 'Rekap_Absensi_Kelas_' . str_replace(' ', '_', $jadwal->kelas) . '_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['No', 'Nama Siswa', 'Nomor Induk', 'Status', 'Keterangan'];
+
+        $delimiter = $request->input('delimiter', ';');
+
+        $callback = function() use($absensiHariIni, $columns, $materi, $jadwal, $today, $delimiter) {
+            $file = fopen('php://output', 'w');
+            
+            // Tulis header info
+            fputcsv($file, ['Mata Pelajaran:', $jadwal->mata_pelajaran], $delimiter);
+            fputcsv($file, ['Kelas:', $jadwal->kelas], $delimiter);
+            fputcsv($file, ['Tanggal:', Carbon::parse($today)->translatedFormat('d F Y')], $delimiter);
+            fputcsv($file, ['Materi:', $materi], $delimiter);
+            fputcsv($file, [], $delimiter);
+            
+            // Tulis kolom
+            fputcsv($file, $columns, $delimiter);
+
+            $no = 1;
+            foreach ($absensiHariIni as $absen) {
+                $row['No']          = $no++;
+                $row['Nama Siswa']  = $absen->siswa->name ?? '-';
+                $row['Nomor Induk'] = $absen->siswa->nomor_induk ?? '-';
+                $row['Status']      = ucfirst($absen->status);
+                $row['Keterangan']  = $absen->keterangan ?? '-';
+
+                fputcsv($file, $row, $delimiter);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -169,5 +251,99 @@ class AbsensiKelasController extends Controller
         );
 
         return back()->with('success', 'File RPP berhasil diunggah dan sedang menunggu persetujuan dari Guru Piket.');
+    }
+
+    /**
+     * Tampilkan form cetak buku kemajuan kelas.
+     */
+    public function bukuKemajuan(Request $request)
+    {
+        $kelasList = \App\Models\Kelas::where('status', true)
+            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+            ->orderBy('jurusan')
+            ->orderBy('rombel')
+            ->get();
+
+        $jadwalHariIni = null;
+        $filterKelas = $request->get('filter_kelas');
+        
+        $hariMap = [
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+            'Sunday'    => 'Minggu',
+        ];
+        $hariIni = $hariMap[Carbon::now()->format('l')];
+        $today = Carbon::today()->toDateString();
+
+        if ($filterKelas) {
+            $jadwalHariIni = \App\Models\JadwalMengajar::with('user')
+                ->where('hari', $hariIni)
+                ->where('kelas', $filterKelas)
+                ->orderBy('jam_ke')
+                ->get();
+                
+            foreach ($jadwalHariIni as $jadwal) {
+                // Status Absensi Masuk & Pulang Guru (dari Aktivitas Mengajar)
+                $absenMengajar = \App\Models\AbsensiMengajar::where('user_id', $jadwal->user_id)
+                    ->where('tanggal', $today)
+                    ->where('kelas', $jadwal->kelas)
+                    ->where('jam_ke', $jadwal->jam_ke)
+                    ->first();
+                $jadwal->waktu_datang = $absenMengajar ? $absenMengajar->waktu_absen_masuk : null;
+                $jadwal->waktu_pulang = $absenMengajar ? $absenMengajar->waktu_absen_keluar : null;
+                
+                // Status Absen Kelas Siswa
+                $jadwal->sudah_absen_kelas = \App\Models\AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
+                    ->where('tanggal', $today)
+                    ->exists();
+            }
+        }
+
+        return view('guru.buku-kemajuan.index', compact('kelasList', 'jadwalHariIni', 'filterKelas', 'hariIni', 'today'));
+    }
+
+    /**
+     * Cetak buku kemajuan kelas.
+     */
+    public function cetakBukuKemajuan(Request $request)
+    {
+        $request->validate([
+            'kelas' => 'required',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
+
+        $kelas = $request->kelas;
+        $tanggalMulai = Carbon::parse($request->tanggal_mulai);
+        $tanggalAkhir = Carbon::parse($request->tanggal_akhir);
+
+        $aktivitas = \App\Models\AbsensiMengajar::with(['user'])
+            ->where('kelas', $kelas)
+            ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
+            ->orderBy('tanggal')
+            ->orderBy('jam_ke')
+            ->get();
+
+        foreach ($aktivitas as $item) {
+            $absenSiswa = \App\Models\AbsensiKelasSiswa::where('guru_id', $item->user_id)
+                ->where('tanggal', $item->tanggal)
+                ->whereHas('jadwalMengajar', function($q) use ($kelas, $item) {
+                    $q->where('kelas', $kelas)
+                      ->where('jam_ke', $item->jam_ke);
+                })->first();
+                
+            $item->materi_pembelajaran = $absenSiswa ? $absenSiswa->materi : '';
+        }
+
+        // Group by week
+        $aktivitasPerMinggu = $aktivitas->groupBy(function($date) {
+            return Carbon::parse($date->tanggal)->startOfWeek()->format('Y-m-d');
+        });
+
+        return view('guru.buku-kemajuan.cetak', compact('kelas', 'tanggalMulai', 'tanggalAkhir', 'aktivitasPerMinggu'));
     }
 }

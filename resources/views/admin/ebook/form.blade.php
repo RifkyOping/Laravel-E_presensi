@@ -79,12 +79,12 @@
                 <div>
                     <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
                         Teks Referensi Verifikasi Suara
-                        <span class="font-normal normal-case text-slate-400 ml-1">(teks yang harus dibacakan siswa)</span>
+                        <span class="font-normal normal-case text-slate-400 ml-1">(teks yang harus dibacakan murid)</span>
                     </label>
                     <textarea name="konten_teks" rows="5"
-                              placeholder="Masukkan paragraf atau kalimat yang akan dibacakan siswa sebagai verifikasi sebelum lanjut ke level berikutnya..."
+                              placeholder="Masukkan paragraf atau kalimat yang akan dibacakan murid sebagai verifikasi sebelum lanjut ke level berikutnya..."
                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm resize-none">{{ old('konten_teks', $ebook->konten_teks ?? '') }}</textarea>
-                    <p class="text-[.7rem] text-slate-400 mt-1.5">Sistem akan membandingkan suara siswa dengan teks ini. Minimal kesamaan 60% untuk membuka level berikutnya.</p>
+                    <p class="text-[.7rem] text-slate-400 mt-1.5">Sistem akan membandingkan suara murid dengan teks ini. Minimal kesamaan 60% untuk membuka level berikutnya.</p>
                 </div>
 
                 <div class="flex items-center gap-3">
@@ -99,7 +99,7 @@
                                     after:border after:rounded-full after:h-5 after:w-5 after:transition-all
                                     peer-checked:bg-[#1e3a6e]"></div>
                     </label>
-                    <span class="text-sm font-semibold text-slate-700">e-Book Aktif (tampil ke siswa)</span>
+                    <span class="text-sm font-semibold text-slate-700">e-Book Aktif (tampil ke murid)</span>
                 </div>
             </div>
         </div>

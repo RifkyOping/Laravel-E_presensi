@@ -114,16 +114,13 @@
         // Teks overlay pada card sakit/izin
         $disableSakitIzin = false;
         $statusSakitIzin  = '';
-        if ($absensiHariIni && $absensiHariIni->status !== 'alpha') {
+        if ($absensiHariIni && $absensiHariIni->status_pengajuan === 'pending') {
             $disableSakitIzin = true;
-            if ($absensiHariIni->status === 'hadir') {
-                $statusSakitIzin = 'Anda sudah absen hadir hari ini.';
-            } elseif ($absensiHariIni->status_pengajuan === 'pending') {
-                $statusSakitIzin = 'Menunggu Konfirmasi Admin';
-            } elseif ($isSakitIzin) {
-                $statusSakitIzin = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
-            }
-        } elseif ($sedangMasaSakitIzin && !$absensiHariIni) {
+            $statusSakitIzin = 'Menunggu Konfirmasi Admin';
+        } elseif ($absensiHariIni && $isSakitIzin) {
+            $disableSakitIzin = true;
+            $statusSakitIzin = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
+        } elseif (isset($sedangMasaSakitIzin) && $sedangMasaSakitIzin && !$absensiHariIni) {
             // Izin multi-hari dari hari sebelumnya
             $disableSakitIzin = true;
             $statusSakitIzin  = 'Sedang dalam masa Izin (multi-hari)';

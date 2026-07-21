@@ -105,6 +105,9 @@
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Waktu Datang</p>
                     @if($absensiHariIni && $absensiHariIni->waktu_datang)
                     <p class="text-xl font-black text-[#1e3a6e]">{{ Carbon::parse($absensiHariIni->waktu_datang)->format('H:i') }} <span class="text-sm font-semibold">WITA</span></p>
+                    @if($absensiHariIni->kategori && str_contains(strtolower($absensiHariIni->kategori), 'terlambat'))
+                        <span class="text-[0.65rem] font-bold text-red-500 uppercase tracking-wider mt-0.5 block">Terlambat</span>
+                    @endif
                     @else
                     <p class="text-base font-semibold text-slate-400">Belum absen</p>
                     @endif
@@ -121,6 +124,9 @@
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Waktu Pulang</p>
                     @if($absensiHariIni && $absensiHariIni->waktu_pulang)
                     <p class="text-xl font-black text-[#1e3a6e]">{{ Carbon::parse($absensiHariIni->waktu_pulang)->format('H:i') }} <span class="text-sm font-semibold">WITA</span></p>
+                    @if($absensiHariIni->kategori && str_contains(strtolower($absensiHariIni->kategori), 'pulang lebih awal'))
+                        <span class="text-[0.65rem] font-bold text-red-500 uppercase tracking-wider mt-0.5 block">Pulang Lebih Awal</span>
+                    @endif
                     @else
                     <p class="text-base font-semibold text-slate-400">Belum absen</p>
                     @endif
@@ -213,15 +219,12 @@
     @php
         $disableCutiTugas = false;
         $statusCutiTugas  = '';
-        if ($absensiHariIni && $absensiHariIni->status !== 'alpha') {
+        if ($absensiHariIni && $absensiHariIni->status_pengajuan === 'pending') {
             $disableCutiTugas = true;
-            if ($absensiHariIni->status === 'hadir') {
-                $statusCutiTugas = 'Anda sudah absen hadir hari ini.';
-            } elseif ($absensiHariIni->status_pengajuan === 'pending') {
-                $statusCutiTugas = 'Menunggu Konfirmasi Admin';
-            } elseif (in_array($absensiHariIni->status, ['cuti', 'tugas'])) {
-                $statusCutiTugas = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
-            }
+            $statusCutiTugas = 'Menunggu Konfirmasi Admin';
+        } elseif ($absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas'])) {
+            $disableCutiTugas = true;
+            $statusCutiTugas = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
         } elseif ($sedangMasaCutiTugas && !$absensiHariIni) {
             $disableCutiTugas = true;
             $statusCutiTugas  = 'Sedang dalam masa ' . ucfirst($jenisMasaAktif);
@@ -360,6 +363,13 @@
                     @elseif($absen->status_pengajuan === 'rejected')
                         <p class="text-[0.6rem] text-red-500 font-semibold mt-0.5">Ditolak</p>
                     @endif
+                    @if($absen->kategori)
+                        @if($absen->kategori === 'tepat waktu')
+                            <p class="text-[0.6rem] text-emerald-500 font-bold mt-0.5 capitalize">{{ $absen->kategori }}</p>
+                        @else
+                            <p class="text-[0.6rem] text-red-500 font-bold mt-0.5 capitalize">{{ $absen->kategori }}</p>
+                        @endif
+                    @endif
                 </div>
             </div>
             @empty
@@ -377,6 +387,7 @@
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Waktu Datang</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Waktu Pulang</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Kategori</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -402,9 +413,20 @@
                                 @endif
                             </div>
                         </td>
+                        <td class="py-3.5 px-5 text-center">
+                            @if($absen->kategori)
+                                @if($absen->kategori === 'tepat waktu')
+                                    <span class="text-[0.7rem] text-emerald-500 font-bold capitalize">{{ $absen->kategori }}</span>
+                                @else
+                                    <span class="text-[0.7rem] text-red-500 font-bold capitalize">{{ $absen->kategori }}</span>
+                                @endif
+                            @else
+                                <span class="text-[0.7rem] text-slate-300 font-bold">—</span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="py-10 text-center text-slate-400 text-sm">Belum ada riwayat kehadiran.</td></tr>
+                    <tr><td colspan="6" class="py-10 text-center text-slate-400 text-sm">Belum ada riwayat kehadiran.</td></tr>
                     @endforelse
                 </tbody>
             </table>

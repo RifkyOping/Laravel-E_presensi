@@ -169,10 +169,10 @@ class AdminController extends Controller
         $callback = function () use ($delimiter) {
             $file = fopen('php://output', 'w');
             // Header kolom
-            fputcsv($file, ['name', 'email', 'role', 'password', 'kelas'], $delimiter);
+            fputcsv($file, ['nama', 'nomor_induk (NISN/NIP)', 'email', 'role', 'password', 'kelas', 'agama'], $delimiter);
             // Contoh data
-            fputcsv($file, ['Murid Contoh 1', 'murid1@smkn1majene.sch.id', 'murid', '12345678', 'X RPL 1'], $delimiter);
-            fputcsv($file, ['Guru Contoh 1', 'guru1@smkn1majene.sch.id', 'guru', '12345678', ''], $delimiter);
+            fputcsv($file, ['Murid Contoh 1', '0012345678', 'murid1@smkn1majene.sch.id', 'murid', '12345678', 'X RPL 1', 'Islam'], $delimiter);
+            fputcsv($file, ['Guru Contoh 1', '198001012010011001', '', 'guru', '12345678', '', ''], $delimiter);
             fclose($file);
         };
 
@@ -198,7 +198,7 @@ class AdminController extends Controller
         rewind($handle);
 
         $header = fgetcsv($handle, 1000, $delimiter);
-        if (!$header || count($header) < 3) {
+        if (!$header || count($header) < 4) {
             return back()->with('error', 'Format CSV tidak sesuai template.');
         }
 
@@ -206,12 +206,20 @@ class AdminController extends Controller
         $gagal = 0;
 
         while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
-            if (count($row) < 3) continue;
+            if (count($row) < 4) continue;
 
             $name = trim($row[0]);
-            $email = trim($row[1]);
-            $role = strtolower(trim($row[2]));
-            $password = isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : '12345678';
+            $nomor_induk = trim($row[1]);
+            $email = trim($row[2]) === '' ? null : trim($row[2]);
+            $role = strtolower(trim($row[3]));
+            $password = isset($row[4]) && trim($row[4]) !== '' ? trim($row[4]) : '12345678';
+            $kelasStr = isset($row[5]) ? trim($row[5]) : null;
+            $agama = isset($row[6]) && trim($row[6]) !== '' ? trim($row[6]) : null;
+
+            if ($nomor_induk === '') {
+                $gagal++;
+                continue;
+            }
 
             // Validasi role dan email
             if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas', 'kurikulum'])) {
@@ -219,21 +227,29 @@ class AdminController extends Controller
                 continue;
             }
 
-            if (User::where('email', $email)->exists()) {
+            if (User::where('nomor_induk', $nomor_induk)->exists()) {
+                $gagal++;
+                continue;
+            }
+
+            if ($email && User::where('email', $email)->exists()) {
                 $gagal++;
                 continue;
             }
 
             $user = User::create([
-                'name'     => $name,
-                'email'    => $email,
-                'role'     => $role,
-                'password' => Hash::make($password),
+                'name'        => $name,
+                'nomor_induk' => $nomor_induk,
+                'email'       => $email,
+                'role'        => $role,
+                'password'    => Hash::make($password),
             ]);
 
             if ($role === 'murid') {
-                $kelasStr = isset($row[4]) ? trim($row[4]) : null;
                 $profileData = [];
+                if ($agama) {
+                    $profileData['agama'] = $agama;
+                }
                 if ($kelasStr) {
                     $parts = explode(' ', $kelasStr);
                     $profileData['kelas'] = $parts[0] ?? null;
@@ -251,7 +267,7 @@ class AdminController extends Controller
         fclose($handle);
 
         $msg = "Import selesai! Berhasil: {$berhasil} akun.";
-        if ($gagal > 0) $msg .= " Gagal/Dilewati: {$gagal} baris (email sudah ada atau role tidak valid).";
+        if ($gagal > 0) $msg .= " Gagal/Dilewati: {$gagal} baris (nomor_induk sudah ada, email sudah ada, role tidak valid, atau data tidak lengkap).";
 
         return back()->with('success', $msg);
     }
@@ -401,17 +417,17 @@ class AdminController extends Controller
 
     public function exportAbsensiGuru(Request $request)
     {
-        $bulan = $request->filled('bulan') ? Carbon::parse($request->bulan) : Carbon::today();
+        $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
+        $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
         $delimiter = $request->input('delimiter', ';');
         
         $riwayat = AbsensiGuru::with('user')
-            ->whereYear('tanggal', $bulan->year)
-            ->whereMonth('tanggal', $bulan->month)
+            ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
             ->orderBy('tanggal')
             ->orderBy('user_id')
             ->get();
 
-        $filename = "absensi_guru_" . $bulan->format('Y-m') . ".csv";
+        $filename = "absensi_guru_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".csv";
 
         $headers = [
             'Content-Type'        => 'text/csv',
@@ -476,6 +492,54 @@ class AdminController extends Controller
         }
 
         return view('admin.aktivitas-guru', compact('semuaGuru', 'aktivitas', 'tanggal', 'jadwalIds'));
+    }
+
+    public function exportAktivitasGuru(Request $request)
+    {
+        $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
+        $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
+        $delimiter = $request->input('delimiter', ';');
+        
+        $riwayat = \App\Models\AbsensiMengajar::with(['user', 'verifier'])
+            ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
+            ->orderBy('tanggal')
+            ->orderBy('user_id')
+            ->orderBy('jam_ke')
+            ->get();
+
+        $filename = "aktivitas_mengajar_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".csv";
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($riwayat, $delimiter) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['No', 'Nama Guru', 'Tanggal', 'Mata Pelajaran', 'Kelas', 'Jam Ke', 'Jam Mulai', 'Jam Selesai', 'Masuk', 'Keluar', 'Kategori', 'Status Verifikasi', 'Diverifikasi Oleh'], $delimiter);
+            
+            $no = 1;
+            foreach ($riwayat as $data) {
+                fputcsv($file, [
+                    $no++,
+                    $data->user->name ?? '-',
+                    Carbon::parse($data->tanggal)->format('Y-m-d'),
+                    $data->mata_pelajaran,
+                    $data->kelas,
+                    $data->jam_ke,
+                    $data->jam_mulai,
+                    $data->jam_selesai,
+                    $data->waktu_absen_masuk ?? '-',
+                    $data->waktu_absen_keluar ?? '-',
+                    $data->kategori ?? '-',
+                    $data->status_verifikasi,
+                    $data->verifier->name ?? '-'
+                ], $delimiter);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     // ──────────────────────────────────────────
@@ -554,6 +618,7 @@ class AdminController extends Controller
             'longitude'    => 'required|numeric|between:-180,180',
             'radius_meter' => 'required|integer|min:1|max:500',
             'nama_sekolah' => 'required|string|max:255',
+            'tahun_ajaran' => 'required|string|max:100',
             'status_absen' => 'required|in:auto,buka,tutup',
             'jadwal'       => 'required|array',
             'jadwal.*.absen_datang_buka'  => 'required|date_format:H:i',
@@ -571,6 +636,7 @@ class AdminController extends Controller
             'radius_meter.min'      => 'Radius minimal 1 meter.',
             'radius_meter.max'      => 'Radius maksimal 500 meter.',
             'nama_sekolah.required' => 'Nama sekolah wajib diisi.',
+            'tahun_ajaran.required' => 'Tahun ajaran wajib diisi.',
             'status_absen.required' => 'Status absen wajib dipilih.',
             'status_absen.in'       => 'Status absen tidak valid.',
             'jadwal.*.absen_datang_buka.required' => 'Jam buka absen datang wajib diisi.',
@@ -585,6 +651,7 @@ class AdminController extends Controller
             'longitude'    => $request->longitude,
             'radius_meter' => $request->radius_meter,
             'nama_sekolah' => $request->nama_sekolah,
+            'tahun_ajaran' => $request->tahun_ajaran,
             'status_absen' => $request->status_absen,
         ]);
 
@@ -662,17 +729,17 @@ class AdminController extends Controller
 
     public function exportAbsensiSiswa(Request $request)
     {
-        $bulan = $request->filled('bulan') ? Carbon::parse($request->bulan) : Carbon::today();
+        $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
+        $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
         $delimiter = $request->input('delimiter', ';');
         
         $riwayat = AbsensiSiswa::with('user')
-            ->whereYear('tanggal', $bulan->year)
-            ->whereMonth('tanggal', $bulan->month)
+            ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
             ->orderBy('tanggal')
             ->orderBy('user_id')
             ->get();
 
-        $filename = "absensi_siswa_" . $bulan->format('Y-m') . ".csv";
+        $filename = "absensi_murid_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".csv";
 
         $headers = [
             'Content-Type'        => 'text/csv',

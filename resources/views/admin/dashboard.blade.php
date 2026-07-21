@@ -19,7 +19,7 @@
                 </div>
                 <div class="flex flex-col items-start sm:items-end gap-1 shrink-0">
                     <span class="text-white/40 text-xs uppercase tracking-widest font-bold">Admin</span>
-                    <span class="text-white text-sm font-semibold">E-Presensi UPTD SMKN 1 Majene</span>
+                    <span class="text-white text-sm font-semibold">E-Presensi {{ \App\Models\SchoolSetting::get()->nama_sekolah }}</span>
                 </div>
             </div>
             <div
@@ -34,8 +34,8 @@
                 $stats_display = [
                     ['label' => 'Total Guru', 'value' => $stats['total_guru'], 'sub' => 'terdaftar', 'accent' => '#1e3a6e', 'light' => '#eef2ff'],
                     ['label' => 'Guru Hadir', 'value' => $stats['guru_hadir'], 'sub' => 'hari ini', 'accent' => '#1e6e3a', 'light' => '#f0fdf4'],
-                    ['label' => 'Total Siswa', 'value' => $stats['total_siswa'], 'sub' => 'terdaftar', 'accent' => '#6d28d9', 'light' => '#f5f3ff'],
-                    ['label' => 'Siswa Hadir', 'value' => $stats['siswa_hadir'], 'sub' => 'hari ini', 'accent' => '#92400e', 'light' => '#fffbeb'],
+                    ['label' => 'Total Murid', 'value' => $stats['total_siswa'], 'sub' => 'terdaftar', 'accent' => '#6d28d9', 'light' => '#f5f3ff'],
+                    ['label' => 'Murid Hadir', 'value' => $stats['siswa_hadir'], 'sub' => 'hari ini', 'accent' => '#92400e', 'light' => '#fffbeb'],
                 ];
             @endphp
 
@@ -61,7 +61,7 @@
                         [
                             'href' => route('admin.users'),
                             'title' => 'Pengguna',
-                            'desc' => 'Kelola akun siswa, guru, dan pengawas',
+                            'desc' => 'Kelola akun murid, guru, dan pengawas',
                             'stat' => ($stats['total_siswa'] + $stats['total_guru']) . ' akun',
                             'color' => '#1e3a6e',
                         ],
@@ -75,7 +75,7 @@
                         [
                             'href' => route('admin.ebook.index'),
                             'title' => 'Literasi e-Book',
-                            'desc' => 'Upload & kelola koleksi e-Book untuk siswa',
+                            'desc' => 'Upload & kelola koleksi e-Book untuk murid',
                             'stat' => \App\Models\EBook::count() . ' buku',
                             'color' => '#1e3a6e',
                         ],

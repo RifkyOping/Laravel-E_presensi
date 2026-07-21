@@ -12,12 +12,12 @@
         </div>
         @endif
 
-        {{-- Pengajuan Siswa --}}
+        {{-- Pengajuan Murid --}}
         <div class="app-card overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <h3 class="font-bold text-slate-800 flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    Pengajuan Siswa
+                    Pengajuan Murid
                 </h3>
             </div>
             
@@ -26,7 +26,7 @@
                     <thead>
                         <tr>
                             <th class="text-left">Tanggal</th>
-                            <th class="text-left">Nama Siswa</th>
+                            <th class="text-left">Nama Murid</th>
                             <th class="text-center">Jenis</th>
                             <th class="text-left">Keterangan</th>
                             <th class="text-center">Bukti</th>
@@ -73,13 +73,13 @@
                             </td>
                             <td>
                                 <div class="flex items-center justify-center gap-2">
-                                    <form action="{{ route('admin.persetujuan-absensi.approve', ['type' => 'siswa', 'id' => $p->id]) }}" method="POST">
+                                    <form action="{{ route('admin.persetujuan-absensi.approve', ['type' => 'murid', 'id' => $p->id]) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white p-2 rounded-xl shadow-sm transition duration-200 border border-emerald-200 hover:border-emerald-600" title="Setujui Pengajuan">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                         </button>
                                     </form>
-                                    <form action="{{ route('admin.persetujuan-absensi.reject', ['type' => 'siswa', 'id' => $p->id]) }}" method="POST">
+                                    <form action="{{ route('admin.persetujuan-absensi.reject', ['type' => 'murid', 'id' => $p->id]) }}" method="POST">
                                         @csrf
                                         <button type="button" onclick="confirmReject(this)" class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white p-2 rounded-xl shadow-sm transition duration-200 border border-red-200 hover:border-red-600" title="Tolak Pengajuan">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -90,7 +90,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400">Tidak ada pengajuan siswa yang menunggu persetujuan.</td>
+                            <td colspan="6" class="py-8 text-center text-slate-400">Tidak ada pengajuan murid yang menunggu persetujuan.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -189,17 +189,17 @@
         </h2>
         
         <div class="grid grid-cols-1 gap-6">
-            {{-- Riwayat Siswa --}}
+            {{-- Riwayat Murid --}}
             <div class="app-card overflow-hidden">
                 <div class="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                    <h3 class="font-bold text-slate-800 text-sm">Riwayat Siswa</h3>
+                    <h3 class="font-bold text-slate-800 text-sm">Riwayat Murid</h3>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full app-tbl">
                         <thead>
                             <tr>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Tanggal</th>
-                                <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Nama Siswa</th>
+                                <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Nama Murid</th>
                                 <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Jenis</th>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Keterangan</th>
                                 <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Bukti</th>

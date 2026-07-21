@@ -18,7 +18,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h2 class="text-xl font-black text-slate-800">Manajemen e-Book</h2>
-            <p class="text-sm text-slate-400 mt-0.5">Kelola koleksi e-Book beserta file PDF untuk literasi siswa.</p>
+            <p class="text-sm text-slate-400 mt-0.5">Kelola koleksi e-Book beserta file PDF untuk literasi murid.</p>
         </div>
         <div class="flex gap-2">
             <a href="{{ route('admin.ebook.students') }}"

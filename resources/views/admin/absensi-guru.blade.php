@@ -104,24 +104,48 @@
         </div>
     </div>
 
-    {{-- Export Bulanan --}}
-    <form method="GET" action="{{ route('admin.absensi-guru.export') }}" class="bg-emerald-50/50 rounded-2xl border border-emerald-100 p-5 flex flex-col sm:flex-row items-stretch sm:items-end gap-4 shadow-sm">
-        <div class="flex-1 w-full">
-            <label class="block text-xs font-black text-emerald-800 uppercase tracking-wider mb-2">Pilih Bulan</label>
-            <input type="month" name="bulan" class="app-input border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500/20 bg-white w-full" value="{{ date('Y-m') }}" required>
-        </div>
-        <div class="w-full sm:w-auto">
-            <label class="block text-xs font-black text-emerald-800 uppercase tracking-wider mb-2">Pemisah Kolom</label>
-            <select name="delimiter" class="app-input border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500/20 bg-white w-full h-10">
-                <option value=";">Excel ID (;)</option>
-                <option value=",">Excel EN (,)</option>
-            </select>
-        </div>
-        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 h-10 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Download Rekap
+    {{-- Export Rekap --}}
+    <div x-data="{ showDownload: false }" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <button type="button" @click="showDownload = !showDownload" class="w-full text-left px-6 py-4 flex items-center justify-between group focus:outline-none hover:bg-slate-50 transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 text-[#1e3a6e] flex items-center justify-center border border-blue-100 group-hover:bg-blue-100 transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-700">Download Rekap Absensi</h3>
+                    <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk mendownload laporan absensi format Excel</p>
+                </div>
+            </div>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 group-hover:bg-slate-100 transition-colors">
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="{ 'rotate-180': showDownload }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
         </button>
-    </form>
+        <div x-show="showDownload" x-transition class="p-6 bg-slate-50 border-t border-slate-100" style="display: none;">
+            <form method="GET" action="{{ route('admin.absensi-guru.export') }}" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 w-full">
+                <div class="flex-1 w-full">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tanggal Mulai</label>
+                    <input type="date" name="tanggal_mulai" class="app-input bg-white w-full" value="{{ date('Y-m-01') }}" required>
+                </div>
+                <div class="flex-1 w-full">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tanggal Akhir</label>
+                    <input type="date" name="tanggal_akhir" class="app-input bg-white w-full" value="{{ date('Y-m-d') }}" required>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Pemisah Kolom</label>
+                    <select name="delimiter" class="app-input bg-white w-full h-[42px]">
+                        <option value=";">Excel ID (;)</option>
+                        <option value=",">Excel EN (,)</option>
+                    </select>
+                </div>
+                <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 h-[42px] rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Download Rekap
+                </button>
+            </form>
+        </div>
+    </div>
 
     {{-- ── STATUS PER TANGGAL ── --}}
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
@@ -159,10 +183,11 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
-                        <th class="py-3.5 px-6 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-left">Guru</th>
+                        <th class="py-3.5 px-6 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-left">Nama</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Waktu Datang</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Waktu Pulang</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Kategori</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -215,18 +240,31 @@
                                     'sakit' => 'bg-slate-100 text-slate-600 border-slate-200',
                                     default => 'bg-red-50 text-red-600 border-red-100'
                                 }; @endphp
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $cls }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ match($record->status) { 'hadir'=>'bg-[#1e3a6e]', 'izin'=>'bg-amber-500', 'sakit'=>'bg-slate-400', default=>'bg-red-500' } }}"></span>
-                                    {{ $record->status }}
-                                    @if($record->status_pengajuan === 'pending') (Pending) @endif
-                                    @if($record->status_pengajuan === 'rejected') (Ditolak) @endif
-                                </span>
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $cls }}">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ match($record->status) { 'hadir'=>'bg-[#1e3a6e]', 'izin'=>'bg-amber-500', 'sakit'=>'bg-slate-400', default=>'bg-red-500' } }}"></span>
+                                        {{ $record->status }}
+                                        @if($record->status_pengajuan === 'pending') (Pending) @endif
+                                        @if($record->status_pengajuan === 'rejected') (Ditolak) @endif
+                                    </span>
+                                </div>
                             @else
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold
                                          bg-red-50 text-red-500 border border-red-100">
                                 <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
                                 Belum Absen
                             </span>
+                            @endif
+                        </td>
+                        <td class="py-3.5 px-5 text-center">
+                            @if($record && $record->kategori)
+                                @if($record->kategori === 'tepat waktu')
+                                    <span class="text-[0.7rem] text-emerald-500 font-bold capitalize">{{ $record->kategori }}</span>
+                                @else
+                                    <span class="text-[0.7rem] text-red-500 font-bold capitalize">{{ $record->kategori }}</span>
+                                @endif
+                            @else
+                                <span class="text-[0.7rem] text-slate-300 font-bold">—</span>
                             @endif
                         </td>
                     </tr>
@@ -252,10 +290,11 @@
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
                         <th class="py-3.5 px-6 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Tanggal</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-left">Guru</th>
+                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-left">Nama</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Datang</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Pulang</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Kategori</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -288,16 +327,29 @@
                                 'sakit' => 'bg-slate-100 text-slate-600 border-slate-200',
                                 default => 'bg-red-50 text-red-600 border-red-100',
                             }; @endphp
-                            <span class="inline-block px-2.5 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $sc }}">
-                                {{ ucfirst($r->status) }}
-                                @if($r->status_pengajuan === 'pending') (Pending) @endif
-                                @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
-                            </span>
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="inline-block px-2.5 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $sc }}">
+                                    {{ ucfirst($r->status) }}
+                                    @if($r->status_pengajuan === 'pending') (Pending) @endif
+                                    @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-5 text-center">
+                            @if($r->kategori)
+                                @if($r->kategori === 'tepat waktu')
+                                    <span class="text-[0.7rem] text-emerald-500 font-bold capitalize">{{ $r->kategori }}</span>
+                                @else
+                                    <span class="text-[0.7rem] text-red-500 font-bold capitalize">{{ $r->kategori }}</span>
+                                @endif
+                            @else
+                                <span class="text-[0.7rem] text-slate-300 font-bold">—</span>
+                            @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-12 text-center">
+                        <td colspan="6" class="py-12 text-center">
                             <div class="flex flex-col items-center gap-2">
                                 <svg class="w-10 h-10 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>

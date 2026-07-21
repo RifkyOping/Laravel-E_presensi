@@ -92,36 +92,20 @@
             <div class="px-6 py-4 border-b border-emerald-100 bg-emerald-50/50">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                     <span class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[10px] font-black">S</span>
-                    Data Akademik Siswa
+                    Data Akademik Murid
                 </h3>
-                <p class="text-xs text-slate-400 mt-0.5">Data lengkap profil siswa.</p>
+                <p class="text-xs text-slate-400 mt-0.5">Data lengkap profil murid.</p>
             </div>
             <div class="px-6 py-6 space-y-5">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 gap-5">
                     <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tingkat</label>
-                        <select name="kelas" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                            <option value="">Pilih Tingkat</option>
-                            @foreach ($tingkats as $t)
-                                <option value="{{ $t }}" {{ old('kelas') === $t ? 'selected' : '' }}>{{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Jurusan</label>
-                        <select name="jurusan" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                            <option value="">Pilih Jurusan</option>
-                            @foreach ($jurusans as $j)
-                                <option value="{{ $j }}" {{ old('jurusan') === $j ? 'selected' : '' }}>{{ $j }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Rombel</label>
-                        <select name="rombel" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
-                            <option value="">Pilih Rombel</option>
-                            @foreach ($rombels as $r)
-                                <option value="{{ $r }}" {{ old('rombel') === $r ? 'selected' : '' }}>{{ $r }}</option>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Kelas</label>
+                        <select name="kelas_id" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                            <option value="">Pilih Kelas</option>
+                            @foreach ($kelasList as $kelasOption)
+                                <option value="{{ $kelasOption->id }}" {{ old('kelas_id') == $kelasOption->id ? 'selected' : '' }}>
+                                    {{ $kelasOption->tingkat }} {{ $kelasOption->jurusan }} {{ $kelasOption->rombel }}
+                                </option>
                             @endforeach
                         </select>
                     </div>

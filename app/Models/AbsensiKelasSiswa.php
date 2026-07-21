@@ -16,6 +16,7 @@ class AbsensiKelasSiswa extends Model
         'tanggal',
         'status',
         'keterangan',
+        'materi',
     ];
 
     protected $casts = [

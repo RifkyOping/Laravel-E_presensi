@@ -181,19 +181,12 @@ class AbsensiSiswaController extends Controller
                 return back()->with('error', "Anda berada di luar area {$setting->nama_sekolah}. Jarak Anda: {$jarakTampil} m (batas: {$setting->radius_meter} m).");
             }
             
-            $kategori = null;
-            $jadwal = \App\Models\JadwalAbsensi::where('hari', \Carbon\Carbon::parse($today)->translatedFormat('l'))->first();
-            if ($jadwal && now()->format('H:i:s') > \Carbon\Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i:s')) {
-                $kategori = 'terlambat';
-            }
-
             $existing = AbsensiSiswa::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
             if ($existing) {
                 if (in_array($existing->status, ['sakit', 'izin'])) {
                     $existing->update([
                         'status' => 'hadir',
                         'waktu_datang' => now()->format('H:i:s'),
-                        'kategori' => $kategori,
                         'keterangan' => null,
                         'file_bukti' => null,
                         'status_pengajuan' => null,
@@ -208,16 +201,12 @@ class AbsensiSiswaController extends Controller
                 'tanggal'      => $today,
                 'waktu_datang' => now()->format('H:i:s'),
                 'status'       => 'hadir',
-                'kategori'     => $kategori,
             ]);
 
             return back()->with('success', 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
             
         } elseif ($jenis === 'sakit') {
             $existing = AbsensiSiswa::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
-            if ($existing && $existing->status === 'hadir') {
-                return back()->with('error', 'Anda sudah absen hadir hari ini.');
-            }
 
             AbsensiSiswa::updateOrCreate(
                 ['user_id' => $user->id, 'tanggal' => $today->toDateString()],
@@ -235,9 +224,6 @@ class AbsensiSiswaController extends Controller
             
         } elseif ($jenis === 'izin') {
             $existing = AbsensiSiswa::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
-            if ($existing && $existing->status === 'hadir') {
-                return back()->with('error', 'Anda sudah absen hadir hari ini.');
-            }
 
             AbsensiSiswa::updateOrCreate(
                 ['user_id' => $user->id, 'tanggal' => $today->toDateString()],
@@ -325,19 +311,8 @@ class AbsensiSiswaController extends Controller
                     . Carbon::parse($existing->waktu_pulang)->format('H:i') . ' WITA.');
         }
 
-        $jadwal = \App\Models\JadwalAbsensi::where('hari', \Carbon\Carbon::parse($today)->translatedFormat('l'))->first();
-        $kategori = $existing->kategori;
-        if ($jadwal && now()->format('H:i:s') < \Carbon\Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i:s')) {
-            if ($kategori === 'terlambat') {
-                $kategori = 'terlambat dan pulang cepat';
-            } else {
-                $kategori = 'pulang cepat';
-            }
-        }
-
         $existing->update([
             'waktu_pulang' => now()->format('H:i:s'),
-            'kategori' => $kategori,
         ]);
 
         return redirect()->route('absensi')

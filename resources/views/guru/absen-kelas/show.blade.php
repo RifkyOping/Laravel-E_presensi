@@ -1,6 +1,8 @@
 @php use Carbon\Carbon; @endphp
 <x-app-layout>
-    <x-slot name="title">Absen Kelas – {{ $jadwal->mata_pelajaran }}</x-slot>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Absen Kelas – {{ $jadwal->mata_pelajaran }}</span>
+    </x-slot>
 
     @php
         $pageTitle    = 'Absen Kelas: ' . $jadwal->kelas;
@@ -34,6 +36,12 @@
                 <div class="text-right flex-shrink-0">
                     <p class="text-white/60 text-xs font-bold uppercase tracking-wider mb-1">Tanggal</p>
                     <p class="text-white font-black text-lg">{{ Carbon::parse($today)->translatedFormat('d M Y') }}</p>
+                    @if($aktivitas->waktu_absen_masuk)
+                        <p class="text-[11px] text-white/75 mt-1 font-bold">Masuk: {{ Carbon::parse($aktivitas->waktu_absen_masuk)->format('H:i') }} WITA</p>
+                    @endif
+                    @if($aktivitas->waktu_absen_keluar)
+                        <p class="text-[11px] text-white/75 font-bold">Keluar: {{ Carbon::parse($aktivitas->waktu_absen_keluar)->format('H:i') }} WITA</p>
+                    @endif
                     @if($sudahDiabsen)
                         <span class="inline-flex items-center gap-1.5 bg-emerald-400/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs px-3 py-1 rounded-full mt-2">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +68,36 @@
             </div>
         @endif
 
-        @if($siswas->isEmpty())
+        @if(session('success'))
+            <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-3.5 rounded-xl text-sm font-semibold">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(!$aktivitas->waktu_absen_masuk)
+            <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
+                <div class="w-16 h-16 bg-[#1e3a6e]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#1e3a6e]">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-700 text-lg mb-2">Absen Masuk Mengajar</h3>
+                <p class="text-slate-500 text-sm mb-6 max-w-md mx-auto">Anda belum melakukan Absen Masuk untuk kelas ini. Silakan klik tombol di bawah untuk mencatat waktu kehadiran Anda sebelum mengambil absen murid.</p>
+                <form method="POST" action="{{ route('guru.aktivitas.masuk', $aktivitas->id) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-8 py-3 rounded-xl text-sm transition duration-200 shadow-sm inline-flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        Absen Masuk Sekarang
+                    </button>
+                </form>
+            </div>
+        @elseif($siswas->isEmpty())
             <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
                 <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,6 +111,27 @@
         @else
             {{-- REKAP MODE (sudah diabsen) --}}
             @if($sudahDiabsen)
+            
+            @if(!$aktivitas->waktu_absen_keluar)
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+                <div>
+                    <h3 class="font-bold text-amber-800 text-lg flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Jangan Lupa Absen Keluar!
+                    </h3>
+                    <p class="text-sm text-amber-700 mt-1 font-medium">Absensi murid sudah disimpan. Jika kelas sudah selesai, silakan lakukan Absen Keluar.</p>
+                </div>
+                <form method="POST" action="{{ route('guru.aktivitas.keluar', $aktivitas->id) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition duration-200 shadow-sm flex-shrink-0 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        Absen Keluar Mengajar
+                    </button>
+                </form>
+            </div>
+            @endif
+
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
@@ -83,7 +141,17 @@
                             </svg>
                             Rekap Absensi Kelas
                         </h3>
-                        <p class="text-sm text-slate-500 mt-0.5">Absensi sudah disimpan dan tidak dapat diubah.</p>
+                        <p class="text-sm text-slate-500 mt-0.5 mb-3">Absensi sudah disimpan dan tidak dapat diubah.</p>
+                        <form method="GET" action="{{ route('guru.absen-kelas.export', $jadwal->id) }}" class="flex items-center gap-2 mt-2 sm:mt-0">
+                            <select name="delimiter" class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-3 py-2 text-slate-800 font-medium text-xs bg-white">
+                                <option value=";">Excel ID (;)</option>
+                                <option value=",">Excel EN (,)</option>
+                            </select>
+                            <button type="submit" class="inline-flex items-center gap-1.5 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Download Rekap
+                            </button>
+                        </form>
                     </div>
                     {{-- Summary badges --}}
                     <div class="flex flex-wrap gap-2">
@@ -111,6 +179,13 @@
                         </span>
                     </div>
                 </div>
+                @php $materiHariIni = $absensiHariIni->first()?->materi; @endphp
+                @if($materiHariIni)
+                <div class="px-6 py-4 bg-slate-50/50 border-b border-slate-100">
+                    <p class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider mb-1">Materi yang Diajarkan</p>
+                    <p class="text-sm text-slate-800">{{ $materiHariIni }}</p>
+                </div>
+                @endif
                 <div class="divide-y divide-slate-100">
                     @foreach($siswas as $i => $siswa)
                     @php $absensi = $absensiHariIni->get($siswa->id); @endphp
@@ -145,6 +220,15 @@
             @else
             <form method="POST" action="{{ route('guru.absen-kelas.store', $jadwal->id) }}" id="form-absen-kelas">
                 @csrf
+                
+                {{-- Input Materi --}}
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+                    <div class="px-6 py-5">
+                        <label class="block text-sm font-bold text-slate-800 mb-2">Materi yang Diajarkan Hari Ini <span class="text-red-500">*</span></label>
+                        <textarea name="materi" rows="3" required class="w-full rounded-xl border-slate-200 focus:border-[#1e3a6e] focus:ring-[#1e3a6e]/20 text-sm p-3" placeholder="Contoh: Bab 1 Pendahuluan, Diskusi Kelompok..."></textarea>
+                        <p class="text-xs text-slate-500 mt-2">Wajib diisi. Materi ini akan disimpan sebagai catatan jurnal kelas untuk sesi ini.</p>
+                    </div>
+                </div>
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>

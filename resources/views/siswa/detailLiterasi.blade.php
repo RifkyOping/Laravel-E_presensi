@@ -32,7 +32,7 @@
                         </h1>
                         {{-- <!-- Nanti bisa diganti dinamis: {{ $buku->penulis }} --> --}}
                         <p class="text-lg font-medium text-[#24417c]/70">
-                            Oleh: Tim IT UPTD SMKN 1 Majene
+                            Oleh: Tim IT {{ \App\Models\SchoolSetting::get()->nama_sekolah }}
                         </p>
                     </div>
                     

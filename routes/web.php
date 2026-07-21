@@ -151,8 +151,13 @@ Route::middleware('auth')->group(function () {
     // Guru - Absen Kelas Siswa
     Route::get('/guru/absen-kelas', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'index'])->name('guru.absen-kelas.index');
     Route::get('/guru/absen-kelas/{jadwal}', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'show'])->name('guru.absen-kelas.show');
+    Route::get('/guru/absen-kelas/{jadwal}/export', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'export'])->name('guru.absen-kelas.export');
     Route::post('/guru/absen-kelas/{jadwal}', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'store'])->name('guru.absen-kelas.store');
     Route::post('/guru/upload-rpp', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'uploadRpp'])->name('guru.upload-rpp');
+    
+    // Guru - Buku Kemajuan Kelas
+    Route::get('/guru/buku-kemajuan', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'bukuKemajuan'])->name('guru.buku-kemajuan');
+    Route::get('/guru/buku-kemajuan/cetak', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'cetakBukuKemajuan'])->name('guru.buku-kemajuan.cetak');
 });
 
 require __DIR__ . '/auth.php';
@@ -251,6 +256,7 @@ Route::middleware(['auth', 'kurikulum'])->prefix('kurikulum')->name('kurikulum.'
 Route::middleware(['auth'])->prefix('piket')->name('piket.')->group(function () {
     // Piket Absen Sholat Siswa
     Route::get('/sholat', [PiketSholatController::class, 'index'])->name('sholat.index');
+    Route::get('/sholat/export', [PiketSholatController::class, 'export'])->name('sholat.export');
     Route::post('/sholat', [PiketSholatController::class, 'store'])->name('sholat.store');
 
     // Piket Verifikasi Mengajar

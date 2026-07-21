@@ -20,7 +20,7 @@
                     </svg>
                 </div>
                 <h2 class="text-white font-black text-xl leading-tight">Verifikasi Akses</h2>
-                <p class="text-white/70 text-sm mt-1.5 font-medium">E-Presensi UPTD SMKN 1 Majene</p>
+                <p class="text-white/70 text-sm mt-1.5 font-medium">E-Presensi {{ \App\Models\SchoolSetting::get()->nama_sekolah }}</p>
             </div>
 
             {{-- Body --}}

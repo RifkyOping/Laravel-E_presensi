@@ -31,7 +31,7 @@
                     <h2 class="font-black text-slate-800 text-lg">Pengaturan Absensi & Geofencing</h2>
                     <p class="text-slate-500 text-sm mt-1">
                         Tentukan titik pusat lokasi sekolah dan radius area yang diizinkan untuk melakukan absensi.
-                        Siswa dan guru hanya bisa absen jika berada dalam radius yang ditentukan.
+                        Murid dan guru hanya bisa absen jika berada dalam radius yang ditentukan.
                     </p>
                 </div>
             </div>
@@ -137,10 +137,17 @@
 
                     <div class="space-y-4">
 
-                        <div>
-                            <label class="app-label">Nama Sekolah</label>
-                            <input type="text" name="nama_sekolah" class="app-input"
-                                value="{{ old('nama_sekolah', $setting->nama_sekolah) }}" required>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="app-label">Nama Sekolah</label>
+                                <input type="text" name="nama_sekolah" class="app-input"
+                                    value="{{ old('nama_sekolah', $setting->nama_sekolah) }}" required>
+                            </div>
+                            <div>
+                                <label class="app-label">Tahun Ajaran</label>
+                                <input type="text" name="tahun_ajaran" class="app-input"
+                                    value="{{ old('tahun_ajaran', $setting->tahun_ajaran) }}" required placeholder="Misal: 2026 / 2027">
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">

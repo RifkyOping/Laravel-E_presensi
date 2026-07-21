@@ -20,41 +20,62 @@
                 .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
             </style>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <form method="GET" action="{{ route('guru.literasi.jawaban-indikator') }}" class="flex flex-wrap gap-4">
-                    <div class="flex-1 min-w-[200px]">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Tingkat</label>
-                        <select name="tingkat" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
-                            <option value="">Semua Tingkat</option>
-                            @foreach($tingkats as $t)
-                                <option value="{{ $t }}" {{ request('tingkat') == $t ? 'selected' : '' }}>{{ $t }}</option>
-                            @endforeach
-                        </select>
+            <div x-data="{ showFilter: {{ request('tingkat') || request('jurusan') || request('rombel') ? 'false' : 'true' }} }" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
+                            <svg class="w-4 h-4 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-black text-slate-700">Filter Pencarian</h2>
+                            <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk menyesuaikan tingkat, jurusan, dan rombel</p>
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-[200px]">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Jurusan</label>
-                        <select name="jurusan" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
-                            <option value="">Semua Jurusan</option>
-                            @foreach($jurusans as $j)
-                                <option value="{{ $j }}" {{ request('jurusan') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                            @endforeach
-                        </select>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 group-hover:bg-slate-100 transition-colors">
+                        <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
                     </div>
-                    <div class="flex-1 min-w-[200px]">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Rombel</label>
-                        <select name="rombel" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
-                            <option value="">Semua Rombel</option>
-                            @foreach($rombels as $r)
-                                <option value="{{ $r }}" {{ request('rombel') == $r ? 'selected' : '' }}>{{ $r }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition">
-                            Filter
-                        </button>
-                    </div>
-                </form>
+                </button>
+
+                <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
+                    <form method="GET" action="{{ route('guru.literasi.jawaban-indikator') }}" class="flex flex-wrap gap-4">
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Tingkat</label>
+                            <select name="tingkat" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
+                                <option value="">Semua Tingkat</option>
+                                @foreach($tingkats as $t)
+                                    <option value="{{ $t }}" {{ request('tingkat') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Jurusan</label>
+                            <select name="jurusan" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
+                                <option value="">Semua Jurusan</option>
+                                @foreach($jurusans as $j)
+                                    <option value="{{ $j }}" {{ request('jurusan') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Rombel</label>
+                            <select name="rombel" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
+                                <option value="">Semua Rombel</option>
+                                @foreach($rombels as $r)
+                                    <option value="{{ $r }}" {{ request('rombel') == $r ? 'selected' : '' }}>{{ $r }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition h-[38px] md:h-auto">
+                                Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

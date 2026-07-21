@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'UPTD SMKN 1 Majene') }}</title>
+        <title>{{ config('app.name', \App\Models\SchoolSetting::get()->nama_sekolah) }}</title>
         <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
 
         <!-- Fonts -->
@@ -27,7 +27,7 @@
                 <!-- Content Top -->
                 <div class="relative z-10 flex items-center gap-3 mb-10">
                     <a href="/" class="transition-transform hover:scale-105 duration-300">
-                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo UPTD SMKN 1 Majene" class="h-12 bg-white p-2.5 rounded-lg shadow-xl">
+                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo {{ \App\Models\SchoolSetting::get()->nama_sekolah }}" class="h-12 bg-white p-2.5 rounded-lg shadow-xl">
                     </a>
                 </div>
 
@@ -38,7 +38,7 @@
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-400">Terpadu & Modern</span>
                     </h1>
                     <p class="text-lg xl:text-xl text-blue-100/90 max-w-md font-medium leading-relaxed mb-10">
-                        Platform digital resmi UPTD SMKN 1 Majene untuk pencatatan kehadiran presisi dan akses literasi e-Book interaktif.
+                        Platform digital resmi {{ \App\Models\SchoolSetting::get()->nama_sekolah }} untuk pencatatan kehadiran presisi dan akses literasi e-Book interaktif.
                     </p>
                     
                     <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 w-fit">
@@ -67,7 +67,7 @@
                 <!-- Mobile Logo -->
                 <div class="lg:hidden mb-10 relative z-10 w-full max-w-md flex justify-center">
                     <a href="/" class="transition-transform hover:scale-105 duration-300">
-                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo UPTD SMKN 1 Majene" class="h-12 shadow-sm bg-white p-2 rounded-lg">
+                        <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo {{ \App\Models\SchoolSetting::get()->nama_sekolah }}" class="h-12 shadow-sm bg-white p-2 rounded-lg">
                     </a>
                 </div>
 
