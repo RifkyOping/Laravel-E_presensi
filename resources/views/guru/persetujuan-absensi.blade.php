@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <span class="text-sm font-bold text-slate-800">Persetujuan Izin & Sakit Siswa</span>
+        <span class="text-sm font-bold text-slate-800">Persetujuan Izin & Sakit Murid</span>
     </x-slot>
 
     <div class="space-y-6">
@@ -23,19 +23,19 @@
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <h3 class="font-bold text-slate-800 flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    Menunggu Persetujuan Anda
+                    Menunggu Persetujuan
                 </h3>
             </div>
             
-            <div class="overflow-x-auto">
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full app-tbl">
                     <thead>
                         <tr>
                             <th class="text-left">Tanggal</th>
                             <th class="text-left">Nama Siswa</th>
-                            <th class="text-center">Jenis</th>
+                            <th class="text-center">Judul Pengajuan</th>
                             <th class="text-left">Keterangan</th>
-                            <th class="text-center">Bukti</th>
+                            <th class="text-center">Surat</th>
                             <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -66,7 +66,7 @@
                                 @if($p->file_bukti)
                                     <a href="{{ asset('storage/' . $p->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                        Lihat Bukti
+                                        Lihat Surat
                                     </a>
                                 @else
                                     <span class="text-slate-400 italic text-xs">Tidak ada</span>
@@ -97,6 +97,64 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Mobile Cards View --}}
+            <div class="md:hidden flex flex-col divide-y divide-slate-100">
+                @forelse($pengajuanSiswa as $p)
+                <div class="p-4 space-y-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm">
+                                {{ strtoupper(substr($p->user->name ?? '?', 0, 1)) }}
+                            </div>
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm block">{{ $p->user->name ?? 'User Dihapus' }}</span>
+                                <span class="text-xs font-medium text-slate-500">
+                                    {{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}
+                                    @if($p->tanggal_selesai && \Carbon\Carbon::parse($p->tanggal_selesai)->format('Y-m-d') !== \Carbon\Carbon::parse($p->tanggal)->format('Y-m-d'))
+                                        - {{ \Carbon\Carbon::parse($p->tanggal_selesai)->translatedFormat('d M y') }}
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                        <span class="app-badge {{ $p->status === 'izin' ? 'b-amber' : 'b-slate' }} capitalize text-[10px] px-2 py-0.5">
+                            {{ $p->status }}
+                        </span>
+                    </div>
+                    
+                    @if($p->keterangan)
+                    <div class="bg-slate-50 rounded-xl p-3 text-xs text-slate-600 border border-slate-100 leading-relaxed">
+                        {{ $p->keterangan }}
+                    </div>
+                    @endif
+                    
+                    <div class="flex items-center justify-between pt-2">
+                        <div>
+                            @if($p->file_bukti)
+                                <a href="{{ asset('storage/' . $p->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1.5 text-[#1e3a6e] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-bold text-xs transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    Lihat Surat
+                                </a>
+                            @else
+                                <span class="text-slate-400 italic text-[11px]">Tak ada surat</span>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <form action="{{ route('guru.persetujuan-absensi.reject', ['id' => $p->id]) }}" method="POST">
+                                @csrf
+                                <button type="button" onclick="confirmReject(this)" class="bg-red-50 text-red-600 px-4 py-1.5 rounded-lg text-xs font-bold border border-red-200">Tolak</button>
+                            </form>
+                            <form action="{{ route('guru.persetujuan-absensi.approve', ['id' => $p->id]) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-lg text-xs font-bold border border-emerald-200">Setujui</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="p-8 text-center text-slate-400 text-sm">Tidak ada pengajuan.</div>
+                @endforelse
+            </div>
         </div>
 
         {{-- Riwayat Keputusan --}}
@@ -107,15 +165,15 @@
             </h2>
             
             <div class="app-card overflow-hidden">
-                <div class="overflow-x-auto">
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full app-tbl">
                         <thead>
                             <tr>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Tanggal</th>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Nama Siswa</th>
-                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Jenis</th>
+                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Judul Pengajuan</th>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Keterangan</th>
-                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Bukti</th>
+                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Surat</th>
                                 <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Keputusan</th>
                             </tr>
                         </thead>
@@ -137,7 +195,7 @@
                                     @if($r->file_bukti)
                                         <a href="{{ asset('storage/' . $r->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition whitespace-nowrap">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                            Lihat
+                                            Lihat Surat
                                         </a>
                                     @else
                                         <span class="text-slate-400 italic text-xs">Tidak ada</span>
@@ -157,6 +215,57 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Mobile Cards View for Riwayat --}}
+                <div class="md:hidden flex flex-col divide-y divide-slate-100">
+                    @forelse($riwayatSiswa as $r)
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm border border-slate-200">
+                                    {{ strtoupper(substr($r->user->name ?? '?', 0, 1)) }}
+                                </div>
+                                <div>
+                                    <span class="font-bold text-slate-800 text-sm block">{{ $r->user->name ?? 'User Dihapus' }}</span>
+                                    <span class="text-xs font-medium text-slate-500">
+                                        {{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('d M Y') }}
+                                        @if($r->tanggal_selesai && \Carbon\Carbon::parse($r->tanggal_selesai)->format('Y-m-d') !== \Carbon\Carbon::parse($r->tanggal)->format('Y-m-d'))
+                                            - {{ \Carbon\Carbon::parse($r->tanggal_selesai)->translatedFormat('d M y') }}
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-1.5">
+                                <span class="app-badge {{ $r->status === 'izin' ? 'b-amber' : 'b-slate' }} capitalize text-[9px] px-2 py-0.5">
+                                    {{ $r->status }}
+                                </span>
+                                @if($r->status_pengajuan === 'approved')
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">Disetujui</span>
+                                @else
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-50 text-red-600 border border-red-100">Ditolak</span>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        @if($r->keterangan)
+                        <div class="bg-slate-50 rounded-xl p-3 text-xs text-slate-600 border border-slate-100 leading-relaxed">
+                            {{ $r->keterangan }}
+                        </div>
+                        @endif
+                        
+                        @if($r->file_bukti)
+                        <div class="pt-1">
+                            <a href="{{ asset('storage/' . $r->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-bold text-xs transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Lihat Surat
+                            </a>
+                        </div>
+                        @endif
+                    </div>
+                    @empty
+                    <div class="p-8 text-center text-slate-400 text-sm">Belum ada riwayat keputusan.</div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>
@@ -166,7 +275,9 @@
         function confirmReject(button) {
             Swal.fire({
                 title: 'Tolak Pengajuan?',
-                text: "Jika ditolak, status kehadiran akan diubah menjadi Alpha.",
+                text: "Berikan alasan penolakan (wajib diisi):",
+                input: 'textarea',
+                inputPlaceholder: 'Tulis alasan penolakan...',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc2626',
@@ -174,6 +285,13 @@
                 confirmButtonText: 'Ya, Tolak!',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
+                preConfirm: (alasan) => {
+                    if (!alasan.trim()) {
+                        Swal.showValidationMessage('Alasan penolakan wajib diisi!');
+                        return false;
+                    }
+                    return alasan;
+                },
                 customClass: {
                     popup: 'rounded-2xl shadow-2xl border border-slate-100',
                     title: 'text-xl font-black text-slate-800',
@@ -182,7 +300,13 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    button.closest('form').submit();
+                    let form = button.closest('form');
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'alasan';
+                    input.value = result.value;
+                    form.appendChild(input);
+                    form.submit();
                 }
             })
         }

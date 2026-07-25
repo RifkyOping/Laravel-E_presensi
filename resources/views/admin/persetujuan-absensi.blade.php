@@ -27,7 +27,7 @@
                         <tr>
                             <th class="text-left">Tanggal</th>
                             <th class="text-left">Nama Murid</th>
-                            <th class="text-center">Jenis</th>
+                            <th class="text-center">Judul Pengajuan</th>
                             <th class="text-left">Keterangan</th>
                             <th class="text-center">Bukti</th>
                             <th class="text-center">Aksi</th>
@@ -113,7 +113,7 @@
                         <tr>
                             <th class="text-left">Tanggal</th>
                             <th class="text-left">Nama Guru</th>
-                            <th class="text-center">Jenis</th>
+                            <th class="text-center">Judul Pengajuan</th>
                             <th class="text-left">Keterangan</th>
                             <th class="text-center">Bukti</th>
                             <th class="text-center">Aksi</th>
@@ -138,7 +138,7 @@
                             </td>
                             <td class="text-center">
                                 <span class="app-badge {{ $p->status === 'izin' ? 'b-amber' : 'b-slate' }} capitalize">
-                                    {{ $p->status }}
+                                    {{ $p->judul_pengajuan ?? $p->status }}
                                 </span>
                             </td>
                             <td class="max-w-xs truncate" title="{{ $p->keterangan }}">{{ $p->keterangan ?? '-' }}</td>
@@ -200,7 +200,7 @@
                             <tr>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Tanggal</th>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Nama Murid</th>
-                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Jenis</th>
+                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Judul Pengajuan</th>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Keterangan</th>
                                 <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Bukti</th>
                                 <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Keputusan</th>
@@ -262,7 +262,7 @@
                             <tr>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Tanggal</th>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Nama Guru</th>
-                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Jenis</th>
+                                <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Judul Pengajuan</th>
                                 <th class="text-left px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Keterangan</th>
                                 <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Bukti</th>
                                 <th class="text-center px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-600">Keputusan</th>
@@ -279,7 +279,7 @@
                                 </td>
                                 <td class="px-4 py-3 font-semibold text-slate-800 whitespace-nowrap">{{ $r->user->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-center">
-                                    <span class="app-badge {{ $r->status === 'izin' ? 'b-amber' : 'b-slate' }} capitalize">{{ $r->status }}</span>
+                                    <span class="app-badge {{ $r->status === 'izin' ? 'b-amber' : 'b-slate' }} capitalize">{{ $r->judul_pengajuan ?? $r->status }}</span>
                                 </td>
                                 <td class="px-4 py-3 max-w-xs truncate" title="{{ $r->keterangan }}">{{ $r->keterangan ?? '-' }}</td>
                                 <td class="px-4 py-3 text-center">
@@ -314,7 +314,9 @@
         function confirmReject(button) {
             Swal.fire({
                 title: 'Tolak Pengajuan?',
-                text: "Jika ditolak, status kehadiran akan diubah menjadi Alpha.",
+                text: "Berikan alasan penolakan (wajib diisi):",
+                input: 'textarea',
+                inputPlaceholder: 'Tulis alasan penolakan...',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc2626',
@@ -322,6 +324,13 @@
                 confirmButtonText: 'Ya, Tolak!',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
+                preConfirm: (alasan) => {
+                    if (!alasan.trim()) {
+                        Swal.showValidationMessage('Alasan penolakan wajib diisi!');
+                        return false;
+                    }
+                    return alasan;
+                },
                 customClass: {
                     popup: 'rounded-2xl shadow-2xl border border-slate-100',
                     title: 'text-xl font-black text-slate-800',
@@ -330,7 +339,13 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    button.closest('form').submit();
+                    let form = button.closest('form');
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'alasan';
+                    input.value = result.value;
+                    form.appendChild(input);
+                    form.submit();
                 }
             })
         }

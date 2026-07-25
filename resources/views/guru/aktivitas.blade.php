@@ -75,98 +75,94 @@
     @endif
 
     {{-- Form Tambah Sesi Mengajar --}}
-    <div class="bg-white rounded-2xl border-2 border-[#24417c]/20 overflow-hidden">
-        <div class="px-5 py-4 sm:px-6 sm:py-5 border-b-2 border-[#24417c]/10">
-            <h3 class="text-base font-black text-[#24417c]">Tambah Sesi Tambahan / Pengganti</h3>
-            <p class="text-[#24417c]/60 font-medium text-xs mt-0.5">Isi form di bawah jika mengajar di luar jadwal tetap hari ini.</p>
-        </div>
+    <div x-data="{ showForm: {{ $errors->any() ? 'true' : 'false' }} }" class="bg-white rounded-2xl border-2 border-[#24417c]/20 overflow-hidden">
+        <button type="button" @click="showForm = !showForm" class="w-full px-5 py-4 sm:px-6 sm:py-5 border-b-2 border-[#24417c]/10 flex items-center justify-between text-left focus:outline-none group hover:bg-[#24417c]/5 transition-colors">
+            <div>
+                <h3 class="text-base font-black text-[#24417c]">Tambah Sesi Tambahan / Pengganti</h3>
+                <p class="text-[#24417c]/60 font-medium text-xs mt-0.5">Isi form di bawah jika mengajar di luar jadwal tetap hari ini.</p>
+            </div>
+            <svg class="w-5 h-5 text-[#24417c]/60 transition-transform duration-200" :class="{ 'rotate-180': showForm }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
 
-        <form method="POST" action="{{ route('guru.aktivitas.store') }}" class="p-5 sm:p-6">
-            @csrf
+        <div x-show="showForm" x-transition style="display: none;" class="bg-slate-50/50">
+            <form method="POST" action="{{ route('guru.aktivitas.store') }}" class="p-5 sm:p-6">
+                @csrf
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
 
-                {{-- Mata Pelajaran --}}
-                <div class="sm:col-span-2">
-                    <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
-                        Mata Pelajaran <span class="text-red-500">*</span>
-                    </label>
-                    <select name="mata_pelajaran"
-                        class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 bg-white text-sm">
-                        <option value="">-- Pilih Mata Pelajaran --</option>
-                        @foreach ($mapels as $mapel)
-                            <option value="{{ $mapel }}" {{ old('mata_pelajaran') === $mapel ? 'selected' : '' }}>
-                                {{ $mapel }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- Kelas (Tingkat, Jurusan, Rombel) --}}
-                <div class="sm:col-span-2">
-                    <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
-                        Kelas <span class="text-red-500">*</span>
-                    </label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <select name="tingkat" required class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-2 py-2.5 text-[#24417c] font-medium text-sm focus:outline-none transition bg-white">
-                            <option value="">Tingkat</option>
-                            @foreach ($tingkats as $t)
-                                <option value="{{ $t }}" {{ old('tingkat') === $t ? 'selected' : '' }}>{{ $t }}</option>
-                            @endforeach
-                        </select>
-                        <select name="jurusan" required class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-2 py-2.5 text-[#24417c] font-medium text-sm focus:outline-none transition bg-white">
-                            <option value="">Jurusan</option>
-                            @foreach ($jurusans as $j)
-                                <option value="{{ $j }}" {{ old('jurusan') === $j ? 'selected' : '' }}>{{ $j }}</option>
-                            @endforeach
-                        </select>
-                        <select name="rombel" required class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-2 py-2.5 text-[#24417c] font-medium text-sm focus:outline-none transition bg-white">
-                            <option value="">Rombel</option>
-                            @foreach ($rombels as $r)
-                                <option value="{{ $r }}" {{ old('rombel') === $r ? 'selected' : '' }}>{{ $r }}</option>
+                    {{-- Mata Pelajaran --}}
+                    <div class="col-span-2">
+                        <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
+                            Mata Pelajaran <span class="text-red-500">*</span>
+                        </label>
+                        <select name="mata_pelajaran"
+                            class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 bg-white text-sm">
+                            <option value="">-- Pilih Mata Pelajaran --</option>
+                            @foreach ($mapels as $mapel)
+                                <option value="{{ $mapel }}" {{ old('mata_pelajaran') === $mapel ? 'selected' : '' }}>
+                                    {{ $mapel }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
+
+                    {{-- Kelas --}}
+                    <div class="col-span-1">
+                        <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
+                            Kelas <span class="text-red-500">*</span>
+                        </label>
+                        <select name="kelas" required
+                            class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 bg-white text-sm">
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach ($kelasList as $kelas)
+                                @php $namaKelas = $kelas->tingkat . ' ' . $kelas->jurusan . ' ' . $kelas->rombel; @endphp
+                                <option value="{{ $namaKelas }}" {{ old('kelas') === $namaKelas ? 'selected' : '' }}>
+                                    {{ $namaKelas }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Jam Ke- --}}
+                    <div class="col-span-1">
+                        <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
+                            Jam Ke- <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="jam_ke" value="{{ old('jam_ke') }}" min="1" required
+                            class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 text-sm">
+                    </div>
+
+                    {{-- Jam Mulai --}}
+                    <div class="col-span-1">
+                        <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
+                            Jam Mulai <span class="text-red-500">*</span>
+                        </label>
+                        <input type="time" name="jam_mulai" value="{{ old('jam_mulai') }}"
+                            class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 text-sm">
+                    </div>
+
+                    {{-- Jam Selesai --}}
+                    <div class="col-span-1">
+                        <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
+                            Jam Selesai
+                        </label>
+                        <input type="time" name="jam_selesai" value="{{ old('jam_selesai') }}"
+                            class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 text-sm">
+                    </div>
+
                 </div>
 
-                {{-- Jam Ke- --}}
-                <div>
-                    <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
-                        Jam Ke- <span class="text-red-500">*</span>
-                    </label>
-                    <input type="number" name="jam_ke" value="{{ old('jam_ke') }}" min="1" required
-                        class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 text-sm">
+                {{-- Tombol Simpan --}}
+                <div class="mt-5 flex justify-end">
+                    <button type="submit"
+                        class="bg-[#24417c] text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-[#162d57] transition duration-200 shadow-md shadow-[#24417c]/20 w-full sm:w-auto">
+                        Simpan
+                    </button>
                 </div>
-
-                {{-- Jam Mulai --}}
-                <div>
-                    <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
-                        Jam Mulai <span class="text-red-500">*</span>
-                    </label>
-                    <input type="time" name="jam_mulai" value="{{ old('jam_mulai') }}"
-                        class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 text-sm">
-                </div>
-
-                {{-- Jam Selesai --}}
-                <div class="sm:col-span-2">
-                    <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
-                        Jam Selesai
-                    </label>
-                    <input type="time" name="jam_selesai" value="{{ old('jam_selesai') }}"
-                        class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 text-sm">
-                </div>
-
-
-            </div>
-
-            {{-- Tombol Simpan --}}
-            <div class="mt-5 flex justify-end">
-                <button type="submit"
-                    class="bg-[#24417c] text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-[#162d57] transition duration-200 shadow-md shadow-[#24417c]/20 w-full sm:w-auto">
-                    Simpan
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     {{-- Riwayat Aktivitas Mengajar --}}

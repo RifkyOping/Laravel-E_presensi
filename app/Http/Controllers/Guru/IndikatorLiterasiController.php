@@ -35,7 +35,7 @@ class IndikatorLiterasiController extends Controller
 
         IndikatorLiterasi::create([
             'pertanyaan' => $request->pertanyaan,
-            'aktif' => $request->has('aktif') ? true : false,
+            'aktif' => $request->boolean('aktif'),
         ]);
 
         return redirect()->route('guru.indikator.index')->with('success', 'Pertanyaan Indikator berhasil ditambahkan.');
@@ -55,7 +55,7 @@ class IndikatorLiterasiController extends Controller
 
         $indikator->update([
             'pertanyaan' => $request->pertanyaan,
-            'aktif' => $request->has('aktif') ? true : false,
+            'aktif' => $request->boolean('aktif'),
         ]);
 
         return redirect()->route('guru.indikator.index')->with('success', 'Pertanyaan Indikator berhasil diperbarui.');

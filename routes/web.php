@@ -82,15 +82,15 @@ Route::middleware('auth')->group(function () {
     // Riwayat Sholat Murid
     Route::get('/murid/sholat', [AbsensiSiswaController::class, 'riwayatSholat'])->name('murid.sholat');
 
+    // Monitoring Kelas Murid
+    Route::get('/murid/monitoring-kelas', [AbsensiSiswaController::class, 'monitoringKelas'])->name('murid.monitoring-kelas');
+
     // Baca Al-Qur'an (Pure Arabic)
     Route::get('/murid/baca-quran', [\App\Http\Controllers\QuranController::class, 'index'])->name('murid.baca-quran.index');
     Route::get('/murid/baca-quran/surah/{nomor}', [\App\Http\Controllers\QuranController::class, 'show'])->name('murid.baca-quran.show');
     Route::get('/murid/baca-quran/juz/{nomor}', [\App\Http\Controllers\QuranController::class, 'juz'])->name('murid.baca-quran.juz');
 
     // E-Book Literasi
-    Route::get('/literasi/ebook/pilih', function () {
-        return view('siswa.ebook.pilih');
-    })->name('ebook.pilih');
 
     Route::get('/literasi/ebook', [EBookController::class, 'index'])->name('ebook.index');
     Route::get('/literasi/ebook/manual', [BukuManualController::class, 'index'])->name('ebook.manual.index');
@@ -138,7 +138,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/guru/literasi/jawaban-indikator/nilai', [\App\Http\Controllers\Guru\ReviewIndikatorController::class, 'storeNilai'])->name('guru.literasi.jawaban-indikator.nilai');
 
     // Guru - Manajemen Pertanyaan Indikator Literasi
-    Route::resource('/guru/literasi/manajemen-indikator', IndikatorLiterasiController::class)->names('guru.indikator');
+    Route::resource('/guru/literasi/manajemen-indikator', IndikatorLiterasiController::class)->parameters([
+        'manajemen-indikator' => 'indikator'
+    ])->names('guru.indikator');
 
     // Guru - Jadwal Mengajar (read-only, dikelola oleh admin)
     Route::get('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'index'])->name('guru.jadwal.index');
@@ -174,6 +176,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/users/import', [AdminController::class, 'importUsers'])->name('users.import');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+    Route::delete('/users/bulk-delete', [AdminController::class, 'bulkDestroyUsers'])->name('users.bulk-delete');
     Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');

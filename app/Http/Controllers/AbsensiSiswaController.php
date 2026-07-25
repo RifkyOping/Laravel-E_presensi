@@ -40,8 +40,8 @@ class AbsensiSiswaController extends Controller
             session()->now('popup_notification', [
                 'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
                 'text'  => $isApproved 
-                           ? 'Pengajuan izin/sakit Anda telah disetujui oleh Admin.' 
-                           : 'Pengajuan izin/sakit Anda ditolak oleh Admin, sehingga status Anda menjadi Alpa.',
+                           ? 'Pengajuan izin/sakit Anda telah disetujui.' 
+                           : 'Pengajuan izin/sakit Anda ditolak, sehingga status Anda menjadi Alpa.' . ($notif->alasan_ditolak ? ' Alasan penolakan: ' . $notif->alasan_ditolak : ''),
                 'icon'  => $isApproved ? 'success' : 'error'
             ]);
             
@@ -103,32 +103,21 @@ class AbsensiSiswaController extends Controller
                 'latitude.required'  => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi.',
                 'longitude.required' => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi.',
             ];
-        } elseif ($jenis === 'sakit') {
-            $rules = [
-                'guru_id'    => 'required|exists:users,id',
-                'keterangan' => 'required|string',
-                'file_bukti' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            ];
-            $messages = [
-                'guru_id.required'    => 'Silakan pilih guru tujuan.',
-                'keterangan.required' => 'Keterangan sakit wajib diisi.',
-                'file_bukti.required' => 'File bukti (surat sakit) wajib diunggah.',
-                'file_bukti.mimes'    => 'File bukti harus berupa gambar (JPG, PNG) atau PDF.',
-                'file_bukti.max'      => 'Ukuran file bukti maksimal 2MB.',
-            ];
-        } elseif ($jenis === 'izin') {
+        } elseif (in_array($jenis, ['sakit', 'izin'])) {
             $rules = [
                 'guru_id'         => 'required|exists:users,id',
-                'tanggal_selesai' => 'required|date|after_or_equal:today',
+                'tanggal_mulai'   => 'required|date',
+                'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
                 'keterangan'      => 'required|string',
                 'file_bukti'      => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             ];
             $messages = [
                 'guru_id.required'               => 'Silakan pilih guru tujuan.',
-                'tanggal_selesai.required'       => 'Tanggal selesai izin wajib diisi.',
-                'tanggal_selesai.after_or_equal' => 'Tanggal selesai izin tidak boleh di masa lalu.',
-                'keterangan.required'            => 'Keterangan izin wajib diisi.',
-                'file_bukti.required'            => 'File bukti izin wajib diunggah.',
+                'tanggal_mulai.required'         => 'Tanggal mulai wajib diisi.',
+                'tanggal_selesai.required'       => 'Tanggal selesai wajib diisi.',
+                'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+                'keterangan.required'            => 'Keterangan wajib diisi.',
+                'file_bukti.required'            => 'File bukti wajib diunggah.',
                 'file_bukti.mimes'               => 'File bukti harus berupa gambar (JPG, PNG) atau PDF.',
                 'file_bukti.max'                 => 'Ukuran file bukti maksimal 2MB.',
             ];
@@ -205,32 +194,14 @@ class AbsensiSiswaController extends Controller
 
             return back()->with('success', 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
             
-        } elseif ($jenis === 'sakit') {
-            $existing = AbsensiSiswa::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
-
+        } elseif (in_array($jenis, ['sakit', 'izin'])) {
+            $tanggalMulai = $request->tanggal_mulai;
             AbsensiSiswa::updateOrCreate(
-                ['user_id' => $user->id, 'tanggal' => $today->toDateString()],
-                [
-                    'guru_id'          => $request->guru_id,
-                    'status'           => 'sakit',
-                    'keterangan'       => $request->keterangan,
-                    'file_bukti'       => $filePath,
-                    'status_pengajuan' => 'pending',
-                    'is_notified'      => true,
-                ]
-            );
-
-            return back()->with('success', 'Pengajuan sakit Anda sedang menunggu konfirmasi guru.');
-            
-        } elseif ($jenis === 'izin') {
-            $existing = AbsensiSiswa::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
-
-            AbsensiSiswa::updateOrCreate(
-                ['user_id' => $user->id, 'tanggal' => $today->toDateString()],
+                ['user_id' => $user->id, 'tanggal' => $tanggalMulai],
                 [
                     'guru_id'          => $request->guru_id,
                     'tanggal_selesai'  => $request->tanggal_selesai,
-                    'status'           => 'izin',
+                    'status'           => $jenis,
                     'keterangan'       => $request->keterangan,
                     'file_bukti'       => $filePath,
                     'status_pengajuan' => 'pending',
@@ -238,7 +209,7 @@ class AbsensiSiswaController extends Controller
                 ]
             );
 
-            return back()->with('success', "Pengajuan Izin Anda sedang menunggu konfirmasi guru.");
+            return back()->with('success', 'Pengajuan ' . ucfirst($jenis) . ' Anda sedang menunggu konfirmasi guru.');
         }
     }
 
@@ -301,8 +272,15 @@ class AbsensiSiswaController extends Controller
             ->first();
 
         if (!$existing) {
-            return redirect()->route('absensi')
-                ->with('error', 'Anda belum melakukan absen datang hari ini.');
+            $existing = AbsensiSiswa::create([
+                'user_id' => $user->id,
+                'tanggal' => $today,
+                'status'  => 'hadir',
+                'kategori'=> 'bolos',
+            ]);
+        } elseif (!$existing->waktu_datang) {
+            $existing->status = 'hadir';
+            $existing->kategori = 'bolos';
         }
 
         if ($existing->waktu_pulang) {
@@ -329,5 +307,56 @@ class AbsensiSiswaController extends Controller
             ->paginate(20);
 
         return view('siswa.sholat', compact('riwayatSholat'));
+    }
+
+    /**
+     * Tampilkan halaman jadwal & monitoring kelas murid
+     */
+    public function monitoringKelas(Request $request)
+    {
+        $user = Auth::user();
+        $profile = $user->siswaProfile;
+        
+        if (!$profile) {
+            return redirect()->route('murid.dashboard')->with('error', 'Profil siswa tidak lengkap.');
+        }
+
+        $kelasStr = trim("{$profile->kelas} {$profile->jurusan} {$profile->rombel}");
+
+        $jadwalList = \App\Models\JadwalMengajar::with('user')
+            ->where('kelas', $kelasStr)
+            ->orderBy('jam_mulai')
+            ->get()
+            ->groupBy('hari');
+
+        $hariIniStr = [
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+            'Sunday'    => 'Minggu'
+        ][now()->format('l')] ?? 'Senin';
+        
+        $activeTab = $request->query('hari', $hariIniStr);
+        $today = Carbon::today()->toDateString();
+
+        // Get today's active AbsensiMengajar for this class
+        $absensiMengajar = \App\Models\AbsensiMengajar::whereDate('tanggal', $today)
+            ->where('kelas', $kelasStr)
+            ->get()
+            ->keyBy(function($item) {
+                return $item->user_id . '_' . $item->mata_pelajaran . '_' . $item->jam_ke;
+            });
+
+        // Get student's class attendance for today
+        // We will fetch based on today's date and the student's ID
+        $absensiKelas = \App\Models\AbsensiKelasSiswa::whereDate('tanggal', $today)
+            ->where('siswa_id', $user->id)
+            ->get()
+            ->keyBy('jadwal_mengajar_id');
+
+        return view('siswa.monitoring-kelas', compact('jadwalList', 'activeTab', 'hariIniStr', 'absensiMengajar', 'absensiKelas'));
     }
 }

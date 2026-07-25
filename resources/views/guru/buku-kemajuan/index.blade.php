@@ -13,7 +13,7 @@
                 Jadwal & Aktivitas Mengajar Hari Ini
             </h2>
 
-            <form method="GET" action="{{ route('guru.buku-kemajuan') }}" class="flex flex-col sm:flex-row gap-4 mb-6">
+            <form method="GET" action="{{ route('guru.buku-kemajuan') }}" class="flex flex-row gap-3 mb-6">
                 <div class="flex-1">
                     <select name="filter_kelas" class="app-input w-full" required>
                         <option value="">-- Pilih Kelas --</option>
@@ -25,19 +25,22 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="inline-flex justify-center items-center gap-2 px-6 py-2.5 rounded-full bg-[#1e3a6e] hover:bg-[#15294d] text-white font-bold text-sm transition shadow-lg shadow-[#1e3a6e]/30 shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="submit" class="inline-flex justify-center items-center gap-2 px-4 sm:px-6 py-2.5 rounded-full bg-[#1e3a6e] hover:bg-[#15294d] text-white font-bold text-sm transition shadow-lg shadow-[#1e3a6e]/30 shrink-0">
+                    <svg class="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Cari
+                    <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span class="hidden sm:inline">Cari</span>
                 </button>
             </form>
 
             @if(request()->has('filter_kelas'))
                 @if(isset($jadwalHariIni) && $jadwalHariIni->isNotEmpty())
-                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
+                    <div class="border border-slate-200 rounded-xl overflow-x-auto">
+                        <table class="w-full text-left border-collapse block md:table min-w-full">
+                            <thead class="hidden md:table-header-group">
                                 <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                                     <th class="p-4 font-bold border-b border-slate-200">Waktu</th>
                                     <th class="p-4 font-bold border-b border-slate-200">Mata Pelajaran</th>
@@ -47,53 +50,77 @@
                                     <th class="p-4 font-bold border-b border-slate-200 text-center">Absen Kelas</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm">
+                            <tbody class="block md:table-row-group divide-y divide-slate-100 text-sm">
                                 @foreach($jadwalHariIni as $jadwal)
-                                    <tr class="hover:bg-slate-50 transition">
-                                        <td class="p-4 whitespace-nowrap">
-                                            <span class="font-semibold text-slate-800">Jam ke-{{ $jadwal->jam_ke }}</span>
-                                            <div class="text-xs text-slate-500 mt-1">{{ $jadwal->jam_mulai }} - {{ $jadwal->jam_selesai }}</div>
+                                    <tr class="block md:table-row hover:bg-slate-50 transition border-b-4 md:border-none border-slate-100 p-4 md:p-0">
+                                        <td class="block md:table-cell md:p-4 md:whitespace-nowrap mb-3 md:mb-0 align-middle">
+                                            <div class="flex justify-between md:block items-center">
+                                                <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Waktu</span>
+                                                <div class="text-right md:text-left">
+                                                    <span class="font-semibold text-slate-800">Jam ke-{{ $jadwal->jam_ke }}</span>
+                                                    <div class="text-xs text-slate-500 mt-0.5 md:mt-1">{{ $jadwal->jam_mulai }} - {{ $jadwal->jam_selesai }}</div>
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td class="p-4 font-medium text-slate-800">{{ $jadwal->mata_pelajaran }}</td>
-                                        <td class="p-4">{{ $jadwal->user->name ?? '-' }}</td>
-                                        <td class="p-4 text-center">
-                                            @if($jadwal->waktu_datang)
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                                    {{ Carbon\Carbon::parse($jadwal->waktu_datang)->format('H:i') }}
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                    Belum
-                                                </span>
-                                            @endif
+                                        <td class="block md:table-cell md:p-4 font-medium text-slate-800 mb-2 md:mb-0 align-middle">
+                                            <div class="flex justify-between md:block items-center">
+                                                <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Mata Pelajaran</span>
+                                                <span class="text-right md:text-left">{{ $jadwal->mata_pelajaran }}</span>
+                                            </div>
                                         </td>
-                                        <td class="p-4 text-center">
-                                            @if($jadwal->waktu_pulang)
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                                    {{ Carbon\Carbon::parse($jadwal->waktu_pulang)->format('H:i') }}
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                    Belum
-                                                </span>
-                                            @endif
+                                        <td class="block md:table-cell md:p-4 mb-3 md:mb-0 align-middle">
+                                            <div class="flex justify-between md:block items-center">
+                                                <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Nama</span>
+                                                <span class="text-right md:text-left">{{ $jadwal->user->name ?? '-' }}</span>
+                                            </div>
                                         </td>
-                                        <td class="p-4 text-center">
-                                            @if($jadwal->sudah_absen_kelas)
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                                    Sudah
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                    Belum
-                                                </span>
-                                            @endif
+                                        <td class="block md:table-cell md:p-4 md:text-center border-t border-slate-100 md:border-none pt-3 md:pt-0 mt-3 md:mt-0 mb-2 md:mb-0 align-middle">
+                                            <div class="flex justify-between md:inline-flex md:justify-center items-center">
+                                                <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Masuk</span>
+                                                @if($jadwal->waktu_datang)
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                                        {{ Carbon\Carbon::parse($jadwal->waktu_datang)->format('H:i') }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        Belum
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="block md:table-cell md:p-4 md:text-center mb-2 md:mb-0 align-middle">
+                                            <div class="flex justify-between md:inline-flex md:justify-center items-center">
+                                                <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Keluar</span>
+                                                @if($jadwal->waktu_pulang)
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                                        {{ Carbon\Carbon::parse($jadwal->waktu_pulang)->format('H:i') }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        Belum
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="block md:table-cell md:p-4 md:text-center align-middle">
+                                            <div class="flex justify-between md:inline-flex md:justify-center items-center">
+                                                <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Absen Kelas</span>
+                                                @if($jadwal->sudah_absen_kelas)
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                                        Sudah
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        Belum
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

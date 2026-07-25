@@ -5,8 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="space-y-6 animate-up">
 
             @if(session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg relative" role="alert">
@@ -20,7 +19,7 @@
                 .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
             </style>
 
-            <div x-data="{ showFilter: {{ request('tingkat') || request('jurusan') || request('rombel') ? 'false' : 'true' }} }" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div x-data="{ showFilter: {{ request('kelas_id') ? 'false' : 'true' }} }" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -41,38 +40,29 @@
                 </button>
 
                 <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-                    <form method="GET" action="{{ route('guru.literasi.jawaban-indikator') }}" class="flex flex-wrap gap-4">
-                        <div class="flex-1 min-w-[200px]">
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Tingkat</label>
-                            <select name="tingkat" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
-                                <option value="">Semua Tingkat</option>
-                                @foreach($tingkats as $t)
-                                    <option value="{{ $t }}" {{ request('tingkat') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                    <form method="GET" action="{{ route('guru.literasi.jawaban-indikator') }}" class="flex flex-row items-end gap-2 sm:gap-3 w-full">
+                        <div class="flex-1 min-w-0">
+                            <label class="block text-[10px] sm:hidden font-black text-slate-500 uppercase tracking-wider mb-1">Kelas</label>
+                            <label class="hidden sm:block text-xs font-bold text-gray-700 mb-1.5">Pilih Kelas</label>
+                            <select name="kelas_id" class="w-full border-gray-300 rounded-xl shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-xs sm:text-sm h-[38px] sm:h-[42px] px-2 sm:px-4 py-1.5 sm:py-2.5">
+                                <option value="">Semua Kelas</option>
+                                @foreach($kelasList as $k)
+                                    <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>{{ $k->tingkat }} {{ $k->jurusan }} {{ $k->rombel }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="flex-1 min-w-[200px]">
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Jurusan</label>
-                            <select name="jurusan" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
-                                <option value="">Semua Jurusan</option>
-                                @foreach($jurusans as $j)
-                                    <option value="{{ $j }}" {{ request('jurusan') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="flex-1 min-w-[200px]">
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Rombel</label>
-                            <select name="rombel" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-[#1e3a6e] focus:ring focus:ring-[#1e3a6e]/20 text-sm">
-                                <option value="">Semua Rombel</option>
-                                @foreach($rombels as $r)
-                                    <option value="{{ $r }}" {{ request('rombel') == $r ? 'selected' : '' }}>{{ $r }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition h-[38px] md:h-auto">
-                                Filter
+                        
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition flex items-center justify-center gap-1.5 h-[38px] sm:h-[42px]">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <span class="hidden sm:inline">Terapkan</span>
                             </button>
+                            @if(request('kelas_id'))
+                                <a href="{{ route('guru.literasi.jawaban-indikator') }}" class="px-3 sm:px-5 py-2 sm:py-2.5 border border-gray-300 text-gray-700 rounded-xl text-xs sm:text-sm font-bold hover:bg-gray-50 transition flex items-center justify-center h-[38px] sm:h-[42px] gap-1.5">
+                                    <svg class="w-3.5 h-3.5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span class="hidden sm:inline">Reset</span>
+                                </a>
+                            @endif
                         </div>
                     </form>
                 </div>
@@ -176,6 +166,5 @@
                 {{ $jawabans->links() }}
             </div>
 
-        </div>
     </div>
 </x-app-layout>

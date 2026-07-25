@@ -119,14 +119,8 @@ class AbsensiKelasController extends Controller
             return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
         }
 
-        // Cek jika sudah pernah disubmit hari ini
-        $sudahAda = AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
-            ->where('tanggal', $today)
-            ->exists();
-
-        if ($sudahAda) {
-            return back()->with('error', 'Absensi kelas ini sudah pernah disimpan hari ini.');
-        }
+        // Allow update by removing the early return for $sudahAda
+        // We will use updateOrCreate to handle both insert and update.
 
         $request->validate([
             'materi'               => 'required|string',
@@ -137,22 +131,18 @@ class AbsensiKelasController extends Controller
             'materi.required' => 'Materi pembelajaran harus diisi sebelum menyimpan absensi kelas.',
         ]);
 
-        $records = [];
         foreach ($request->absensi as $siswaId => $data) {
-            $records[] = [
+            AbsensiKelasSiswa::updateOrCreate([
                 'jadwal_mengajar_id' => $jadwal->id,
                 'guru_id'            => $guru->id,
                 'siswa_id'           => (int) $siswaId,
                 'tanggal'            => $today,
+            ], [
                 'status'             => $data['status'],
                 'keterangan'         => $data['keterangan'] ?? null,
                 'materi'             => $request->materi,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ];
+            ]);
         }
-
-        AbsensiKelasSiswa::insert($records);
 
         return redirect()->route('guru.absen-kelas.show', $jadwal->id)
             ->with('success', "Absensi kelas {$jadwal->kelas} - {$jadwal->mata_pelajaran} berhasil disimpan.");

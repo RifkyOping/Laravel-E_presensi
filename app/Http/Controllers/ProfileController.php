@@ -43,7 +43,7 @@ class ProfileController extends Controller
         if ($user->role === 'murid') {
             $request->validate([
                 'name'          => 'required|string|max:255',
-                'email'         => ['required', 'string', 'email', 'max:255',
+                'email'         => ['nullable', 'string', 'email', 'max:255',
                                     Rule::unique('users', 'email')->ignore($user->id)],
                 'jenis_kelamin' => 'nullable|in:L,P',
                 'tempat_lahir'  => 'nullable|string|max:100',
@@ -52,7 +52,6 @@ class ProfileController extends Controller
                 'password'      => 'nullable|string|min:6|confirmed',
             ], [
                 'name.required'        => 'Nama lengkap wajib diisi.',
-                'email.required'       => 'Email wajib diisi.',
                 'email.unique'         => 'Email ini sudah digunakan akun lain.',
                 'tanggal_lahir.before' => 'Tanggal lahir tidak valid.',
                 'password.min'         => 'Password minimal 6 karakter.',
@@ -91,7 +90,7 @@ class ProfileController extends Controller
         // ── Non-siswa (Guru, Admin, dll) ────────────────────────────
         $request->user()->fill($request->validate([
             'name'  => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255',
+            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255',
                         Rule::unique('users')->ignore($user->id)],
         ]));
 

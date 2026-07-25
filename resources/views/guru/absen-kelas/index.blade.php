@@ -78,23 +78,24 @@
                     @endif
                 </div>
                 
-                <form action="{{ route('guru.upload-rpp') }}" method="POST" enctype="multipart/form-data" class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+                <form action="{{ route('guru.upload-rpp') }}" method="POST" enctype="multipart/form-data" class="w-full md:w-auto flex flex-row items-center gap-2 sm:gap-3">
                     @csrf
-                    <div>
+                    <div class="flex-1 min-w-0">
                         <input type="file" name="rpp_file" accept=".pdf,.doc,.docx" required
-                               class="block w-full text-sm text-slate-500
-                                      file:mr-4 file:py-2.5 file:px-4
+                               class="block w-full text-[11px] sm:text-sm text-slate-500
+                                      file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-2.5 sm:file:px-4
                                       file:rounded-xl file:border-0
-                                      file:text-sm file:font-semibold
+                                      file:text-[11px] sm:file:text-sm file:font-semibold
                                       file:bg-slate-100 file:text-slate-700
                                       hover:file:bg-slate-200 file:transition">
                         @error('rpp_file')
                             <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                         @enderror
                     </div>
-                    <button type="submit" class="flex-shrink-0 flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition duration-200 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        Unggah RPP
+                    <button type="submit" class="flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl text-[11px] sm:text-sm transition duration-200 shadow-sm mt-0">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span class="sm:hidden">Unggah</span>
+                        <span class="hidden sm:inline">Unggah RPP</span>
                     </button>
                 </form>
             </div>

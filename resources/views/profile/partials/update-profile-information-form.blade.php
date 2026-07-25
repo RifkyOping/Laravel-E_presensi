@@ -24,7 +24,7 @@
 
         <div>
             <label for="email" class="block font-bold text-sm text-[#24417c] mb-1">{{ __('Email') }}</label>
-            <input id="email" name="email" type="email" class="block w-full rounded-xl border-2 border-[#24417c]/20 focus:border-[#24417c] focus:ring-0 text-[#24417c] shadow-sm transition duration-300 bg-white" value="{{ old('email', $user->email) }}" required autocomplete="username" />
+            <input id="email" name="email" type="email" class="block w-full rounded-xl border-2 border-[#24417c]/20 focus:border-[#24417c] focus:ring-0 text-[#24417c] shadow-sm transition duration-300 bg-white" value="{{ old('email', $user->email) }}" autocomplete="username" />
             <x-input-error class="mt-2 text-red-600 font-medium text-sm" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())

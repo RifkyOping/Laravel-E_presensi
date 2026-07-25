@@ -1,12 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2">
-            <a href="{{ route('murid.dashboard') }}" class="text-slate-400 hover:text-[#1e3a6e] transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-            </a>
-            <span class="text-slate-300">/</span>
             <span class="text-sm font-bold text-slate-800">Koleksi e-Book</span>
         </div>
     </x-slot>
@@ -27,7 +21,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h2 class="text-xl font-black text-slate-800">Koleksi e-Book</h2>
-            <p class="text-sm text-slate-400 mt-0.5">Baca secara bertahap — selesaikan setiap level untuk membuka buku berikutnya.</p>
+            <p class="text-sm text-slate-400 mt-0.5">Baca secara bertahap. Selesaikan setiap level untuk membuka buku berikutnya.</p>
         </div>
         <div class="bg-white rounded-xl border border-slate-200 px-5 py-3 text-center">
             <p class="text-[.68rem] font-black text-slate-400 uppercase tracking-wide">Total Koleksi</p>
@@ -36,20 +30,20 @@
     </div>
 
     {{-- Info Level --}}
-    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start gap-4 shadow-sm">
-        <div class="w-12 h-12 rounded-full bg-[#1e3a6e] flex items-center justify-center flex-shrink-0 shadow-md">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 sm:p-6 flex items-start gap-3 sm:gap-4 shadow-sm">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1e3a6e] flex items-center justify-center flex-shrink-0 shadow-md mt-0.5 sm:mt-0">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
-        <div>
-            <h3 class="text-base sm:text-lg font-black text-[#1e3a6e] mb-2">Cara Membuka Level Berikutnya</h3>
-            <ul class="text-sm text-blue-800/80 space-y-1.5 list-disc list-inside marker:text-blue-400 font-medium leading-relaxed">
-                <li>Buka e-Book yang berstatus <span class="font-bold text-blue-600">terbuka</span> dan baca materinya dengan cermat.</li>
-                <li>Gunakan fitur <span class="font-bold text-blue-600">Verifikasi Suara</span> dengan membacakan teks yang tersedia.</li>
-                <li>Sistem akan mencocokkan suara Anda. Diperlukan skor kesamaan minimal <span class="font-bold text-green-600">60%</span>.</li>
-                <li>Jika e-Book memiliki kuis, Anda wajib menjawab soal dengan nilai minimal <span class="font-bold text-green-600">60</span>.</li>
-                <li>Setelah semua syarat terpenuhi, level e-Book selanjutnya akan otomatis <strong>terbuka</strong>!</li>
+        <div class="flex-1">
+            <h3 class="text-sm sm:text-lg font-black text-[#1e3a6e] mb-2 sm:mb-3">Cara Membuka Level Berikutnya</h3>
+            <ul class="text-xs sm:text-sm text-blue-800/80 space-y-1.5 sm:space-y-2 list-outside ml-4 sm:ml-5 marker:text-blue-500 font-medium leading-relaxed">
+                <li>Baca e-Book yang berstatus <span class="font-bold text-blue-600">terbuka</span>.</li>
+                <li>Lakukan <span class="font-bold text-blue-600">Verifikasi Suara</span> dengan skor minimal <span class="font-bold text-green-600">60%</span>.</li>
+                <li>Kerjakan <span class="font-bold text-blue-600">Kuis</span> (jika tersedia) dengan nilai minimal <span class="font-bold text-green-600">60</span>.</li>
+                <li>Isi form <span class="font-bold text-blue-600">Indikator Pemahaman</span> yang telah disediakan.</li>
+                <li>Level selanjutnya otomatis <strong class="text-blue-700">terbuka</strong> setelah syarat terpenuhi!</li>
             </ul>
         </div>
     </div>

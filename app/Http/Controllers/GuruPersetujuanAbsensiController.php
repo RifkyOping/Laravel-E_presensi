@@ -43,8 +43,14 @@ class GuruPersetujuanAbsensiController extends Controller
         return back()->with('success', 'Pengajuan berhasil disetujui.');
     }
 
-    public function reject($id)
+    public function reject(Request $request, $id)
     {
+        $request->validate([
+            'alasan' => 'required|string|max:500'
+        ], [
+            'alasan.required' => 'Alasan penolakan wajib diisi.'
+        ]);
+
         $pengajuan = AbsensiSiswa::where('guru_id', Auth::id())->findOrFail($id);
 
         if ($pengajuan->status_pengajuan !== 'pending') {
@@ -54,6 +60,7 @@ class GuruPersetujuanAbsensiController extends Controller
         $pengajuan->update([
             'status_pengajuan' => 'rejected',
             'status'           => 'alpa',
+            'alasan_ditolak'   => $request->alasan,
             'is_notified'      => false,
         ]);
 

@@ -3,7 +3,7 @@
         <span class="text-sm font-bold text-slate-800">Pengaturan Absensi & Zona Geofencing</span>
     </x-slot>
 
-    <div class="space-y-6 max-w-4xl mx-auto">
+    <div class="space-y-6">
 
         {{-- Flash --}}
         @if(session('success'))

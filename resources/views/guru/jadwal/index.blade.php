@@ -1,6 +1,9 @@
-<x-app-layout pageTitle="Jadwal Mengajar" pageSubtitle="Jadwal mengajar mingguan Anda yang ditetapkan oleh Admin">
+<x-app-layout pageTitle="Jadwal Mengajar" pageSubtitle="Jadwal mengajar Anda yang ditetapkan oleh Admin">
+    <x-slot name="header">
+        <h2 class="text-sm font-bold text-slate-700">Jadwal Mengajar</h2>
+    </x-slot>
 
-    <div class="max-w-5xl mx-auto space-y-6">
+    <div class="space-y-6">
 
         @if(session('success'))
         <div class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 font-semibold px-5 py-3.5 rounded-xl text-sm">
@@ -11,16 +14,26 @@
 
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-800">Jadwal Mengajar Mingguan</h2>
-                    <p class="text-sm text-slate-500 mt-1">Jadwal ini ditetapkan oleh Admin. Hubungi Admin jika ada perubahan jadwal.</p>
+                <div class="w-full">
+                    <p class="text-sm text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex items-start sm:items-center gap-3 font-medium">
+                        <svg class="w-5 h-5 flex-shrink-0 mt-0.5 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Jadwal ini ditetapkan oleh Admin. Hubungi Admin jika ada perubahan jadwal.
+                    </p>
                 </div>
             </div>
 
             {{-- Tabs --}}
             @php
                 $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-                $activeHari = request('hari', 'Senin');
+                $hariMap = [
+                    'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu',
+                    'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu', 'Sunday' => 'Minggu'
+                ];
+                $hariIni = $hariMap[now()->format('l')] ?? 'Senin';
+                if (!in_array($hariIni, $hariList)) {
+                    $hariIni = 'Senin';
+                }
+                $activeHari = request('hari', $hariIni);
             @endphp
 
             <div class="-mx-1 overflow-x-auto pb-1 mb-6 border-b border-slate-200">
@@ -96,12 +109,6 @@
                 </div>
             @endif
 
-            <div class="mt-6 pt-4 border-t border-slate-100">
-                <p class="text-xs text-slate-400 flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Jika ada perubahan jadwal, hubungi Admin untuk pembaruan.
-                </p>
-            </div>
         </div>
     </div>
 

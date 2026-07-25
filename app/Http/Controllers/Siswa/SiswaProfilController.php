@@ -21,6 +21,7 @@ class SiswaProfilController extends Controller
 
         $request->validate([
             'name'          => 'required|string|max:255',
+            'email'         => ['nullable', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($siswa->id)],
             'nis'           => ['nullable', 'string', 'max:20', Rule::unique('users', 'nis')->ignore($siswa->id)],
             'nisn'          => ['nullable', 'string', 'max:20', Rule::unique('users', 'nisn')->ignore($siswa->id)],
             'jenis_kelamin' => 'nullable|in:L,P',
@@ -39,6 +40,7 @@ class SiswaProfilController extends Controller
 
         $data = [
             'name'          => $request->name,
+            'email'         => $request->email,
             'nis'           => $request->nis,
             'nisn'          => $request->nisn,
             'jenis_kelamin' => $request->jenis_kelamin,

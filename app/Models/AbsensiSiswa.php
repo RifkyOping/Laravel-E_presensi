@@ -23,6 +23,8 @@ class AbsensiSiswa extends Model
         'status_pengajuan',
         'is_notified',
         'guru_id',
+        'alasan_ditolak',
+        'kategori',
     ];
 
     protected $casts = [

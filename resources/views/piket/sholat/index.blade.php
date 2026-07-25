@@ -38,16 +38,16 @@
             </button>
             
             <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-                <form method="GET" action="{{ route('piket.sholat.index') }}" class="flex flex-wrap items-end gap-4">
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tanggal</label>
+                <form method="GET" action="{{ route('piket.sholat.index') }}" class="flex flex-row items-end gap-2 sm:gap-4 w-full">
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider mb-1 sm:mb-2 truncate">Tanggal</label>
                         <input type="date" name="tanggal" value="{{ $tanggal->format('Y-m-d') }}" 
-                               class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white min-w-[150px]">
+                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-2 sm:px-4 py-2 sm:py-2.5 text-slate-800 font-medium focus:outline-none transition text-xs sm:text-sm bg-white">
                     </div>
-                    <div>
-                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Kelas</label>
-                        <select name="kelas_id" class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white min-w-[200px]">
-                            <option value="">-- Pilih Kelas --</option>
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider mb-1 sm:mb-2 truncate">Kelas</label>
+                        <select name="kelas_id" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-2 sm:px-4 py-2 sm:py-2.5 text-slate-800 font-medium focus:outline-none transition text-xs sm:text-sm bg-white">
+                            <option value="">Kelas</option>
                             @foreach($kelasList as $k)
                                 <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>
                                     {{ $k->tingkat }} {{ $k->jurusan }} {{ $k->rombel }}
@@ -55,10 +55,12 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition shadow-sm h-[42px] flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        Cari
-                    </button>
+                    <div class="flex-shrink-0">
+                        <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm h-[34px] sm:h-[42px] flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <span class="hidden sm:inline">Cari</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -121,12 +123,64 @@
                         <form method="POST" action="{{ route('piket.sholat.store') }}">
                             @csrf
                             <input type="hidden" name="tanggal" value="{{ $tanggal->format('Y-m-d') }}">
-                            
-                            <table class="w-full text-left border-collapse">
-                                <thead>
+                            <div class="p-4 sm:p-5 bg-white border-b border-slate-100 flex flex-row items-center justify-between gap-3 sm:gap-4">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-slate-800 text-sm sm:text-base">Daftar Absensi Sholat</h3>
+                                    <p class="text-[11px] sm:text-sm text-slate-500 mt-0.5 truncate sm:whitespace-normal">Tandai status sholat siswa. {{ $absensi->isNotEmpty() ? 'Data sudah disimpan.' : '' }}</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <button type="button" onclick="sholatSemua()" id="btn-tandai-semua" class="inline-flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[11px] sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-emerald-100 transition shadow-sm {{ $absensi->isNotEmpty() ? 'hidden' : '' }}">
+                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span class="hidden sm:inline">Tandai Semua</span>
+                                        <span class="sm:hidden">Semua Hadir</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Hidden Inputs untuk Sinkronisasi Mobile & Desktop --}}
+                            @foreach($siswas as $s)
+                                @php $currentStatus = isset($absensi[$s->id]) ? $absensi[$s->id]->status : 'tidak_sholat'; @endphp
+                                <input type="hidden" name="status[{{ $s->id }}]" id="status-hidden-{{ $s->id }}" value="{{ $currentStatus }}">
+                            @endforeach
+
+                            {{-- Mobile View --}}
+                            <div class="block sm:hidden bg-white border-b border-slate-100">
+                                <div class="flex flex-row items-center gap-2 px-4 py-3.5 bg-slate-50 border-b border-slate-100 text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider text-center">
+                                    <div class="flex-1 text-left min-w-0">Nama</div>
+                                    <div class="w-12 flex-shrink-0 leading-tight">Sholat</div>
+                                    <div class="w-12 flex-shrink-0 leading-tight">Udzur</div>
+                                    <div class="w-12 flex-shrink-0 leading-tight">Tidak</div>
+                                </div>
+                                <div class="divide-y divide-slate-100">
+                                    @foreach($siswas as $idx => $s)
+                                        @php 
+                                            $currentStatus = isset($absensi[$s->id]) ? $absensi[$s->id]->status : 'tidak_sholat';
+                                        @endphp
+                                        <div class="flex flex-row items-center gap-2 px-4 py-3.5 hover:bg-slate-50/50 transition">
+                                            <div class="flex-1 min-w-0 pr-2">
+                                                <div class="font-bold text-slate-800 text-[13px] sm:text-sm leading-tight truncate">{{ $s->name }}</div>
+                                            </div>
+                                            <div class="w-12 flex-shrink-0 flex justify-center">
+                                                <input type="radio" name="status_mobile[{{ $s->id }}]" value="sholat" onchange="syncStatus({{ $s->id }}, 'sholat')" {{ $currentStatus === 'sholat' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-5 h-5 text-emerald-600 focus:ring-emerald-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            </div>
+                                            <div class="w-12 flex-shrink-0 flex justify-center">
+                                                <input type="radio" name="status_mobile[{{ $s->id }}]" value="udzur" onchange="syncStatus({{ $s->id }}, 'udzur')" {{ $currentStatus === 'udzur' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-5 h-5 text-amber-500 focus:ring-amber-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            </div>
+                                            <div class="w-12 flex-shrink-0 flex justify-center">
+                                                <input type="radio" name="status_mobile[{{ $s->id }}]" value="tidak_sholat" onchange="syncStatus({{ $s->id }}, 'tidak_sholat')" {{ $currentStatus === 'tidak_sholat' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-5 h-5 text-red-500 focus:ring-red-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- Desktop View --}}
+                            <div class="hidden sm:block">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
                                     <tr class="bg-slate-50 border-b border-slate-100">
                                         <th class="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-wider w-16">No</th>
-                                        <th class="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-wider">Murid</th>
+                                        <th class="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-wider">Nama</th>
                                         <th class="px-6 py-4 text-xs font-black text-slate-500 uppercase tracking-wider">Status Absensi Sholat</th>
                                     </tr>
                                 </thead>
@@ -144,15 +198,15 @@
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center gap-4">
                                                     <label class="flex items-center gap-2 cursor-pointer group">
-                                                        <input type="radio" name="status[{{ $s->id }}]" value="sholat" {{ $currentStatus === 'sholat' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                        <input type="radio" name="status_desktop[{{ $s->id }}]" value="sholat" onchange="syncStatus({{ $s->id }}, 'sholat')" {{ $currentStatus === 'sholat' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
                                                         <span class="text-sm font-semibold text-slate-600 group-hover:text-emerald-700 transition">Sholat</span>
                                                     </label>
                                                     <label class="flex items-center gap-2 cursor-pointer group">
-                                                        <input type="radio" name="status[{{ $s->id }}]" value="udzur" {{ $currentStatus === 'udzur' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-4 h-4 text-amber-500 focus:ring-amber-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                        <input type="radio" name="status_desktop[{{ $s->id }}]" value="udzur" onchange="syncStatus({{ $s->id }}, 'udzur')" {{ $currentStatus === 'udzur' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-4 h-4 text-amber-500 focus:ring-amber-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
                                                         <span class="text-sm font-semibold text-slate-600 group-hover:text-amber-600 transition">Udzur (Haid/Sakit)</span>
                                                     </label>
                                                     <label class="flex items-center gap-2 cursor-pointer group">
-                                                        <input type="radio" name="status[{{ $s->id }}]" value="tidak_sholat" {{ $currentStatus === 'tidak_sholat' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-4 h-4 text-red-500 focus:ring-red-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                        <input type="radio" name="status_desktop[{{ $s->id }}]" value="tidak_sholat" onchange="syncStatus({{ $s->id }}, 'tidak_sholat')" {{ $currentStatus === 'tidak_sholat' ? 'checked' : '' }} {{ $absensi->isNotEmpty() ? 'disabled' : '' }} class="absensi-radio w-4 h-4 text-red-500 focus:ring-red-500 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed">
                                                         <span class="text-sm font-semibold text-slate-600 group-hover:text-red-600 transition">Tidak Sholat</span>
                                                     </label>
                                                 </div>
@@ -161,16 +215,16 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            </div>
                             
-                            <div class="p-6 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-4">
-
-                                <button type="{{ $absensi->isNotEmpty() ? 'button' : 'submit' }}" {!! $absensi->isNotEmpty() ? 'onclick="enableEditMode(event, this)"' : '' !!} class="{{ $absensi->isNotEmpty() ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-semibold text-xs transition duration-200' : 'bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-sm w-full sm:w-auto flex items-center justify-center gap-2' }}">
+                            <div class="p-5 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-3 sticky bottom-0 z-10 shadow-[0_-5px_15px_-3px_rgba(0,0,0,0.05)]">
+                                <button type="{{ $absensi->isNotEmpty() ? 'button' : 'submit' }}" {!! $absensi->isNotEmpty() ? 'onclick="enableEditMode(event, this)"' : '' !!} class="w-full sm:w-auto {{ $absensi->isNotEmpty() ? 'inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-2 border-[#1e3a6e] text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-bold text-sm transition duration-200 shadow-sm' : 'bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2' }}">
                                     @if($absensi->isNotEmpty())
-                                        <svg class="edit-icon w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        <span class="btn-text">Edit</span>
+                                        <svg class="edit-icon w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        <span class="btn-text">Edit Absensi</span>
                                     @else
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        <span class="btn-text">Simpan</span>
+                                        <span class="btn-text">Simpan Absensi</span>
                                     @endif
                                 </button>
                             </div>
@@ -188,6 +242,27 @@
     </div>
 
     <script>
+        function sholatSemua() {
+            document.querySelectorAll('input[id^="status-hidden-"]').forEach(hidden => {
+                let id = hidden.id.replace('status-hidden-', '');
+                // Pastikan tidak disabled
+                let sampleRadio = document.querySelector(`input[name="status_mobile[${id}]"][value="sholat"]`);
+                if(sampleRadio && !sampleRadio.disabled) {
+                    syncStatus(id, 'sholat');
+                }
+            });
+        }
+
+        function syncStatus(id, value) {
+            let hidden = document.getElementById('status-hidden-' + id);
+            if(hidden) hidden.value = value;
+            
+            // Sync radio mobile
+            document.querySelectorAll(`input[name="status_mobile[${id}]"][value="${value}"]`).forEach(r => r.checked = true);
+            // Sync radio desktop
+            document.querySelectorAll(`input[name="status_desktop[${id}]"][value="${value}"]`).forEach(r => r.checked = true);
+        }
+
         function enableEditMode(e, btn) {
             if(e) e.preventDefault();
             
@@ -196,13 +271,17 @@
                 radio.disabled = false;
             });
             
+            // Show tandai semua button
+            const btnTandai = document.getElementById('btn-tandai-semua');
+            if(btnTandai) btnTandai.classList.remove('hidden');
+            
             // Change button to submit state
             setTimeout(() => {
                 btn.type = 'submit';
                 btn.removeAttribute('onclick');
             }, 50);
             
-            btn.className = 'bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-sm w-full sm:w-auto flex items-center justify-center gap-2';
+            btn.className = 'w-full sm:w-auto bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2';
             
             // Change text
             const btnText = btn.querySelector('.btn-text');

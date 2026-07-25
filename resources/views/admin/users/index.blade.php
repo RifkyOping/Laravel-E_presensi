@@ -76,13 +76,14 @@
                 @endforeach
             </div>
             {{-- Search --}}
-            <form method="GET" action="{{ route('admin.users') }}" class="flex gap-3">
+            <form method="GET" action="{{ route('admin.users') }}" class="flex gap-3" id="searchForm">
                 <input type="hidden" name="tab" value="{{ $tab }}">
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Cari nama atau email..."
+                <input type="text" name="search" id="searchInput" value="{{ request('search') }}"
+                       placeholder="Cari nama, NISN, NIP atau ID..."
+                       oninput="handleSearchInput(this)"
                        class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                <button type="submit"
-                        class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-[#1e3a6e]/20">
+                <!-- Tombol Cari disembunyikan sesuai permintaan karena sudah otomatis -->
+                <button type="submit" class="hidden bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition items-center gap-2 shadow-md shadow-[#1e3a6e]/20">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     Cari
                 </button>
@@ -103,11 +104,32 @@
             <p class="text-sm text-slate-500">
                 Menampilkan <span class="font-bold text-slate-800">{{ $users->total() }}</span> pengguna
             </p>
+            <div id="bulkActionContainer" class="flex items-center gap-2">
+                <button type="button" id="btnPilihBanyak" onclick="enableBulkMode()"
+                    class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Hapus Banyak
+                </button>
+                <div id="bulkDeleteActions" class="hidden items-center gap-2">
+                    <button type="button" onclick="disableBulkMode()"
+                        class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
+                        Batal
+                    </button>
+                    <button type="button" id="btnBulkDelete" onclick="submitBulkDelete()" disabled
+                        class="inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Hapus Terpilih
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
+                        <th class="bulk-mode-col hidden py-3 px-5 w-12 text-center">
+                            <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" class="w-4 h-4 rounded border-slate-300 text-[#1e3a6e] focus:ring-[#1e3a6e]">
+                        </th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">No</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Nama</th>
                         <th class="py-3 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Email</th>
@@ -119,6 +141,11 @@
                 <tbody class="divide-y divide-slate-50">
                     @forelse($users as $i => $user)
                     <tr class="hover:bg-slate-50/60 transition duration-150">
+                        <td class="bulk-mode-col hidden py-3.5 px-5 text-center">
+                            @if($user->id !== auth()->id())
+                                <input type="checkbox" value="{{ $user->id }}" onchange="updateBulkDeleteButton()" class="user-checkbox w-4 h-4 rounded border-slate-300 text-[#1e3a6e] focus:ring-[#1e3a6e]">
+                            @endif
+                        </td>
                         <td class="py-3.5 px-5 text-sm text-slate-400 font-semibold">{{ $users->firstItem() + $i }}</td>
                         <td class="py-3.5 px-5">
                             <div class="flex items-center gap-3">
@@ -182,7 +209,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="py-12 text-center text-slate-400 text-sm">Tidak ada pengguna ditemukan.</td>
+                        <td colspan="7" class="py-12 text-center text-slate-400 text-sm">Tidak ada pengguna ditemukan.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -236,6 +263,118 @@
         </form>
     </div>
 </div>
+
+<form id="bulkDeleteForm" method="POST" action="{{ route('admin.users.bulk-delete') }}" class="hidden">
+    @csrf
+    @method('DELETE')
+    <div id="bulkDeleteInputs"></div>
+</form>
+
+<script>
+    let searchTimeout;
+    function handleSearchInput(input) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            input.form.submit();
+        }, 600); // Tunggu 600ms setelah user berhenti mengetik sebelum submit
+    }
+
+    // Kembalikan fokus ke input setelah halaman dimuat ulang jika ada pencarian
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('searchInput');
+        if(searchInput && searchInput.value) {
+            searchInput.focus();
+            // Pindahkan kursor ke akhir teks
+            const val = searchInput.value;
+            searchInput.value = '';
+            searchInput.value = val;
+        }
+    });
+
+    function enableBulkMode() {
+        document.getElementById('btnPilihBanyak').classList.add('hidden');
+        document.getElementById('bulkDeleteActions').classList.remove('hidden');
+        document.getElementById('bulkDeleteActions').classList.add('flex');
+        
+        const cols = document.querySelectorAll('.bulk-mode-col');
+        cols.forEach(col => col.classList.remove('hidden'));
+    }
+
+    function disableBulkMode() {
+        document.getElementById('btnPilihBanyak').classList.remove('hidden');
+        document.getElementById('bulkDeleteActions').classList.add('hidden');
+        document.getElementById('bulkDeleteActions').classList.remove('flex');
+        
+        const cols = document.querySelectorAll('.bulk-mode-col');
+        cols.forEach(col => col.classList.add('hidden'));
+
+        // Reset checkboxes
+        document.getElementById('selectAll').checked = false;
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+        updateBulkDeleteButton();
+    }
+
+    function toggleSelectAll(source) {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        for(let i=0, n=checkboxes.length; i<n; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+        updateBulkDeleteButton();
+    }
+
+    function updateBulkDeleteButton() {
+        const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+        const btn = document.getElementById('btnBulkDelete');
+        if (btn) {
+            btn.disabled = checkboxes.length === 0;
+            if (checkboxes.length > 0) {
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus Terpilih (${checkboxes.length})`;
+            } else {
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus Terpilih`;
+            }
+        }
+    }
+
+    function submitBulkDelete() {
+        const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+        if (checkboxes.length === 0) return;
+
+        Swal.fire({
+            title: 'Konfirmasi Hapus Massal',
+            text: `Apakah Anda yakin ingin menghapus ${checkboxes.length} pengguna terpilih secara permanen?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                title: 'text-xl font-black text-slate-800',
+                confirmButton: 'font-bold rounded-xl px-6 py-2.5 shadow-sm',
+                cancelButton: 'font-bold rounded-xl px-6 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shadow-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('bulkDeleteForm');
+                const inputsContainer = document.getElementById('bulkDeleteInputs');
+                inputsContainer.innerHTML = '';
+                
+                checkboxes.forEach(cb => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'user_ids[]';
+                    input.value = cb.value;
+                    inputsContainer.appendChild(input);
+                });
+                
+                form.submit();
+            }
+        });
+    }
+</script>
 @endpush
 
 </x-app-layout>

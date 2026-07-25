@@ -40,14 +40,92 @@ class AdminController extends Controller
             ->take(5)
             ->get();
 
-        // Aktivitas mengajar hari ini
-        $aktivitasHariIni = AbsensiMengajar::with('user')
-            ->whereDate('tanggal', $today)
-            ->orderBy('jam_ke')
-            ->take(5)
-            ->get();
+        // Mengumpulkan Aktivitas Pengguna (Tanpa Tabel Baru)
+        $aktivitas = collect();
 
-        return view('admin.dashboard', compact('stats', 'guruHadir', 'aktivitasHariIni'));
+        // 1. Aktivitas Login / Sesi Aktif
+        $sessions = \Illuminate\Support\Facades\DB::table('sessions')
+            ->join('users', 'sessions.user_id', '=', 'users.id')
+            ->select('users.name', 'users.role', 'sessions.last_activity as time')
+            ->whereNotNull('sessions.user_id')
+            ->orderByDesc('sessions.last_activity')
+            ->take(5)
+            ->get()
+            ->map(function ($s) {
+                return (object)[
+                    'name' => $s->name,
+                    'role' => $s->role,
+                    'description' => 'Akses Sistem (Online)',
+                    'last_activity' => $s->time
+                ];
+            });
+        $aktivitas = $aktivitas->merge($sessions);
+
+        // 2. Aktivitas Absensi Guru
+        $absensiGuru = \App\Models\AbsensiGuru::with('user')
+            ->orderByDesc('updated_at')
+            ->take(5)
+            ->get()
+            ->map(function ($a) {
+                $isNew = $a->created_at == $a->updated_at;
+                return (object)[
+                    'name' => $a->user->name ?? 'Pengguna Dihapus',
+                    'role' => 'guru',
+                    'description' => $isNew ? 'Absen Datang Sekolah' : 'Pembaruan Data Absensi',
+                    'last_activity' => $a->updated_at->timestamp
+                ];
+            });
+        $aktivitas = $aktivitas->merge($absensiGuru);
+
+        // 3. Aktivitas Absensi Siswa
+        $absensiSiswa = \App\Models\AbsensiSiswa::with('user')
+            ->orderByDesc('updated_at')
+            ->take(5)
+            ->get()
+            ->map(function ($a) {
+                $isNew = $a->created_at == $a->updated_at;
+                return (object)[
+                    'name' => $a->user->name ?? 'Pengguna Dihapus',
+                    'role' => 'murid',
+                    'description' => $isNew ? 'Absen Datang Sekolah' : 'Pembaruan Data Absensi',
+                    'last_activity' => $a->updated_at->timestamp
+                ];
+            });
+        $aktivitas = $aktivitas->merge($absensiSiswa);
+
+        // 4. Aktivitas Akun (CRUD User)
+        $usersCrud = \App\Models\User::orderByDesc('updated_at')
+            ->take(5)
+            ->get()
+            ->map(function ($u) {
+                $isNew = $u->created_at == $u->updated_at;
+                return (object)[
+                    'name' => $u->name,
+                    'role' => $u->role,
+                    'description' => $isNew ? 'Pendaftaran Akun Baru' : 'Pembaruan Profil Akun',
+                    'last_activity' => $u->updated_at->timestamp
+                ];
+            });
+        $aktivitas = $aktivitas->merge($usersCrud);
+
+        // Urutkan semua aktivitas berdasarkan waktu terbaru, ambil pengguna unik, dan ambil 10 teratas
+        $aktivitasHariIni = $aktivitas->sortByDesc('last_activity')->unique('name')->take(10)->values();
+
+        // Status Sistem (Job Queue)
+        $pendingJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('jobs') 
+            ? \Illuminate\Support\Facades\DB::table('jobs')->count() 
+            : 0;
+            
+        $failedJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('failed_jobs') 
+            ? \Illuminate\Support\Facades\DB::table('failed_jobs')->count() 
+            : 0;
+
+        $systemStatus = [
+            'pending_jobs' => $pendingJobs,
+            'failed_jobs'  => $failedJobs,
+        ];
+
+        return view('admin.dashboard', compact('stats', 'guruHadir', 'aktivitasHariIni', 'systemStatus'));
     }
 
     // ──────────────────────────────────────────
@@ -67,7 +145,7 @@ class AdminController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+                  ->orWhere('nomor_induk', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -373,6 +451,26 @@ class AdminController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users')->with('success', "Akun {$name} berhasil dihapus.");
+    }
+
+    public function bulkDestroyUsers(Request $request)
+    {
+        $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id'
+        ]);
+
+        $ids = $request->user_ids;
+        // Mencegah admin menghapus akunnya sendiri
+        $ids = array_diff($ids, [auth()->id()]);
+
+        if (empty($ids)) {
+            return redirect()->route('admin.users')->with('error', 'Tidak ada akun valid yang dipilih untuk dihapus.');
+        }
+
+        User::whereIn('id', $ids)->delete();
+
+        return redirect()->route('admin.users')->with('success', count($ids) . ' akun pengguna berhasil dihapus.');
     }
 
     public function resetDevice(User $user)
@@ -848,13 +946,20 @@ class AdminController extends Controller
         return back()->with('success', 'Pengajuan berhasil disetujui.');
     }
 
-    public function rejectPengajuan($type, $id)
+    public function rejectPengajuan(Request $request, $type, $id)
     {
+        $request->validate([
+            'alasan' => 'required|string|max:500'
+        ], [
+            'alasan.required' => 'Alasan penolakan wajib diisi.'
+        ]);
+
         $model = $type === 'murid' ? AbsensiSiswa::findOrFail($id) : AbsensiGuru::findOrFail($id);
         
         $model->update([
             'status_pengajuan' => 'rejected',
             'status' => 'alpa',
+            'alasan_ditolak' => $request->alasan,
             'is_notified' => false,
         ]);
         

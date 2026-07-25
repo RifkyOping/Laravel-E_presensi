@@ -40,12 +40,10 @@ class AbsensiMengajarController extends Controller
             ->withQueryString();
 
         // Ambil data unik untuk dropdown kelas
-        $tingkats = \App\Models\Kelas::where('status', true)->select('tingkat')->distinct()->pluck('tingkat');
-        $jurusans = \App\Models\Kelas::where('status', true)->select('jurusan')->distinct()->pluck('jurusan');
-        $rombels  = \App\Models\Kelas::where('status', true)->select('rombel')->distinct()->pluck('rombel');
+        $kelasList = \App\Models\Kelas::where('status', true)->orderBy('tingkat')->orderBy('jurusan')->orderBy('rombel')->get();
         $mapels   = \App\Models\MataPelajaran::where('aktif', true)->orderBy('nama')->pluck('nama');
 
-        return view('guru.aktivitas', compact('hariIni', 'riwayat', 'tanggalRiwayat', 'tingkats', 'jurusans', 'rombels', 'mapels'));
+        return view('guru.aktivitas', compact('hariIni', 'riwayat', 'tanggalRiwayat', 'kelasList', 'mapels'));
     }
 
     /**
@@ -55,28 +53,22 @@ class AbsensiMengajarController extends Controller
     {
         $request->validate([
             'mata_pelajaran'    => 'required|string|max:100',
-            'tingkat'           => 'required|string',
-            'jurusan'           => 'required|string',
-            'rombel'            => 'required|string',
+            'kelas'             => 'required|string',
             'jam_ke'            => 'required|integer|min:1',
             'jam_mulai'         => 'required',
             'jam_selesai'       => 'nullable',
         ], [
             'mata_pelajaran.required' => 'Mata pelajaran wajib diisi.',
-            'tingkat.required'        => 'Tingkat wajib dipilih.',
-            'jurusan.required'        => 'Jurusan wajib dipilih.',
-            'rombel.required'         => 'Rombel wajib dipilih.',
+            'kelas.required'          => 'Kelas wajib dipilih.',
             'jam_ke.required'         => 'Jam ke- wajib diisi.',
             'jam_mulai.required'      => 'Jam mulai wajib diisi.',
         ]);
-
-        $kelasStr = $request->tingkat . ' ' . $request->jurusan . ' ' . $request->rombel;
 
         AbsensiMengajar::create([
             'user_id'            => Auth::id(),
             'tanggal'            => Carbon::today()->toDateString(),
             'mata_pelajaran'     => $request->mata_pelajaran,
-            'kelas'              => $kelasStr,
+            'kelas'              => $request->kelas,
             'jam_ke'             => $request->jam_ke,
             'jam_mulai'          => $request->jam_mulai,
             'jam_selesai'        => $request->jam_selesai,

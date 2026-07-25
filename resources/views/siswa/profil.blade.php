@@ -105,9 +105,9 @@
                     </div>
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
-                            Email <span class="text-red-500">*</span>
+                            Email
                         </label>
-                        <input type="email" name="email" value="{{ old('email', $siswa->email) }}" required
+                        <input type="email" name="email" value="{{ old('email', $siswa->email) }}"
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10
                                       rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                     </div>

@@ -441,8 +441,16 @@ document.addEventListener('DOMContentLoaded', function() {
     Swal.fire({
         icon: '{{ session("popup_notification")["icon"] }}',
         title: '{{ session("popup_notification")["title"] }}',
-        text: '{{ session("popup_notification")["text"] }}',
-        confirmButtonColor: '#1e3a6e'
+        html: '{!! session("popup_notification")["text"] !!}',
+        confirmButtonText: 'Mengerti',
+        confirmButtonColor: '#1e3a6e',
+        customClass: {
+            popup: 'rounded-2xl shadow-2xl border border-slate-100',
+            title: 'text-xl font-black text-slate-800',
+            htmlContainer: 'text-sm text-slate-500 font-medium',
+            confirmButton: 'font-bold rounded-xl px-8 py-2.5 shadow-sm hover:shadow-md transition-all'
+        },
+        buttonsStyling: true
     });
 });
 @endif
@@ -523,7 +531,7 @@ function requestGPS() {
             gpsSpeed = pos.coords.speed;
             gpsTimestamp = pos.timestamp;
             gpsReady = true;
-            updateGpsStatus(true, 'Lokasi asli terdeteksi (akurasi ±' + Math.round(acc) + 'm)');
+            updateGpsStatus(true, 'Lokasi terdeteksi (jarak dari sekolah ±' + Math.round(acc) + 'm)');
         },
         function(err) {
             const msg = err.code === 1

@@ -71,8 +71,7 @@ class CekLupaPulangAbsensi extends Command
             ->get();
             
         foreach ($siswaAbsens as $absen) {
-            $newKategori = ($absen->kategori === 'terlambat') ? 'terlambat dan lupa absen pulang' : 'lupa absen pulang';
-            $absen->update(['kategori' => $newKategori]);
+            $absen->update(['kategori' => 'bolos']);
         }
 
         // 2. Proses Guru

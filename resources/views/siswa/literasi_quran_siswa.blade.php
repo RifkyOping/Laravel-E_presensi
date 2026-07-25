@@ -1,14 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2">
-            <a href="{{ route('ebook.index') }}" class="text-slate-400 hover:text-emerald-600 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-            </a>
-            <span class="text-slate-300">/</span>
-            <a href="{{ route('ebook.index') }}" class="text-slate-400 hover:text-emerald-600 text-sm transition-colors">Literasi</a>
-            <span class="text-slate-300">/</span>
             <span class="text-sm font-bold text-slate-800">Literasi Keagamaan Saya</span>
         </div>
     </x-slot>

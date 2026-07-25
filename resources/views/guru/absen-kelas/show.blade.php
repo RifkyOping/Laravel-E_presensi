@@ -110,8 +110,7 @@
             </div>
         @else
             {{-- REKAP MODE (sudah diabsen) --}}
-            @if($sudahDiabsen)
-            
+            @if($sudahDiabsen && !request('edit'))
             @if(!$aktivitas->waktu_absen_keluar)
             <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
                 <div>
@@ -141,16 +140,20 @@
                             </svg>
                             Rekap Absensi Kelas
                         </h3>
-                        <p class="text-sm text-slate-500 mt-0.5 mb-3">Absensi sudah disimpan dan tidak dapat diubah.</p>
+                        <p class="text-sm text-slate-500 mt-1 mb-4">Absensi sudah disimpan. Anda dapat mengunduh rekap atau mengedit kembali absensi jika diperlukan.</p>
                         <form method="GET" action="{{ route('guru.absen-kelas.export', $jadwal->id) }}" class="flex items-center gap-2 mt-2 sm:mt-0">
-                            <select name="delimiter" class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-3 py-2 text-slate-800 font-medium text-xs bg-white">
+                            <select name="delimiter" class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl pl-3 pr-8 py-2 text-slate-800 font-medium text-xs bg-white">
                                 <option value=";">Excel ID (;)</option>
                                 <option value=",">Excel EN (,)</option>
                             </select>
-                            <button type="submit" class="inline-flex items-center gap-1.5 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm">
+                            <button type="submit" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                 Download Rekap
                             </button>
+                            <a href="{{ route('guru.absen-kelas.show', ['jadwal' => $jadwal->id, 'edit' => 'true']) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-semibold text-xs transition duration-200 shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                Edit Absensi
+                            </a>
                         </form>
                     </div>
                     {{-- Summary badges --}}
@@ -218,6 +221,7 @@
 
             {{-- FORM ABSEN MODE --}}
             @else
+            @php $materiHariIni = $absensiHariIni->first()?->materi; @endphp
             <form method="POST" action="{{ route('guru.absen-kelas.store', $jadwal->id) }}" id="form-absen-kelas">
                 @csrf
                 
@@ -225,7 +229,7 @@
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6">
                     <div class="px-6 py-5">
                         <label class="block text-sm font-bold text-slate-800 mb-2">Materi yang Diajarkan Hari Ini <span class="text-red-500">*</span></label>
-                        <textarea name="materi" rows="3" required class="w-full rounded-xl border-slate-200 focus:border-[#1e3a6e] focus:ring-[#1e3a6e]/20 text-sm p-3" placeholder="Contoh: Bab 1 Pendahuluan, Diskusi Kelompok..."></textarea>
+                        <textarea name="materi" rows="3" required class="w-full rounded-xl border-slate-200 focus:border-[#1e3a6e] focus:ring-[#1e3a6e]/20 text-sm p-3" placeholder="Contoh: Bab 1 Pendahuluan, Diskusi Kelompok...">{{ old('materi', $materiHariIni ?? '') }}</textarea>
                         <p class="text-xs text-slate-500 mt-2">Wajib diisi. Materi ini akan disimpan sebagai catatan jurnal kelas untuk sesi ini.</p>
                     </div>
                 </div>
@@ -269,13 +273,16 @@
 
                             {{-- Status Buttons --}}
                             <div class="flex gap-4 flex-shrink-0 items-center">
+                                @php
+                                    $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? 'hadir';
+                                @endphp
                                 @foreach(['hadir' => 'Hadir', 'alpa' => 'Alpa', 'sakit' => 'Sakit', 'izin' => 'Izin'] as $val => $label)
                                 <label class="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 font-medium">
                                     <input type="radio"
                                            name="absensi[{{ $siswa->id }}][status]"
                                            value="{{ $val }}"
                                            class="w-4 h-4 text-[#1e3a6e] border-slate-300 focus:ring-[#1e3a6e] status-radio-{{ $siswa->id }}"
-                                           {{ $val === 'hadir' ? 'checked' : '' }}>
+                                           {{ $val === $currentStatus ? 'checked' : '' }}>
                                     <span>{{ $label }}</span>
                                 </label>
                                 @endforeach

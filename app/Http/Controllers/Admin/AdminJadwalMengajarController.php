@@ -143,14 +143,14 @@ class AdminJadwalMengajarController extends Controller
             "Expires" => "0"
         ];
 
-        $columns = ['email_guru', 'hari', 'mata_pelajaran', 'kelas', 'jam_ke', 'jam_mulai', 'jam_selesai'];
+        $columns = ['nama', 'hari', 'mata_pelajaran', 'kelas', 'jam_ke', 'jam_mulai', 'jam_selesai'];
 
         $callback = function() use ($columns, $delimiter) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns, $delimiter);
             // Contoh isi
-            fputcsv($file, ['guru@smkn1majene.sch.id', 'Senin', 'Matematika', 'X RPL 1', '1', '07:30', '08:15'], $delimiter);
-            fputcsv($file, ['guru@smkn1majene.sch.id', 'Senin', 'Matematika', 'X RPL 1', '2', '08:15', '09:00'], $delimiter);
+            fputcsv($file, ['NAMA GURU', 'Senin', 'Mata Pelajaran 1', 'X JURUSAN 1', '1', '07:30', '08:15'], $delimiter);
+            fputcsv($file, ['NAMA GURU', 'Selasa', 'Mata Pelajaran 2', 'X JURUSAN 1', '2', '08:15', '09:00'], $delimiter);
             fclose($file);
         };
 
@@ -183,11 +183,16 @@ class AdminJadwalMengajarController extends Controller
         $header = array_map('strtolower', $header);
         
         // Mapping kolom standar
-        $expectedHeaders = ['email_guru', 'hari', 'mata_pelajaran', 'kelas', 'jam_ke', 'jam_mulai', 'jam_selesai'];
-        
         // Validasi header minimum
-        if (!in_array('email_guru', $header) || !in_array('hari', $header) || !in_array('jam_ke', $header)) {
-            return redirect()->back()->with('error', 'Format header CSV tidak sesuai template. Pastikan ada email_guru, hari, dll.');
+        $identifierColumn = null;
+        if (in_array('nama', $header)) {
+            $identifierColumn = 'nama';
+        } elseif (in_array('email_guru', $header)) {
+            $identifierColumn = 'email_guru';
+        }
+
+        if (!$identifierColumn || !in_array('hari', $header) || !in_array('jam_ke', $header)) {
+            return redirect()->back()->with('error', 'Format header CSV tidak sesuai template. Pastikan ada kolom nama, hari, dan jam_ke.');
         }
 
         $berhasil = 0;
@@ -202,8 +207,12 @@ class AdminJadwalMengajarController extends Controller
             
             $rowAssoc = array_combine($header, $row);
             
-            // Cari user (guru) berdasarkan email
-            $guru = User::where('email', $rowAssoc['email_guru'])->where('role', 'guru')->first();
+            // Cari user (guru) berdasarkan nama atau email
+            if ($identifierColumn === 'nama') {
+                $guru = User::where('name', trim($rowAssoc['nama']))->where('role', 'guru')->first();
+            } else {
+                $guru = User::where('email', trim($rowAssoc['email_guru']))->where('role', 'guru')->first();
+            }
             
             if ($guru) {
                 // Hapus jadwal sebelumnya hanya jika user ini baru pertama kali diproses di file ini
@@ -237,6 +246,6 @@ class AdminJadwalMengajarController extends Controller
             );
         }
 
-        return redirect()->back()->with('success', "Import selesai. Berhasil memasukkan $berhasil jadwal. Gagal: $gagal jadwal (karena email guru tidak ditemukan).");
+        return redirect()->back()->with('success', "Import selesai. Berhasil memasukkan $berhasil jadwal. Gagal: $gagal baris (karena nama/email guru tidak ditemukan di sistem).");
     }
 }

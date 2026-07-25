@@ -18,23 +18,19 @@ class ReviewIndikatorController extends Controller
         }
 
         $kelasList = Kelas::where('status', true)->orderBy('tingkat')->orderBy('jurusan')->orderBy('rombel')->get();
-        $tingkats = $kelasList->pluck('tingkat')->unique();
-        $jurusans = $kelasList->pluck('jurusan')->unique();
-        $rombels = $kelasList->pluck('rombel')->unique();
 
         $query = JawabanIndikator::with(['user.siswaProfile', 'indikator', 'user.progresEbook'])
             ->join('users', 'jawaban_indikators.user_id', '=', 'users.id')
             ->join('siswa_profiles', 'users.id', '=', 'siswa_profiles.user_id')
             ->select('jawaban_indikators.*');
 
-        if ($request->filled('tingkat')) {
-            $query->where('siswa_profiles.kelas', $request->tingkat);
-        }
-        if ($request->filled('jurusan')) {
-            $query->where('siswa_profiles.jurusan', $request->jurusan);
-        }
-        if ($request->filled('rombel')) {
-            $query->where('siswa_profiles.rombel', $request->rombel);
+        if ($request->filled('kelas_id')) {
+            $kelas = Kelas::find($request->kelas_id);
+            if ($kelas) {
+                $query->where('siswa_profiles.kelas', $kelas->tingkat)
+                      ->where('siswa_profiles.jurusan', $kelas->jurusan)
+                      ->where('siswa_profiles.rombel', $kelas->rombel);
+            }
         }
 
         // Ambil data terbaru dan kelompokkan per siswa per buku jika perlu, 
@@ -47,7 +43,7 @@ class ReviewIndikatorController extends Controller
             return $item->user_id . '-' . $item->buku_id . '-' . $item->jenis_buku;
         });
 
-        return view('guru.literasi.jawaban-indikator', compact('jawabans', 'groupedJawabans', 'tingkats', 'jurusans', 'rombels'));
+        return view('guru.literasi.jawaban-indikator', compact('jawabans', 'groupedJawabans', 'kelasList'));
     }
 
     public function storeNilai(Request $request)
