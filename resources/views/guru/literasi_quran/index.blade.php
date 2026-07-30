@@ -45,58 +45,43 @@
         <div class="absolute right-20 -bottom-10 w-36 h-36 rounded-full bg-white/5 pointer-events-none"></div>
     </div>
 
-    {{-- Filter Kelas & Jurusan --}}
-    <div x-data="{ showFilter: {{ request('kelas_id') ? 'true' : 'false' }} }" class="bg-white rounded-2xl border border-blue-200 p-6">
-        <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
-            <h2 class="text-sm font-black text-slate-700 flex items-center gap-2">
-                <div class="w-5 h-5 rounded bg-[#1e3a6e]/10 flex items-center justify-center group-hover:bg-[#1e3a6e]/20 transition-colors">
-                    <svg class="w-3 h-3 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
-                    </svg>
-                </div>
-                Filter Murid
-            </h2>
-            <svg class="w-5 h-5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-        </button>
+    <div class="bg-white rounded-2xl border border-blue-200 p-6">
+        <h2 class="text-sm font-black text-slate-700 flex items-center gap-2 mb-5">
+            <div class="w-5 h-5 rounded bg-[#1e3a6e]/10 flex items-center justify-center">
+                <svg class="w-3 h-3 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                </svg>
+            </div>
+            Filter Murid
+        </h2>
 
-        <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-            <form method="GET" action="{{ route('guru.literasi.quran') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div class="sm:col-span-3">
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kelas</label>
-                <select name="kelas_id"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
-                               focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition">
-                    <option value="">-- Semua Kelas --</option>
-                    @foreach($kelasList as $k)
-                        <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>
-                            {{ $k->tingkat }} {{ $k->jurusan }} {{ $k->rombel }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex items-end">
-                <button type="submit"
-                        class="w-full flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57]
-                               text-white font-bold py-2.5 rounded-xl text-sm transition duration-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Tampilkan Murid
-                </button>
-            </div>
-        </form>
+        <div class="border-t border-slate-100 pt-5">
+            <form method="GET" action="{{ route('guru.literasi.quran') }}">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kelas</label>
+                    <select name="kelas_id" onchange="fetchDaftarMurid(this.value)"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-700
+                                   focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition cursor-pointer">
+                        <option value="">-- Pilih Kelas --</option>
+                        @foreach($kelasList as $k)
+                            <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>
+                                {{ $k->tingkat }} {{ $k->jurusan }} {{ $k->rombel }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </form>
         </div>
     </div>
 
     {{-- Daftar Murid --}}
+    <div id="daftar-murid-container" class="transition-opacity duration-300">
     @if($selectedKelasId)
     <div class="space-y-4">
         <div>
             <h2 class="text-lg font-black text-slate-800">
-                Daftar Murid — Kelas {{ $selectedKelasModel->tingkat }} {{ $selectedKelasModel->jurusan }} {{ $selectedKelasModel->rombel }}
+                Daftar Murid Kelas {{ $selectedKelasModel->tingkat }} {{ $selectedKelasModel->jurusan }} {{ $selectedKelasModel->rombel }}
             </h2>
             <p class="text-sm text-slate-400 mt-0.5">{{ $siswaList->count() }} murid ditemukan</p>
         </div>
@@ -131,7 +116,7 @@
                         <p class="font-bold text-slate-800 text-sm truncate">{{ $siswa->name }}</p>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
                             @if($siswa->nomor_induk)
-                            <span class="text-[.65rem] text-slate-400 font-medium">No. Induk: {{ $siswa->nomor_induk }}</span>
+                            <span class="text-[.65rem] text-slate-400 font-medium">NISN: {{ $siswa->nomor_induk }}</span>
                             @endif
                             @if($siswa->jenis_kelamin)
                             <span class="text-[.65rem] text-slate-400 font-medium">{{ $siswa->jenis_kelamin_lengkap }}</span>
@@ -168,7 +153,7 @@
                                 @php
                                     $profilItems = [
                                         ['label' => 'Nama Lengkap',      'value' => $siswa->name],
-                                        ['label' => 'No. Induk',              'value' => $siswa->nomor_induk ?? '-'],
+                                        ['label' => 'NISN',              'value' => $siswa->nomor_induk ?? '-'],
                                         ['label' => 'Kelas - Jurusan',   'value' => ($siswa->kelas && $siswa->jurusan) ? $siswa->kelas . ' ' . $siswa->jurusan . ' ' . $siswa->rombel : ($siswa->kelas ?? '-')],
                                         ['label' => 'Jenis Kelamin',     'value' => $siswa->jenis_kelamin_lengkap],
                                         ['label' => 'Tempat, Tgl Lahir', 'value' => $siswa->tempat_tanggal_lahir],
@@ -204,12 +189,12 @@
                                     <div class="sm:col-span-3">
                                         <textarea name="catatan" rows="2" required
                                                   placeholder="Catatan perkembangan literasi keagamaan..."
-                                                  class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700
+                                                  class="w-full h-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700
                                                          focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 resize-none transition"></textarea>
                                     </div>
-                                    <div class="flex items-end">
+                                    <div class="flex items-stretch">
                                         <button type="submit"
-                                                class="w-full bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold py-2.5 rounded-xl text-sm transition">
+                                                class="w-full h-full bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold py-2.5 rounded-xl text-sm transition">
                                             Simpan
                                         </button>
                                     </div>
@@ -255,9 +240,9 @@
 
                                         {{-- Aksi (hanya guru pembuat) --}}
                                         @if(Auth::id() === $catatan->guru_id)
-                                        <div class="flex gap-1.5 flex-shrink-0">
+                                        <div class="flex flex-col sm:flex-row gap-1.5 flex-shrink-0">
                                             <button onclick="toggleEdit({{ $catatan->id }})"
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-semibold text-xs transition duration-200">
+                                                    class="inline-flex justify-center items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-semibold text-xs transition duration-200 w-full sm:w-auto">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -265,10 +250,10 @@
                                                 Edit
                                             </button>
                                             <form method="POST" action="{{ route('guru.literasi.quran.destroy', $catatan->id) }}"
-                                                  onsubmit="return confirm('Hapus catatan ini?')" class="inline">
+                                                  onsubmit="return confirm('Hapus catatan ini?')" class="w-full sm:w-auto">
                                                 @csrf @method('DELETE')
                                                 <button type="submit"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-xs transition duration-200">
+                                                        class="inline-flex justify-center items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-xs transition duration-200 w-full sm:w-auto">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -288,16 +273,16 @@
                                             @csrf @method('PUT')
                                             <div class="sm:col-span-3">
                                                 <textarea name="catatan" rows="2" required
-                                                          class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700
+                                                          class="w-full h-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700
                                                                  focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none transition">{{ $catatan->catatan }}</textarea>
                                             </div>
-                                            <div class="grid grid-cols-2 gap-2 items-end">
+                                            <div class="grid grid-cols-2 gap-2 items-stretch">
                                                 <button type="submit"
-                                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                                                        class="h-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
                                                     Simpan
                                                 </button>
                                                 <button type="button" onclick="toggleEdit({{ $catatan->id }})"
-                                                        class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">
+                                                        class="h-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">
                                                     Batal
                                                 </button>
                                             </div>
@@ -328,6 +313,7 @@
         <p class="text-sm text-slate-400 mt-1">Gunakan dropdown di atas untuk menampilkan daftar murid.</p>
     </div>
     @endif
+    </div>
 
 </div>
 
@@ -341,6 +327,45 @@ function toggleSiswa(id) {
 }
 function toggleEdit(id) {
     document.getElementById('edit-' + id).classList.toggle('hidden');
+}
+
+function fetchDaftarMurid(kelasId) {
+    const container = document.getElementById('daftar-murid-container');
+    if (container) {
+        container.style.opacity = '0.5';
+        container.style.pointerEvents = 'none';
+    }
+
+    const url = new URL(window.location.href);
+    if (kelasId) {
+        url.searchParams.set('kelas_id', kelasId);
+    } else {
+        url.searchParams.delete('kelas_id');
+    }
+    
+    // Perbarui URL browser secara visual tanpa mereload halaman
+    window.history.pushState({}, '', url);
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContainer = doc.getElementById('daftar-murid-container');
+            
+            if (container && newContainer) {
+                container.innerHTML = newContainer.innerHTML;
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        })
+        .catch(err => {
+            console.error('Gagal mengambil data murid', err);
+            if (container) {
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        });
 }
 </script>
 </x-app-layout>

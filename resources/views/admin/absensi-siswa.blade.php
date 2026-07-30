@@ -6,7 +6,7 @@
 <div class="space-y-6">
 
     {{-- ── WELCOME STRIP ── --}}
-    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
+    <div id="welcome-strip" class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
          style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -18,25 +18,25 @@
                 </p>
             </div>
             <div class="flex flex-row overflow-x-auto sm:overflow-visible flex-nowrap gap-2 sm:gap-3 w-full sm:w-auto mt-3 sm:mt-0 pb-1 sm:pb-0 snap-x">
-                <div class="bg-white/15 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
-                    <p class="text-white text-xl sm:text-2xl font-black">{{ $stats['hadir'] }}</p>
-                    <p class="text-blue-300 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
+                <div class="bg-white/15 rounded-xl px-4 py-2.5 text-center min-w-[75px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl font-black">{{ $stats['hadir'] }}</p>
+                    <p class="text-blue-300 text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wider mt-0.5">Hadir</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
-                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $stats['izin'] }}</p>
-                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Izin</p>
+                <div class="bg-white/10 rounded-xl px-4 py-2.5 text-center min-w-[75px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl font-black">{{ $stats['izin'] }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wider mt-0.5">Izin</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
-                    <p class="text-white/90 text-xl sm:text-2xl font-black">{{ $stats['sakit'] }}</p>
-                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Sakit</p>
+                <div class="bg-white/10 rounded-xl px-4 py-2.5 text-center min-w-[75px] snap-start flex-shrink-0">
+                    <p class="text-white/90 text-xl font-black">{{ $stats['sakit'] }}</p>
+                    <p class="text-blue-300/80 text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wider mt-0.5">Sakit</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
-                    <p class="text-white/70 text-xl sm:text-2xl font-black">{{ $stats['belum'] }}</p>
-                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Belum</p>
+                <div class="bg-white/10 rounded-xl px-4 py-2.5 text-center min-w-[75px] snap-start flex-shrink-0">
+                    <p class="text-white/70 text-xl font-black">{{ $stats['belum'] }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wider mt-0.5">Belum</p>
                 </div>
-                <div class="bg-white/10 rounded-xl px-4 sm:px-5 py-3 text-center min-w-[80px] snap-start flex-shrink-0">
-                    <p class="text-white text-xl sm:text-2xl font-black">{{ $stats['total'] }}</p>
-                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[.68rem] font-semibold uppercase tracking-wider mt-0.5">Total</p>
+                <div class="bg-white/10 rounded-xl px-4 py-2.5 text-center min-w-[75px] snap-start flex-shrink-0">
+                    <p class="text-white text-xl font-black">{{ $stats['total'] }}</p>
+                    <p class="text-blue-300/70 text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wider mt-0.5">Total</p>
                 </div>
             </div>
         </div>
@@ -69,30 +69,17 @@
         </button>
 
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-            <form method="GET" action="{{ route('admin.absensi-siswa') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="app-label">Tanggal</label>
-                    <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}">
+                    <input type="date" id="filter-tanggal" class="app-input" value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}" onchange="fetchData()">
                 </div>
                 <div>
                     <label class="app-label">Cari Nama Murid</label>
-                    <input type="text" name="search" class="app-input" placeholder="Ketik nama murid..."
-                           value="{{ request('search') }}">
+                    <input type="text" id="filter-search" class="app-input" placeholder="Ketik nama murid..."
+                           value="{{ request('search') }}" onkeyup="debounceFetch()">
                 </div>
-                <div class="flex items-end gap-3 pt-2">
-                    <button type="submit" class="btn-primary flex-1 sm:flex-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
-                        Terapkan
-                    </button>
-                    @if($hasFilter)
-                    <a href="{{ route('admin.absensi-siswa') }}"
-                       class="btn-outline flex-1 sm:flex-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        Reset
-                    </a>
-                    @endif
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -140,7 +127,7 @@
     </div>
 
     {{-- ── REKAP CHART ── --}}
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+    <div id="chart-container" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800">Rekap Kehadiran Murid</h3>
@@ -171,7 +158,7 @@
     </div>
 
     {{-- 2 Kolom: Murid Hadir vs Belum Absen --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div id="lists-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {{-- Murid Hadir --}}
         <div class="app-card overflow-hidden">
@@ -237,7 +224,7 @@
     </div>
 
     {{-- Riwayat Absensi Murid --}}
-    <div class="app-card overflow-hidden">
+    <div id="riwayat-container" class="app-card overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100">
             <h3 class="font-bold text-slate-800">Riwayat Absensi Murid</h3>
             <p class="text-xs text-slate-400 mt-0.5">{{ $riwayat->total() }} record ditemukan</p>
@@ -286,3 +273,61 @@
 
 </div>
 </x-app-layout>
+
+<script>
+    let searchTimeout;
+    function debounceFetch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(fetchData, 400);
+    }
+
+    function fetchData() {
+        const tanggal = document.getElementById('filter-tanggal').value;
+        const search = document.getElementById('filter-search').value;
+        const url = new URL(window.location.href);
+        
+        if (tanggal) url.searchParams.set('tanggal', tanggal);
+        
+        if (search) url.searchParams.set('search', search);
+        else url.searchParams.delete('search');
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const els = ['welcome-strip', 'chart-container', 'lists-container', 'riwayat-container'];
+            els.forEach(id => {
+                const newEl = doc.getElementById(id);
+                if (newEl) document.getElementById(id).innerHTML = newEl.innerHTML;
+            });
+            
+            window.history.pushState({}, '', url);
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        const paginationLink = e.target.closest('#riwayat-container .pagination a, #riwayat-container nav a');
+        if (paginationLink) {
+            e.preventDefault();
+            const url = new URL(paginationLink.href);
+            
+            const tanggal = document.getElementById('filter-tanggal').value;
+            const search = document.getElementById('filter-search').value;
+            
+            if (tanggal) url.searchParams.set('tanggal', tanggal);
+            if (search) url.searchParams.set('search', search);
+            
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const riwayat = doc.getElementById('riwayat-container');
+                if (riwayat) document.getElementById('riwayat-container').innerHTML = riwayat.innerHTML;
+                window.history.pushState({}, '', url);
+            });
+        }
+    });
+</script>

@@ -67,28 +67,39 @@
             <div class="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl pointer-events-none"></div>
             <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-white opacity-10 rounded-full blur-xl pointer-events-none"></div>
             
-            <div class="relative z-10 flex flex-col sm:flex-row items-center sm:justify-between gap-6">
-                <div class="flex items-center gap-5 w-full sm:w-auto">
-                    <!-- Foto Profil Melingkar -->
-                    <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-[#1e3a6e] font-bold text-3xl shadow-inner border-4 border-white/20 shrink-0">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 relative z-10 w-full">
+                
+                <div class="flex flex-col w-full sm:w-auto gap-2 sm:gap-0">
+                    <!-- Foto Profil & Nama (Selalu sejajar) -->
+                    <div class="flex flex-row items-center gap-4 sm:gap-5 w-full">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white flex items-center justify-center text-[#1e3a6e] font-bold text-2xl sm:text-3xl shadow-inner border-4 border-white/20 shrink-0">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </div>
+                        
+                        <div class="flex-1 min-w-0">
+                            <p class="text-blue-100 text-xs sm:text-sm font-medium tracking-wide truncate">{{ $sapaan }}, Bapak/Ibu</p>
+                            <h1 class="text-white text-lg sm:text-2xl font-bold tracking-tight leading-tight mt-0.5 truncate">{{ $user->name }}</h1>
+                            <!-- NIP Desktop -->
+                            <div class="hidden sm:flex flex-wrap items-center gap-3 mt-2 text-blue-50 text-sm">
+                                <span class="bg-black/20 px-2.5 py-1 rounded backdrop-blur-sm border border-white/10 font-semibold flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                                    NIP: {{ $nip }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <!-- Detail Sapaan & Identitas -->
-                    <div>
-                        <p class="text-blue-100 text-sm font-medium tracking-wide">{{ $sapaan }}, Bapak/Ibu</p>
-                        <h1 class="text-white text-2xl font-bold tracking-tight">{{ $user->name }}</h1>
-                        <div class="flex flex-wrap items-center gap-3 mt-2 text-blue-50 text-sm">
-                            <span class="bg-black/20 px-2.5 py-1 rounded backdrop-blur-sm border border-white/10 font-semibold flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
-                                NIP: {{ $nip }}
-                            </span>
+
+                    <!-- NIP Mobile (Lebar Penuh) -->
+                    <div class="sm:hidden w-full mt-2">
+                        <div class="bg-black/10 p-3.5 rounded-xl border border-white/10 text-blue-50 text-sm font-semibold flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                            <span class="truncate">NIP: {{ $nip }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Waktu & Tanggal -->
-                <div class="flex flex-col items-start sm:items-end w-full sm:w-auto bg-black/10 sm:bg-transparent p-4 sm:p-0 rounded-xl border border-white/10 sm:border-none">
+                <div class="flex flex-col items-start sm:items-end w-full sm:w-auto bg-black/10 sm:bg-transparent p-4 sm:p-0 rounded-xl border border-white/10 sm:border-none shrink-0">
                     <p class="text-white font-bold text-2xl" id="realtime-clock">--:--:--</p>
                     <p class="text-blue-100 text-sm font-medium mt-1 flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -231,7 +242,7 @@
             </div>
 
             {{-- 4. Bagian Samping/Manajemen (1/3 -> col-span-4) --}}
-            <div class="lg:col-span-4 order-1 lg:order-2 grid grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
+            <div class="lg:col-span-4 order-1 lg:order-2 flex flex-col gap-4 sm:gap-6">
                 
                 <!-- Daftar Tugas Prioritas -->
                 <div class="bg-white rounded-2xl shadow-md p-4 sm:p-6 border border-slate-100 h-full flex flex-col">
@@ -275,16 +286,6 @@
                         @endif
                     </ul>
                 </div>
-
-                <!-- Info Box -->
-                <div class="bg-white rounded-2xl shadow-md p-4 sm:p-6 border border-slate-100 text-center h-full flex flex-col justify-center">
-                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 text-[#1e3a6e] rounded-full flex items-center justify-center mx-auto mb-3 shrink-0">
-                        <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <h3 class="text-[11px] sm:text-sm font-bold text-slate-800 mb-1">Informasi</h3>
-                    <p class="text-[10px] sm:text-xs text-slate-500 mb-0">Pastikan Anda mengisi presensi kelas tepat waktu setiap sesinya dan selalu periksa pengajuan validasi dari siswa.</p>
-                </div>
-
             </div>
         </div>
     </div>

@@ -36,16 +36,6 @@
             <div class="font-black text-2xl tracking-tighter">
                 <img src="https://i0.wp.com/smkn1majene.sch.id/wp-content/uploads/2019/01/HEADER-PANJANG-SMK-BARU.png?w=2452" alt="Logo {{ \App\Models\SchoolSetting::get()->nama_sekolah }}" class="h-10 w-auto">
             </div>
-            
-            @if (Route::has('login'))
-                <nav class="flex gap-4">
-                    @auth
-                        <a href="{{ url('/dashboard') }}" class="font-bold border-2 border-[#24417c] px-6 py-2 rounded-full hover:bg-[#24417c] hover:text-white transition duration-300">
-                            Ke Dashboard
-                        </a>
-                    @endauth
-                </nav>
-            @endif
         </div>
     </header>
 

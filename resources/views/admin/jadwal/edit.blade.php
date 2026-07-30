@@ -12,13 +12,13 @@
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800">Jadwal Mengajar Mingguan</h2>
+                    <h2 class="text-lg font-bold text-slate-800">Jadwal Mengajar</h2>
                     <p class="text-sm text-slate-500 mt-1">Atur jadwal mengajar untuk guru bersangkutan.</p>
                 </div>
                 @if(!$user->is_jadwal_set)
                     <div
                         class="bg-amber-50 text-amber-700 px-4 py-2 rounded-lg text-sm font-semibold border border-amber-200">
-                        ⚠️ Jadwalperbaiki bagian upload rpp saya ingin untuk bagian upload rpp ketika itu di index pada jadwal. absen tidak akan muncul jika rpp belum di upload. jika sudah upload maka absen akan muncul dan rpp tetap bisa di edit di halaman index namun absen akan tampil jika rpp sudah di setujui oleh kurikulum belum diatur
+                        ⚠️ Jadwal belum diatur
                     </div>
                 @endif
             </div>

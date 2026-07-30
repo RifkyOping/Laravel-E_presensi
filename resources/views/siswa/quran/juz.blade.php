@@ -7,8 +7,6 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <a href="{{ route('murid.baca-quran.index') }}" class="text-slate-400 hover:text-blue-600 text-sm transition-colors">Al-Qur'an</a>
-            <span class="text-slate-300">/</span>
             <span class="text-sm font-bold text-slate-800" id="headerJuzName">Juz {{ $nomor }}</span>
         </div>
     </x-slot>

@@ -7,9 +7,7 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <a href="{{ route('ebook.index') }}" class="text-slate-400 hover:text-[#1e3a6e] text-sm transition-colors">e-Book</a>
-            <span class="text-slate-300">/</span>
-            <span class="text-sm font-bold text-slate-800 truncate max-w-xs">Kuis: {{ $ebook->judul }}</span>
+            <span class="text-sm font-bold text-slate-800 truncate max-w-xs">Sesi Evaluasi</span>
         </div>
     </x-slot>
 
@@ -154,11 +152,9 @@
                             `;
                             q.opsi.forEach(opsi => {
                                 html += `
-                                <label class="flex items-start gap-3 cursor-pointer group">
-                                    <div class="mt-0.5">
-                                        <input type="radio" name="jawaban[${q.id}]" value="${opsi}"
-                                               class="w-4 h-4 text-[#1e3a6e] border-slate-300 focus:ring-[#1e3a6e]">
-                                    </div>
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="radio" name="jawaban[${q.id}]" value="${opsi}"
+                                           class="flex-shrink-0 w-4 h-4 text-[#1e3a6e] border-slate-300 focus:ring-[#1e3a6e]">
                                     <span class="text-sm text-slate-600 group-hover:text-slate-800 transition">${opsi}</span>
                                 </label>`;
                             });

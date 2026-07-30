@@ -8,9 +8,6 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <a href="{{ route('ebook.index') }}"
-                class="text-slate-400 hover:text-[#1e3a6e] text-sm transition-colors">e-Book</a>
-            <span class="text-slate-300">/</span>
             <span class="text-sm font-bold text-slate-800 truncate max-w-xs">{{ $ebook->judul }}</span>
         </div>
     </x-slot>
@@ -456,23 +453,6 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
-
-                {{-- Navigasi --}}
-                <div class="bg-white rounded-2xl border border-slate-200 p-5">
-                    <p class="text-xs font-black text-slate-400 uppercase tracking-wide mb-3">Navigasi</p>
-                    <div class="space-y-2">
-                        <a href="{{ route('ebook.index') }}"
-                            class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group">
-                            <svg class="w-4 h-4 text-slate-400 group-hover:text-[#1e3a6e]" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            <span class="text-sm font-medium text-slate-600 group-hover:text-[#1e3a6e]">Kembali ke
-                                Koleksi</span>
-                        </a>
                     </div>
                 </div>
             </div>

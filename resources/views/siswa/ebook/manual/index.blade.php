@@ -29,7 +29,7 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <h2 class="text-xl font-black text-slate-800">Koleksi Buku Manual</h2>
+            <h2 class="text-xl font-black text-slate-800">Buku Manual</h2>
             <p class="text-sm text-slate-400 mt-0.5">Upload data buku fisik yang telah Anda baca, isi indikatornya untuk menyelesaikan level.</p>
         </div>
     </div>
@@ -37,47 +37,49 @@
     {{-- Grid e-Book --}}
     <div class="flex flex-col gap-4">
         @foreach($levels as $item)
-        <div class="bg-white rounded-2xl border {{ $item->terbuka ? 'border-slate-200' : 'border-slate-100' }} p-5 flex flex-col sm:flex-row sm:items-center gap-5 transition-all duration-300 {{ $item->terbuka ? 'hover:shadow-lg hover:-translate-y-1' : 'opacity-75' }}">
+        <div class="bg-white rounded-2xl border {{ $item->terbuka ? 'border-slate-200' : 'border-slate-100' }} p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 transition-all duration-300 {{ $item->terbuka ? 'hover:shadow-lg hover:-translate-y-1' : 'opacity-75' }}">
             
-            {{-- Level Badge --}}
-            <div class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center font-black shadow-inner border-2
-                        {{ ($item->buku && $item->buku->status_selesai) ? 'bg-green-50 border-green-200 text-green-600' : ($item->terbuka ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-400') }}">
-                @if($item->buku && $item->buku->status_selesai)
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                @else
-                    <span class="text-lg">{{ $item->level }}</span>
-                @endif
-            </div>
-
-            {{-- Info --}}
-            <div class="flex-1">
-                <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                    @if(!$item->terbuka)
-                        <span class="flex items-center gap-1 text-[0.65rem] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2.5 py-0.5 rounded-md">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                            Terkunci
-                        </span>
-                    @endif
+            <div class="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto flex-1">
+                {{-- Level Badge --}}
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0 flex items-center justify-center font-black shadow-inner border-2
+                            {{ ($item->buku && $item->buku->status_selesai) ? 'bg-green-50 border-green-200 text-green-600' : ($item->terbuka ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-400') }}">
                     @if($item->buku && $item->buku->status_selesai)
-                        <span class="flex items-center gap-1 text-[0.65rem] font-bold text-green-600 uppercase tracking-wider bg-green-100 px-2.5 py-0.5 rounded-md">
-                            Selesai Dibaca
-                        </span>
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    @else
+                        <span class="text-base sm:text-lg">{{ $item->level }}</span>
                     @endif
                 </div>
-                
-                @if($item->buku)
-                    <h3 class="font-black text-slate-800 text-lg leading-tight">{{ $item->buku->judul }}</h3>
-                    <p class="text-sm text-slate-500 mt-1 leading-relaxed">
-                        Karya {{ $item->buku->penulis }} • {{ $item->buku->penerbit }} ({{ $item->buku->tahun_terbit }})
-                    </p>
-                @else
-                    <h3 class="font-black text-slate-400 text-lg leading-tight">Belum Ada Buku</h3>
-                    <p class="text-sm text-slate-400 mt-1 leading-relaxed">Upload informasi buku untuk level ini.</p>
-                @endif
+
+                {{-- Info --}}
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                        @if(!$item->terbuka)
+                            <span class="flex items-center gap-1 text-[0.65rem] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                Terkunci
+                            </span>
+                        @endif
+                        @if($item->buku && $item->buku->status_selesai)
+                            <span class="flex items-center gap-1 text-[0.65rem] font-bold text-green-600 uppercase tracking-wider bg-green-100 px-2 py-0.5 rounded-md">
+                                Selesai Dibaca
+                            </span>
+                        @endif
+                    </div>
+                    
+                    @if($item->buku)
+                        <h3 class="font-black text-slate-800 text-base sm:text-lg leading-tight">{{ $item->buku->judul }}</h3>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+                            Karya {{ $item->buku->penulis }} • {{ $item->buku->penerbit }} ({{ $item->buku->tahun_terbit }})
+                        </p>
+                    @else
+                        <h3 class="font-black text-slate-400 text-base sm:text-lg leading-tight">Belum Ada Buku</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">Upload informasi buku untuk level ini.</p>
+                    @endif
+                </div>
             </div>
 
             {{-- Action --}}
-            <div class="mt-4 sm:mt-0 sm:ml-auto w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+            <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
                 @if($item->buku)
                     <a href="{{ route('ebook.manual.show', $item->buku->id) }}"
                        class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-[#1e3a6e] bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-all duration-300">

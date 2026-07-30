@@ -45,7 +45,7 @@
             $rppFile = auth()->user()->rpp_file;
             $statusData = match($rppStatus) {
                 'kosong' => ['Belum Upload', 'bg-red-50 text-red-700 border-red-200', 'Mulai absen kelas dikunci. Silakan unggah RPP terlebih dahulu.'],
-                'pending' => ['Menunggu Persetujuan', 'bg-amber-50 text-amber-700 border-amber-200', 'RPP Anda sedang menunggu persetujuan Guru Piket. Anda sudah dapat mulai mengisi absen kelas.'],
+                'pending' => ['Menunggu Persetujuan', 'bg-amber-50 text-amber-700 border-amber-200', 'RPP Anda sedang menunggu persetujuan Kurikulum. Absen kelas akan terbuka setelah RPP disetujui.'],
                 'disetujui' => ['Disetujui', 'bg-emerald-50 text-emerald-700 border-emerald-200', 'RPP disetujui. Anda dapat mulai mengisi absen kelas.'],
                 'ditolak' => ['Ditolak', 'bg-red-50 text-red-700 border-red-200', 'RPP Anda ditolak. Silakan perbaiki dan unggah ulang.'],
                 default => ['Belum Upload', 'bg-slate-50 text-slate-700 border-slate-200', 'Silakan unggah RPP Anda.'],
@@ -185,7 +185,15 @@
                                 </svg>
                                 Lihat Rekap
                             </a>
-                        @elseif(!in_array(auth()->user()->rpp_status, ['pending', 'disetujui']))
+                        @elseif(auth()->user()->rpp_status === 'pending')
+                            <button type="button" disabled
+                               class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold bg-slate-100 text-slate-400 cursor-not-allowed" title="Menunggu persetujuan Kurikulum">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Menunggu Persetujuan
+                            </button>
+                        @elseif(auth()->user()->rpp_status === 'ditolak')
                             <button type="button" disabled
                                class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold bg-slate-100 text-slate-400 cursor-not-allowed">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

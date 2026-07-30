@@ -42,7 +42,7 @@
             @csrf
 
             {{-- Form Jadwal Absensi --}}
-            <div class="app-card p-6 anim-up">
+            <div class="app-card p-6 anim-up" x-data="{ activeTab: 'Senin', days: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] }">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">
                     <div>
                         <h3 class="font-bold text-slate-800 flex items-center gap-2">
@@ -61,54 +61,89 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto custom-scrollbar pb-2">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-black tracking-wider">
-                            <tr>
-                                <th class="px-4 py-3 rounded-l-xl">Hari</th>
-                                <th class="px-4 py-3 text-center">Status</th>
-                                <th class="px-2 py-3 text-center" title="Jam Buka Absen Kedatangan">Masuk Buka</th>
-                                <th class="px-2 py-3 text-center text-amber-600" title="Batas waktu agar tidak Terlambat">Batas Datang</th>
-                                <th class="px-2 py-3 text-center text-red-500" title="Jam Tutup Absen Kedatangan">Masuk Tutup</th>
-                                <th class="px-2 py-3 text-center" title="Jam Buka Absen Kepulangan (Batas Cepat)">Pulang Buka</th>
-                                <th class="px-2 py-3 text-center text-amber-600" title="Batas waktu agar dianggap Cepat Pulang (Jika absen sebelum ini dianggap cepat)">Batas Pulang</th>
-                                <th class="px-2 py-3 rounded-r-xl text-center text-red-500" title="Jam Tutup Absen Kepulangan">Pulang Tutup</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @foreach($jadwalAbsensi as $jadwal)
-                            <tr class="hover:bg-slate-50/50 transition schedule-row" data-libur="{{ $jadwal->is_libur ? '1' : '0' }}">
-                                <td class="px-4 py-3 font-bold text-slate-700">{{ $jadwal->hari }}</td>
-                                <td class="px-4 py-3 text-center">
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" name="jadwal[{{ $jadwal->hari }}][is_libur]" value="1" class="sr-only peer status-libur-checkbox" {{ $jadwal->is_libur ? 'checked' : '' }}>
-                                        <div class="w-9 h-5 bg-blue-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
-                                        <span class="ml-2 text-xs font-bold peer-checked:text-red-500 text-blue-600 toggle-text w-10 text-left">{{ $jadwal->is_libur ? 'Libur' : 'Masuk' }}</span>
-                                    </label>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_datang_buka]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input" value="{{ \Carbon\Carbon::parse($jadwal->absen_datang_buka)->format('H:i') }}" required>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][batas_waktu_terlambat]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-amber-200 focus:border-amber-500 focus:ring-amber-200 bg-amber-50" value="{{ \Carbon\Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i') }}" required>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_datang_tutup]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-red-200 focus:border-red-500 focus:ring-red-200 bg-red-50" value="{{ \Carbon\Carbon::parse($jadwal->absen_datang_tutup)->format('H:i') }}" required>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_pulang_buka]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input" value="{{ \Carbon\Carbon::parse($jadwal->absen_pulang_buka)->format('H:i') }}" required>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][batas_pulang_cepat]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-amber-200 focus:border-amber-500 focus:ring-amber-200 bg-amber-50" value="{{ \Carbon\Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i') }}" required>
-                                </td>
-                                <td class="px-2 py-3">
-                                    <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_pulang_tutup]" class="app-input !py-1 !px-2 !text-xs w-[85px] mx-auto time-input border-red-200 focus:border-red-500 focus:ring-red-200 bg-red-50" value="{{ \Carbon\Carbon::parse($jadwal->absen_pulang_tutup)->format('H:i') }}" required>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                {{-- Tabs --}}
+                <div class="-mx-1 overflow-x-auto pb-1 mb-6 border-b border-slate-200 custom-scrollbar">
+                    <div class="flex gap-2 px-1 min-w-max pb-2">
+                        <template x-for="hari in days" :key="hari">
+                            <button type="button" @click="activeTab = hari"
+                                :class="activeTab === hari ? 'bg-[#1e3a6e] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                                class="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                x-text="hari">
+                            </button>
+                        </template>
+                    </div>
                 </div>
+
+                {{-- Tab Contents --}}
+                <div class="min-h-[250px]">
+                    @foreach($jadwalAbsensi as $jadwal)
+                    <div x-show="activeTab === '{{ $jadwal->hari }}'" class="space-y-6" style="display: none;" x-init="if(activeTab === '{{ $jadwal->hari }}') $el.style.display = 'block'">
+                        
+                        {{-- Status Hari Ini --}}
+                        <div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">Status Hari {{ $jadwal->hari }}</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Tentukan apakah hari ini masuk sekolah atau libur</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="jadwal[{{ $jadwal->hari }}][is_libur]" value="1" class="sr-only peer status-libur-checkbox" {{ $jadwal->is_libur ? 'checked' : '' }}>
+                                <div class="w-11 h-6 bg-blue-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                                <span class="ml-3 text-sm font-bold peer-checked:text-red-500 text-blue-600 toggle-text w-12">{{ $jadwal->is_libur ? 'Libur' : 'Masuk' }}</span>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Kedatangan --}}
+                            <div class="border border-slate-200 rounded-xl p-5 relative overflow-hidden group hover:border-blue-300 transition-colors bg-white">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                                <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-4">
+                                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                                    Absen Datang
+                                </h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-[0.7rem] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Jam Masuk Buka</label>
+                                        <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_datang_buka]" class="app-input w-full time-input font-medium" value="{{ \Carbon\Carbon::parse($jadwal->absen_datang_buka)->format('H:i') }}" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[0.7rem] font-bold text-amber-600 mb-1.5 uppercase tracking-wider flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Batas Tepat Waktu</label>
+                                        <input type="time" name="jadwal[{{ $jadwal->hari }}][batas_waktu_terlambat]" class="app-input w-full time-input border-amber-200 focus:border-amber-500 bg-amber-50/50 font-medium text-amber-900" value="{{ \Carbon\Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i') }}" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[0.7rem] font-bold text-red-500 mb-1.5 uppercase tracking-wider flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Jam Masuk Tutup</label>
+                                        <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_datang_tutup]" class="app-input w-full time-input border-red-200 focus:border-red-500 bg-red-50/50 font-medium text-red-900" value="{{ \Carbon\Carbon::parse($jadwal->absen_datang_tutup)->format('H:i') }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Kepulangan --}}
+                            <div class="border border-slate-200 rounded-xl p-5 relative overflow-hidden group hover:border-emerald-300 transition-colors bg-white">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                                <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-4">
+                                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    Absen Pulang
+                                </h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-[0.7rem] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Jam Pulang Buka</label>
+                                        <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_pulang_buka]" class="app-input w-full time-input font-medium" value="{{ \Carbon\Carbon::parse($jadwal->absen_pulang_buka)->format('H:i') }}" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[0.7rem] font-bold text-amber-600 mb-1.5 uppercase tracking-wider flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Batas Tepat Waktu</label>
+                                        <input type="time" name="jadwal[{{ $jadwal->hari }}][batas_pulang_cepat]" class="app-input w-full time-input border-amber-200 focus:border-amber-500 bg-amber-50/50 font-medium text-amber-900" value="{{ \Carbon\Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i') }}" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[0.7rem] font-bold text-red-500 mb-1.5 uppercase tracking-wider flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Jam Pulang Tutup</label>
+                                        <input type="time" name="jadwal[{{ $jadwal->hari }}][absen_pulang_tutup]" class="app-input w-full time-input border-red-200 focus:border-red-500 bg-red-50/50 font-medium text-red-900" value="{{ \Carbon\Carbon::parse($jadwal->absen_pulang_tutup)->format('H:i') }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    @endforeach
+                </div>
+                
                 <style>
                     .custom-scrollbar::-webkit-scrollbar { height: 6px; }
                     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -119,7 +154,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {{-- Form Setting --}}
-                <div class="app-card p-6 anim-up d1">
+                <div class="app-card p-6 anim-up d1 order-2 lg:order-1">
                     <h3 class="font-bold text-slate-800 mb-5 flex items-center gap-2">
                         <span class="w-1.5 h-5 bg-[#1e3a6e] rounded-full inline-block"></span>
                         Konfigurasi Koordinat
@@ -232,7 +267,7 @@
                 </div>
 
                 {{-- Peta Preview --}}
-                <div class="app-card overflow-hidden anim-up d2">
+                <div class="app-card overflow-hidden anim-up d2 order-1 lg:order-2">
                     <div class="px-5 py-4 border-b border-slate-100">
                         <h3 class="font-bold text-slate-800 text-sm">Preview Peta Zona Absensi</h3>
                         <p class="text-xs text-slate-400 mt-0.5">Klik pada peta untuk menggeser titik pusat</p>

@@ -12,6 +12,7 @@ use App\Models\AbsensiSiswa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Shuchkin\SimpleXLSX;
 
 class AdminController extends Controller
 {
@@ -149,7 +150,7 @@ class AdminController extends Controller
             });
         }
 
-        $users = $query->orderBy('role')->orderBy('name')->paginate(15)->withQueryString();
+        $users = $query->orderBy('role')->orderBy('name')->paginate(50)->withQueryString();
 
         return view('admin.users.index', compact('users', 'tab'));
     }
@@ -260,30 +261,46 @@ class AdminController extends Controller
     public function importUsers(Request $request)
     {
         $request->validate([
-            'file_csv' => 'required|file|mimes:csv,txt|max:2048',
+            'file_csv' => 'required|file|mimes:csv,txt,xlsx|max:2048',
         ], [
-            'file_csv.required' => 'Pilih file CSV terlebih dahulu.',
-            'file_csv.mimes'    => 'File harus berupa format CSV.',
+            'file_csv.required' => 'Pilih file terlebih dahulu.',
+            'file_csv.mimes'    => 'File harus berupa format CSV atau XLSX.',
             'file_csv.max'      => 'Ukuran file maksimal 2MB.',
         ]);
 
         $file = $request->file('file_csv');
-        $handle = fopen($file->getRealPath(), 'r');
+        $extension = strtolower($file->getClientOriginalExtension());
+        
+        $rows = [];
 
-        // Deteksi pemisah (koma atau titik koma)
-        $firstLine = fgets($handle);
-        $delimiter = strpos($firstLine, ';') !== false ? ';' : ',';
-        rewind($handle);
+        if ($extension === 'xlsx') {
+            if ($xlsx = SimpleXLSX::parse($file->getRealPath())) {
+                $rows = $xlsx->rows();
+            } else {
+                return back()->with('error', 'Gagal membaca file XLSX: ' . SimpleXLSX::parseError());
+            }
+        } else {
+            $handle = fopen($file->getRealPath(), 'r');
+            $firstLine = fgets($handle);
+            $delimiter = strpos($firstLine, ';') !== false ? ';' : ',';
+            rewind($handle);
 
-        $header = fgetcsv($handle, 1000, $delimiter);
-        if (!$header || count($header) < 4) {
-            return back()->with('error', 'Format CSV tidak sesuai template.');
+            while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
+                $rows[] = $row;
+            }
+            fclose($handle);
+        }
+
+        if (count($rows) < 2) {
+            return back()->with('error', 'File kosong atau format tidak sesuai.');
         }
 
         $berhasil = 0;
         $gagal = 0;
 
-        while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
+        // Skip header at index 0
+        for ($i = 1; $i < count($rows); $i++) {
+            $row = $rows[$i];
             if (count($row) < 4) continue;
 
             $name = trim($row[0]);
@@ -341,8 +358,6 @@ class AdminController extends Controller
 
             $berhasil++;
         }
-
-        fclose($handle);
 
         $msg = "Import selesai! Berhasil: {$berhasil} akun.";
         if ($gagal > 0) $msg .= " Gagal/Dilewati: {$gagal} baris (nomor_induk sudah ada, email sudah ada, role tidak valid, atau data tidak lengkap).";
@@ -489,8 +504,15 @@ class AdminController extends Controller
     {
         $tanggal = $request->filled('tanggal') ? Carbon::parse($request->tanggal) : Carbon::today();
 
-        // Semua guru
-        $semuaGuru = User::where('role', 'guru')->orderBy('name')->get();
+        // Untuk dropdown filter
+        $listGuru = User::where('role', 'guru')->orderBy('name')->get();
+
+        // Guru yang akan ditampilkan di tabel Rekap
+        $guruQuery = User::where('role', 'guru')->orderBy('name');
+        if ($request->filled('guru_id')) {
+            $guruQuery->where('id', $request->guru_id);
+        }
+        $semuaGuru = $guruQuery->get();
 
         // Record absensi pada tanggal tersebut
         $absensi = AbsensiGuru::with('user')
@@ -510,7 +532,7 @@ class AdminController extends Controller
 
         $riwayat = $query->paginate(20)->withQueryString();
 
-        return view('admin.absensi-guru', compact('semuaGuru', 'absensi', 'tanggal', 'riwayat'));
+        return view('admin.absensi-guru', compact('semuaGuru', 'listGuru', 'absensi', 'tanggal', 'riwayat'));
     }
 
     public function exportAbsensiGuru(Request $request)

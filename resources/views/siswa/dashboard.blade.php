@@ -75,7 +75,7 @@ $dailyQuote = $quotes[date('z') % count($quotes)];
 
 <x-app-layout>
     <x-slot name="header">
-        <span class="text-sm font-bold text-slate-800">Dashboard Siswa</span>
+        <span class="text-sm font-bold text-slate-800">Dashboard Murid</span>
     </x-slot>
 
     <div class="space-y-6 pb-10 bg-slate-50 min-h-screen">

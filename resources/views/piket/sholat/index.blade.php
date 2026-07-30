@@ -38,15 +38,15 @@
             </button>
             
             <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-                <form method="GET" action="{{ route('piket.sholat.index') }}" class="flex flex-row items-end gap-2 sm:gap-4 w-full">
+                <form id="filter-form" method="GET" action="{{ route('piket.sholat.index') }}" class="flex flex-row items-end gap-2 sm:gap-4 w-full">
                     <div class="flex-1 min-w-0">
                         <label class="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider mb-1 sm:mb-2 truncate">Tanggal</label>
-                        <input type="date" name="tanggal" value="{{ $tanggal->format('Y-m-d') }}" 
+                        <input id="filter_tanggal" type="date" name="tanggal" value="{{ $tanggal->format('Y-m-d') }}" 
                                class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-2 sm:px-4 py-2 sm:py-2.5 text-slate-800 font-medium focus:outline-none transition text-xs sm:text-sm bg-white">
                     </div>
                     <div class="flex-1 min-w-0">
                         <label class="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider mb-1 sm:mb-2 truncate">Kelas</label>
-                        <select name="kelas_id" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-2 sm:px-4 py-2 sm:py-2.5 text-slate-800 font-medium focus:outline-none transition text-xs sm:text-sm bg-white">
+                        <select id="filter_kelas_id" name="kelas_id" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-2 sm:px-4 py-2 sm:py-2.5 text-slate-800 font-medium focus:outline-none transition text-xs sm:text-sm bg-white">
                             <option value="">Kelas</option>
                             @foreach($kelasList as $k)
                                 <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>
@@ -55,17 +55,18 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="flex-shrink-0">
-                        <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm h-[34px] sm:h-[42px] flex items-center justify-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            <span class="hidden sm:inline">Cari</span>
-                        </button>
+                    <!-- Loading indicator -->
+                    <div id="loading-indicator" class="flex-shrink-0 flex items-center justify-center h-[34px] sm:h-[42px] px-3 hidden">
+                        <svg class="animate-spin h-5 w-5 text-[#1e3a6e]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div id="data-container" class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
             @if($selectedKelas)
                 <div x-data="{ showDownload: false }" class="border-b border-slate-100">
                     <button type="button" @click="showDownload = !showDownload" class="w-full text-left px-6 py-4 flex items-center justify-between group focus:outline-none bg-blue-50/40 hover:bg-blue-100/50 transition-colors">
@@ -294,5 +295,50 @@
                 editIcon.classList.remove('edit-icon');
             }
         }
+
+        // AJAX Filter Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('filter_tanggal');
+            const kelasInput = document.getElementById('filter_kelas_id');
+            const form = document.getElementById('filter-form');
+            const container = document.getElementById('data-container');
+            const loading = document.getElementById('loading-indicator');
+
+            function fetchFilteredData() {
+                const kelasId = kelasInput.value;
+                const tanggal = dateInput.value;
+                
+                loading.classList.remove('hidden');
+
+                const url = new URL(form.action);
+                if (tanggal) url.searchParams.append('tanggal', tanggal);
+                if (kelasId) url.searchParams.append('kelas_id', kelasId);
+
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.getElementById('data-container');
+                    
+                    if(newContent) {
+                        container.innerHTML = newContent.innerHTML;
+                    }
+                    
+                    window.history.pushState({}, '', url);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                })
+                .finally(() => {
+                    loading.classList.add('hidden');
+                });
+            }
+
+            if(dateInput) dateInput.addEventListener('change', fetchFilteredData);
+            if(kelasInput) kelasInput.addEventListener('change', fetchFilteredData);
+        });
     </script>
 </x-app-layout>

@@ -73,23 +73,20 @@
         </button>
 
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-            <form method="GET" action="{{ route('admin.mata-pelajaran.index') }}" class="flex flex-col sm:flex-row gap-3">
+            <form method="GET" action="{{ route('admin.mata-pelajaran.index') }}" class="flex flex-col sm:flex-row gap-3" id="searchForm">
                 <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Cari nama mata pelajaran..."
+                       oninput="handleSearchInput(this)"
                        class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
 
                 <select name="status"
+                        onchange="performLiveSearch(this.form)"
                         class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
                     <option value="">Status</option>
                     <option value="aktif"    {{ request('status')==='aktif'    ?'selected':'' }}>Aktif</option>
                     <option value="nonaktif" {{ request('status')==='nonaktif' ?'selected':'' }}>Nonaktif</option>
                 </select>
                 <div class="flex items-center gap-3">
-                    <button type="submit"
-                            class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-[#1e3a6e]/20 w-full sm:w-auto justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        Cari
-                    </button>
                     @if(request()->hasAny(['search','status']))
                     <a href="{{ route('admin.mata-pelajaran.index') }}"
                        class="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-sm rounded-xl transition text-center w-full sm:w-auto flex items-center justify-center gap-2">
@@ -103,7 +100,7 @@
     </div>
 
     {{-- Tabel --}}
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div id="table-container" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100">
             <p class="text-sm text-slate-500">
                 Menampilkan <span class="font-bold text-slate-800">{{ $mapel->total() }}</span> mata pelajaran
@@ -173,4 +170,80 @@
     </div>
 
 </div>
+
+<script>
+    let searchTimeout;
+    function handleSearchInput(input) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            performLiveSearch(input.form);
+        }, 500); // Tunggu 500ms
+    }
+
+    async function performLiveSearch(form) {
+        const url = new URL(form.action);
+        const formData = new FormData(form);
+        
+        formData.forEach((value, key) => {
+            if(value) url.searchParams.append(key, value);
+        });
+
+        const tableContainer = document.getElementById('table-container');
+        tableContainer.style.opacity = '0.5';
+        tableContainer.style.pointerEvents = 'none';
+
+        try {
+            const response = await fetch(url.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const html = await response.text();
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('table-container');
+            
+            if(newTable) {
+                tableContainer.innerHTML = newTable.innerHTML;
+            }
+            
+            window.history.pushState({}, '', url.toString());
+        } catch (error) {
+            console.error('Error saat live search:', error);
+        } finally {
+            tableContainer.style.opacity = '1';
+            tableContainer.style.pointerEvents = 'auto';
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const form = document.getElementById('searchForm');
+        
+        // Handle klik link pagination
+        const paginationLink = e.target.closest('#table-container nav a');
+        if(paginationLink) {
+            e.preventDefault();
+            const url = new URL(paginationLink.href);
+            
+            const formData = new FormData(form);
+            formData.forEach((value, key) => {
+                if(value) url.searchParams.set(key, value);
+            });
+
+            const dummyForm = document.createElement('form');
+            dummyForm.action = url.pathname + url.search;
+            performLiveSearch(dummyForm);
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchForm = document.getElementById('searchForm');
+        if(searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                performLiveSearch(this);
+            });
+        }
+    });
+</script>
+
 </x-app-layout>

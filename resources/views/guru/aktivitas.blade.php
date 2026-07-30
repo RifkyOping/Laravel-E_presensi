@@ -18,6 +18,12 @@
                     <span>{{ session('error') }}</span>
                 </div>
             @endif
+            @if (session('info'))
+                <div class="bg-blue-50 border-2 border-blue-400 text-blue-800 font-bold px-6 py-4 rounded-2xl shadow flex items-center gap-3">
+                    <span class="text-2xl">ℹ️</span>
+                    <span>{{ session('info') }}</span>
+                </div>
+            @endif
             @if ($errors->any())
                 <div class="bg-red-50 border-2 border-red-400 text-red-800 font-bold px-6 py-4 rounded-2xl shadow">
                     <p class="flex items-center gap-2 mb-2"><span class="text-2xl">⚠️</span> Periksa kembali isian form:</p>

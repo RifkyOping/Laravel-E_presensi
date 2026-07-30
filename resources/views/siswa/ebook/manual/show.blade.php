@@ -71,28 +71,28 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 pt-6 border-t border-slate-100 flex flex-wrap justify-end gap-3">
-                            <a href="{{ route('ebook.manual.index') }}" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm transition flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                                Kembali
+                        <div class="mt-8 pt-6 border-t border-slate-100 flex md:flex-wrap justify-between md:justify-end gap-2 md:gap-3">
+                            <a href="{{ route('ebook.manual.index') }}" class="flex-1 md:flex-none justify-center px-2 md:px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-[11px] md:text-sm transition flex items-center gap-1 md:gap-2 text-center text-balance">
+                                <svg class="w-4 h-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                                <span>Kembali</span>
                             </a>
-                            <a href="{{ route('ebook.manual.edit', $buku->id) }}" class="px-5 py-2.5 rounded-xl border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-blue-50 font-semibold text-sm transition flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Edit Buku
+                            <a href="{{ route('ebook.manual.edit', $buku->id) }}" class="flex-1 md:flex-none justify-center px-2 md:px-5 py-2.5 rounded-xl border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-blue-50 font-semibold text-[11px] md:text-sm transition flex items-center gap-1 md:gap-2 text-center text-balance">
+                                <svg class="w-4 h-4 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span>Edit Buku</span>
                             </a>
                             @if(!$buku->status_selesai)
                                 <a href="{{ route('ebook.indikator.show', ['jenis' => 'manual', 'id' => $buku->id]) }}"
-                                   class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-yellow-500 hover:bg-yellow-600 transition-colors shadow-sm shadow-yellow-500/30">
+                                   class="flex-1 md:flex-none flex items-center justify-center text-center px-2 md:px-6 py-2.5 rounded-xl text-[11px] md:text-sm font-bold text-white bg-yellow-500 hover:bg-yellow-600 transition-colors shadow-sm shadow-yellow-500/30 leading-tight">
                                     Isi Indikator
                                 </a>
                             @elseif(isset($rataNilai) && $rataNilai !== null)
                                 <a href="{{ route('ebook.indikator.show', ['jenis' => 'manual', 'id' => $buku->id]) }}"
-                                   class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-purple-500 hover:bg-purple-600 transition-colors shadow-sm shadow-purple-500/30">
+                                   class="flex-1 md:flex-none flex items-center justify-center text-center px-2 md:px-6 py-2.5 rounded-xl text-[11px] md:text-sm font-bold text-white bg-purple-500 hover:bg-purple-600 transition-colors shadow-sm shadow-purple-500/30 leading-tight text-balance">
                                     Lihat Penilaian Guru
                                 </a>
                             @else
                                 <a href="{{ route('ebook.indikator.show', ['jenis' => 'manual', 'id' => $buku->id]) }}"
-                                   class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-500 hover:bg-slate-600 transition-colors shadow-sm shadow-slate-500/30">
+                                   class="flex-1 md:flex-none flex items-center justify-center text-center px-2 md:px-6 py-2.5 rounded-xl text-[11px] md:text-sm font-bold text-white bg-slate-500 hover:bg-slate-600 transition-colors shadow-sm shadow-slate-500/30 leading-tight text-balance">
                                     Lihat Jawaban Indikator
                                 </a>
                             @endif

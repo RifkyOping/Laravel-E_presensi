@@ -7,8 +7,6 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <a href="{{ route('murid.baca-quran.index') }}" class="text-slate-400 hover:text-blue-600 text-sm transition-colors">Al-Qur'an</a>
-            <span class="text-slate-300">/</span>
             <span class="text-sm font-bold text-slate-800" id="headerSurahName">Surah</span>
         </div>
     </x-slot>
@@ -66,16 +64,16 @@
 
         {{-- Navigasi Bawah --}}
         <div class="flex items-center justify-between pt-6 border-t border-slate-200 mt-10">
-            <a :href="surah.nomor > 1 ? `/murid/baca-quran/${surah.nomor - 1}` : '#'" 
-               class="px-5 py-2.5 rounded-xl text-sm font-semibold transition"
+            <a :href="surah.nomor > 1 ? `/murid/baca-quran/surah/${surah.nomor - 1}` : '#'" 
+               class="px-5 py-2.5 rounded-xl text-sm font-semibold transition text-center"
                :class="surah.nomor > 1 ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50' : 'bg-slate-100 text-slate-400 cursor-not-allowed'">
-                &larr; Surah Sebelumnya
+                &larr; <span class="hidden sm:inline">Surah </span>Sebelumnya
             </a>
             
-            <a :href="surah.nomor < 114 ? `/murid/baca-quran/${surah.nomor + 1}` : '#'" 
-               class="px-5 py-2.5 rounded-xl text-sm font-semibold transition"
+            <a :href="surah.nomor < 114 ? `/murid/baca-quran/surah/${surah.nomor + 1}` : '#'" 
+               class="px-5 py-2.5 rounded-xl text-sm font-semibold transition text-center"
                :class="surah.nomor < 114 ? 'bg-[#1e3a6e] hover:bg-[#162d57] text-white shadow-md' : 'bg-slate-100 text-slate-400 cursor-not-allowed'">
-                Surah Selanjutnya &rarr;
+                <span class="hidden sm:inline">Surah </span>Selanjutnya &rarr;
             </a>
         </div>
 

@@ -342,20 +342,44 @@ class AbsensiSiswaController extends Controller
         $activeTab = $request->query('hari', $hariIniStr);
         $today = Carbon::today()->toDateString();
 
-        // Get today's active AbsensiMengajar for this class
-        $absensiMengajar = \App\Models\AbsensiMengajar::whereDate('tanggal', $today)
+        $startOfWeek = Carbon::now()->startOfWeek()->toDateString();
+        $endOfWeek = Carbon::now()->endOfWeek()->toDateString();
+
+        // Get this week's active AbsensiMengajar for this class
+        $absensiMengajar = \App\Models\AbsensiMengajar::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->where('kelas', $kelasStr)
             ->get()
             ->keyBy(function($item) {
-                return $item->user_id . '_' . $item->mata_pelajaran . '_' . $item->jam_ke;
+                $dayName = [
+                    'Monday'    => 'Senin',
+                    'Tuesday'   => 'Selasa',
+                    'Wednesday' => 'Rabu',
+                    'Thursday'  => 'Kamis',
+                    'Friday'    => 'Jumat',
+                    'Saturday'  => 'Sabtu',
+                    'Sunday'    => 'Minggu'
+                ][\Carbon\Carbon::parse($item->tanggal)->format('l')] ?? 'Senin';
+                
+                return $dayName . '_' . $item->user_id . '_' . $item->mata_pelajaran . '_' . $item->jam_ke;
             });
 
-        // Get student's class attendance for today
-        // We will fetch based on today's date and the student's ID
-        $absensiKelas = \App\Models\AbsensiKelasSiswa::whereDate('tanggal', $today)
+        // Get student's class attendance for this week
+        $absensiKelas = \App\Models\AbsensiKelasSiswa::whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->where('siswa_id', $user->id)
             ->get()
-            ->keyBy('jadwal_mengajar_id');
+            ->keyBy(function($item) {
+                $dayName = [
+                    'Monday'    => 'Senin',
+                    'Tuesday'   => 'Selasa',
+                    'Wednesday' => 'Rabu',
+                    'Thursday'  => 'Kamis',
+                    'Friday'    => 'Jumat',
+                    'Saturday'  => 'Sabtu',
+                    'Sunday'    => 'Minggu'
+                ][\Carbon\Carbon::parse($item->tanggal)->format('l')] ?? 'Senin';
+                
+                return $dayName . '_' . $item->jadwal_mengajar_id;
+            });
 
         return view('siswa.monitoring-kelas', compact('jadwalList', 'activeTab', 'hariIniStr', 'absensiMengajar', 'absensiKelas'));
     }

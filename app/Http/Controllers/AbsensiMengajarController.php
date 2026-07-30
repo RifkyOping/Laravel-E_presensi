@@ -101,7 +101,7 @@ class AbsensiMengajarController extends Controller
         }
 
         if ($aktivitas->waktu_absen_masuk) {
-            return back()->with('error', 'Absen masuk mengajar sudah tercatat.');
+            return back()->with('info', 'Absen masuk mengajar sudah tercatat.');
         }
 
         $now = Carbon::now();
@@ -133,7 +133,7 @@ class AbsensiMengajarController extends Controller
         }
 
         if ($aktivitas->waktu_absen_keluar) {
-            return back()->with('error', 'Absen keluar mengajar sudah tercatat.');
+            return back()->with('info', 'Absen keluar mengajar sudah tercatat.');
         }
 
         $aktivitas->update([

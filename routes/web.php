@@ -85,6 +85,9 @@ Route::middleware('auth')->group(function () {
     // Monitoring Kelas Murid
     Route::get('/murid/monitoring-kelas', [AbsensiSiswaController::class, 'monitoringKelas'])->name('murid.monitoring-kelas');
 
+    // QR Code Murid (Absensi Offline)
+    Route::get('/murid/qr-code', [\App\Http\Controllers\Siswa\QrCodeController::class, 'index'])->name('murid.qr-code');
+
     // Baca Al-Qur'an (Pure Arabic)
     Route::get('/murid/baca-quran', [\App\Http\Controllers\QuranController::class, 'index'])->name('murid.baca-quran.index');
     Route::get('/murid/baca-quran/surah/{nomor}', [\App\Http\Controllers\QuranController::class, 'show'])->name('murid.baca-quran.show');
@@ -116,6 +119,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/guru/absensi', [AbsensiGuruController::class, 'index'])->name('guru.absensi');
     Route::post('/guru/absensi/datang', [AbsensiGuruController::class, 'absenDatang'])->name('guru.absensi.datang');
     Route::post('/guru/absensi/pulang', [AbsensiGuruController::class, 'absenPulang'])->name('guru.absensi.pulang');
+
+    // Guru - Scan Absen QR Code Siswa
+    Route::get('/guru/scan-qr', [\App\Http\Controllers\Guru\ScanQrController::class, 'index'])->name('guru.scan-qr');
+    Route::post('/guru/scan-qr/process', [\App\Http\Controllers\Guru\ScanQrController::class, 'processScan'])->name('guru.scan-qr.process');
 
     // Guru - Aktivitas Mengajar
     Route::get('/guru/aktivitas', [AbsensiMengajarController::class, 'index'])->name('guru.aktivitas');

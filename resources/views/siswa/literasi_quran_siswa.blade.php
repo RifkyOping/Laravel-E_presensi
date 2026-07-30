@@ -13,7 +13,7 @@
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <span class="inline-block text-[.65rem] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2"
-                      style="background:rgba(255,255,255,.15);color:#bfdbfe;">Literasi Keagamaan Saya</span>
+                      style="background:rgba(255,255,255,.15);color:#bfdbfe;">Literasi Keagamaan</span>
                 <h1 class="text-white text-2xl font-black leading-tight">{{ $siswa->name }}</h1>
                 <div class="flex flex-wrap gap-2 mt-2">
                     @if($siswa->kelas)

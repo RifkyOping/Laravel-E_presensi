@@ -7,7 +7,7 @@
     <div class="space-y-7">
 
         {{-- ── WELCOME STRIP ── --}}
-        <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
+        <div id="welcome-strip" class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
             style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
             <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -71,17 +71,16 @@
             </button>
 
             <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-                <form method="GET" action="{{ route('admin.aktivitas-guru') }}"
-                    class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label
                             class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tanggal</label>
-                        <input type="date" name="tanggal" value="{{ request('tanggal') }}" class="app-input">
+                        <input type="date" id="filter-tanggal" value="{{ request('tanggal') }}" class="app-input" onchange="fetchData()">
                     </div>
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Filter
                             Guru</label>
-                        <select name="guru_id" class="app-input">
+                        <select id="filter-guru" class="app-input" onchange="fetchData()">
                             <option value="">— Semua Guru —</option>
                             @foreach($semuaGuru as $g)
                                 <option value="{{ $g->id }}" {{ request('guru_id') == $g->id ? 'selected' : '' }}>{{ $g->name }}
@@ -89,25 +88,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="flex items-end gap-3 sm:col-span-2">
-                        <button type="submit" class="btn-primary">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
-                            </svg>
-                            Terapkan
-                        </button>
-                        @if($hasFilter)
-                            <a href="{{ route('admin.aktivitas-guru') }}" class="btn-outline">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                Reset
-                            </a>
-                        @endif
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -155,74 +136,73 @@
         </div>
 
         {{-- ── TABEL AKTIVITAS ── --}}
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div id="tabel-container" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-slate-800">Jurnal Aktivitas Mengajar</h3>
                     <p class="text-xs text-slate-400 mt-0.5">{{ $aktivitas->total() }} sesi ditemukan</p>
                 </div>
-                <span class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600">
+                <span class="text-[0.65rem] md:text-xs font-bold px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-slate-100 text-slate-600">
                     Hal {{ $aktivitas->currentPage() }} / {{ $aktivitas->lastPage() }}
                 </span>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left">
+                <table class="w-full text-left text-xs md:text-sm">
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/70">
                             <th
-                                class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">
+                                class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
                                 Nama</th>
                             <th
-                                class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">
+                                class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
                                 Mata Pelajaran</th>
                             <th
-                                class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">
+                                class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
                                 Kelas</th>
                             <th
-                                class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">
+                                class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
                                 Jam ke-</th>
                             <th
-                                class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">
+                                class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
                                 Waktu</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
                         @forelse($aktivitas as $item)
                             <tr class="hover:bg-slate-50/60 transition duration-150">
-
                                 {{-- Guru --}}
-                                <td class="py-3.5 px-5 text-left">
-                                    <div class="flex items-center gap-2.5">
+                                <td class="py-2 md:py-3.5 px-2 md:px-5 text-left">
+                                    <div class="flex items-center gap-1.5 md:gap-2.5">
                                         <div
-                                            class="w-8 h-8 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-black text-xs flex-shrink-0">
+                                            class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-black text-[0.6rem] md:text-xs flex-shrink-0">
                                             {{ strtoupper(substr($item->user->name, 0, 1)) }}
                                         </div>
-                                        <span class="text-sm font-semibold text-slate-800 whitespace-nowrap">
+                                        <span class="text-[0.65rem] md:text-sm font-semibold text-slate-800 max-w-[4rem] sm:max-w-[7rem] md:max-w-none truncate md:overflow-visible md:whitespace-normal">
                                             {{ $item->user->name }}
                                         </span>
                                     </div>
                                 </td>
 
                                 {{-- Mata Pelajaran --}}
-                                <td class="py-3.5 px-5 text-center text-sm text-slate-600 whitespace-nowrap">
+                                <td class="py-2 md:py-3.5 px-2 md:px-5 text-center text-[0.65rem] md:text-sm text-slate-600 max-w-[4.5rem] sm:max-w-[7rem] md:max-w-none truncate md:overflow-visible md:whitespace-normal">
                                     {{ $item->mata_pelajaran }}
                                 </td>
 
                                 {{-- Kelas --}}
-                                <td class="py-3.5 px-5 text-center">
-                                    <span class="inline-block px-2.5 py-1 rounded-full text-[.7rem] font-bold
-                                             bg-blue-50 text-[#1e3a6e] border border-blue-100">
+                                <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
+                                    <span class="inline-block px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full text-[0.55rem] md:text-[.7rem] font-bold
+                                             bg-blue-50 text-[#1e3a6e] border border-blue-100 whitespace-nowrap">
                                         {{ $item->kelas }}
                                     </span>
                                 </td>
 
                                 {{-- Jam ke- --}}
-                                <td class="py-3.5 px-5 text-center font-bold text-slate-700 text-sm">
+                                <td class="py-2 md:py-3.5 px-2 md:px-5 text-center font-bold text-slate-700 text-[0.65rem] md:text-sm">
                                     {{ $item->jam_ke }}
                                 </td>
 
                                 {{-- Waktu --}}
-                                <td class="py-3.5 px-5 text-center text-sm text-slate-600 whitespace-nowrap">
+                                <td class="py-2 md:py-3.5 px-2 md:px-5 text-center text-[0.55rem] md:text-sm text-slate-600 whitespace-nowrap">
                                     <span class="font-semibold text-slate-700">
                                         {{ Carbon::parse($item->jam_mulai)->format('H:i') }}
                                     </span>
@@ -234,19 +214,17 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-16 text-center">
+                                <td colspan="5" class="py-12 md:py-16 text-center">
                                     <div class="flex flex-col items-center gap-3">
                                         <div
-                                            class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                                            <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor"
+                                            class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                                            <svg class="w-6 h-6 md:w-8 md:h-8 text-slate-300" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                             </svg>
                                         </div>
-                                        <p class="text-slate-400 text-sm font-medium">Belum ada data aktivitas mengajar.</p>
-                                        <p class="text-slate-300 text-xs">Coba ubah filter atau pilih tanggal yang berbeda.
-                                        </p>
+                                        <p class="text-slate-400 text-xs md:text-sm font-medium">Belum ada data aktivitas mengajar.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -255,9 +233,61 @@
                 </table>
             </div>
             @if($aktivitas->hasPages())
-                <div class="px-6 py-4 border-t border-slate-100">{{ $aktivitas->links() }}</div>
+                <div class="px-3 md:px-6 py-2 md:py-4 border-t border-slate-100">{{ $aktivitas->links() }}</div>
             @endif
         </div>
 
     </div>
 </x-app-layout>
+
+<script>
+    function fetchData() {
+        const tanggal = document.getElementById('filter-tanggal').value;
+        const guruId = document.getElementById('filter-guru').value;
+        const url = new URL(window.location.href);
+        
+        if (tanggal) url.searchParams.set('tanggal', tanggal);
+        
+        if (guruId) url.searchParams.set('guru_id', guruId);
+        else url.searchParams.delete('guru_id');
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const els = ['welcome-strip', 'tabel-container'];
+            els.forEach(id => {
+                const newEl = doc.getElementById(id);
+                if (newEl) document.getElementById(id).innerHTML = newEl.innerHTML;
+            });
+            
+            window.history.pushState({}, '', url);
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        const paginationLink = e.target.closest('#tabel-container .pagination a, #tabel-container nav a');
+        if (paginationLink) {
+            e.preventDefault();
+            const url = new URL(paginationLink.href);
+            
+            const tanggal = document.getElementById('filter-tanggal').value;
+            const guruId = document.getElementById('filter-guru').value;
+            
+            if (tanggal) url.searchParams.set('tanggal', tanggal);
+            if (guruId) url.searchParams.set('guru_id', guruId);
+            
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const tabel = doc.getElementById('tabel-container');
+                if (tabel) document.getElementById('tabel-container').innerHTML = tabel.innerHTML;
+                window.history.pushState({}, '', url);
+            });
+        }
+    });
+</script>

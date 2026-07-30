@@ -7,7 +7,7 @@
 <div class="space-y-7">
 
     {{-- ── WELCOME STRIP ── --}}
-    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
+    <div id="stats-container" class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-7 shadow-xl"
          style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
         <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -70,37 +70,23 @@
         </button>
 
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-            <form method="GET" action="{{ route('admin.absensi-guru') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Tanggal</label>
-                    <input type="date" name="tanggal"
+                    <input type="date" id="filter-tanggal"
                            value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}"
-                           class="app-input">
+                           class="app-input" onchange="fetchData()">
                 </div>
                 <div>
                     <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Filter Guru</label>
-                    <select name="guru_id" class="app-input">
+                    <select id="filter-guru" class="app-input" onchange="fetchData()">
                         <option value="">— Semua Guru —</option>
-                        @foreach($semuaGuru as $g)
+                        @foreach($listGuru as $g)
                         <option value="{{ $g->id }}" {{ request('guru_id')==$g->id?'selected':'' }}>{{ $g->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="flex items-end gap-3 sm:col-span-2">
-                    <button type="submit" class="btn-primary">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
-                        </svg>
-                        Terapkan
-                    </button>
-                    @if($hasFilter)
-                    <a href="{{ route('admin.absensi-guru') }}" class="btn-outline">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        Reset
-                    </a>
-                    @endif
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -148,7 +134,7 @@
     </div>
 
     {{-- ── STATUS PER TANGGAL ── --}}
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+    <div id="rekap-container" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800">Rekap Kehadiran</h3>
@@ -180,59 +166,59 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left text-xs md:text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
-                        <th class="py-3.5 px-6 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-left">Nama</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Waktu Datang</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Waktu Pulang</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Kategori</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-6 font-black text-slate-400 uppercase tracking-wider text-left">Nama</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Datang</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Pulang</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Kategori</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     @foreach($semuaGuru as $guru)
                     @php $record = $absensi->get($guru->id); @endphp
                     <tr class="hover:bg-slate-50/60 transition duration-150 group">
-                        <td class="py-3.5 px-6 text-left">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full text-white flex items-center justify-center font-black text-sm flex-shrink-0
+                        <td class="py-2 md:py-3.5 px-2 md:px-6 text-left">
+                            <div class="flex items-center gap-1.5 md:gap-3">
+                                <div class="w-6 h-6 md:w-9 md:h-9 rounded-full text-white flex items-center justify-center font-black text-[0.6rem] md:text-sm flex-shrink-0
                                             {{ $record ? 'bg-[#1e3a6e]' : 'bg-slate-300' }}">
                                     {{ strtoupper(substr($guru->name, 0, 1)) }}
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-slate-800 text-sm">{{ $guru->name }}</p>
-                                    <p class="text-xs text-slate-400">{{ $guru->email }}</p>
+                                    <p class="font-semibold text-slate-800 text-[0.65rem] md:text-sm max-w-[4.5rem] sm:max-w-[7rem] md:max-w-none truncate md:overflow-visible md:whitespace-normal">{{ $guru->name }}</p>
+                                    <p class="text-[0.55rem] md:text-xs text-slate-400 max-w-[4.5rem] sm:max-w-[7rem] md:max-w-none truncate md:overflow-visible md:whitespace-normal">{{ $guru->nomor_induk ?? '-' }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3.5 px-5 text-center">
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
                             @if($record && $record->waktu_datang)
-                            <div class="flex items-center justify-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
-                                <span class="text-sm font-semibold text-slate-700">
+                            <div class="flex items-center justify-center gap-1 md:gap-2">
+                                <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+                                <span class="text-[0.65rem] md:text-sm font-semibold text-slate-700">
                                     {{ Carbon::parse($record->waktu_datang)->format('H:i') }}
-                                    <span class="font-normal text-slate-400 text-xs">WITA</span>
+                                    <span class="font-normal text-slate-400 text-[0.55rem] md:text-xs hidden md:inline">WITA</span>
                                 </span>
                             </div>
                             @else
-                            <span class="text-slate-300 text-sm">—</span>
+                            <span class="text-slate-300 text-[0.65rem] md:text-sm">—</span>
                             @endif
                         </td>
-                        <td class="py-3.5 px-5 text-center">
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
                             @if($record && $record->waktu_pulang)
-                            <div class="flex items-center justify-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-slate-400 flex-shrink-0"></span>
-                                <span class="text-sm font-semibold text-slate-700">
+                            <div class="flex items-center justify-center gap-1 md:gap-2">
+                                <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-slate-400 flex-shrink-0"></span>
+                                <span class="text-[0.65rem] md:text-sm font-semibold text-slate-700">
                                     {{ Carbon::parse($record->waktu_pulang)->format('H:i') }}
-                                    <span class="font-normal text-slate-400 text-xs">WITA</span>
+                                    <span class="font-normal text-slate-400 text-[0.55rem] md:text-xs hidden md:inline">WITA</span>
                                 </span>
                             </div>
                             @else
-                            <span class="text-slate-300 text-sm">—</span>
+                            <span class="text-slate-300 text-[0.65rem] md:text-sm">—</span>
                             @endif
                         </td>
-                        <td class="py-3.5 px-5 text-center">
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
                             @if($record)
                                 @php $cls = match($record->status) {
                                     'hadir' => 'bg-blue-50 text-[#1e3a6e] border-blue-100',
@@ -241,30 +227,28 @@
                                     default => 'bg-red-50 text-red-600 border-red-100'
                                 }; @endphp
                                 <div class="flex flex-col items-center gap-1">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $cls }}">
-                                        <span class="w-1.5 h-1.5 rounded-full {{ match($record->status) { 'hadir'=>'bg-[#1e3a6e]', 'izin'=>'bg-amber-500', 'sakit'=>'bg-slate-400', default=>'bg-red-500' } }}"></span>
+                                    <span class="inline-flex items-center gap-1 md:gap-1.5 px-1.5 md:px-3 py-0.5 md:py-1 rounded-full text-[0.55rem] md:text-[.7rem] font-bold border capitalize {{ $cls }}">
+                                        <span class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full {{ match($record->status) { 'hadir'=>'bg-[#1e3a6e]', 'izin'=>'bg-amber-500', 'sakit'=>'bg-slate-400', default=>'bg-red-500' } }}"></span>
                                         {{ $record->status }}
-                                        @if($record->status_pengajuan === 'pending') (Pending) @endif
-                                        @if($record->status_pengajuan === 'rejected') (Ditolak) @endif
                                     </span>
                                 </div>
                             @else
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[.7rem] font-bold
+                            <span class="inline-flex items-center gap-1 md:gap-1.5 px-1.5 md:px-3 py-0.5 md:py-1 rounded-full text-[0.55rem] md:text-[.7rem] font-bold
                                          bg-red-50 text-red-500 border border-red-100">
-                                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
-                                Belum Absen
+                                <span class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-red-400"></span>
+                                Belum
                             </span>
                             @endif
                         </td>
-                        <td class="py-3.5 px-5 text-center">
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
                             @if($record && $record->kategori)
                                 @if($record->kategori === 'tepat waktu')
-                                    <span class="text-[0.7rem] text-emerald-500 font-bold capitalize">{{ $record->kategori }}</span>
+                                    <span class="text-[0.55rem] md:text-[0.7rem] text-emerald-500 font-bold capitalize">{{ $record->kategori }}</span>
                                 @else
-                                    <span class="text-[0.7rem] text-red-500 font-bold capitalize">{{ $record->kategori }}</span>
+                                    <span class="text-[0.55rem] md:text-[0.7rem] text-red-500 font-bold capitalize">{{ $record->kategori }}</span>
                                 @endif
                             @else
-                                <span class="text-[0.7rem] text-slate-300 font-bold">—</span>
+                                <span class="text-[0.55rem] md:text-[0.7rem] text-slate-300 font-bold">—</span>
                             @endif
                         </td>
                     </tr>
@@ -274,53 +258,52 @@
         </div>
     </div>
 
-    {{-- ── RIWAYAT ── --}}
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+    <div id="riwayat-container" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800">Riwayat Absensi Guru</h3>
                 <p class="text-xs text-slate-400 mt-0.5">{{ $riwayat->total() }} record ditemukan</p>
             </div>
-            <span class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600">
+            <span class="text-[0.65rem] md:text-xs font-bold px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-slate-100 text-slate-600">
                 Hal {{ $riwayat->currentPage() }} / {{ $riwayat->lastPage() }}
             </span>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left text-xs md:text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 bg-slate-50/70">
-                        <th class="py-3.5 px-6 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Tanggal</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-left">Nama</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Datang</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Pulang</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Kategori</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-6 font-black text-slate-400 uppercase tracking-wider text-center w-12 md:w-auto">Tgl</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-left">Nama</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Datang</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Pulang</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">Kategori</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     @forelse($riwayat as $r)
                     <tr class="hover:bg-slate-50/60 transition duration-150">
-                        <td class="py-3.5 px-6 text-center">
-                            <p class="text-sm font-semibold text-slate-700 whitespace-nowrap">
-                                {{ Carbon::parse($r->tanggal)->translatedFormat('d M Y') }}
+                        <td class="py-2 md:py-3.5 px-2 md:px-6 text-center">
+                            <p class="text-[0.65rem] md:text-sm font-semibold text-slate-700 whitespace-nowrap">
+                                {{ Carbon::parse($r->tanggal)->translatedFormat('d M y') }}
                             </p>
-                            <p class="text-xs text-slate-400">{{ Carbon::parse($r->tanggal)->translatedFormat('l') }}</p>
+                            <p class="text-[0.55rem] md:text-xs text-slate-400">{{ Carbon::parse($r->tanggal)->translatedFormat('l') }}</p>
                         </td>
-                        <td class="py-3.5 px-5 text-left">
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-7 h-7 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-black text-xs flex-shrink-0">
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-left">
+                            <div class="flex items-center gap-1.5 md:gap-2.5">
+                                <div class="w-5 h-5 md:w-7 md:h-7 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-black text-[0.55rem] md:text-xs flex-shrink-0">
                                     {{ strtoupper(substr($r->user->name, 0, 1)) }}
                                 </div>
-                                <span class="text-sm font-semibold text-slate-800">{{ $r->user->name }}</span>
+                                <span class="text-[0.65rem] md:text-sm font-semibold text-slate-800 max-w-[4.5rem] sm:max-w-[7rem] md:max-w-none truncate md:overflow-visible md:whitespace-normal">{{ $r->user->name }}</span>
                             </div>
                         </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-600 text-center">
-                            {{ $r->waktu_datang ? Carbon::parse($r->waktu_datang)->format('H:i').' WITA' : '—' }}
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-[0.65rem] md:text-sm text-slate-600 text-center whitespace-nowrap">
+                            {{ $r->waktu_datang ? Carbon::parse($r->waktu_datang)->format('H:i') : '—' }}
                         </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-600 text-center">
-                            {{ $r->waktu_pulang ? Carbon::parse($r->waktu_pulang)->format('H:i').' WITA' : '—' }}
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-[0.65rem] md:text-sm text-slate-600 text-center whitespace-nowrap">
+                            {{ $r->waktu_pulang ? Carbon::parse($r->waktu_pulang)->format('H:i') : '—' }}
                         </td>
-                        <td class="py-3.5 px-5 text-center">
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
                             @php $sc = match($r->status) {
                                 'hadir' => 'bg-blue-50 text-[#1e3a6e] border-blue-100',
                                 'izin'  => 'bg-amber-50 text-amber-700 border-amber-100',
@@ -328,33 +311,31 @@
                                 default => 'bg-red-50 text-red-600 border-red-100',
                             }; @endphp
                             <div class="flex flex-col items-center gap-1">
-                                <span class="inline-block px-2.5 py-1 rounded-full text-[.7rem] font-bold border capitalize {{ $sc }}">
+                                <span class="inline-block px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full text-[0.55rem] md:text-[.7rem] font-bold border capitalize {{ $sc }}">
                                     {{ ucfirst($r->status) }}
-                                    @if($r->status_pengajuan === 'pending') (Pending) @endif
-                                    @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
                                 </span>
                             </div>
                         </td>
-                        <td class="py-3.5 px-5 text-center">
+                        <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
                             @if($r->kategori)
                                 @if($r->kategori === 'tepat waktu')
-                                    <span class="text-[0.7rem] text-emerald-500 font-bold capitalize">{{ $r->kategori }}</span>
+                                    <span class="text-[0.55rem] md:text-[0.7rem] text-emerald-500 font-bold capitalize">{{ $r->kategori }}</span>
                                 @else
-                                    <span class="text-[0.7rem] text-red-500 font-bold capitalize">{{ $r->kategori }}</span>
+                                    <span class="text-[0.55rem] md:text-[0.7rem] text-red-500 font-bold capitalize">{{ $r->kategori }}</span>
                                 @endif
                             @else
-                                <span class="text-[0.7rem] text-slate-300 font-bold">—</span>
+                                <span class="text-[0.55rem] md:text-[0.7rem] text-slate-300 font-bold">—</span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="py-12 text-center">
+                        <td colspan="6" class="py-8 md:py-12 text-center">
                             <div class="flex flex-col items-center gap-2">
-                                <svg class="w-10 h-10 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-8 h-8 md:w-10 md:h-10 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                 </svg>
-                                <p class="text-slate-400 text-sm font-medium">Belum ada data absensi.</p>
+                                <p class="text-slate-400 text-xs md:text-sm font-medium">Belum ada data absensi.</p>
                             </div>
                         </td>
                     </tr>
@@ -363,9 +344,60 @@
             </table>
         </div>
         @if($riwayat->hasPages())
-        <div class="px-6 py-4 border-t border-slate-100">{{ $riwayat->links() }}</div>
+        <div class="px-3 md:px-6 py-2 md:py-4 border-t border-slate-100">{{ $riwayat->links() }}</div>
         @endif
     </div>
 
 </div>
 </x-app-layout>
+
+<script>
+    function fetchData() {
+        const tanggal = document.getElementById('filter-tanggal').value;
+        const guruId = document.getElementById('filter-guru').value;
+        const url = new URL(window.location.href);
+        if(tanggal) url.searchParams.set('tanggal', tanggal);
+        if(guruId) url.searchParams.set('guru_id', guruId);
+        else url.searchParams.delete('guru_id');
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const stats = doc.getElementById('stats-container');
+            const rekap = doc.getElementById('rekap-container');
+            const riwayat = doc.getElementById('riwayat-container');
+            
+            if (stats) document.getElementById('stats-container').innerHTML = stats.innerHTML;
+            if (rekap) document.getElementById('rekap-container').innerHTML = rekap.innerHTML;
+            if (riwayat) document.getElementById('riwayat-container').innerHTML = riwayat.innerHTML;
+            
+            window.history.pushState({}, '', url);
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        const paginationLink = e.target.closest('#riwayat-container .pagination a, #riwayat-container nav a');
+        if (paginationLink) {
+            e.preventDefault();
+            const url = new URL(paginationLink.href);
+            
+            const tanggal = document.getElementById('filter-tanggal').value;
+            const guruId = document.getElementById('filter-guru').value;
+            if(tanggal) url.searchParams.set('tanggal', tanggal);
+            if(guruId) url.searchParams.set('guru_id', guruId);
+            
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const riwayat = doc.getElementById('riwayat-container');
+                if (riwayat) document.getElementById('riwayat-container').innerHTML = riwayat.innerHTML;
+                window.history.pushState({}, '', url);
+            });
+        }
+    });
+</script>

@@ -72,8 +72,12 @@ class EBookController extends Controller
             ['selesai' => false]
         );
 
-        if ($progres->lulus_suara && !$progres->selesai && $ebook->questions()->count() > 0) {
-            return redirect()->route('ebook.quiz.page', $ebook->id);
+        if ($progres->lulus_suara && !$progres->selesai) {
+            if ($progres->lulus_kuis) {
+                return redirect()->route('ebook.indikator.show', ['jenis' => 'digital', 'id' => $ebook->id]);
+            } elseif ($ebook->questions()->count() > 0) {
+                return redirect()->route('ebook.quiz.page', $ebook->id);
+            }
         }
 
         $catatan = \App\Models\CatatanMembaca::where('user_id', $user->id)
@@ -114,6 +118,10 @@ class EBookController extends Controller
         if ($progres->selesai) {
             return redirect()->route('ebook.index')
                 ->with('success', 'Anda sudah menyelesaikan e-book ini.');
+        }
+
+        if ($progres->lulus_kuis) {
+            return redirect()->route('ebook.indikator.show', ['jenis' => 'digital', 'id' => $ebook->id]);
         }
 
         return view('siswa.ebook.quiz', compact('ebook', 'progres'));

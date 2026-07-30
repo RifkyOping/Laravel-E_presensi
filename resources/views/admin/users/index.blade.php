@@ -69,7 +69,8 @@
             <div class="flex flex-wrap gap-2">
                 @foreach(['semua'=>'Semua','murid'=>'Murid','guru'=>'Guru','pengawas'=>'Pengawas','admin'=>'Admin'] as $key=>$label)
                 <a href="{{ route('admin.users', ['tab'=>$key,'search'=>request('search')]) }}"
-                   class="px-4 py-1.5 rounded-lg font-semibold text-sm border transition duration-200
+                   data-tab="{{ $key }}"
+                   class="role-tab px-4 py-1.5 rounded-lg font-semibold text-sm border transition duration-200
                           {{ $tab===$key ? 'bg-[#1e3a6e] text-white border-[#1e3a6e]' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-[#1e3a6e] hover:text-[#1e3a6e]' }}">
                     {{ $label }}
                 </a>
@@ -82,11 +83,6 @@
                        placeholder="Cari nama, NISN, NIP atau ID..."
                        oninput="handleSearchInput(this)"
                        class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                <!-- Tombol Cari disembunyikan sesuai permintaan karena sudah otomatis -->
-                <button type="submit" class="hidden bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition items-center gap-2 shadow-md shadow-[#1e3a6e]/20">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    Cari
-                </button>
                 @if(request('search'))
                 <a href="{{ route('admin.users', ['tab'=>$tab]) }}"
                    class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-sm transition flex items-center gap-2">
@@ -99,7 +95,7 @@
     </div>
 
     {{-- Tabel --}}
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div id="table-container" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <p class="text-sm text-slate-500">
                 Menampilkan <span class="font-bold text-slate-800">{{ $users->total() }}</span> pengguna
@@ -180,7 +176,7 @@
                         <td class="py-3.5 px-5">
                             <div class="flex items-center justify-center gap-2">
                                 <form method="POST" action="{{ route('admin.users.reset-device', $user->id) }}"
-                                      onsubmit="return confirm('Reset perangkat untuk akun {{ $user->name }}?')">
+                                      onsubmit="confirmResetDevice(event, this, '{{ addslashes($user->name) }}')">
                                     @csrf @method('PATCH')
                                     <button type="submit"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-200 text-orange-500 hover:bg-orange-500 hover:text-white font-semibold text-xs transition duration-200">
@@ -195,7 +191,7 @@
                                 </a>
                                 @if($user->id !== auth()->id())
                                 <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
-                                      onsubmit="return confirm('Hapus akun {{ $user->name }}?')">
+                                      onsubmit="confirmDeleteUser(event, this, '{{ addslashes($user->name) }}')">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-500 hover:text-white font-semibold text-xs transition duration-200">
@@ -227,13 +223,13 @@
 <div id="importModal" class="fixed inset-0 z-[100] hidden bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 class="font-bold text-slate-800 text-lg">Import Pengguna dari CSV</h3>
+            <h3 class="font-bold text-slate-800 text-lg">Import Pengguna (CSV / Excel)</h3>
             <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
         <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-            <label class="block text-sm font-semibold text-slate-700 mb-2">1. Download Template CSV</label>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">1. Download Template Import</label>
             <div class="flex gap-2">
                 <select id="templateDelimiterUser" class="flex-1 text-sm border-slate-200 rounded-xl focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
                     <option value=",">Format Excel EN (,)</option>
@@ -249,8 +245,8 @@
         <form action="{{ route('admin.users.import') }}" method="POST" enctype="multipart/form-data" class="p-6">
             @csrf
             <div class="mb-5">
-                <label class="block text-sm font-semibold text-slate-700 mb-2">2. Upload File CSV</label>
-                <input type="file" name="file_csv" accept=".csv" required
+                <label class="block text-sm font-semibold text-slate-700 mb-2">2. Upload File Import</label>
+                <input type="file" name="file_csv" accept=".csv,.xlsx" required
                        class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#1e3a6e] hover:file:bg-blue-100">
                 <p class="text-xs text-slate-400 mt-2">Maksimal ukuran file 2MB.</p>
             </div>
@@ -275,19 +271,109 @@
     function handleSearchInput(input) {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            input.form.submit();
-        }, 600); // Tunggu 600ms setelah user berhenti mengetik sebelum submit
+            performLiveSearch(input.form);
+        }, 500); // Tunggu 500ms
     }
 
-    // Kembalikan fokus ke input setelah halaman dimuat ulang jika ada pencarian
+    async function performLiveSearch(form) {
+        const url = new URL(form.action);
+        const formData = new FormData(form);
+        
+        // Buat URL dengan query string dari form
+        formData.forEach((value, key) => {
+            if(value) url.searchParams.append(key, value);
+        });
+
+        const tableContainer = document.getElementById('table-container');
+        // Efek loading transparan
+        tableContainer.style.opacity = '0.5';
+        tableContainer.style.pointerEvents = 'none';
+
+        try {
+            const response = await fetch(url.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const html = await response.text();
+            
+            // Parse HTML respons untuk mengambil tabel yang baru
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTable = doc.getElementById('table-container');
+            
+            if(newTable) {
+                // Update isi tabel
+                tableContainer.innerHTML = newTable.innerHTML;
+            }
+            
+            // Update URL di browser agar user bisa copy-paste URL hasil pencarian
+            window.history.pushState({}, '', url.toString());
+        } catch (error) {
+            console.error('Error saat live search:', error);
+        } finally {
+            // Kembalikan visibilitas tabel
+            tableContainer.style.opacity = '1';
+            tableContainer.style.pointerEvents = 'auto';
+            // Panggil ulang event listener untuk bulk delete jika diperlukan
+            disableBulkMode(); 
+        }
+    }
+
+    // Menangani klik pada link pagination dan tab filter agar menggunakan AJAX juga
+    document.addEventListener('click', function(e) {
+        const form = document.getElementById('searchForm');
+
+        // 1. Handle klik tab filter role
+        const tabLink = e.target.closest('.role-tab');
+        if(tabLink) {
+            e.preventDefault();
+            const selectedTab = tabLink.getAttribute('data-tab');
+            
+            // Update input hidden tab di form
+            if(form.querySelector('input[name="tab"]')) {
+                form.querySelector('input[name="tab"]').value = selectedTab;
+            }
+
+            // Update UI class untuk tab aktif
+            document.querySelectorAll('.role-tab').forEach(tab => {
+                if(tab.getAttribute('data-tab') === selectedTab) {
+                    tab.className = "role-tab px-4 py-1.5 rounded-lg font-semibold text-sm border transition duration-200 bg-[#1e3a6e] text-white border-[#1e3a6e]";
+                } else {
+                    tab.className = "role-tab px-4 py-1.5 rounded-lg font-semibold text-sm border transition duration-200 bg-slate-50 text-slate-600 border-slate-200 hover:border-[#1e3a6e] hover:text-[#1e3a6e]";
+                }
+            });
+
+            // Jalankan pencarian live
+            performLiveSearch(form);
+            return;
+        }
+
+        // 2. Handle klik link pagination
+        const paginationLink = e.target.closest('#table-container nav a');
+        if(paginationLink) {
+            e.preventDefault();
+            const url = new URL(paginationLink.href);
+            
+            // Pindahkan nilai search dan tab dari form ke URL pagination (agar filter tidak hilang saat pindah halaman)
+            const formData = new FormData(form);
+            formData.forEach((value, key) => {
+                if(value) url.searchParams.set(key, value);
+            });
+
+            // Panggil ulang ajax
+            const dummyForm = document.createElement('form');
+            dummyForm.action = url.pathname + url.search;
+            performLiveSearch(dummyForm);
+        }
+    });
+
+    // Menangani submit form (misalnya saat menekan tombol Enter)
     document.addEventListener("DOMContentLoaded", function() {
-        const searchInput = document.getElementById('searchInput');
-        if(searchInput && searchInput.value) {
-            searchInput.focus();
-            // Pindahkan kursor ke akhir teks
-            const val = searchInput.value;
-            searchInput.value = '';
-            searchInput.value = val;
+        const searchForm = document.getElementById('searchForm');
+        if(searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                performLiveSearch(this);
+            });
         }
     });
 
@@ -353,7 +439,7 @@
             customClass: {
                 popup: 'rounded-2xl shadow-2xl border border-slate-100',
                 title: 'text-xl font-black text-slate-800',
-                confirmButton: 'font-bold rounded-xl px-6 py-2.5 shadow-sm',
+                confirmButton: 'font-bold rounded-xl px-6 py-2.5 shadow-sm text-white',
                 cancelButton: 'font-bold rounded-xl px-6 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shadow-sm'
             }
         }).then((result) => {
@@ -370,6 +456,56 @@
                     inputsContainer.appendChild(input);
                 });
                 
+                form.submit();
+            }
+        });
+    }
+
+    function confirmResetDevice(event, form, userName) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Reset Perangkat',
+            text: `Apakah Anda yakin ingin mereset perangkat untuk akun ${userName}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f97316', // orange-500
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Reset!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                title: 'text-xl font-black text-slate-800',
+                confirmButton: 'font-bold rounded-xl px-6 py-2.5 shadow-sm text-white',
+                cancelButton: 'font-bold rounded-xl px-6 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shadow-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    }
+
+    function confirmDeleteUser(event, form, userName) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Hapus Akun',
+            text: `Apakah Anda yakin ingin menghapus akun ${userName}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444', // red-500
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                title: 'text-xl font-black text-slate-800',
+                confirmButton: 'font-bold rounded-xl px-6 py-2.5 shadow-sm text-white',
+                cancelButton: 'font-bold rounded-xl px-6 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shadow-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
                 form.submit();
             }
         });
