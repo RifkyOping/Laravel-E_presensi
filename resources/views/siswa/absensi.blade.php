@@ -35,9 +35,9 @@
     @endif
 
     {{-- Banner tanggal + GPS status --}}
-    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-8 py-6 shadow-xl"
+    <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-5 py-5 sm:px-8 sm:py-6 shadow-xl"
          style="box-shadow: 0 8px 32px rgba(30,58,110,.3)">
-        <div class="relative z-10 text-center">
+        <div class="relative z-10 text-left">
             <p class="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-1">E-Presensi Murid — Hari Ini</p>
             <p class="text-white text-2xl font-black">{{ Carbon::now()->translatedFormat('l, d F Y') }}</p>
             <p class="text-blue-300/70 text-sm mt-1">
@@ -250,6 +250,42 @@
             <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
     </div>
+
+    {{-- QR Code Section --}}
+    @if(Auth::user()->nomor_induk)
+    <div class="mt-4 relative bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start shadow-sm transition hover:shadow-md hover:border-slate-300">
+        {{-- QR Code --}}
+        <div class="flex flex-col items-center flex-shrink-0">
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 mb-4" id="qr-code-container">
+                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(150)->style('round')->margin(1)->generate(Auth::user()->nomor_induk) !!}
+            </div>
+            <div class="flex gap-2 w-full">
+                <button onclick="downloadPDFQR()" class="w-full justify-center bg-[#1e3a6e] hover:bg-[#162d57] text-white text-[11px] font-bold py-2.5 px-3 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download
+                </button>
+            </div>
+        </div>
+        
+        {{-- Instructions --}}
+        <div class="flex-1 text-center md:text-left w-full">
+            <h3 class="text-base font-bold text-slate-800 mb-1">QR Code Absensi Offline</h3>
+            <p class="text-xs text-slate-500 mb-3 leading-relaxed">Gunakan QR Code ini untuk melakukan absensi saat Anda tidak memiliki koneksi internet atau terkendala GPS.</p>
+            
+            <div class="bg-blue-50 text-blue-800 p-4 rounded-xl text-[0.7rem] leading-relaxed border border-blue-100 shadow-sm text-left">
+                <p class="font-bold mb-1.5 flex items-center gap-1.5 text-blue-900">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Cara Penggunaan:
+                </p>
+                <ol class="list-decimal pl-5 space-y-1 text-blue-800/90 font-medium">
+                    <li>Simpan gambar QR Code ini ke galeri HP Anda, atau cetak di kertas.</li>
+                    <li>Saat di sekolah, tunjukkan QR Code ini ke guru yang bertugas piket atau mengajar.</li>
+                    <li>Guru akan melakukan scan menggunakan sistem ini untuk mencatat kehadiran Anda.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    @endif
 
     @push('modals')
     {{-- Modal Pengajuan Sakit/Izin --}}
@@ -613,5 +649,60 @@ function submitAbsen(type) {
     // Submit form
     document.getElementById('form-' + type).submit();
 }
+
+/* ── QR Code PDF Download ── */
+function downloadPDFQR() {
+    const svg = document.querySelector('#qr-code-container svg');
+    if (!svg) return alert('QR Code tidak ditemukan');
+    
+    // Convert SVG to Data URI for perfect rendering in canvas
+    const serializer = new XMLSerializer();
+    let source = serializer.serializeToString(svg);
+    if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    const svgDataUri = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+    
+    // Create temporary wrapper in DOM for accurate styling
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '-9999px';
+    wrapper.style.top = '0';
+    wrapper.innerHTML = `
+        <div id="pdf-wrapper" style="width: 559px; height: 793px; background: #ffffff; padding-top: 130px; box-sizing: border-box;">
+            <div id="pdf-content" style="width: 420px; margin: 0 auto; padding: 40px; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 24px; box-sizing: border-box;">
+                <p style="margin: 0 0 25px 0; color: #1e3a6e; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">
+                    QR Code Absensi
+                </p>
+                <div style="margin-bottom: 25px;">
+                    <img src="${svgDataUri}" style="width: 200px; height: 200px; margin: 0 auto; display: block;" />
+                </div>
+                <h2 style="margin: 0 0 8px 0; color: #1e293b; font-size: 24px; font-weight: 800;">{{ Auth::user()->name }}</h2>
+                <p style="margin: 0 0 15px 0; color: #64748b; font-size: 16px; font-weight: 600;">NISN: {{ Auth::user()->nomor_induk }}</p>
+                
+                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+                
+                <p style="margin: 0; color: #94a3b8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                    E-Presensi {{ \App\Models\SchoolSetting::first()->nama_sekolah ?? '' }}
+                </p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(wrapper);
+    
+    const opt = {
+        margin:       0,
+        filename:     'QR_Code_Absensi_{{ Auth::user()->nomor_induk }}.pdf',
+        image:        { type: 'jpeg', quality: 1 },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+    };
+    
+    // Generate and cleanup
+    html2pdf().set(opt).from(wrapper.querySelector('#pdf-wrapper')).save().then(() => {
+        document.body.removeChild(wrapper);
+    });
+}
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </x-app-layout>

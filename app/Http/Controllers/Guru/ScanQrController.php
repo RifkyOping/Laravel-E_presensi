@@ -16,6 +16,10 @@ class ScanQrController extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->guruProfile || !auth()->user()->guruProfile->is_piket_absen_qr) {
+            abort(403, 'Anda tidak memiliki akses ke fitur Scan Absen QR.');
+        }
+
         return view('guru.scan-qr.index');
     }
 
@@ -24,6 +28,13 @@ class ScanQrController extends Controller
      */
     public function processScan(Request $request)
     {
+        if (!auth()->user()->guruProfile || !auth()->user()->guruProfile->is_piket_absen_qr) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses piket untuk fitur ini.'
+            ], 403);
+        }
+
         $request->validate([
             'qr_data' => 'required|string',
             'tipe_absen' => 'required|in:datang,pulang' // Jenis absensi yang dipilih guru

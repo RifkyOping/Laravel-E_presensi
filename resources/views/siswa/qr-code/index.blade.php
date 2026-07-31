@@ -33,11 +33,13 @@
                 </button>
             </div>
             
-            <div class="mt-8 max-w-md text-center bg-blue-50 text-blue-800 p-4 rounded-xl text-sm leading-relaxed border border-blue-100">
-                <p class="font-semibold mb-1">Cara Penggunaan:</p>
-                <p>1. Simpan gambar QR Code ini ke galeri HP Anda, atau cetak di kertas.</p>
-                <p>2. Saat di sekolah, tunjukkan QR Code ini ke guru yang bertugas piket atau mengajar.</p>
-                <p>3. Guru akan melakukan scan menggunakan sistem ini untuk mencatat kehadiran Anda.</p>
+            <div class="mt-8 max-w-md w-full text-left bg-blue-50 text-blue-800 p-5 rounded-xl text-sm leading-relaxed border border-blue-100 shadow-sm">
+                <p class="font-bold mb-2 text-base">Cara Penggunaan:</p>
+                <ol class="list-decimal pl-5 space-y-1">
+                    <li>Simpan gambar QR Code ini ke galeri HP Anda, atau cetak di kertas.</li>
+                    <li>Saat di sekolah, tunjukkan QR Code ini ke guru yang bertugas piket atau mengajar.</li>
+                    <li>Guru akan melakukan scan menggunakan sistem ini untuk mencatat kehadiran Anda.</li>
+                </ol>
             </div>
         </div>
     </div>

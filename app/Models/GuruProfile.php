@@ -18,6 +18,7 @@ class GuruProfile extends Model
         'is_piket_sholat',
         'is_piket_mengajar',
         'is_piket_rpp',
+        'is_piket_absen_qr',
         'is_guru_bahasa',
     ];
 
@@ -26,6 +27,7 @@ class GuruProfile extends Model
         'is_piket_sholat'   => 'boolean',
         'is_piket_mengajar' => 'boolean',
         'is_piket_rpp'      => 'boolean',
+        'is_piket_absen_qr' => 'boolean',
         'is_guru_bahasa'    => 'boolean',
     ];
 

@@ -179,6 +179,12 @@
                     </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_piket_absen_qr" value="1"
+                           {{ old('is_piket_absen_qr', $user->guruProfile?->is_piket_absen_qr) ? 'checked' : '' }}
+                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
+                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Piket Scan Absen QR</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
                     <input type="checkbox" name="is_piket_mengajar" value="1"
                            {{ old('is_piket_mengajar', $user->guruProfile?->is_piket_mengajar) ? 'checked' : '' }}
                            class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">

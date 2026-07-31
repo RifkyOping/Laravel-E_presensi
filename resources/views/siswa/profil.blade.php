@@ -30,7 +30,8 @@
             <div class="bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-sm text-red-700">
                 <p class="font-bold mb-1">Periksa kembali isian form:</p>
                 <ul class="list-disc list-inside space-y-0.5 font-medium">
-                    @foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach
+                    @foreach($errors->all() as $e)
+                    <li>{{ $e }}</li>@endforeach
                 </ul>
             </div>
         @endif

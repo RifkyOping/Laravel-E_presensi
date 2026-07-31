@@ -216,6 +216,7 @@ class AdminController extends Controller
                 'is_piket_sholat'   => $request->has('is_piket_sholat'),
                 'is_piket_mengajar' => $request->has('is_piket_mengajar'),
                 'is_piket_rpp'      => $request->has('is_piket_rpp'),
+                'is_piket_absen_qr' => $request->has('is_piket_absen_qr'),
                 'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
             ]);
         }
@@ -431,6 +432,7 @@ class AdminController extends Controller
                     'is_piket_sholat'   => $request->has('is_piket_sholat'),
                     'is_piket_mengajar' => $request->has('is_piket_mengajar'),
                     'is_piket_rpp'      => $request->has('is_piket_rpp'),
+                    'is_piket_absen_qr' => $request->has('is_piket_absen_qr'),
                     'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
                 ]
             );
