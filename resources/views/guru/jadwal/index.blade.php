@@ -15,6 +15,15 @@
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="w-full">
+                    <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 mb-4">
+                        <div>
+                            <p class="text-sm font-bold text-blue-800">BLOK AKTIF MINGGU INI:</p>
+                            <p class="text-xs text-blue-600 mt-1">Hanya jadwal dengan tipe Semua atau sesuai Blok Aktif yang berjalan minggu ini.</p>
+                        </div>
+                        <span class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-black rounded-lg text-lg">
+                            Blok {{ $blokAktif }}
+                        </span>
+                    </div>
                     <p class="text-sm text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex items-start sm:items-center gap-3 font-medium">
                         <svg class="w-5 h-5 flex-shrink-0 mt-0.5 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         Jadwal ini ditetapkan oleh Admin. Hubungi Admin jika ada perubahan jadwal.
@@ -73,7 +82,16 @@
                                                 @if($j->jam_selesai) – {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }} @endif
                                             </span>
                                         </div>
-                                        <p class="font-bold text-slate-800">{{ $j->mata_pelajaran }}</p>
+                                        <div class="flex items-center justify-between">
+                                            <p class="font-bold text-slate-800">{{ $j->mata_pelajaran }}</p>
+                                            @if($j->tipe_blok === 'A')
+                                                <span class="text-[0.65rem] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">Blok A</span>
+                                            @elseif($j->tipe_blok === 'B')
+                                                <span class="text-[0.65rem] font-bold px-2 py-0.5 rounded-md bg-purple-100 text-purple-700">Blok B</span>
+                                            @else
+                                                <span class="text-[0.65rem] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">Semua Blok</span>
+                                            @endif
+                                        </div>
                                         <p class="text-sm text-slate-500">{{ $j->kelas }}</p>
                                     </div>
                                 @endforeach
@@ -98,7 +116,16 @@
                                                         {{ $j->jam_ke }}
                                                     </span>
                                                 </td>
-                                                <td class="p-3 font-semibold text-slate-800">{{ $j->mata_pelajaran }}</td>
+                                                <td class="p-3">
+                                                    <div class="font-semibold text-slate-800">{{ $j->mata_pelajaran }}</div>
+                                                    @if($j->tipe_blok === 'A')
+                                                        <span class="text-[0.65rem] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 mt-1 inline-block">Blok A</span>
+                                                    @elseif($j->tipe_blok === 'B')
+                                                        <span class="text-[0.65rem] font-bold px-2 py-0.5 rounded-md bg-purple-100 text-purple-700 mt-1 inline-block">Blok B</span>
+                                                    @else
+                                                        <span class="text-[0.65rem] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 mt-1 inline-block">Semua Blok</span>
+                                                    @endif
+                                                </td>
                                                 <td class="p-3 text-slate-600">{{ $j->kelas }}</td>
                                                 <td class="p-3 text-center text-slate-600 font-medium">
                                                     {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }}

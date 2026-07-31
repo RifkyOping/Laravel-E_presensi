@@ -32,8 +32,12 @@ class AbsensiKelasController extends Controller
         $hariIni = $hariMap[Carbon::now()->format('l')];
         $today   = Carbon::today()->toDateString();
 
+        $setting = \App\Models\SchoolSetting::get();
+        $blokAktif = $setting->blok_jadwal_aktif;
+
         $jadwals = JadwalMengajar::where('user_id', $guru->id)
             ->where('hari', $hariIni)
+            ->whereIn('tipe_blok', ['Semua', $blokAktif])
             ->orderBy('jam_ke')
             ->get();
 
@@ -270,9 +274,13 @@ class AbsensiKelasController extends Controller
         $today = Carbon::today()->toDateString();
 
         if ($filterKelas) {
+            $setting = \App\Models\SchoolSetting::get();
+            $blokAktif = $setting->blok_jadwal_aktif;
+
             $jadwalHariIni = \App\Models\JadwalMengajar::with('user')
                 ->where('hari', $hariIni)
                 ->where('kelas', $filterKelas)
+                ->whereIn('tipe_blok', ['Semua', $blokAktif])
                 ->orderBy('jam_ke')
                 ->get();
                 

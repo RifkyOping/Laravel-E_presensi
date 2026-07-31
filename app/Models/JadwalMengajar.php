@@ -9,6 +9,7 @@ class JadwalMengajar extends Model
     protected $fillable = [
         'user_id',
         'hari',
+        'tipe_blok',
         'mata_pelajaran',
         'kelas',
         'jam_ke',

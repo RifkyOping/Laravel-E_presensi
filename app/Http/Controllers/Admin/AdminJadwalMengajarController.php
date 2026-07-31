@@ -27,7 +27,72 @@ class AdminJadwalMengajarController extends Controller
         // Cek apakah guru sudah punya jadwal
         $gurus = $query->withCount('jadwalMengajars')->paginate(15);
         
-        return view('admin.jadwal.index', compact('gurus'));
+        $setting = \App\Models\SchoolSetting::get();
+        $blokAktif = $setting->blok_jadwal_aktif;
+        
+        return view('admin.jadwal.index', compact('gurus', 'blokAktif'));
+    }
+
+    /**
+     * Menampilkan rekap keseluruhan jadwal mengajar dalam bentuk matriks.
+     */
+    public function rekap(Request $request)
+    {
+        $hariMap = [
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+        ];
+        $hariIniStr = $hariMap[now()->format('l')] ?? 'Senin';
+        $activeTab = $request->query('hari', $hariIniStr);
+        $filterBlok = $request->query('tipe_blok', ''); // '', 'A', 'B', 'Semua'
+
+        // Ambil semua kelas yang ada di tabel kelas
+        $kelasList = \App\Models\Kelas::where('status', true)
+            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+            ->orderBy('jurusan')
+            ->orderBy('rombel')
+            ->get();
+
+        // Ambil semua jadwal (semua blok)
+        $jadwalRaw = JadwalMengajar::with('user')->get();
+
+        $maxJam = $jadwalRaw->max('jam_ke') ?? 10;
+        if ($maxJam < 10) $maxJam = 10;
+
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        $matrix = [];
+
+        foreach ($hariList as $hari) {
+            $matrix[$hari] = [];
+            foreach ($kelasList as $kelas) {
+                $namaKelas = trim("{$kelas->tingkat} {$kelas->jurusan} {$kelas->rombel}");
+                $matrix[$hari][$namaKelas] = [];
+                for ($i = 1; $i <= $maxJam; $i++) {
+                    $matrix[$hari][$namaKelas][$i] = [];
+                }
+            }
+        }
+
+        foreach ($jadwalRaw as $j) {
+            $hari = $j->hari;
+            if (!in_array($hari, $hariList)) continue;
+            
+            $kelasStr = $j->kelas;
+            if (!isset($matrix[$hari][$kelasStr])) {
+                $matrix[$hari][$kelasStr] = [];
+                for ($i = 1; $i <= $maxJam; $i++) {
+                    $matrix[$hari][$kelasStr][$i] = [];
+                }
+            }
+            if (isset($matrix[$hari][$kelasStr][$j->jam_ke])) {
+                $matrix[$hari][$kelasStr][$j->jam_ke][] = $j;
+            }
+        }
+
+        return view('admin.jadwal.rekap', compact('kelasList', 'activeTab', 'filterBlok', 'matrix', 'maxJam', 'hariList'));
     }
 
     /**
@@ -80,6 +145,7 @@ class AdminJadwalMengajarController extends Controller
             'jadwal.*.hari'            => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat',
             'jadwal.*.mata_pelajaran'  => 'required|string',
             'jadwal.*.kelas_id'        => 'required|exists:kelas,id',
+            'jadwal.*.tipe_blok'       => 'required|in:A,B,Semua',
             'jadwal.*.jam_ke'          => 'required|integer|min:1',
             'jadwal.*.jam_mulai'       => 'required',
             'jadwal.*.jam_selesai'     => 'nullable',
@@ -110,6 +176,7 @@ class AdminJadwalMengajarController extends Controller
                 JadwalMengajar::create([
                     'user_id' => $user->id,
                     'hari' => $j['hari'],
+                    'tipe_blok' => $j['tipe_blok'] ?? 'Semua',
                     'mata_pelajaran' => $j['mata_pelajaran'],
                     'kelas' => $kelasStr,
                     'jam_ke' => $j['jam_ke'],
@@ -143,14 +210,15 @@ class AdminJadwalMengajarController extends Controller
             "Expires" => "0"
         ];
 
-        $columns = ['nama', 'hari', 'mata_pelajaran', 'kelas', 'jam_ke', 'jam_mulai', 'jam_selesai'];
+        $columns = ['nama', 'hari', 'tipe_blok', 'mata_pelajaran', 'kelas', 'jam_ke', 'jam_mulai', 'jam_selesai'];
 
         $callback = function() use ($columns, $delimiter) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns, $delimiter);
             // Contoh isi
-            fputcsv($file, ['NAMA GURU', 'Senin', 'Mata Pelajaran 1', 'X JURUSAN 1', '1', '07:30', '08:15'], $delimiter);
-            fputcsv($file, ['NAMA GURU', 'Selasa', 'Mata Pelajaran 2', 'X JURUSAN 1', '2', '08:15', '09:00'], $delimiter);
+            fputcsv($file, ['NAMA GURU', 'Senin', 'A', 'Mata Pelajaran 1', 'X JURUSAN 1', '1', '07:30', '08:15'], $delimiter);
+            fputcsv($file, ['NAMA GURU', 'Senin', 'B', 'Mata Pelajaran 2', 'X JURUSAN 1', '1', '07:30', '08:15'], $delimiter);
+            fputcsv($file, ['NAMA GURU', 'Selasa', 'Semua', 'Mata Pelajaran Umum', 'X JURUSAN 1', '2', '08:15', '09:00'], $delimiter);
             fclose($file);
         };
 
@@ -226,6 +294,7 @@ class AdminJadwalMengajarController extends Controller
                 JadwalMengajar::create([
                     'user_id' => $guru->id,
                     'hari' => ucfirst($rowAssoc['hari']), // Senin, Selasa...
+                    'tipe_blok' => isset($rowAssoc['tipe_blok']) ? ucfirst(strtolower($rowAssoc['tipe_blok'])) : 'Semua',
                     'mata_pelajaran' => $rowAssoc['mata_pelajaran'],
                     'kelas' => $kelasStr,
                     'jam_ke' => $rowAssoc['jam_ke'],
@@ -247,5 +316,23 @@ class AdminJadwalMengajarController extends Controller
         }
 
         return redirect()->back()->with('success', "Import selesai. Berhasil memasukkan $berhasil jadwal. Gagal: $gagal baris (karena nama/email guru tidak ditemukan di sistem).");
+    }
+
+    /**
+     * Mengubah status Blok Jadwal Aktif (A <-> B).
+     */
+    public function toggleBlok(Request $request)
+    {
+        $setting = \App\Models\SchoolSetting::get();
+        
+        if ($setting->blok_jadwal_aktif === 'A') {
+            $setting->blok_jadwal_aktif = 'B';
+        } else {
+            $setting->blok_jadwal_aktif = 'A';
+        }
+        
+        $setting->save();
+        
+        return redirect()->back()->with('success', "Blok jadwal aktif berhasil diubah menjadi Blok {$setting->blok_jadwal_aktif}.");
     }
 }

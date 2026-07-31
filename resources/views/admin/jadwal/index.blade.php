@@ -12,6 +12,13 @@
                 <p class="text-sm text-slate-400 mt-0.5">Kelola jadwal mengajar untuk semua guru</p>
             </div>
             <div class="flex items-center gap-2">
+                <a href="{{ route('admin.jadwal-mengajar.rekap') }}"
+                    class="inline-flex items-center gap-2 bg-[#1e3a6e] hover:bg-[#1e3a6e]/90 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition duration-200 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    Lihat Jadwal Lengkap
+                </a>
                 <button type="button" onclick="document.getElementById('importModal').classList.remove('hidden')"
                     class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition duration-200 shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,8 +51,28 @@
             </div>
         @endif
 
+        {{-- Toggle Blok Aktif --}}
+        <div class="bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-between shadow-sm">
+            <div>
+                <h3 class="font-bold text-slate-800 text-lg">Jadwal Aktif: <span class="text-[#1e3a6e]">Blok {{ $blokAktif }}</span></h3>
+                <p class="text-sm text-slate-500 mt-1">Ubah ini setiap dua pekan sekali untuk merotasi mapel umum dan kejuruan.</p>
+            </div>
+            <form action="{{ route('admin.jadwal-mengajar.toggle-blok') }}" method="POST">
+                @csrf
+                <button type="submit" 
+                    class="relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#1e3a6e] focus:ring-offset-2 {{ $blokAktif === 'B' ? 'bg-[#1e3a6e]' : 'bg-slate-300' }}"
+                    role="switch" aria-checked="{{ $blokAktif === 'B' ? 'true' : 'false' }}">
+                    <span class="sr-only">Toggle Blok</span>
+                    <span aria-hidden="true" 
+                        class="pointer-events-none inline-block h-7 w-7 transform rounded-full shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center font-bold text-xs {{ $blokAktif === 'B' ? 'translate-x-6 bg-slate-200 text-[#1e3a6e]' : 'translate-x-0 bg-[#1e3a6e] text-white' }}">
+                        {{ $blokAktif }}
+                    </span>
+                </button>
+            </form>
+        </div>
+
         {{-- Filter + Tabs --}}
-        <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
             <form method="GET" action="{{ route('admin.jadwal-mengajar.index') }}" class="flex gap-3" id="searchForm">
                 <input type="text" name="search" value="{{ request('search') }}"
                     placeholder="Cari nama guru atau NIP..." oninput="handleSearchInput(this)"

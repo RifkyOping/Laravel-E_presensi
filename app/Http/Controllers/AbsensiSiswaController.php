@@ -323,8 +323,12 @@ class AbsensiSiswaController extends Controller
 
         $kelasStr = trim("{$profile->kelas} {$profile->jurusan} {$profile->rombel}");
 
+        $setting = \App\Models\SchoolSetting::get();
+        $blokAktif = $setting->blok_jadwal_aktif;
+
         $jadwalList = \App\Models\JadwalMengajar::with('user')
             ->where('kelas', $kelasStr)
+            ->whereIn('tipe_blok', ['Semua', $blokAktif])
             ->orderBy('jam_mulai')
             ->get()
             ->groupBy('hari');
@@ -381,6 +385,6 @@ class AbsensiSiswaController extends Controller
                 return $dayName . '_' . $item->jadwal_mengajar_id;
             });
 
-        return view('siswa.monitoring-kelas', compact('jadwalList', 'activeTab', 'hariIniStr', 'absensiMengajar', 'absensiKelas'));
+        return view('siswa.monitoring-kelas', compact('jadwalList', 'activeTab', 'hariIniStr', 'absensiMengajar', 'absensiKelas', 'blokAktif'));
     }
 }

@@ -26,7 +26,10 @@ class JadwalMengajarController extends Controller
             $jadwal[$j->hari][] = $j;
         }
 
-        return view('guru.jadwal.index', compact('jadwal'));
+        $setting = \App\Models\SchoolSetting::get();
+        $blokAktif = $setting->blok_jadwal_aktif;
+
+        return view('guru.jadwal.index', compact('jadwal', 'blokAktif'));
     }
 
     public function store(Request $request)

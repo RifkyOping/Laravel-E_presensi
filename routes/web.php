@@ -231,10 +231,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Manajemen Jadwal Mengajar
     Route::get('/jadwal-mengajar', [AdminJadwalMengajarController::class, 'index'])->name('jadwal-mengajar.index');
+    Route::get('/jadwal-mengajar/rekap', [AdminJadwalMengajarController::class, 'rekap'])->name('jadwal-mengajar.rekap');
     Route::get('/jadwal-mengajar/template', [AdminJadwalMengajarController::class, 'template'])->name('jadwal-mengajar.template');
     Route::post('/jadwal-mengajar/import', [AdminJadwalMengajarController::class, 'import'])->name('jadwal-mengajar.import');
     Route::get('/jadwal-mengajar/{user}/edit', [AdminJadwalMengajarController::class, 'edit'])->name('jadwal-mengajar.edit');
     Route::post('/jadwal-mengajar/{user}', [AdminJadwalMengajarController::class, 'update'])->name('jadwal-mengajar.update');
+    Route::post('/jadwal-mengajar-toggle-blok', [AdminJadwalMengajarController::class, 'toggleBlok'])->name('jadwal-mengajar.toggle-blok');
 
 });
 

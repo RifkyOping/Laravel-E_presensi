@@ -22,6 +22,7 @@ class SchoolSetting extends Model
         'absen_pulang_tutup',
         'batas_pulang_cepat',
         'status_absen',
+        'blok_jadwal_aktif',
     ];
 
     protected $casts = [
@@ -48,6 +49,7 @@ class SchoolSetting extends Model
             'absen_pulang_tutup' => '17:00:00',
             'batas_pulang_cepat' => '15:00:00',
             'status_absen' => 'auto',
+            'blok_jadwal_aktif' => 'A',
         ]);
     }
 

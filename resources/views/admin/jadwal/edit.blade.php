@@ -94,6 +94,15 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        {{-- Tipe Blok --}}
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Tipe Blok</label>
+                                            <select :name="`jadwal[${item.id}][tipe_blok]`" x-model="item.tipe_blok" class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
+                                                <option value="Semua">Semua Blok</option>
+                                                <option value="A">Blok A</option>
+                                                <option value="B">Blok B</option>
+                                            </select>
+                                        </div>
                                         {{-- Jam --}}
                                         <div class="grid grid-cols-3 gap-2">
                                             <div>
@@ -123,6 +132,7 @@
                                         <tr class="bg-slate-50 text-slate-600">
                                             <th class="p-3 font-semibold rounded-tl-lg">Mata Pelajaran</th>
                                             <th class="p-3 font-semibold">Kelas</th>
+                                            <th class="p-3 font-semibold w-28">Tipe Blok</th>
                                             <th class="p-3 font-semibold w-24 text-center">Jam Ke-</th>
                                             <th class="p-3 font-semibold w-32">Jam Mulai</th>
                                             <th class="p-3 font-semibold w-32">Jam Selesai</th>
@@ -151,6 +161,14 @@
                                                         @foreach($kelasList as $k)
                                                         <option value="{{$k->id}}">{{$k->tingkat}} {{$k->jurusan}} {{$k->rombel}}</option>
                                                         @endforeach
+                                                    </select>
+                                                </td>
+                                                <td class="p-2">
+                                                    <select :name="`jadwal[${item.id}][tipe_blok]`" x-model="item.tipe_blok"
+                                                        class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
+                                                        <option value="Semua">Semua</option>
+                                                        <option value="A">Blok A</option>
+                                                        <option value="B">Blok B</option>
                                                     </select>
                                                 </td>
                                                 <td class="p-2">
@@ -248,7 +266,8 @@
                                 kelas_id: matchedKelas ? String(matchedKelas.id) : '',
                                 jam_ke: j.jam_ke,
                                 jam_mulai: j.jam_mulai.substring(0, 5), // potong detik (H:i)
-                                jam_selesai: j.jam_selesai ? j.jam_selesai.substring(0, 5) : ''
+                                jam_selesai: j.jam_selesai ? j.jam_selesai.substring(0, 5) : '',
+                                tipe_blok: j.tipe_blok || 'Semua'
                             });
                         });
                     }
@@ -264,6 +283,7 @@
                         hari: hari,
                         mata_pelajaran: '',
                         kelas_id: '',
+                        tipe_blok: 'Semua',
                         jam_ke: 1,
                         jam_mulai: '',
                         jam_selesai: ''
@@ -289,6 +309,7 @@
                             jam_ke:         item.jam_ke,
                             jam_mulai:      item.jam_mulai,
                             jam_selesai:    item.jam_selesai || '',
+                            tipe_blok:      item.tipe_blok || 'Semua',
                         };
                         Object.entries(fields).forEach(([key, value]) => {
                             const input = document.createElement('input');
