@@ -8,9 +8,12 @@
     <div class="space-y-6">
 
         {{-- Header & Filter --}}
-        <div x-data="{ showFilter: window.innerWidth >= 768 }" 
-             @resize.window="if (window.innerWidth >= 768) showFilter = true"
-             class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div x-data="{ 
+            showFilter: window.innerWidth >= 768 || localStorage.getItem('filter_guru_literasi_catatan') === 'true' 
+        }" 
+        x-init="$watch('showFilter', val => localStorage.setItem('filter_guru_literasi_catatan', val))"
+        @resize.window="if (window.innerWidth >= 768) showFilter = true"
+        class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             
             {{-- Desktop Header (Hidden on Mobile) --}}
             <div class="hidden md:block">

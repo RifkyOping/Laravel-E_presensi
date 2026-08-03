@@ -52,7 +52,11 @@
     </div>
 
     {{-- Filter --}}
-    <div x-data="{ showFilter: {{ request()->hasAny(['search','status']) ? 'true' : 'false' }} }" class="bg-white rounded-xl border border-slate-200 p-6">
+    <div x-data="{ 
+        showFilter: localStorage.getItem('filter_admin_mapel') === 'true' || {{ request()->hasAny(['search','status']) ? 'true' : 'false' }} 
+    }" 
+    x-init="$watch('showFilter', val => localStorage.setItem('filter_admin_mapel', val))"
+    class="bg-white rounded-xl border border-slate-200 p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -103,7 +107,7 @@
     <div id="table-container" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100">
             <p class="text-sm text-slate-500">
-                Menampilkan <span class="font-bold text-slate-800">{{ $mapel->total() }}</span> mata pelajaran
+                Total <span class="font-bold text-slate-800">{{ $mapel->total() }}</span> mata pelajaran
             </p>
         </div>
         <div class="overflow-x-auto">
@@ -180,15 +184,23 @@
         }, 500); // Tunggu 500ms
     }
 
-    async function performLiveSearch(form) {
-        const url = new URL(form.action);
-        const formData = new FormData(form);
-        
-        formData.forEach((value, key) => {
-            if(value) url.searchParams.append(key, value);
-        });
+    async function performLiveSearch(source) {
+        let url;
+        if (typeof source === 'string') {
+            url = new URL(source, window.location.origin);
+        } else if (source instanceof HTMLFormElement) {
+            url = new URL(source.action || window.location.href, window.location.origin);
+            const formData = new FormData(source);
+            url.search = '';
+            formData.forEach((value, key) => {
+                if(value) url.searchParams.set(key, value);
+            });
+        } else {
+            url = new URL(window.location.href);
+        }
 
         const tableContainer = document.getElementById('table-container');
+        if (!tableContainer) return;
         tableContainer.style.opacity = '0.5';
         tableContainer.style.pointerEvents = 'none';
 
@@ -224,14 +236,14 @@
             e.preventDefault();
             const url = new URL(paginationLink.href);
             
-            const formData = new FormData(form);
-            formData.forEach((value, key) => {
-                if(value) url.searchParams.set(key, value);
-            });
+            if (form) {
+                const formData = new FormData(form);
+                formData.forEach((value, key) => {
+                    if(value) url.searchParams.set(key, value);
+                });
+            }
 
-            const dummyForm = document.createElement('form');
-            dummyForm.action = url.pathname + url.search;
-            performLiveSearch(dummyForm);
+            performLiveSearch(url.toString());
         }
     });
 

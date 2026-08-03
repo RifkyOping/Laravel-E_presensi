@@ -15,8 +15,8 @@ class AbsensiGuruController extends Controller
      */
     public function index()
     {
-        $user   = Auth::user();
-        $today  = Carbon::today();
+        $user = Auth::user();
+        $today = Carbon::today();
 
         $absensiHariIni = AbsensiGuru::where('user_id', $user->id)
             ->whereDate('tanggal', $today)
@@ -41,12 +41,12 @@ class AbsensiGuruController extends Controller
             $isApproved = $notif->status_pengajuan === 'approved';
             session()->now('popup_notification', [
                 'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
-                'text'  => $isApproved 
-                           ? 'Pengajuan izin/sakit Anda telah disetujui.' 
-                           : 'Pengajuan izin/sakit Anda ditolak, sehingga status Anda menjadi Alpa.' . ($notif->alasan_ditolak ? ' Alasan penolakan: ' . $notif->alasan_ditolak : ''),
-                'icon'  => $isApproved ? 'success' : 'error'
+                'text' => $isApproved
+                    ? 'Pengajuan izin/sakit Anda telah disetujui.'
+                    : 'Pengajuan izin/sakit Anda ditolak, sehingga status Anda menjadi Alpa.' . ($notif->alasan_ditolak ? ' Alasan penolakan: ' . $notif->alasan_ditolak : ''),
+                'icon' => $isApproved ? 'success' : 'error'
             ]);
-            
+
             // Mark all as notified to avoid repeated popups
             AbsensiGuru::where('user_id', $user->id)
                 ->where('is_notified', false)
@@ -79,42 +79,42 @@ class AbsensiGuruController extends Controller
     public function absenDatang(Request $request)
     {
         $jenis = $request->input('jenis_absen', 'hadir');
-        
+
         $rules = [];
         $messages = [];
-        
+
         if ($jenis === 'hadir') {
             $rules = [
-                'latitude'  => 'required|numeric',
+                'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
             ];
             $messages = [
-                'latitude.required'  => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi.',
+                'latitude.required' => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi.',
                 'longitude.required' => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi.',
             ];
         } elseif (in_array($jenis, ['cuti', 'tugas'])) {
             $rules = [
                 'judul_pengajuan' => 'required|string|max:255',
-                'tanggal_mulai'   => 'required|date',
+                'tanggal_mulai' => 'required|date',
                 'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-                'keterangan'      => 'required|string',
-                'file_bukti'      => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'keterangan' => 'required|string',
+                'file_bukti' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ];
             $messages = [
-                'judul_pengajuan.required'       => 'Judul pengajuan wajib diisi.',
-                'tanggal_mulai.required'         => 'Tanggal mulai wajib diisi.',
-                'tanggal_selesai.required'       => 'Tanggal selesai wajib diisi.',
+                'judul_pengajuan.required' => 'Judul pengajuan wajib diisi.',
+                'tanggal_mulai.required' => 'Tanggal mulai wajib diisi.',
+                'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
                 'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
-                'keterangan.required'            => 'Keterangan/kepentingan wajib diisi.',
-                'file_bukti.mimes'               => 'Dokumen harus berupa gambar (JPG, PNG) atau PDF.',
-                'file_bukti.max'                 => 'Ukuran dokumen maksimal 5MB.',
+                'keterangan.required' => 'Keterangan/kepentingan wajib diisi.',
+                'file_bukti.mimes' => 'Dokumen harus berupa gambar (JPG, PNG) atau PDF.',
+                'file_bukti.max' => 'Ukuran dokumen maksimal 5MB.',
             ];
         }
-        
+
         $request->validate($rules, $messages);
 
         $setting = SchoolSetting::get();
-        $user  = Auth::user();
+        $user = Auth::user();
         $today = Carbon::today();
 
         // Cek Jadwal Buka/Tutup Absen
@@ -143,10 +143,9 @@ class AbsensiGuruController extends Controller
 
             if ($request->filled('accuracy')) {
                 $acc = (float) $request->input('accuracy');
-                $speed = (float) $request->input('speed');
-                
+
                 $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
-                if ($isRoundAccuracy || $acc < 5 || ($speed > 0)) {
+                if ($isRoundAccuracy || $acc < 5) {
                     return back()->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
                 }
             }
@@ -157,7 +156,7 @@ class AbsensiGuruController extends Controller
                 $jarakTampil = number_format($jarak, 0, ',', '.');
                 return back()->with('error', "Anda berada di luar area {$setting->nama_sekolah}. Jarak Anda: {$jarakTampil} m (batas: {$setting->radius_meter} m).");
             }
-            
+
             $kategori = 'tepat waktu';
             $jadwal = \App\Models\JadwalAbsensi::where('hari', \Carbon\Carbon::parse($today)->translatedFormat('l'))->first();
             if ($jadwal && now()->format('H:i:s') > \Carbon\Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i:s')) {
@@ -182,31 +181,31 @@ class AbsensiGuruController extends Controller
             }
 
             AbsensiGuru::create([
-                'user_id'      => $user->id,
-                'tanggal'      => $today,
+                'user_id' => $user->id,
+                'tanggal' => $today,
                 'waktu_datang' => now()->format('H:i:s'),
-                'status'       => 'hadir',
-                'kategori'     => $kategori,
+                'status' => 'hadir',
+                'kategori' => $kategori,
             ]);
 
             return back()->with('success', 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
-            
+
         } elseif (in_array($jenis, ['cuti', 'tugas'])) {
             $existing = AbsensiGuru::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
 
-            $tanggalMulai  = $request->tanggal_mulai;
+            $tanggalMulai = $request->tanggal_mulai;
             $tanggalSelesai = $request->tanggal_selesai;
 
             AbsensiGuru::updateOrCreate(
                 ['user_id' => $user->id, 'tanggal' => $tanggalMulai],
                 [
-                    'tanggal_selesai'  => $tanggalSelesai,
-                    'status'           => $jenis,
-                    'judul_pengajuan'  => $request->judul_pengajuan,
-                    'keterangan'       => $request->keterangan,
-                    'file_bukti'       => $filePath,
+                    'tanggal_selesai' => $tanggalSelesai,
+                    'status' => $jenis,
+                    'judul_pengajuan' => $request->judul_pengajuan,
+                    'keterangan' => $request->keterangan,
+                    'file_bukti' => $filePath,
                     'status_pengajuan' => 'pending',
-                    'is_notified'      => true,
+                    'is_notified' => true,
                 ]
             );
 
@@ -221,10 +220,10 @@ class AbsensiGuruController extends Controller
     public function absenPulang(Request $request)
     {
         $request->validate([
-            'latitude'  => 'required|numeric',
+            'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ], [
-            'latitude.required'  => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi di perangkat Anda.',
+            'latitude.required' => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi di perangkat Anda.',
             'longitude.required' => 'Lokasi GPS tidak terdeteksi. Aktifkan izin lokasi di perangkat Anda.',
         ]);
 
@@ -250,10 +249,9 @@ class AbsensiGuruController extends Controller
 
         if ($request->filled('accuracy')) {
             $acc = (float) $request->input('accuracy');
-            $speed = (float) $request->input('speed');
-            
+
             $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
-            if ($isRoundAccuracy || $acc < 5 || ($speed > 0)) {
+            if ($isRoundAccuracy || $acc < 5) {
                 return back()->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
             }
         }
@@ -262,12 +260,13 @@ class AbsensiGuruController extends Controller
 
         if ($jarak > $setting->radius_meter) {
             $jarakTampil = number_format($jarak, 0, ',', '.');
-            return back()->with('error',
+            return back()->with(
+                'error',
                 "Anda berada di luar area {$setting->nama_sekolah}. Jarak Anda: {$jarakTampil} m (batas: {$setting->radius_meter} m)."
             );
         }
 
-        $user  = Auth::user();
+        $user = Auth::user();
         $today = Carbon::today();
 
         $absensi = AbsensiGuru::where('user_id', $user->id)
@@ -279,8 +278,8 @@ class AbsensiGuruController extends Controller
             $absensi = AbsensiGuru::create([
                 'user_id' => $user->id,
                 'tanggal' => $today,
-                'status'  => 'hadir',
-                'kategori'=> 'terlambat',
+                'status' => 'hadir',
+                'kategori' => 'terlambat',
             ]);
         } elseif (!$absensi->waktu_datang) {
             // Ada record (misal status lain) tapi belum ada waktu datang

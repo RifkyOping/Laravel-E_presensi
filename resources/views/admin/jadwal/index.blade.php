@@ -25,7 +25,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    Import CSV
+                    Import Excel / CSV
                 </button>
             </div>
         </div>
@@ -37,7 +37,16 @@
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
-                {{ session('success') }}
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+        @if(session('warning'))
+            <div
+                class="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 font-semibold px-5 py-3.5 rounded-xl text-sm">
+                <svg class="w-4 h-4 flex-shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>{{ session('warning') }}</span>
             </div>
         @endif
         @if(session('error'))
@@ -47,7 +56,45 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                {{ session('error') }}
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
+        {{-- Detail Baris Gagal Import --}}
+        @if(session('import_errors') && count(session('import_errors')) > 0)
+            <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-5 text-rose-900 shadow-sm animate-up">
+                <div class="flex items-start justify-between gap-3 mb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-rose-800 text-sm">Daftar Baris yang Gagal Diimport ({{ count(session('import_errors')) }} Baris)</h4>
+                            <p class="text-xs text-rose-600 mt-0.5">Periksa kembali data pada file Excel / CSV Anda atau pastikan nama guru sudah terdaftar di sistem.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-h-64 overflow-y-auto rounded-xl border border-rose-200 bg-white divide-y divide-rose-100 text-xs shadow-inner">
+                    @foreach(session('import_errors') as $err)
+                        <div class="p-3 hover:bg-rose-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div class="flex items-start sm:items-center gap-2 min-w-0">
+                                <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-[11px] whitespace-nowrap shrink-0">
+                                    Baris {{ $err['baris'] }}
+                                </span>
+                                <div class="truncate">
+                                    <span class="font-bold text-slate-800">{{ $err['nama'] }}</span>
+                                    <span class="text-slate-500 font-normal ml-1">({{ $err['detail'] }})</span>
+                                </div>
+                            </div>
+                            <span class="text-rose-600 text-[11px] font-semibold bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 shrink-0 self-start sm:self-auto">
+                                {{ $err['alasan'] }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         @endif
 
@@ -94,7 +141,7 @@
         <div id="table-container" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                 <p class="text-sm text-slate-500">
-                    Menampilkan <span class="font-bold text-slate-800">{{ $gurus->total() }}</span> guru
+                    Total <span class="font-bold text-slate-800">{{ $gurus->total() }}</span> guru
                 </p>
             </div>
             <div class="overflow-x-auto">
@@ -201,15 +248,23 @@
             }, 500); // Tunggu 500ms
         }
 
-        async function performLiveSearch(form) {
-            const url = new URL(form.action);
-            const formData = new FormData(form);
-
-            formData.forEach((value, key) => {
-                if (value) url.searchParams.append(key, value);
-            });
+        async function performLiveSearch(source) {
+            let url;
+            if (typeof source === 'string') {
+                url = new URL(source, window.location.origin);
+            } else if (source instanceof HTMLFormElement) {
+                url = new URL(source.action || window.location.href, window.location.origin);
+                const formData = new FormData(source);
+                url.search = '';
+                formData.forEach((value, key) => {
+                    if (value) url.searchParams.set(key, value);
+                });
+            } else {
+                url = new URL(window.location.href);
+            }
 
             const tableContainer = document.getElementById('table-container');
+            if (!tableContainer) return;
             tableContainer.style.opacity = '0.5';
             tableContainer.style.pointerEvents = 'none';
 
@@ -245,14 +300,14 @@
                 e.preventDefault();
                 const url = new URL(paginationLink.href);
 
-                const formData = new FormData(form);
-                formData.forEach((value, key) => {
-                    if (value) url.searchParams.set(key, value);
-                });
+                if (form) {
+                    const formData = new FormData(form);
+                    formData.forEach((value, key) => {
+                        if (value) url.searchParams.set(key, value);
+                    });
+                }
 
-                const dummyForm = document.createElement('form');
-                dummyForm.action = url.pathname + url.search;
-                performLiveSearch(dummyForm);
+                performLiveSearch(url.toString());
             }
         });
 
@@ -273,7 +328,7 @@
             class="fixed inset-0 z-[100] hidden bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
                 <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 class="font-bold text-slate-800 text-lg">Import Jadwal Mengajar dari CSV</h3>
+                    <h3 class="font-bold text-slate-800 text-lg">Import Jadwal Mengajar (Excel / CSV)</h3>
                     <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
                         class="text-slate-400 hover:text-slate-600">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -306,10 +361,10 @@
                     @csrf
                     <div class="mb-5 space-y-4">
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">2. Upload File CSV</label>
-                            <input type="file" name="file_csv" accept=".csv" required
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">2. Upload File CSV / XLSX</label>
+                            <input type="file" name="file_csv" accept=".csv,.xlsx,.txt" required
                                 class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#1e3a6e] hover:file:bg-blue-100">
-                            <p class="text-xs text-slate-400 mt-2">Maksimal ukuran file 2MB.</p>
+                            <p class="text-xs text-slate-400 mt-2">Mendukung format CSV dan XLSX. Maksimal ukuran file 2MB.</p>
                         </div>
                     </div>
                     <div class="flex items-center justify-end">

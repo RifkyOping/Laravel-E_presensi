@@ -1,9 +1,12 @@
 <x-app-layout>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Scan Absensi offline</span>
+    </x-slot>
     <div class="space-y-6">
         <div class="flex flex-col justify-between items-start gap-4">
             <div>
                 <h2 class="text-2xl font-black text-slate-800 tracking-tight">Scan Absen QR Code</h2>
-                <p class="text-slate-500 text-sm mt-1">Scan QR Code milik siswa untuk melakukan absensi (offline murid).</p>
+                <p class="text-slate-500 text-sm mt-1">Scan QR Code milik murid untuk melakukan absensi (offline murid).</p>
             </div>
         </div>
 
@@ -11,19 +14,11 @@
             <!-- Bagian Scanner -->
             <div class="md:col-span-7 lg:col-span-8 space-y-6">
                 <div class="app-card p-6">
-                    <div class="flex gap-4 mb-6">
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="tipe_absen" value="datang" checked class="peer sr-only">
-                            <div class="text-center p-3 rounded-xl border-2 border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 font-bold transition-all">
-                                Absen Datang
-                            </div>
-                        </label>
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="tipe_absen" value="pulang" class="peer sr-only">
-                            <div class="text-center p-3 rounded-xl border-2 border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 font-bold transition-all">
-                                Absen Pulang
-                            </div>
-                        </label>
+                    <div class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-100 flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="text-sm text-blue-800">
+                            <strong>Sistem Otomatis:</strong> Scan QR akan mendeteksi jenis absen (datang/pulang) secara otomatis berdasarkan jam absensi saat ini.
+                        </div>
                     </div>
 
                     <div id="reader-container" class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative min-h-[300px] flex items-center justify-center">
@@ -71,10 +66,9 @@
             function onScanSuccess(decodedText, decodedResult) {
                 if (isProcessing) return;
                 
-                const tipeAbsen = document.querySelector('input[name="tipe_absen"]:checked').value;
-                const cacheKey = tipeAbsen + '_' + decodedText;
+                const cacheKey = decodedText;
 
-                // Jika QR ini sudah pernah diproses dengan sukses (atau sudah absen) untuk tipe absen ini, abaikan diam-diam
+                // Jika QR ini sudah pernah diproses dengan sukses (atau mendapat error logika), abaikan diam-diam
                 if (processedQRs.has(cacheKey)) {
                     return;
                 }
@@ -93,8 +87,7 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        qr_data: decodedText,
-                        tipe_absen: tipeAbsen
+                        qr_data: decodedText
                     })
                 })
                 .then(async response => {
@@ -120,8 +113,8 @@
                         });
                     }
                     
-                    // Jika sukses, ATAU jika error yang butuh popup/sudah absen (berarti jangan discan lagi)
-                    if (data.success || data.show_popup || (data.message && data.message.toLowerCase().includes('sudah melakukan absen'))) {
+                    // Jika sukses, ATAU jika mendapat response error logika dari server (seperti hari libur, sudah absen, dll)
+                    if (data.success || status === 422 || status === 404 || status === 403) {
                         processedQRs.add(cacheKey);
                     }
                     

@@ -26,7 +26,7 @@ class MataPelajaranController extends Controller
             $query->where('aktif', $request->status === 'aktif');
         }
 
-        $mapel = $query->orderBy('nama')->paginate(15)->withQueryString();
+        $mapel = $query->orderBy('nama')->paginate(50)->withQueryString();
 
         $stats = [
             'total'  => MataPelajaran::count(),
@@ -47,11 +47,44 @@ class MataPelajaranController extends Controller
     }
 
     // ──────────────────────────────────────────
-    //  STORE
+    //  STORE (Mendukung Simpan Sekaligus / Bulk)
     // ──────────────────────────────────────────
 
     public function store(Request $request)
     {
+        if ($request->has('mapels') && is_array($request->mapels)) {
+            $request->validate([
+                'mapels'          => 'required|array|min:1',
+                'mapels.*.nama'   => 'required|string|max:150',
+            ], [
+                'mapels.required'        => 'Setidaknya harus ada 1 mata pelajaran yang diisi.',
+                'mapels.*.nama.required' => 'Nama mata pelajaran tidak boleh kosong.',
+                'mapels.*.nama.max'      => 'Nama mata pelajaran maksimal 150 karakter.',
+            ]);
+
+            $createdCount = 0;
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, &$createdCount) {
+                foreach ($request->mapels as $item) {
+                    $nama = trim($item['nama'] ?? '');
+                    if ($nama !== '') {
+                        MataPelajaran::create([
+                            'nama'  => $nama,
+                            'aktif' => isset($item['aktif']) && ($item['aktif'] === '1' || $item['aktif'] === true || $item['aktif'] === 1),
+                        ]);
+                        $createdCount++;
+                    }
+                }
+            });
+
+            $pesan = $createdCount === 1
+                ? "1 mata pelajaran berhasil ditambahkan."
+                : "{$createdCount} mata pelajaran berhasil ditambahkan secara bersamaan.";
+
+            return redirect()->route('admin.mata-pelajaran.index')
+                ->with('success', $pesan);
+        }
+
+        // Fallback jika input tunggal
         $request->validate([
             'nama'      => 'required|string|max:150',
             'aktif'     => 'nullable|boolean',

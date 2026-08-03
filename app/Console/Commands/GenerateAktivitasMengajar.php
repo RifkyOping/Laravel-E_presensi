@@ -51,8 +51,12 @@ class GenerateAktivitasMengajar extends Command
         // Jam dan menit saat ini, misal '07:15:00'
         $jamSekarang = $now->format('H:i') . ':00';
 
-        // Cari semua jadwal untuk hari ini (tanpa menunggu jam mulai)
+        $setting = \App\Models\SchoolSetting::get();
+        $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
+
+        // Cari semua jadwal untuk hari ini dan blok aktif (tanpa menunggu jam mulai)
         $jadwalCocok = JadwalMengajar::where('hari', $hariIni)
+            ->whereIn('tipe_blok', ['Semua', $blokAktif])
             ->get();
 
         $jumlahDibuat = 0;

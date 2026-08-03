@@ -43,7 +43,7 @@
                         placeholder="Masukkan NPSN Sekolah..."
                         maxlength="20"
                         autocomplete="off"
-                        class="w-full border-2 border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 font-bold text-center tracking-widest text-lg focus:outline-none focus:border-[#1e3a6e] focus:ring-4 focus:ring-[#1e3a6e]/10 transition"
+                        class="w-full border-2 border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 font-bold text-center tracking-widest text-base sm:text-lg placeholder:tracking-normal placeholder:font-medium placeholder:text-slate-400 focus:outline-none focus:border-[#1e3a6e] focus:ring-4 focus:ring-[#1e3a6e]/10 transition"
                         style="letter-spacing: 0.2em;"
                         onkeydown="if(event.key==='Enter') verifyNpsn()"
                     >
@@ -79,17 +79,33 @@
     /* Prevent body scroll & interaction while modal is open */
     body.npsn-locked { overflow: hidden; }
     body.npsn-locked > *:not(#npsn-modal) { pointer-events: none; }
+    
+    /* Override wide tracking on placeholder only so text fits nicely */
+    #npsn-input::placeholder {
+        letter-spacing: normal !important;
+        font-weight: 500;
+    }
 </style>
 
 <script>
     // Lock the body immediately
     document.body.classList.add('npsn-locked');
 
-    // Focus input on load
+    // Sesuaikan placeholder otomatis: Ringkas di Mobile, Lengkap di Desktop
+    function updateNpsnPlaceholder() {
+        const inp = document.getElementById('npsn-input');
+        if (inp) {
+            inp.placeholder = window.innerWidth < 640 ? 'NPSN Sekolah' : 'Masukkan NPSN Sekolah';
+        }
+    }
+
+    // Focus input on load & init responsive placeholder
     document.addEventListener('DOMContentLoaded', function () {
+        updateNpsnPlaceholder();
         const inp = document.getElementById('npsn-input');
         if (inp) inp.focus();
     });
+    window.addEventListener('resize', updateNpsnPlaceholder);
 
     function verifyNpsn() {
         const input = document.getElementById('npsn-input');

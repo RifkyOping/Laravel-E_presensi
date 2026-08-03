@@ -15,15 +15,6 @@
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100" x-data="{ activeTab: '{{ $activeTab }}' }">
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="w-full">
-                    <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 mb-4">
-                        <div>
-                            <p class="text-sm font-bold text-blue-800">BLOK AKTIF MINGGU INI:</p>
-                            <p class="text-xs text-blue-600 mt-1">Sistem saat ini menampilkan jadwal khusus untuk Blok {{ $blokAktif }} (dan Semua).</p>
-                        </div>
-                        <span class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-black rounded-lg text-lg">
-                            Blok {{ $blokAktif }}
-                        </span>
-                    </div>
                     <h2 class="text-lg font-bold text-slate-800">Jadwal & Monitoring Kelas</h2>
                     <p class="text-sm text-slate-500 mt-1">Status kehadiran guru dan riwayat absen Anda ditampilkan untuk minggu ini.</p>
                 </div>

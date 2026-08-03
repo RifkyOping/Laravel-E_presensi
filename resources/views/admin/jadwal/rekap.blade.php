@@ -8,7 +8,14 @@
         </div>
     </x-slot>
 
-    <div class="space-y-6" x-data="{ activeTab: '{{ $activeTab }}' }">
+    <div class="space-y-6" x-data="{ 
+        activeTab: localStorage.getItem('jadwal_rekap_tab') || '{{ $activeTab }}',
+        filterBlok: localStorage.getItem('jadwal_rekap_blok') || ''
+    }"
+    x-init="
+        $watch('activeTab', val => localStorage.setItem('jadwal_rekap_tab', val));
+        $watch('filterBlok', val => localStorage.setItem('jadwal_rekap_blok', val));
+    ">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
                 <div>

@@ -297,12 +297,27 @@ class AdminController extends Controller
         }
 
         $berhasil = 0;
-        $gagal = 0;
+        $gagalRows = [];
 
         // Skip header at index 0
         for ($i = 1; $i < count($rows); $i++) {
+            $rowNum = $i + 1;
             $row = $rows[$i];
-            if (count($row) < 4) continue;
+            
+            // Abaikan baris kosong
+            if (empty($row) || count(array_filter($row, fn($val) => trim((string)$val) !== '')) === 0) {
+                continue;
+            }
+
+            if (count($row) < 4) {
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => trim($row[0] ?? '(Kosong)'),
+                    'detail' => 'Data kolom tidak lengkap (kurang dari 4 kolom)',
+                    'alasan' => 'Jumlah kolom kurang dari ketentuan minimal template.'
+                ];
+                continue;
+            }
 
             $name = trim($row[0]);
             $nomor_induk = trim($row[1]);
@@ -313,57 +328,92 @@ class AdminController extends Controller
             $agama = isset($row[6]) && trim($row[6]) !== '' ? trim($row[6]) : null;
 
             if ($nomor_induk === '') {
-                $gagal++;
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => $name ?: '(Kosong)',
+                    'detail' => "Role: {$role}" . ($kelasStr ? " | Kelas: {$kelasStr}" : ''),
+                    'alasan' => 'Nomor Induk / NIP / NISN wajib diisi.'
+                ];
                 continue;
             }
 
             // Validasi role dan email
             if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas', 'kurikulum'])) {
-                $gagal++;
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => $name,
+                    'detail' => "Nomor Induk: {$nomor_induk} | Role: {$role}",
+                    'alasan' => "Role '{$role}' tidak valid (pilihan: murid, guru, admin, pengawas, kurikulum)."
+                ];
                 continue;
             }
 
             if (User::where('nomor_induk', $nomor_induk)->exists()) {
-                $gagal++;
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => $name,
+                    'detail' => "Nomor Induk: {$nomor_induk}",
+                    'alasan' => "Nomor Induk '{$nomor_induk}' sudah terdaftar di sistem."
+                ];
                 continue;
             }
 
             if ($email && User::where('email', $email)->exists()) {
-                $gagal++;
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => $name,
+                    'detail' => "Email: {$email}",
+                    'alasan' => "Email '{$email}' sudah digunakan oleh pengguna lain."
+                ];
                 continue;
             }
 
-            $user = User::create([
-                'name'        => $name,
-                'nomor_induk' => $nomor_induk,
-                'email'       => $email,
-                'role'        => $role,
-                'password'    => Hash::make($password),
-            ]);
+            try {
+                $user = User::create([
+                    'name'        => $name,
+                    'nomor_induk' => $nomor_induk,
+                    'email'       => $email,
+                    'role'        => $role,
+                    'password'    => Hash::make($password),
+                ]);
 
-            if ($role === 'murid') {
-                $profileData = [];
-                if ($agama) {
-                    $profileData['agama'] = $agama;
-                }
-                if ($kelasStr) {
-                    $parts = explode(' ', $kelasStr);
-                    $profileData['kelas'] = $parts[0] ?? null;
-                    $profileData['rombel'] = end($parts) ?: null;
-                    if (count($parts) > 2) {
-                        $profileData['jurusan'] = implode(' ', array_slice($parts, 1, -1));
+                if ($role === 'murid') {
+                    $profileData = [];
+                    if ($agama) {
+                        $profileData['agama'] = $agama;
                     }
+                    if ($kelasStr) {
+                        $parts = explode(' ', $kelasStr);
+                        $profileData['kelas'] = $parts[0] ?? null;
+                        $profileData['rombel'] = end($parts) ?: null;
+                        if (count($parts) > 2) {
+                            $profileData['jurusan'] = implode(' ', array_slice($parts, 1, -1));
+                        }
+                    }
+                    $user->siswaProfile()->create($profileData);
                 }
-                $user->siswaProfile()->create($profileData);
-            }
 
-            $berhasil++;
+                $berhasil++;
+            } catch (\Exception $e) {
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => $name,
+                    'detail' => "Nomor Induk: {$nomor_induk}",
+                    'alasan' => 'Gagal menyimpan ke database: ' . $e->getMessage()
+                ];
+            }
         }
 
-        $msg = "Import selesai! Berhasil: {$berhasil} akun.";
-        if ($gagal > 0) $msg .= " Gagal/Dilewati: {$gagal} baris (nomor_induk sudah ada, email sudah ada, role tidak valid, atau data tidak lengkap).";
+        $totalGagal = count($gagalRows);
 
-        return back()->with('success', $msg);
+        if ($totalGagal > 0) {
+            $msg = "Import selesai. Berhasil: {$berhasil} akun. Terdapat {$totalGagal} baris yang gagal diimport.";
+            return back()
+                ->with($berhasil > 0 ? 'warning' : 'error', $msg)
+                ->with('import_errors', $gagalRows);
+        }
+
+        return back()->with('success', "Import selesai! Seluruh {$berhasil} akun berhasil ditambahkan.");
     }
 
     public function editUser(User $user)

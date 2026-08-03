@@ -1,7 +1,7 @@
 @php use Carbon\Carbon; @endphp
 <x-app-layout>
     <x-slot name="header">
-        <span class="text-sm font-bold text-slate-800">Absensi Murid</span>
+        <span class="text-sm font-bold text-slate-800">Absensi Sekolah</span>
     </x-slot>
 
 <div class="space-y-6">
@@ -116,7 +116,7 @@
         $statusSakitIzin  = '';
         if ($absensiHariIni && $absensiHariIni->status_pengajuan === 'pending') {
             $disableSakitIzin = true;
-            $statusSakitIzin = 'Menunggu Konfirmasi Admin';
+            $statusSakitIzin = 'Menunggu Konfirmasi';
         } elseif ($absensiHariIni && $isSakitIzin) {
             $disableSakitIzin = true;
             $statusSakitIzin = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
@@ -151,7 +151,6 @@
                 <input type="hidden" name="latitude"  id="lat-datang">
                 <input type="hidden" name="longitude" id="lng-datang">
                 <input type="hidden" name="accuracy"  id="acc-datang">
-                <input type="hidden" name="speed"     id="spd-datang">
                 <input type="hidden" name="timestamp" id="ts-datang">
                 @php
                     $labelBatalkan = $jenisMasaAktif === 'izin' ? 'Batalkan Izin & Hadir' : 'Batalkan Sakit & Hadir';
@@ -198,7 +197,6 @@
                 <input type="hidden" name="latitude"  id="lat-pulang">
                 <input type="hidden" name="longitude" id="lng-pulang">
                 <input type="hidden" name="accuracy"  id="acc-pulang">
-                <input type="hidden" name="speed"     id="spd-pulang">
                 <input type="hidden" name="timestamp" id="ts-pulang">
                 <button type="button" id="btn-pulang"
                         onclick="submitAbsen('pulang')"
@@ -321,10 +319,16 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Pilih Wali Kelas</label>
+                        @php
+                            $lastGuruId = \App\Models\AbsensiSiswa::where('user_id', Auth::id())
+                                ->whereNotNull('guru_id')
+                                ->latest('created_at')
+                                ->value('guru_id');
+                        @endphp
                         <select name="guru_id" class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 text-sm bg-white" required>
                             <option value="">-- Pilih Wali Kelas --</option>
                             @foreach($semuaGuru as $guru)
-                                <option value="{{ $guru->id }}">{{ $guru->name }}</option>
+                                <option value="{{ $guru->id }}" {{ (old('guru_id', $lastGuruId) == $guru->id) ? 'selected' : '' }}>{{ $guru->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -498,13 +502,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 @endif
 
-/* ── GPS State ── */
+/* ── GPS State & Jitter Detection ── */
 let gpsLat = null;
 let gpsLng = null;
 let gpsAcc = null;
-let gpsSpeed = null;
 let gpsTimestamp = null;
 let gpsReady = false;
+let watchId = null;
+let gpsSamples = [];
+const REQUIRED_SAMPLES = 3;
 
 let gpsErrorTitle = 'GPS Belum Siap';
 let gpsErrorMsg = 'Sistem masih memuat lokasi GPS Anda. Pastikan izin lokasi aktif dan tunggu sebentar...';
@@ -519,9 +525,9 @@ function updateGpsStatus(ok, msg) {
     el.classList.add(ok ? '!bg-green-500/80' : '!bg-red-500/80');
 
     if (!ok) {
-        if (msg.includes('Fake GPS')) {
+        if (msg.includes('Fake GPS') || msg.includes('Palsu') || msg.includes('Jitter')) {
             gpsErrorTitle = 'Peringatan Keamanan!';
-            gpsErrorMsg   = 'Sistem mendeteksi indikasi penggunaan Fake GPS atau Lokasi Palsu di perangkat Anda. Harap matikan aplikasi tersebut untuk dapat melakukan absensi.';
+            gpsErrorMsg   = 'Sistem mendeteksi indikasi penggunaan Fake GPS / Lokasi Palsu (sinyal GPS statis tanpa getaran alami satelit). Harap matikan aplikasi Fake GPS untuk absensi.';
         } else if (msg.includes('ditolak')) {
             gpsErrorTitle = 'Izin Ditolak';
             gpsErrorMsg   = 'Anda belum mengizinkan akses lokasi. Jika menekan peringatan lokasi tidak memunculkan notifikasi izin, harap ubah izin situs secara manual di pengaturan browser Anda (Izinkan Lokasi).';
@@ -532,58 +538,117 @@ function updateGpsStatus(ok, msg) {
     }
 }
 
-/* ── Ambil GPS otomatis saat halaman dibuka ── */
+/* ── Ambil GPS otomatis dengan Deteksi Jitter ── */
 function requestGPS() {
     const el   = document.getElementById('gps-status');
     const spin = document.getElementById('gps-spinner');
     const txt  = document.getElementById('gps-text');
     
+    // Reset state
+    gpsReady = false;
+    gpsSamples = [];
+    if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+
     // Set UI to loading
     el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm';
-    txt.textContent = 'Mendeteksi lokasi GPS...';
+    txt.textContent = 'Memindai sinyal satelit GPS...';
     spin.classList.remove('hidden');
 
     if (!navigator.geolocation) {
         updateGpsStatus(false, '❌ Browser tidak mendukung GPS');
         return;
     }
-    navigator.geolocation.getCurrentPosition(
-        function(pos) {
-            const acc = pos.coords.accuracy;
-            const speed = pos.coords.speed;
-            
-            // --- ANTI FAKE GPS HEURISTIC ---
-            // 1. Fake GPS sering memberikan akurasi bulat sempurna tanpa desimal atau altitude kosong
-            const isRoundAccuracy = Number.isInteger(acc) && (acc % 10 === 0 || acc === 65);
-            const isMissingAltitude = (pos.coords.altitude === null || pos.coords.altitude === 0);
-            
-            // 2. Fake GPS sering memberikan akurasi terlalu sempurna (1-4 meter)
-            const isTooPerfectAccuracy = acc < 5;
-            
-            // 3. Fake GPS kadang mensimulasikan pergerakan (speed > 0) padahal sedang diam absen
-            const isSuspiciousSpeed = speed !== null && speed > 0;
-            
-            // Jika terdeteksi salah satu ciri mencurigakan, tandai sebagai Fake GPS
-            if ((isRoundAccuracy && isMissingAltitude) || isTooPerfectAccuracy || isSuspiciousSpeed) {
-                updateGpsStatus(false, 'Terdeteksi penggunaan Aplikasi Fake GPS / Lokasi Palsu!');
+
+    let sampleTimeout = null;
+
+    function evaluateSamples(isTimeout = false) {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+        if (sampleTimeout) clearTimeout(sampleTimeout);
+
+        if (gpsSamples.length === 0) {
+            updateGpsStatus(false, 'Gagal memperoleh koordinat GPS yang akurat.');
+            return;
+        }
+
+        const latestPos = gpsSamples[gpsSamples.length - 1];
+        const acc = latestPos.coords.accuracy;
+
+        // 1. Basic Heuristics
+        const isRoundAccuracy = Number.isInteger(acc) && (acc % 10 === 0 || acc === 65);
+        const isMissingAltitude = (latestPos.coords.altitude === null || latestPos.coords.altitude === 0);
+        const isTooPerfectAccuracy = acc < 5;
+
+        if ((isRoundAccuracy && isMissingAltitude) || isTooPerfectAccuracy) {
+            updateGpsStatus(false, 'Terdeteksi penggunaan Aplikasi Fake GPS / Lokasi Palsu!');
+            return;
+        }
+
+        // 2. Deteksi Jitter (Getaran Alami Satelit GPS Fisik)
+        if (gpsSamples.length >= 3) {
+            const lats = gpsSamples.map(s => s.coords.latitude);
+            const lngs = gpsSamples.map(s => s.coords.longitude);
+            const accs = gpsSamples.map(s => s.coords.accuracy);
+
+            const latDiff = Math.max(...lats) - Math.min(...lats);
+            const lngDiff = Math.max(...lngs) - Math.min(...lngs);
+            const accDiff = Math.max(...accs) - Math.min(...accs);
+
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const timeSpan = (gpsSamples[gpsSamples.length - 1].timestamp - gpsSamples[0].timestamp);
+
+            // Pada perangkat HP asli, satelit fisik selalu menghasilkan getaran mikro desimal atau fluktuasi akurasi.
+            // Aplikasi Mock/Fake GPS di HP menginjeksi angka statis 100% kaku tanpa jitter sama sekali.
+            if (isMobile && timeSpan >= 1000 && latDiff === 0 && lngDiff === 0 && accDiff === 0) {
+                updateGpsStatus(false, 'Terdeteksi Lokasi Palsu (Sinyal GPS Statis Tanpa Jitter Satelit)!');
                 return;
             }
+        }
 
-            gpsLat   = pos.coords.latitude;
-            gpsLng   = pos.coords.longitude;
-            gpsAcc   = pos.coords.accuracy;
-            gpsSpeed = pos.coords.speed;
-            gpsTimestamp = pos.timestamp;
-            gpsReady = true;
-            updateGpsStatus(true, 'Lokasi terdeteksi (jarak dari sekolah ±' + Math.round(acc) + 'm)');
+        gpsLat   = latestPos.coords.latitude;
+        gpsLng   = latestPos.coords.longitude;
+        gpsAcc   = latestPos.coords.accuracy;
+        gpsTimestamp = latestPos.timestamp;
+        gpsReady = true;
+        updateGpsStatus(true, 'Lokasi terverifikasi (akurasi ±' + Math.round(acc) + 'm)');
+    }
+
+    // Timeout pengaman (maksimal 6 detik untuk menyelesaikan sampling)
+    sampleTimeout = setTimeout(function() {
+        if (!gpsReady && gpsSamples.length > 0) {
+            evaluateSamples(true);
+        }
+    }, 6000);
+
+    watchId = navigator.geolocation.watchPosition(
+        function(pos) {
+            gpsSamples.push(pos);
+            const count = gpsSamples.length;
+
+            if (count < REQUIRED_SAMPLES) {
+                txt.textContent = 'Menguji keaslian sinyal GPS... (' + count + '/' + REQUIRED_SAMPLES + ')';
+            } else {
+                evaluateSamples();
+            }
         },
         function(err) {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            if (sampleTimeout) clearTimeout(sampleTimeout);
+
             const msg = err.code === 1
                 ? 'Izin lokasi ditolak. Tekan untuk mengizinkan.'
                 : 'GPS tidak tersedia: ' + err.message;
             updateGpsStatus(false, msg);
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
 }
 
@@ -636,7 +701,6 @@ function submitAbsen(type) {
     document.getElementById('lat-' + type).value = gpsLat;
     document.getElementById('lng-' + type).value = gpsLng;
     document.getElementById('acc-' + type).value = gpsAcc;
-    document.getElementById('spd-' + type).value = gpsSpeed;
     document.getElementById('ts-' + type).value = gpsTimestamp;
 
     // Tampilkan loading

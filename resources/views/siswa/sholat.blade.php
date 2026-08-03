@@ -1,7 +1,7 @@
 @php use Carbon\Carbon; @endphp
 <x-app-layout>
     <x-slot name="header">
-        <span class="text-sm font-bold text-slate-800">Riwayat Sholat</span>
+        <span class="text-sm font-bold text-slate-800">Absen Sholat</span>
     </x-slot>
 
     <div class="space-y-6">

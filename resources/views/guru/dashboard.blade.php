@@ -24,6 +24,9 @@
     elseif ($jam >= 15 && $jam < 18) $sapaan = 'Selamat Sore';
     elseif ($jam >= 18) $sapaan = 'Selamat Malam';
 
+    $setting = \App\Models\SchoolSetting::get();
+    $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
+
     // 1. Data Absensi Pribadi Guru (Masuk/Pulang)
     $absenPribadi = \App\Models\AbsensiGuru::where('user_id', $userId)
         ->where('tanggal', $today)
@@ -32,6 +35,7 @@
     // 2. Data Jadwal Mengajar Hari Ini
     $jadwalHariIni = \App\Models\JadwalMengajar::where('user_id', $userId)
         ->where('hari', $hariIni)
+        ->whereIn('tipe_blok', ['Semua', $blokAktif])
         ->orderBy('jam_ke')
         ->get();
     

@@ -43,8 +43,11 @@
         @php
             $hasFilter = request()->hasAny(['tanggal', 'guru_id']);
         @endphp
-        <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }"
-            class="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-300 transition-all duration-200 shadow-sm">
+        <div x-data="{ 
+            showFilter: localStorage.getItem('filter_admin_aktivitas_guru') === 'true' || {{ $hasFilter ? 'true' : 'false' }} 
+        }"
+        x-init="$watch('showFilter', val => localStorage.setItem('filter_admin_aktivitas_guru', val))"
+        class="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-300 transition-all duration-200 shadow-sm">
             <button type="button" @click="showFilter = !showFilter"
                 class="w-full text-left flex items-center justify-between group focus:outline-none">
                 <div class="flex items-center gap-3">

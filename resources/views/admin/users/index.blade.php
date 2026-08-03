@@ -33,18 +33,68 @@
     @if(session('success'))
     <div class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 font-semibold px-5 py-3.5 rounded-xl text-sm">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-        {{ session('success') }}
+        <span>{{ session('success') }}</span>
+    </div>
+    @endif
+    @if(session('warning'))
+    <div class="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 font-semibold px-5 py-3.5 rounded-xl text-sm">
+        <svg class="w-4 h-4 flex-shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <span>{{ session('warning') }}</span>
     </div>
     @endif
     @if(session('error'))
     <div class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 font-semibold px-5 py-3.5 rounded-xl text-sm">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        {{ session('error') }}
+        <span>{{ session('error') }}</span>
     </div>
     @endif
 
+    {{-- Detail Baris Gagal Import --}}
+    @if(session('import_errors') && count(session('import_errors')) > 0)
+        <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-5 text-rose-900 shadow-sm animate-up">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-rose-800 text-sm">Daftar Baris yang Gagal Diimport ({{ count(session('import_errors')) }} Baris)</h4>
+                        <p class="text-xs text-rose-600 mt-0.5">Periksa kembali data pada file Excel / CSV Anda atau pastikan data belum pernah terdaftar sebelumnya.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-h-64 overflow-y-auto rounded-xl border border-rose-200 bg-white divide-y divide-rose-100 text-xs shadow-inner">
+                @foreach(session('import_errors') as $err)
+                    <div class="p-3 hover:bg-rose-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-start sm:items-center gap-2 min-w-0">
+                            <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-[11px] whitespace-nowrap shrink-0">
+                                Baris {{ $err['baris'] }}
+                            </span>
+                            <div class="truncate">
+                                <span class="font-bold text-slate-800">{{ $err['nama'] }}</span>
+                                <span class="text-slate-500 font-normal ml-1">({{ $err['detail'] }})</span>
+                            </div>
+                        </div>
+                        <span class="text-rose-600 text-[11px] font-semibold bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 shrink-0 self-start sm:self-auto">
+                            {{ $err['alasan'] }}
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- Filter + Tabs --}}
-    <div x-data="{ showFilter: {{ request('search') || request('tab', 'semua') !== 'semua' ? 'true' : 'false' }} }" class="bg-white rounded-xl border border-slate-200 p-6">
+    <div x-data="{ 
+        showFilter: localStorage.getItem('filter_admin_users') === 'true' || {{ (request('search') || (request('tab') && request('tab') !== 'semua')) ? 'true' : 'false' }} 
+    }" 
+    x-init="$watch('showFilter', val => localStorage.setItem('filter_admin_users', val))"
+    class="bg-white rounded-xl border border-slate-200 p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -98,7 +148,7 @@
     <div id="table-container" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <p class="text-sm text-slate-500">
-                Menampilkan <span class="font-bold text-slate-800">{{ $users->total() }}</span> pengguna
+                Total <span class="font-bold text-slate-800">{{ $users->total() }}</span> pengguna
             </p>
             <div id="bulkActionContainer" class="flex items-center gap-2">
                 <button type="button" id="btnPilihBanyak" onclick="enableBulkMode()"
@@ -275,16 +325,23 @@
         }, 500); // Tunggu 500ms
     }
 
-    async function performLiveSearch(form) {
-        const url = new URL(form.action);
-        const formData = new FormData(form);
-        
-        // Buat URL dengan query string dari form
-        formData.forEach((value, key) => {
-            if(value) url.searchParams.append(key, value);
-        });
+    async function performLiveSearch(source) {
+        let url;
+        if (typeof source === 'string') {
+            url = new URL(source, window.location.origin);
+        } else if (source instanceof HTMLFormElement) {
+            url = new URL(source.action || window.location.href, window.location.origin);
+            const formData = new FormData(source);
+            url.search = '';
+            formData.forEach((value, key) => {
+                if(value) url.searchParams.set(key, value);
+            });
+        } else {
+            url = new URL(window.location.href);
+        }
 
         const tableContainer = document.getElementById('table-container');
+        if (!tableContainer) return;
         // Efek loading transparan
         tableContainer.style.opacity = '0.5';
         tableContainer.style.pointerEvents = 'none';
@@ -305,7 +362,7 @@
                 tableContainer.innerHTML = newTable.innerHTML;
             }
             
-            // Update URL di browser agar user bisa copy-paste URL hasil pencarian
+            // Update URL di browser agar user bisa refresh/copy-paste URL tanpa kehilangan filter
             window.history.pushState({}, '', url.toString());
         } catch (error) {
             console.error('Error saat live search:', error);
@@ -314,7 +371,7 @@
             tableContainer.style.opacity = '1';
             tableContainer.style.pointerEvents = 'auto';
             // Panggil ulang event listener untuk bulk delete jika diperlukan
-            disableBulkMode(); 
+            if (typeof disableBulkMode === 'function') disableBulkMode(); 
         }
     }
 
@@ -329,7 +386,7 @@
             const selectedTab = tabLink.getAttribute('data-tab');
             
             // Update input hidden tab di form
-            if(form.querySelector('input[name="tab"]')) {
+            if(form && form.querySelector('input[name="tab"]')) {
                 form.querySelector('input[name="tab"]').value = selectedTab;
             }
 
@@ -343,7 +400,7 @@
             });
 
             // Jalankan pencarian live
-            performLiveSearch(form);
+            if (form) performLiveSearch(form);
             return;
         }
 
@@ -354,15 +411,15 @@
             const url = new URL(paginationLink.href);
             
             // Pindahkan nilai search dan tab dari form ke URL pagination (agar filter tidak hilang saat pindah halaman)
-            const formData = new FormData(form);
-            formData.forEach((value, key) => {
-                if(value) url.searchParams.set(key, value);
-            });
+            if (form) {
+                const formData = new FormData(form);
+                formData.forEach((value, key) => {
+                    if(value) url.searchParams.set(key, value);
+                });
+            }
 
             // Panggil ulang ajax
-            const dummyForm = document.createElement('form');
-            dummyForm.action = url.pathname + url.search;
-            performLiveSearch(dummyForm);
+            performLiveSearch(url.toString());
         }
     });
 

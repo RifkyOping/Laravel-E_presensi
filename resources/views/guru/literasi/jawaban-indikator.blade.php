@@ -19,7 +19,11 @@
                 .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
             </style>
 
-            <div x-data="{ showFilter: {{ request('kelas_id') ? 'false' : 'true' }} }" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div x-data="{ 
+                showFilter: localStorage.getItem('filter_guru_jawaban_indikator') === 'true' || {{ request('kelas_id') ? 'true' : 'false' }} 
+            }" 
+            x-init="$watch('showFilter', val => localStorage.setItem('filter_guru_jawaban_indikator', val))"
+            class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">

@@ -11,7 +11,13 @@ class JadwalMengajarController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $jadwalRaw = $user->jadwalMengajars()->orderBy('jam_ke')->get();
+        $setting = \App\Models\SchoolSetting::get();
+        $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
+
+        $jadwalRaw = $user->jadwalMengajars()
+            ->whereIn('tipe_blok', ['Semua', $blokAktif])
+            ->orderBy('jam_ke')
+            ->get();
 
         // Kelompokkan berdasarkan hari
         $jadwal = [
@@ -25,9 +31,6 @@ class JadwalMengajarController extends Controller
         foreach ($jadwalRaw as $j) {
             $jadwal[$j->hari][] = $j;
         }
-
-        $setting = \App\Models\SchoolSetting::get();
-        $blokAktif = $setting->blok_jadwal_aktif;
 
         return view('guru.jadwal.index', compact('jadwal', 'blokAktif'));
     }

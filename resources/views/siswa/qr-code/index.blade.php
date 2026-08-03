@@ -37,7 +37,7 @@
                 <p class="font-bold mb-2 text-base">Cara Penggunaan:</p>
                 <ol class="list-decimal pl-5 space-y-1">
                     <li>Simpan gambar QR Code ini ke galeri HP Anda, atau cetak di kertas.</li>
-                    <li>Saat di sekolah, tunjukkan QR Code ini ke guru yang bertugas piket atau mengajar.</li>
+                    <li>Saat di sekolah, tunjukkan QR Code ini ke guru yang bertugas piket.</li>
                     <li>Guru akan melakukan scan menggunakan sistem ini untuk mencatat kehadiran Anda.</li>
                 </ol>
             </div>

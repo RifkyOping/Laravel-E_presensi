@@ -12,11 +12,16 @@ $hariIniStr = Carbon::now()->locale('id')->translatedFormat('l');
 $tanggalSekarang = Carbon::now()->format('Y-m-d');
 $currentTime = Carbon::now()->format('H:i:s');
 
+$setting = \App\Models\SchoolSetting::get();
+$blokAktif = $setting->blok_jadwal_aktif ?? 'A';
+
 // 1. Jadwal Hari Ini
-$kelasLengkap = trim($user->kelas . ' ' . $user->jurusan . ' ' . $user->rombel);
+$profile = $user->siswaProfile;
+$kelasLengkap = $profile ? trim("{$profile->kelas} {$profile->jurusan} {$profile->rombel}") : trim("{$user->kelas} {$user->jurusan} {$user->rombel}");
 $jadwalHariIni = JadwalMengajar::with(['user'])
     ->where('hari', $hariIniStr)
     ->where('kelas', $kelasLengkap)
+    ->whereIn('tipe_blok', ['Semua', $blokAktif])
     ->orderBy('jam_mulai')
     ->get();
 

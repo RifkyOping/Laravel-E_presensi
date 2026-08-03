@@ -36,12 +36,10 @@ class ScanQrController extends Controller
         }
 
         $request->validate([
-            'qr_data' => 'required|string',
-            'tipe_absen' => 'required|in:datang,pulang' // Jenis absensi yang dipilih guru
+            'qr_data' => 'required|string'
         ]);
 
         $qrData = $request->input('qr_data');
-        $tipeAbsen = $request->input('tipe_absen');
         
         // Cari siswa berdasarkan NISN (nomor_induk)
         $siswa = User::where('nomor_induk', $qrData)
@@ -58,18 +56,36 @@ class ScanQrController extends Controller
         $setting = SchoolSetting::get();
         $today = Carbon::today();
 
-        // Cek Jadwal Buka/Tutup Absen
-        [$isOpen, $reason] = $setting->isAbsensiTerbuka($tipeAbsen, 'hadir');
-        if (!$isOpen) {
+        // Auto-detect tipe absen
+        [$isOpenDatang, $reasonDatang] = $setting->isAbsensiTerbuka('datang', 'hadir');
+        [$isOpenPulang, $reasonPulang] = $setting->isAbsensiTerbuka('pulang', 'hadir');
+
+        if (!$isOpenDatang && !$isOpenPulang) {
             return response()->json([
                 'success' => false,
-                'message' => $reason
+                'message' => "Saat ini tidak dalam jam absen datang maupun pulang.\nDetail: " . $reasonDatang
             ], 422);
         }
 
         $existing = AbsensiSiswa::where('user_id', $siswa->id)
             ->whereDate('tanggal', $today)
             ->first();
+
+        // Tentukan tipe absen berdasarkan jadwal buka dan status siswa
+        $tipeAbsen = null;
+
+        if ($isOpenDatang && $isOpenPulang) {
+            // Jika jadwalnya overlap (misal buka dua-duanya), cek existing
+            if (!$existing || !$existing->waktu_datang) {
+                $tipeAbsen = 'datang';
+            } else {
+                $tipeAbsen = 'pulang';
+            }
+        } elseif ($isOpenDatang) {
+            $tipeAbsen = 'datang';
+        } else {
+            $tipeAbsen = 'pulang';
+        }
 
         if ($tipeAbsen === 'datang') {
             if ($existing) {

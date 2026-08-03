@@ -17,7 +17,11 @@
         </div>
         @endif
 
-        <div x-data="{ showFilter: {{ request('kelas_id') ? 'false' : 'true' }} }" class="bg-white rounded-xl border border-slate-200 p-6">
+        <div x-data="{ 
+            showFilter: localStorage.getItem('filter_piket_sholat') === 'false' ? false : true 
+        }" 
+        x-init="$watch('showFilter', val => localStorage.setItem('filter_piket_sholat', val))"
+        class="bg-white rounded-xl border border-slate-200 p-6">
             <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
@@ -311,8 +315,8 @@
                 loading.classList.remove('hidden');
 
                 const url = new URL(form.action);
-                if (tanggal) url.searchParams.append('tanggal', tanggal);
-                if (kelasId) url.searchParams.append('kelas_id', kelasId);
+                if (tanggal) url.searchParams.set('tanggal', tanggal);
+                if (kelasId) url.searchParams.set('kelas_id', kelasId);
 
                 fetch(url, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }

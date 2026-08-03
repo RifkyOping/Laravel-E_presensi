@@ -10,7 +10,11 @@
     @php
         $hasFilter = request()->hasAny(['tanggal','guru_id']);
     @endphp
-    <div x-data="{ showFilter: {{ $hasFilter ? 'true' : 'false' }} }" class="app-card p-6">
+    <div x-data="{ 
+        showFilter: localStorage.getItem('filter_pengawas_aktivitas_guru') === 'true' || {{ $hasFilter ? 'true' : 'false' }} 
+    }" 
+    x-init="$watch('showFilter', val => localStorage.setItem('filter_pengawas_aktivitas_guru', val))"
+    class="app-card p-6">
         <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
