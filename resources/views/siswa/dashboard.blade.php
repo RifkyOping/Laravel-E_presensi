@@ -25,8 +25,14 @@ $jadwalHariIni = JadwalMengajar::with(['user'])
     ->orderBy('jam_mulai')
     ->get();
 
-// 2. Persentase Kehadiran Kelas (Pendekatan mock persentase kehadiran)
-$persentaseKehadiran = 95; // Anda dapat mengganti ini dengan kueri aktual ke tabel absensi siswa
+// 2. Persentase Kehadiran Kelas (Dihitung dinamis dari tabel absensi_kelas_siswa)
+$totalAbsenKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->count();
+$totalHadirKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'hadir')->count();
+$totalIzinKelas  = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'izin')->count();
+$totalSakitKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'sakit')->count();
+$totalAlpaKelas  = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'alpa')->count();
+
+$persentaseKehadiran = $totalAbsenKelas > 0 ? round(($totalHadirKelas / $totalAbsenKelas) * 100) : 100;
 
 // 2.5. Kehadiran Sekolah
 $absenSekolah = \App\Models\AbsensiSiswa::where('user_id', $user->id)
@@ -123,59 +129,87 @@ $dailyQuote = $quotes[date('z') % count($quotes)];
         {{-- 2. Grid Statistik Cepat (5 Kartu) --}}
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-5">
             <!-- Kartu 1: Kehadiran Sekolah -->
-            <div class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg transition-shadow border border-slate-100 overflow-hidden">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <a href="{{ route('absensi') }}" class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg hover:border-blue-200 transition-all border border-slate-100 overflow-hidden group block">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-[#1e3a6e] group-hover:text-white transition-colors text-[#1e3a6e]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
                 <div class="w-full overflow-hidden">
-                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate">Absen Sekolah</p>
-                    <h3 class="text-sm sm:text-lg font-bold truncate {{ ($absenSekolah && $absenSekolah->waktu_datang) ? 'text-[#1e3a6e]' : 'text-slate-800' }}">
+                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate flex items-center justify-between">
+                        <span>Absen Sekolah</span>
+                        <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors hidden sm:inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </p>
+                    <h3 class="text-sm sm:text-lg font-bold truncate {{ ($absenSekolah && $absenSekolah->waktu_datang) ? 'text-emerald-600' : 'text-slate-800' }}">
                         {{ ($absenSekolah && $absenSekolah->waktu_datang) ? 'Sudah Hadir' : 'Belum Hadir' }}
                     </h3>
                 </div>
-            </div>
+            </a>
 
             <!-- Kartu 2: Kehadiran Kelas -->
-            <div class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg transition-shadow border border-slate-100 overflow-hidden">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <a href="{{ route('murid.monitoring-kelas') }}" 
+               title="Rincian: Hadir {{ $totalHadirKelas }}, Sakit {{ $totalSakitKelas }}, Izin {{ $totalIzinKelas }}, Alpa {{ $totalAlpaKelas }} (Total {{ $totalAbsenKelas }} sesi)"
+               class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg hover:border-blue-200 transition-all border border-slate-100 overflow-hidden group block">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-[#1e3a6e] group-hover:text-white transition-colors text-[#1e3a6e]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
                 <div class="w-full overflow-hidden">
-                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate">Kehadiran Kelas</p>
-                    <h3 class="text-sm sm:text-xl font-bold text-slate-800 truncate">{{ $persentaseKehadiran }}%</h3>
+                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate flex items-center justify-between">
+                        <span>Kehadiran Kelas</span>
+                        <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors hidden sm:inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </p>
+                    <div class="flex items-baseline gap-1.5">
+                        <h3 class="text-sm sm:text-xl font-bold truncate {{ $totalAbsenKelas == 0 ? 'text-[#1e3a6e]' : ($persentaseKehadiran >= 85 ? 'text-emerald-600' : ($persentaseKehadiran >= 75 ? 'text-amber-600' : 'text-rose-600')) }}">
+                            {{ $persentaseKehadiran }}%
+                        </h3>
+                    </div>
+                    <p class="text-[10px] text-slate-400 truncate mt-0.5">
+                        @if($totalAbsenKelas > 0)
+                            {{ $totalHadirKelas }}/{{ $totalAbsenKelas }} Sesi Hadir
+                        @else
+                            Belum ada sesi
+                        @endif
+                    </p>
                 </div>
-            </div>
+            </a>
 
             <!-- Kartu 3: Literasi -->
-            <div class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg transition-shadow border border-slate-100 overflow-hidden">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"></path></svg>
+            <a href="{{ route('ebook.index') }}" class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg hover:border-blue-200 transition-all border border-slate-100 overflow-hidden group block">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-[#1e3a6e] group-hover:text-white transition-colors text-[#1e3a6e]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"></path></svg>
                 </div>
                 <div class="w-full overflow-hidden">
-                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate">e-Book Dibaca</p>
+                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate flex items-center justify-between">
+                        <span>e-Book Dibaca</span>
+                        <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors hidden sm:inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </p>
                     <h3 class="text-sm sm:text-xl font-bold text-slate-800 truncate">{{ $totalBukuDibaca }}</h3>
                 </div>
-            </div>
+            </a>
 
             <!-- Kartu 4: Progres Al-Quran -->
-            <div class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg transition-shadow border border-slate-100 overflow-hidden">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#1e3a6e]" fill="currentColor" viewBox="-32 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M448 358.4V25.6c0-16-9.6-25.6-25.6-25.6H96C41.6 0 0 41.6 0 96v320c0 54.4 41.6 96 96 96h326.4c12.8 0 25.6-9.6 25.6-25.6v-16c0-6.4-3.2-12.8-9.6-19.2-3.2-16-3.2-60.8 0-73.6 6.4-3.2 9.6-9.6 9.6-19.2zM301.08 145.82c.6-1.21 1.76-1.82 2.92-1.82s2.32.61 2.92 1.82l11.18 22.65 25 3.63c2.67.39 3.74 3.67 1.81 5.56l-18.09 17.63 4.27 24.89c.36 2.11-1.31 3.82-3.21 3.82-.5 0-1.02-.12-1.52-.38L304 211.87l-22.36 11.75c-.5.26-1.02.38-1.52.38-1.9 0-3.57-1.71-3.21-3.82l4.27-24.89-18.09-17.63c-1.94-1.89-.87-5.17 1.81-5.56l24.99-3.63 11.19-22.65zm-57.89-69.01c13.67 0 27.26 2.49 40.38 7.41a6.775 6.775 0 1 1-2.38 13.12c-.67 0-3.09-.21-4.13-.21-52.31 0-94.86 42.55-94.86 94.86 0 52.3 42.55 94.86 94.86 94.86 1.03 0 3.48-.21 4.13-.21 3.93 0 6.8 3.14 6.8 6.78 0 2.98-1.94 5.51-4.62 6.42-13.07 4.87-26.59 7.34-40.19 7.34C179.67 307.19 128 255.51 128 192c0-63.52 51.67-115.19 115.19-115.19zM380.8 448H96c-19.2 0-32-12.8-32-32s16-32 32-32h284.8v64z"/></svg>
+            <a href="{{ route('murid.quran') }}" class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg hover:border-blue-200 transition-all border border-slate-100 overflow-hidden group block">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-[#1e3a6e] group-hover:text-white transition-colors text-[#1e3a6e]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="-32 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M448 358.4V25.6c0-16-9.6-25.6-25.6-25.6H96C41.6 0 0 41.6 0 96v320c0 54.4 41.6 96 96 96h326.4c12.8 0 25.6-9.6 25.6-25.6v-16c0-6.4-3.2-12.8-9.6-19.2-3.2-16-3.2-60.8 0-73.6 6.4-3.2 9.6-9.6 9.6-19.2zM301.08 145.82c.6-1.21 1.76-1.82 2.92-1.82s2.32.61 2.92 1.82l11.18 22.65 25 3.63c2.67.39 3.74 3.67 1.81 5.56l-18.09 17.63 4.27 24.89c.36 2.11-1.31 3.82-3.21 3.82-.5 0-1.02-.12-1.52-.38L304 211.87l-22.36 11.75c-.5.26-1.02.38-1.52.38-1.9 0-3.57-1.71-3.21-3.82l4.27-24.89-18.09-17.63c-1.94-1.89-.87-5.17 1.81-5.56l24.99-3.63 11.19-22.65zm-57.89-69.01c13.67 0 27.26 2.49 40.38 7.41a6.775 6.775 0 1 1-2.38 13.12c-.67 0-3.09-.21-4.13-.21-52.31 0-94.86 42.55-94.86 94.86 0 52.3 42.55 94.86 94.86 94.86 1.03 0 3.48-.21 4.13-.21 3.93 0 6.8 3.14 6.8 6.78 0 2.98-1.94 5.51-4.62 6.42-13.07 4.87-26.59 7.34-40.19 7.34C179.67 307.19 128 255.51 128 192c0-63.52 51.67-115.19 115.19-115.19zM380.8 448H96c-19.2 0-32-12.8-32-32s16-32 32-32h284.8v64z"/></svg>
                 </div>
                 <div class="w-full overflow-hidden">
-                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate">Catatan Terakhir</p>
+                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate flex items-center justify-between">
+                        <span>Catatan Terakhir</span>
+                        <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors hidden sm:inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </p>
                     <h3 class="text-sm font-bold text-slate-800 truncate" title="{{ $surahTerakhir }}">{{ $surahTerakhir }}</h3>
                 </div>
-            </div>
+            </a>
 
             @if(strtolower($user->agama) == 'islam')
             <!-- Kartu 5: Status Sholat -->
-            <div class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg transition-shadow border border-slate-100 overflow-hidden lg:col-span-1">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#1e3a6e]" fill="currentColor" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg"><path d="M40-120v-491q-18-11-29-28.5T0-680q0-23 24-56t56-64q32 31 56 64t24 56q0 23-11 40.5T120-611v171h80v-80q0-25 16-48t46-30q-11-17-16.5-37t-5.5-41q0-40 19-74t51-56l170-114 170 114q32 22 51 56t19 74q0 21-5.5 41T698-598q30 7 46 30t16 48v80h80v-171q-18-11-29-28.5T800-680q0-23 24-56t56-64q32 31 56 64t24 56q0 23-11 40.5T920-611v491H520v-160q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280v160H40Zm356-480h168q32 0 54-22t22-54q0-20-9-36.5T606-740l-126-84-126 84q-16 11-25 27.5t-9 36.5q0 32 22 54t54 22ZM120-200h240v-80q0-50 35-85t85-35q50 0 85 35t35 85v80h240v-160H680v-160H280v160H120v160Zm360-320Zm0-80Zm0 2Z"/></svg>
+            <a href="{{ route('murid.sholat') }}" class="bg-white rounded-xl shadow-md p-3 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:shadow-lg hover:border-blue-200 transition-all border border-slate-100 overflow-hidden lg:col-span-1 group block">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-[#1e3a6e] group-hover:text-white transition-colors text-[#1e3a6e]">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="-960 0 960 960" xmlns="http://www.w3.org/2000/svg"><path d="M40-120v-491q-18-11-29-28.5T0-680q0-23 24-56t56-64q32 31 56 64t24 56q0 23-11 40.5T120-611v171h80v-80q0-25 16-48t46-30q-11-17-16.5-37t-5.5-41q0-40 19-74t51-56l170-114 170 114q32 22 51 56t19 74q0 21-5.5 41T698-598q30 7 46 30t16 48v80h80v-171q-18-11-29-28.5T800-680q0-23 24-56t56-64q32 31 56 64t24 56q0 23-11 40.5T920-611v491H520v-160q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280v160H40Zm356-480h168q32 0 54-22t22-54q0-20-9-36.5T606-740l-126-84-126 84q-16 11-25 27.5t-9 36.5q0 32 22 54t54 22ZM120-200h240v-80q0-50 35-85t85-35q50 0 85 35t35 85v80h240v-160H680v-160H280v160H120v160Zm360-320Zm0-80Zm0 2Z"/></svg>
                 </div>
                 <div class="w-full overflow-hidden">
-                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate">Absen Sholat Hari Ini</p>
+                    <p class="text-[11px] sm:text-sm text-slate-500 font-medium truncate flex items-center justify-between">
+                        <span>Absen Sholat Hari Ini</span>
+                        <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors hidden sm:inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </p>
                     @php
                         $colorClass = 'text-slate-800';
                         if ($statusSholatStr == 'Sudah Absen') $colorClass = 'text-green-600';
@@ -184,7 +218,7 @@ $dailyQuote = $quotes[date('z') % count($quotes)];
                     @endphp
                     <h3 class="text-sm sm:text-lg font-bold truncate {{ $colorClass }}">{{ $statusSholatStr }}</h3>
                 </div>
-            </div>
+            </a>
             @endif
 
             <!-- Kartu Info (Hanya Mobile) -->

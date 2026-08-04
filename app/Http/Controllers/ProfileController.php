@@ -87,20 +87,47 @@ class ProfileController extends Controller
             return Redirect::route('profile.edit')->with('success', 'Profil berhasil diperbarui!');
         }
 
-        // ── Non-siswa (Guru, Admin, dll) ────────────────────────────
-        $request->user()->fill($request->validate([
-            'name'  => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255',
-                        Rule::unique('users')->ignore($user->id)],
-        ]));
+        // ── Non-siswa (Guru, Admin, Pengawas, Kurikulum, dll) ───────────────
+        $nomorIndukLabel = match ($user->role) {
+            'guru'      => 'NIP',
+            'admin'     => 'ID Admin',
+            'pengawas'  => 'ID Pengawas',
+            'kurikulum' => 'ID Kurikulum',
+            default     => 'ID / Nomor Induk',
+        };
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $validated = $request->validate([
+            'name'        => ['required', 'string', 'max:255'],
+            'nomor_induk' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'nomor_induk')->ignore($user->id),
+            ],
+            'email'       => [
+                'nullable',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+        ], [
+            'name.required'        => 'Nama lengkap wajib diisi.',
+            'nomor_induk.required' => "{$nomorIndukLabel} wajib diisi.",
+            'nomor_induk.unique'   => "{$nomorIndukLabel} ini sudah digunakan oleh akun lain.",
+            'email.unique'         => 'Alamat email ini sudah digunakan oleh akun lain.',
+        ]);
+
+        $user->fill($validated);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated')->with('success', 'Profil berhasil diperbarui!');
     }
 
 }

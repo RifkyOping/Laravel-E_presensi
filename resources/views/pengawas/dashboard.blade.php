@@ -17,8 +17,13 @@
                         {{ Carbon::now()->translatedFormat('l, d F Y') }}
                     </p>
                 </div>
-                <div class="flex flex-col items-start sm:items-end gap-1 shrink-0">
-                    <span class="text-white/40 text-xs uppercase tracking-widest font-bold">Pengawas</span>
+                <div class="flex flex-col items-start sm:items-end gap-1.5 shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-white/40 text-xs uppercase tracking-widest font-bold">Pengawas</span>
+                        <span class="bg-black/20 text-blue-100 text-xs font-semibold px-2.5 py-0.5 rounded backdrop-blur-sm border border-white/10 flex items-center gap-1">
+                            ID: {{ Auth::user()->nomor_induk ?? '-' }}
+                        </span>
+                    </div>
                     <span class="text-white text-sm font-semibold">E-Presensi {{ \App\Models\SchoolSetting::get()->nama_sekolah }}</span>
                 </div>
             </div>
