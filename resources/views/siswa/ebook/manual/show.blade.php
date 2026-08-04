@@ -7,7 +7,7 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <span class="text-sm font-bold text-slate-800">Detail Buku Manual</span>
+            <span class="text-sm font-bold text-slate-800">Detail Buku Cetak</span>
         </div>
     </x-slot>
 

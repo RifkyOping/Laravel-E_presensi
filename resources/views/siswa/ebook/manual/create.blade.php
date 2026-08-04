@@ -7,7 +7,7 @@
                 </svg>
             </a>
             <span class="text-slate-300">/</span>
-            <span class="text-sm font-bold text-slate-800">Upload Buku Manual Level {{ $level }}</span>
+            <span class="text-sm font-bold text-slate-800">Upload Buku Cetak Level {{ $level }}</span>
         </div>
     </x-slot>
 
@@ -15,8 +15,8 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-slate-200">
                 <div class="p-6 text-slate-800">
-                    <h3 class="text-xl font-black mb-4">Form Upload Buku Manual</h3>
-                    <p class="text-sm text-slate-500 mb-6">Isilah data buku fisik yang telah Anda baca dengan lengkap dan benar.</p>
+                    <h3 class="text-xl font-black mb-4">Form Upload Buku Cetak</h3>
+                    <p class="text-sm text-slate-500 mb-6">Isilah data buku cetak yang telah Anda baca dengan lengkap dan benar.</p>
 
                     <form action="{{ route('ebook.manual.store', $level) }}" method="POST" enctype="multipart/form-data">
                         @csrf

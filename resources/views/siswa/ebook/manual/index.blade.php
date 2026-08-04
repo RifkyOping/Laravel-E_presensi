@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2">
-            <span class="text-sm font-bold text-slate-800">Buku Manual</span>
+            <span class="text-sm font-bold text-slate-800">Buku Cetak</span>
         </div>
     </x-slot>
 
@@ -29,8 +29,8 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <h2 class="text-xl font-black text-slate-800">Buku Manual</h2>
-            <p class="text-sm text-slate-400 mt-0.5">Upload data buku fisik yang telah Anda baca, isi indikatornya untuk menyelesaikan level.</p>
+            <h2 class="text-xl font-black text-slate-800">Buku Cetak</h2>
+            <p class="text-sm text-slate-400 mt-0.5">Upload data buku cetak yang telah Anda baca, isi indikatornya untuk menyelesaikan level.</p>
         </div>
     </div>
 

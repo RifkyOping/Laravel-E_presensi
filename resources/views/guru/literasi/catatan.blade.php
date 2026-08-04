@@ -26,7 +26,7 @@
                     </div>
                     Filter Murid
                 </h2>
-                <p class="text-sm text-slate-500 mb-5 ml-7">Pantau perkembangan bacaan buku digital maupun manual murid.</p>
+                <p class="text-sm text-slate-500 mb-5 ml-7">Pantau perkembangan bacaan buku digital maupun cetak murid.</p>
             </div>
 
             {{-- Mobile Button (Visible only on Mobile) --}}
@@ -66,7 +66,7 @@
                                        focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/20 focus:border-[#1e3a6e] transition cursor-pointer">
                             <option value="">-- Semua Buku --</option>
                             <option value="digital" {{ request('jenis') == 'digital' ? 'selected' : '' }}>Buku Digital</option>
-                            <option value="manual" {{ request('jenis') == 'manual' ? 'selected' : '' }}>Buku Manual</option>
+                            <option value="manual" {{ request('jenis') == 'manual' ? 'selected' : '' }}>Buku Cetak</option>
                         </select>
                     </div>
 
@@ -123,7 +123,7 @@
                             @else
                                 <span
                                     class="inline-flex items-center px-2 py-0.5 rounded text-[0.65rem] font-bold bg-emerald-100 text-emerald-800">
-                                    Manual
+                                    Cetak
                                 </span>
                             @endif
                         </div>

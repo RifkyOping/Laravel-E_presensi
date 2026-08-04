@@ -111,7 +111,7 @@ class BukuManualController extends Controller
             'status_selesai' => false,
         ]);
 
-        return redirect()->route('ebook.manual.index')->with('success', 'Buku Manual berhasil diupload. Silakan baca dan isi pertanyaan indikator.');
+        return redirect()->route('ebook.manual.index')->with('success', 'Buku Cetak berhasil diupload. Silakan baca dan isi pertanyaan indikator.');
     }
 
     public function show($id)

@@ -22,13 +22,14 @@ class AbsensiMengajarController extends Controller
             : Carbon::today()->format('Y-m-d');
 
         // Daftar hari ini (selalu hari ini untuk widget atas)
-        $hariIni = AbsensiMengajar::where('user_id', $user->id)
+        $hariIni = AbsensiMengajar::with('verifier')
+            ->where('user_id', $user->id)
             ->whereDate('tanggal', Carbon::today())
             ->orderBy('jam_ke')
             ->get();
 
         // Query Riwayat
-        $riwayatQuery = AbsensiMengajar::where('user_id', $user->id);
+        $riwayatQuery = AbsensiMengajar::with('verifier')->where('user_id', $user->id);
         
         if (!empty($tanggalRiwayat)) {
             $riwayatQuery->whereDate('tanggal', $tanggalRiwayat);

@@ -58,6 +58,113 @@
             </div>
         </div>
 
+        {{-- Verifikasi Status Card jika sudah diverifikasi --}}
+        @if($aktivitas->status_verifikasi || $aktivitas->verified_at)
+        <div class="rounded-2xl border {{ $aktivitas->status_verifikasi === 'mengajar' ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40' }} p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b {{ $aktivitas->status_verifikasi === 'mengajar' ? 'border-emerald-200/70' : 'border-rose-200/70' }}">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl {{ $aktivitas->status_verifikasi === 'mengajar' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white' }} flex items-center justify-center font-black shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-black text-sm uppercase tracking-wider {{ $aktivitas->status_verifikasi === 'mengajar' ? 'text-emerald-950' : 'text-rose-950' }}">
+                                Hasil Verifikasi Mengajar
+                            </h3>
+                            @if($aktivitas->status_verifikasi === 'mengajar')
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                    Terverifikasi Mengajar
+                                </span>
+                            @elseif($aktivitas->status_verifikasi === 'tidak_mengajar')
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                    Terverifikasi Tidak Mengajar
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-xs {{ $aktivitas->status_verifikasi === 'mengajar' ? 'text-emerald-700' : 'text-rose-700' }} font-medium mt-0.5">
+                            Diverifikasi oleh <span class="font-bold">{{ $aktivitas->verifier?->name ?? 'Petugas Verifikasi' }}</span>
+                            @if($aktivitas->verified_at)
+                                pada {{ Carbon::parse($aktivitas->verified_at)->translatedFormat('d F Y, H:i') }} WITA
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-white/80 border border-slate-200 px-3 py-1 rounded-lg self-start sm:self-auto shadow-2xs">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Hanya Lihat (Read-only)
+                </span>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 {{ $aktivitas->foto_verifikasi ? 'md:grid-cols-12' : '' }} gap-3.5 items-stretch text-left">
+                {{-- Catatan --}}
+                <div class="{{ $aktivitas->foto_verifikasi ? 'md:col-span-7 lg:col-span-8' : 'w-full' }} flex flex-col text-left">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1.5 text-left">
+                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                        <span>Catatan Petugas :</span>
+                    </p>
+                    <div class="flex-1 bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-2xs text-left">
+                        <p class="text-sm text-slate-800 font-medium leading-relaxed whitespace-pre-line text-left break-words">{{ trim($aktivitas->catatan_kurikulum) ?: 'Tidak ada catatan khusus.' }}</p>
+                    </div>
+                </div>
+
+                {{-- Foto Verifikasi --}}
+                @if($aktivitas->foto_verifikasi)
+                <div class="md:col-span-5 lg:col-span-4 flex flex-col text-left" x-data="{ showImgModal: false }">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1.5 text-left">
+                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>Foto Bukti :</span>
+                    </p>
+                    <div class="flex-1 bg-white rounded-xl p-3 border border-slate-200/80 shadow-2xs flex items-center gap-3 text-left">
+                        <button type="button" @click="showImgModal = true"
+                            class="group relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 shrink-0 focus:outline-none focus:ring-2 focus:ring-[#1e3a6e] bg-slate-100 cursor-pointer">
+                            <img src="{{ Storage::url($aktivitas->foto_verifikasi) }}" alt="Foto Bukti Verifikasi" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                            </div>
+                        </button>
+                        <div class="text-xs text-left">
+                            <p class="font-bold text-slate-800">Foto Kegiatan</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Bukti lapangan</p>
+                            <button type="button" @click="showImgModal = true" class="mt-1.5 text-[#1e3a6e] font-bold hover:underline inline-flex items-center gap-1 cursor-pointer">
+                                <span>Perbesar Foto</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Modal Perbesar Foto dengan Teleport --}}
+                    <template x-teleport="body">
+                        <div x-show="showImgModal" 
+                             x-transition:enter="transition ease-out duration-200" 
+                             x-transition:enter-start="opacity-0" 
+                             x-transition:enter-end="opacity-100" 
+                             x-transition:leave="transition ease-in duration-150" 
+                             x-transition:leave-start="opacity-100" 
+                             x-transition:leave-end="opacity-0" 
+                             @keydown.escape.window="showImgModal = false"
+                             class="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md" 
+                             style="display: none;">
+                            <div class="fixed inset-0" @click="showImgModal = false"></div>
+                            <div class="relative z-10 max-w-4xl w-full max-h-[90vh] flex flex-col items-center">
+                                <button type="button" @click="showImgModal = false" 
+                                        class="absolute -top-12 right-0 text-white hover:text-slate-200 font-bold text-xs sm:text-sm flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-1.5 rounded-full transition shadow-lg cursor-pointer">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    <span>Tutup</span>
+                                </button>
+                                <div class="bg-black/40 rounded-2xl overflow-hidden border border-white/20 shadow-2xl p-2">
+                                    <img src="{{ Storage::url($aktivitas->foto_verifikasi) }}" alt="Foto Bukti Verifikasi" class="max-w-full max-h-[78vh] rounded-xl object-contain mx-auto block shadow-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         {{-- Alert --}}
         @if(session('error'))
             <div class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-5 py-3.5 rounded-xl text-sm font-semibold">
@@ -349,7 +456,7 @@
                     {{-- Footer Submit --}}
                     <div class="px-6 py-5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p class="text-sm text-slate-500 font-medium">
-                            Pastikan semua status sudah benar sebelum menyimpan. <strong>Absensi tidak dapat diubah setelah disimpan.</strong>
+                            Pastikan semua status sudah benar sebelum menyimpan.
                         </p>
                         <button type="submit"
                             onclick="confirmSubmit(event, this.form)"
@@ -391,7 +498,7 @@
                     e.preventDefault();
                     Swal.fire({
                         title: 'Simpan Absensi?',
-                        text: 'Pastikan semua status sudah benar. Data tidak dapat diubah setelah disimpan.',
+                        text: 'Pastikan semua status sudah benar.',
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#1e3a6e',

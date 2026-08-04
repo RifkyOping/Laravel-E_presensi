@@ -180,7 +180,7 @@
             <label for="catatan_kurikulum" class="app-label">
                 <span class="flex items-center gap-1.5">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                    Catatan Kurikulum <span class="text-red-500">*</span>
+                    Catatan <span class="text-red-500">*</span>
                     <span class="normal-case font-normal text-slate-400 ml-1">(wajib diisi)</span>
                 </span>
             </label>

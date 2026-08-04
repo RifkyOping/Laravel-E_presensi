@@ -54,7 +54,7 @@ class IndikatorLiterasiController extends Controller
                 return redirect()->route('ebook.index')->with('success', 'Selamat, Anda telah menyelesaikan buku ini.');
             } else {
                 $buku->update(['status_selesai' => true]);
-                return redirect()->route('ebook.manual.index')->with('success', 'Selamat, Anda telah menyelesaikan buku manual ini.');
+                return redirect()->route('ebook.manual.index')->with('success', 'Selamat, Anda telah menyelesaikan buku cetak ini.');
             }
         }
 
@@ -114,7 +114,7 @@ class IndikatorLiterasiController extends Controller
             return redirect()->route('ebook.index')->with('success', 'Jawaban indikator berhasil disimpan. Anda telah menyelesaikan buku ini.');
         } else {
             $buku->update(['status_selesai' => true]);
-            return redirect()->route('ebook.manual.index')->with('success', 'Jawaban indikator berhasil disimpan. Anda telah menyelesaikan buku manual ini.');
+            return redirect()->route('ebook.manual.index')->with('success', 'Jawaban indikator berhasil disimpan. Anda telah menyelesaikan buku cetak ini.');
         }
     }
 }

@@ -140,40 +140,6 @@
                 <div id="siswa-{{ $siswa->id }}" class="hidden border-t border-slate-100">
                     <div class="p-6 space-y-5">
 
-                        {{-- Kartu Profil Murid --}}
-                        <div class="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl border border-blue-100 p-5">
-                            <h4 class="text-xs font-black text-[#1e3a6e] uppercase tracking-wide mb-4 flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                Profil Murid
-                            </h4>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                                @php
-                                    $profilItems = [
-                                        ['label' => 'Nama Lengkap',      'value' => $siswa->name],
-                                        ['label' => 'NISN',              'value' => $siswa->nomor_induk ?? '-'],
-                                        ['label' => 'Kelas - Jurusan',   'value' => ($siswa->kelas && $siswa->jurusan) ? $siswa->kelas . ' ' . $siswa->jurusan . ' ' . $siswa->rombel : ($siswa->kelas ?? '-')],
-                                        ['label' => 'Jenis Kelamin',     'value' => $siswa->jenis_kelamin_lengkap],
-                                        ['label' => 'Tempat, Tgl Lahir', 'value' => $siswa->tempat_tanggal_lahir],
-                                        ['label' => 'Agama',             'value' => $siswa->agama ?? '-'],
-                                        ['label' => 'Email',             'value' => $siswa->email],
-                                    ];
-                                @endphp
-                                @foreach($profilItems as $item)
-                                <div>
-                                    <p class="text-[.6rem] font-black text-[#1e3a6e]/60 uppercase tracking-widest mb-0.5">
-                                        {{ $item['label'] }}
-                                    </p>
-                                    <p class="text-xs font-semibold text-slate-700 leading-snug">
-                                        {{ $item['value'] }}
-                                    </p>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-
                         {{-- Form Tambah Catatan --}}
                         <div class="bg-slate-50 rounded-xl border border-slate-200 p-4">
                             <h4 class="text-xs font-black text-slate-600 uppercase tracking-wide mb-3 flex items-center gap-2">

@@ -99,6 +99,8 @@ class AbsensiKelasController extends Controller
             'jam_selesai'    => $jadwal->jam_selesai,
         ]);
 
+        $aktivitas->load('verifier');
+
         return view('guru.absen-kelas.show', compact(
             'jadwal', 'siswas', 'absensiHariIni', 'sudahDiabsen', 'today', 'aktivitas'
         ));
