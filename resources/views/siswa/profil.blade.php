@@ -137,15 +137,25 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         <div>
                             <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
-                                Nomor Induk / NISN
+                                NISN
                                 <span class="text-slate-300 font-normal normal-case ml-1">(admin)</span>
                             </label>
                             <div
                                 class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
                                 {{ $siswa->nomor_induk ?? '—' }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
+                                NIS
+                                <span class="text-slate-300 font-normal normal-case ml-1">(admin)</span>
+                            </label>
+                            <div
+                                class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-slate-400 text-sm font-medium cursor-not-allowed select-none">
+                                {{ $siswa->siswaProfile?->nis ?? '—' }}
                             </div>
                         </div>
                         <div>

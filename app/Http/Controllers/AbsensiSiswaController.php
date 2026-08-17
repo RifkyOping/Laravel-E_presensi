@@ -41,8 +41,8 @@ class AbsensiSiswaController extends Controller
                 'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
                 'text' => $isApproved
                     ? 'Pengajuan izin/sakit Anda telah disetujui.'
-                    : 'Pengajuan izin/sakit Anda ditolak, sehingga status Anda menjadi Alpa.' . ($notif->alasan_ditolak ? ' Alasan penolakan: ' . $notif->alasan_ditolak : ''),
-                'icon' => $isApproved ? 'success' : 'error'
+                    : 'Pengajuan izin/sakit Anda ditolak. Silakan melakukan absensi sekolah biasa hari ini.' . ($notif->alasan_ditolak ? '<br><br><strong>Alasan:</strong> ' . e($notif->alasan_ditolak) : ''),
+                'icon' => $isApproved ? 'success' : 'warning'
             ]);
 
             // Mark all as notified to avoid repeated popups
@@ -53,7 +53,7 @@ class AbsensiSiswaController extends Controller
 
         $sedangMasaSakitIzin = false;
         $jenisMasaAktif = null; // 'sakit' atau 'izin'
-        if ($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin'])) {
+        if ($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']) && $absensiHariIni->status_pengajuan === 'approved') {
             $sedangMasaSakitIzin = true;
             $jenisMasaAktif = $absensiHariIni->status;
         } elseif (!$absensiHariIni) {
@@ -71,7 +71,7 @@ class AbsensiSiswaController extends Controller
                     ->whereDate('tanggal', '<', $today)
                     ->orderByDesc('tanggal')
                     ->first();
-                if ($lastAbsen && $lastAbsen->status === 'sakit') {
+                if ($lastAbsen && $lastAbsen->status === 'sakit' && $lastAbsen->status_pengajuan === 'approved') {
                     $sedangMasaSakitIzin = true;
                     $jenisMasaAktif = 'sakit';
                 }
@@ -171,15 +171,22 @@ class AbsensiSiswaController extends Controller
 
             $existing = AbsensiSiswa::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
             if ($existing) {
-                if (in_array($existing->status, ['sakit', 'izin'])) {
+                if (in_array($existing->status, ['sakit', 'izin']) || $existing->status_pengajuan === 'rejected' || !$existing->waktu_datang) {
+                    $pesan = ($existing->status_pengajuan === 'rejected')
+                        ? 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.'
+                        : (in_array($existing->status, ['sakit', 'izin'])
+                            ? 'Masa Sakit/Izin dihentikan. Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.'
+                            : 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
+
                     $existing->update([
                         'status' => 'hadir',
                         'waktu_datang' => now()->format('H:i:s'),
                         'keterangan' => null,
                         'file_bukti' => null,
                         'status_pengajuan' => null,
+                        'alasan_ditolak' => null,
                     ]);
-                    return back()->with('success', 'Masa Sakit/Izin dihentikan. Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
+                    return back()->with('success', $pesan);
                 }
                 return back()->with('error', 'Anda sudah melakukan absen hari ini.');
             }

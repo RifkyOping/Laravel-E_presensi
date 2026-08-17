@@ -1,5 +1,7 @@
 <x-app-layout>
-    <x-slot name="title">Persetujuan RPP Guru</x-slot>
+    <x-slot name="header">
+        <span class="text-sm font-bold text-slate-800">Persetujuan RPP Guru</span>
+    </x-slot>
 
     @php
         $pageTitle    = 'Persetujuan RPP';
@@ -9,25 +11,19 @@
     <div class="space-y-6">
         {{-- Header & Filter --}}
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div class="w-full md:w-auto text-center md:text-left">
+            <div class="w-full md:w-auto text-left">
                 <h2 class="font-bold text-slate-800 text-lg">Daftar RPP Guru</h2>
                 <p class="text-slate-500 text-sm">Menampilkan guru yang sudah mengunggah RPP</p>
             </div>
-            <form method="GET" action="{{ route('piket.persetujuan-rpp') }}" class="flex flex-row items-end gap-2 sm:gap-3 w-full md:w-auto">
+            <form id="filter-form" onsubmit="event.preventDefault();" class="flex flex-row items-end gap-2 sm:gap-3 w-full md:w-auto">
                 <div class="flex-1 min-w-0">
                     <label class="block text-[10px] sm:hidden font-black text-slate-500 uppercase tracking-wider mb-1">Status</label>
-                    <select name="status" class="w-full rounded-xl border border-slate-200 text-xs sm:text-sm focus:ring-[#1e3a6e] focus:border-[#1e3a6e] h-[34px] sm:h-[42px] px-2 sm:px-4 py-1.5 sm:py-2.5">
+                    <select name="status" onchange="filterData(this.value)" class="w-full rounded-xl border border-slate-200 text-xs sm:text-sm focus:ring-[#1e3a6e] focus:border-[#1e3a6e] h-[34px] sm:h-[42px] px-2 sm:px-4 py-1.5 sm:py-2.5">
                         <option value="">Semua Status</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
                         <option value="disetujui" {{ request('status') === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
                         <option value="ditolak" {{ request('status') === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
-                </div>
-                <div class="flex-shrink-0">
-                    <button type="submit" class="bg-[#1e3a6e] hover:bg-[#162d57] text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm h-[34px] sm:h-[42px] flex items-center justify-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span class="hidden sm:inline">Filter</span>
-                    </button>
                 </div>
             </form>
         </div>
@@ -43,7 +39,7 @@
         @endif
 
         {{-- Table --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div id="table-container" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             
             {{-- Mobile: Table View --}}
             <div class="block sm:hidden bg-white">
@@ -255,6 +251,47 @@
                     document.getElementById('form-reject-' + id).submit();
                 }
             });
+        }
+
+        async function filterData(status) {
+            const url = new URL(window.location.href);
+            if (status) {
+                url.searchParams.set('status', status);
+            } else {
+                url.searchParams.delete('status');
+            }
+            
+            // Perbarui URL di browser tanpa reload
+            window.history.pushState({}, '', url);
+
+            const tableContainer = document.getElementById('table-container');
+            if(tableContainer) {
+                tableContainer.style.opacity = '0.5';
+                tableContainer.style.pointerEvents = 'none';
+            }
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTableContainer = doc.getElementById('table-container');
+                
+                if (newTableContainer && tableContainer) {
+                    tableContainer.innerHTML = newTableContainer.innerHTML;
+                    tableContainer.style.opacity = '1';
+                    tableContainer.style.pointerEvents = 'auto';
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                if(tableContainer) {
+                    tableContainer.style.opacity = '1';
+                    tableContainer.style.pointerEvents = 'auto';
+                }
+            }
         }
     </script>
 </x-app-layout>

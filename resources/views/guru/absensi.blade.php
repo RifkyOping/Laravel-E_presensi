@@ -48,20 +48,17 @@
         <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
         {{-- GPS Status --}}
         <div class="relative z-10 mt-3 flex justify-center gap-3 flex-wrap">
-            @if($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']))
+            @if($absensiHariIni && $absensiHariIni->status_pengajuan === 'rejected' && !$absensiHariIni->waktu_datang && !$absensiHariIni->waktu_pulang)
+                <span class="bg-red-500/30 border border-red-400/40 text-red-100 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    Pengajuan {{ ucfirst($absensiHariIni->status) }} Ditolak &mdash; Silakan Lakukan Absensi
+                </span>
+            @elseif($absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas', 'sakit', 'izin']) && $absensiHariIni->status_pengajuan !== 'rejected')
                 <span class="bg-amber-500/20 border border-amber-500/30 text-amber-100 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
-                    @if($absensiHariIni->status === 'sakit')
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Status: Sakit
-                    @else
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Status: Izin
-                    @endif
-                    
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Status: {{ ucfirst($absensiHariIni->status) }}
                     @if($absensiHariIni->status_pengajuan === 'pending')
                         (Menunggu Konfirmasi)
-                    @elseif($absensiHariIni->status_pengajuan === 'ditolak')
-                        (Ditolak)
                     @else
                         (Disetujui)
                     @endif
@@ -89,6 +86,25 @@
             </button>
         </div>
     </div>
+
+    {{-- Alert jika pengajuan cuti/tugas ditolak dan belum absen --}}
+    @php
+        $isRejectedTodayGuru = $absensiHariIni && $absensiHariIni->status_pengajuan === 'rejected' && !$absensiHariIni->waktu_datang && !$absensiHariIni->waktu_pulang;
+    @endphp
+    @if($isRejectedTodayGuru)
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 text-amber-800 text-sm shadow-sm">
+        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div class="flex-1">
+            <p class="font-bold text-amber-900">Pengajuan Cuti/Tugas Anda Ditolak</p>
+            @if($absensiHariIni->alasan_ditolak)
+                <p class="text-xs text-amber-800 mt-1"><strong>Alasan Penolakan:</strong> {{ $absensiHariIni->alasan_ditolak }}</p>
+            @endif
+            <p class="text-xs text-amber-700 mt-1 font-medium">Anda masih dapat melakukan absensi sekolah biasa hari ini melalui tombol kehadiran di bawah.</p>
+        </div>
+    </div>
+    @endif
 
     {{-- Status Hari Ini --}}
     <div class="bg-white rounded-xl border border-slate-200 p-6">
@@ -161,12 +177,12 @@
                 <input type="hidden" name="longitude" id="lng-datang">
                 <input type="hidden" name="accuracy"  id="acc-datang">
                 <input type="hidden" name="timestamp" id="ts-datang">
-                <button type="button" id="btn-datang" onclick="confirmDatang('{{ $jenisMasaAktif ?? 'none' }}')"
-                        class="w-full {{ $sedangMasaCutiTugas ? 'bg-orange-600 hover:bg-orange-700' : 'bg-[#1e3a6e] hover:bg-[#162d57]' }} text-white font-bold py-3.5 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2">
+                <button type="button" id="btn-datang" onclick="confirmDatang('{{ ($sedangMasaCutiTugas && !$isRejectedTodayGuru) ? ($jenisMasaAktif ?? 'none') : 'none' }}')"
+                        class="w-full {{ ($sedangMasaCutiTugas && !$isRejectedTodayGuru) ? 'bg-orange-600 hover:bg-orange-700' : 'bg-[#1e3a6e] hover:bg-[#162d57]' }} text-white font-bold py-3.5 rounded-xl text-sm transition duration-200 shadow-sm flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 hidden" id="spin-datang" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    @if($sedangMasaCutiTugas)
+                    @if($sedangMasaCutiTugas && !$isRejectedTodayGuru)
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         {{ $labelBatalkanGuru }}
                     @else
@@ -180,10 +196,19 @@
         {{-- Pulang --}}
         <div class="bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-5 hover:border-[#1e3a6e]/40 hover:shadow-md transition-all duration-200">
             <div>
-                <div class="w-8 h-1 rounded-full bg-slate-300 mb-4"></div>
+                <div class="w-8 h-1 rounded-full {{ $absensiHariIni && $absensiHariIni->waktu_pulang ? 'bg-green-500' : 'bg-[#1e3a6e]' }} mb-4"></div>
                 <h3 class="text-lg font-black text-slate-800">Absen Pulang</h3>
                 <p class="text-sm text-slate-500 mt-1">Catat kehadiran saat jam sekolah usai.</p>
             </div>
+            @if($absensiHariIni && $absensiHariIni->waktu_pulang)
+            <div class="mt-auto flex items-center gap-3 bg-blue-50 border border-blue-100 text-[#1e3a6e] font-bold px-5 py-3.5 rounded-xl text-sm">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Sudah tercatat pukul {{ Carbon::parse($absensiHariIni->waktu_pulang)->format('H:i') }} WITA
+            </div>
+            @else
+            @php
+                $isCutiTugasApproved = $absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas', 'sakit', 'izin']) && $absensiHariIni->status_pengajuan === 'approved';
+            @endphp
             <form method="POST" action="{{ route('guru.absensi.pulang') }}" class="mt-auto" id="form-pulang">
                 @csrf
                 <input type="hidden" name="latitude"  id="lat-pulang">
@@ -191,25 +216,20 @@
                 <input type="hidden" name="accuracy"  id="acc-pulang">
                 <input type="hidden" name="timestamp" id="ts-pulang">
                 <button type="button" id="btn-pulang" onclick="submitAbsen('pulang')"
-                        {{ ($absensiHariIni && ($absensiHariIni->waktu_pulang || in_array($absensiHariIni->status, ['sakit', 'izin']))) || !$absensiHariIni || !$absensiHariIni->waktu_datang ? 'disabled' : '' }}
+                        {{ $isCutiTugasApproved ? 'disabled' : '' }}
                         class="w-full border border-[#1e3a6e] text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-bold py-3.5 rounded-xl text-sm transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-transparent disabled:hover:text-slate-400 flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 hidden" id="spin-pulang" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    @if($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']))
+                    @if($isCutiTugasApproved)
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Sedang {{ ucfirst($absensiHariIni->status) }}
-                    @elseif($absensiHariIni && $absensiHariIni->waktu_pulang)
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Sudah Absen Pulang
-                    @elseif(!$absensiHariIni || !$absensiHariIni->waktu_datang)
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Absen Datang Dulu
                     @else
                         Hadir — Pulang Sekolah
                     @endif
                 </button>
             </form>
+            @endif
         </div>
 
     </div>
@@ -569,12 +589,12 @@ function requestGPS() {
         updateGpsStatus(true, 'Lokasi terverifikasi (akurasi ±' + Math.round(acc) + 'm)');
     }
 
-    // Timeout pengaman (maksimal 6 detik untuk menyelesaikan sampling)
+    // Timeout pengaman (maksimal 15 detik untuk menyelesaikan sampling)
     sampleTimeout = setTimeout(function() {
         if (!gpsReady && gpsSamples.length > 0) {
             evaluateSamples(true);
         }
-    }, 6000);
+    }, 15000);
 
     watchId = navigator.geolocation.watchPosition(
         function(pos) {
@@ -599,7 +619,7 @@ function requestGPS() {
                 : 'GPS tidak tersedia: ' + err.message;
             updateGpsStatus(false, msg);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
     );
 }
 

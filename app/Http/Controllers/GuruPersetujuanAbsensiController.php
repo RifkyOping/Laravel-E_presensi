@@ -59,11 +59,10 @@ class GuruPersetujuanAbsensiController extends Controller
 
         $pengajuan->update([
             'status_pengajuan' => 'rejected',
-            'status'           => 'alpa',
             'alasan_ditolak'   => $request->alasan,
             'is_notified'      => false,
         ]);
 
-        return back()->with('success', 'Pengajuan ditolak. Status kehadiran diubah menjadi Alpa.');
+        return back()->with('success', 'Pengajuan ditolak. Murid masih dapat melakukan absen sekolah biasa.');
     }
 }

@@ -42,26 +42,37 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Cek apakah Nomor Induk/NIP terdaftar
-        $user = \App\Models\User::where('nomor_induk', $this->input('nomor_induk'))->first();
+        // Cek apakah input adalah Nomor Induk/NIP/NISN di tabel users
+        $inputNomorInduk = $this->input('nomor_induk');
+        $user = \App\Models\User::where('nomor_induk', $inputNomorInduk)->first();
+
+        // Jika tidak ditemukan di tabel users, cek apakah itu NIS di tabel siswa_profiles
+        if (!$user) {
+            $profile = \App\Models\SiswaProfile::where('nis', $inputNomorInduk)->first();
+            if ($profile) {
+                $user = $profile->user;
+            }
+        }
 
         if (!$user) {
-            // Nomor Induk/NIP tidak ditemukan sama sekali
+            // Nomor Induk/NIP/NIS tidak ditemukan sama sekali
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'nomor_induk' => 'Nomor Induk/NIP tidak terdaftar.',
+                'nomor_induk' => 'Nomor Induk/NIP/NISN/NIS tidak terdaftar.',
             ]);
         }
 
-        // Akun ditemukan, cek password (selalu gunakan remember=true agar sesi tidak mudah habis)
-        if (!Auth::attempt($this->only('nomor_induk', 'password'), true)) {
+        // Akun ditemukan, cek password
+        if (!\Illuminate\Support\Facades\Hash::check($this->input('password'), $user->password)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
                 'password' => 'Kata sandi yang Anda masukkan salah.',
             ]);
         }
+
+        Auth::login($user, true); // always remember=true
 
         RateLimiter::clear($this->throttleKey());
     }

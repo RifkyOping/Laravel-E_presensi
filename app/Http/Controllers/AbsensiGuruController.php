@@ -54,7 +54,7 @@ class AbsensiGuruController extends Controller
         }
         $sedangMasaCutiTugas = false;
         $jenisMasaAktif = null; // 'cuti' atau 'tugas'
-        if ($absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas'])) {
+        if ($absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas']) && $absensiHariIni->status_pengajuan === 'approved') {
             $sedangMasaCutiTugas = true;
             $jenisMasaAktif = $absensiHariIni->status;
         } elseif (!$absensiHariIni) {
@@ -158,14 +158,30 @@ class AbsensiGuruController extends Controller
             }
 
             $kategori = 'tepat waktu';
-            $jadwal = \App\Models\JadwalAbsensi::where('hari', \Carbon\Carbon::parse($today)->translatedFormat('l'))->first();
-            if ($jadwal && now()->format('H:i:s') > \Carbon\Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i:s')) {
+            $hariMap = [
+                'Monday' => 'Senin',
+                'Tuesday' => 'Selasa',
+                'Wednesday' => 'Rabu',
+                'Thursday' => 'Kamis',
+                'Friday' => 'Jumat',
+                'Saturday' => 'Sabtu',
+                'Sunday' => 'Minggu'
+            ];
+            $hariIni = $hariMap[Carbon::now()->format('l')] ?? 'Senin';
+            $jadwal = \App\Models\JadwalAbsensi::where('hari', $hariIni)->first();
+            if ($jadwal && now()->format('H:i:s') > Carbon::parse($jadwal->batas_waktu_terlambat)->format('H:i:s')) {
                 $kategori = 'terlambat';
             }
 
             $existing = AbsensiGuru::where('user_id', $user->id)->whereDate('tanggal', $today)->first();
             if ($existing) {
-                if (in_array($existing->status, ['cuti', 'tugas'])) {
+                if (in_array($existing->status, ['cuti', 'tugas']) || $existing->status_pengajuan === 'rejected' || !$existing->waktu_datang) {
+                    $pesan = ($existing->status_pengajuan === 'rejected')
+                        ? 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.'
+                        : (in_array($existing->status, ['cuti', 'tugas'])
+                            ? 'Masa Cuti/Tugas dihentikan. Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.'
+                            : 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
+
                     $existing->update([
                         'status' => 'hadir',
                         'waktu_datang' => now()->format('H:i:s'),
@@ -174,8 +190,9 @@ class AbsensiGuruController extends Controller
                         'file_bukti' => null,
                         'status_pengajuan' => null,
                         'judul_pengajuan' => null,
+                        'alasan_ditolak' => null,
                     ]);
-                    return back()->with('success', 'Masa Cuti/Tugas dihentikan. Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
+                    return back()->with('success', $pesan);
                 }
                 return back()->with('error', 'Anda sudah melakukan absen hari ini.');
             }
@@ -230,7 +247,7 @@ class AbsensiGuruController extends Controller
         $setting = SchoolSetting::get();
 
         // Cek Jadwal Buka/Tutup Absen
-        [$isOpen, $reason] = $setting->isAbsensiTerbuka('pulang');
+        [$isOpen, $reason] = $setting->isAbsensiTerbuka('pulang', 'hadir');
         if (!$isOpen) {
             return back()->with('error', $reason);
         }
@@ -273,28 +290,65 @@ class AbsensiGuruController extends Controller
             ->whereDate('tanggal', $today)
             ->first();
 
-        if (!$absensi) {
-            // Lupa absen datang
-            $absensi = AbsensiGuru::create([
-                'user_id' => $user->id,
-                'tanggal' => $today,
-                'status' => 'hadir',
-                'kategori' => 'terlambat',
-            ]);
-        } elseif (!$absensi->waktu_datang) {
-            // Ada record (misal status lain) tapi belum ada waktu datang
-            $absensi->status = 'hadir';
-            $absensi->kategori = 'terlambat';
-        }
-
-        if ($absensi->waktu_pulang) {
+        if ($absensi && $absensi->waktu_pulang) {
             return back()->with('error', 'Anda sudah melakukan absen pulang hari ini.');
         }
 
-        $jadwal = \App\Models\JadwalAbsensi::where('hari', \Carbon\Carbon::parse($today)->translatedFormat('l'))->first();
-        $kategori = $absensi->kategori;
-        if ($jadwal && now()->format('H:i:s') < \Carbon\Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i:s')) {
-            if ($kategori === 'terlambat') {
+        $hariMap = [
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu'
+        ];
+        $hariIni = $hariMap[Carbon::now()->format('l')] ?? 'Senin';
+        $jadwal = \App\Models\JadwalAbsensi::where('hari', $hariIni)->first();
+
+        if (!$absensi) {
+            // Lupa / belum absen datang, langsung absen pulang
+            $kategori = 'terlambat';
+            if ($jadwal && now()->format('H:i:s') < Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i:s')) {
+                $kategori = 'terlambat dan pulang lebih awal';
+            }
+
+            AbsensiGuru::create([
+                'user_id' => $user->id,
+                'tanggal' => $today,
+                'waktu_pulang' => Carbon::now()->format('H:i:s'),
+                'status' => 'hadir',
+                'kategori' => $kategori,
+            ]);
+
+            return back()->with('success', 'Absen pulang berhasil dicatat pada pukul ' . Carbon::now()->format('H:i') . ' WITA.');
+        }
+
+        if (!$absensi->waktu_datang) {
+            // Sudah ada record (misal izin/cuti ditolak atau dibuat tanpa jam datang), langsung catat pulang
+            $kategori = 'terlambat';
+            if ($jadwal && now()->format('H:i:s') < Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i:s')) {
+                $kategori = 'terlambat dan pulang lebih awal';
+            }
+
+            $absensi->update([
+                'status' => 'hadir',
+                'waktu_pulang' => Carbon::now()->format('H:i:s'),
+                'kategori' => $kategori,
+                'status_pengajuan' => null,
+                'alasan_ditolak' => null,
+                'keterangan' => null,
+                'file_bukti' => null,
+                'judul_pengajuan' => null,
+            ]);
+
+            return back()->with('success', 'Absen pulang berhasil dicatat pada pukul ' . Carbon::now()->format('H:i') . ' WITA.');
+        }
+
+        // Sudah ada waktu datang normal
+        $kategori = $absensi->kategori ?? 'tepat waktu';
+        if ($jadwal && now()->format('H:i:s') < Carbon::parse($jadwal->batas_pulang_cepat)->format('H:i:s')) {
+            if (str_contains(strtolower($kategori), 'terlambat')) {
                 $kategori = 'terlambat dan pulang lebih awal';
             } else {
                 $kategori = 'pulang lebih awal';

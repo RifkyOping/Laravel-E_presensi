@@ -29,31 +29,38 @@
                     <p class="text-white/60 text-xs font-bold uppercase tracking-wider mb-1">Mata Pelajaran</p>
                     <h2 class="text-xl md:text-2xl font-black">{{ $jadwal->mata_pelajaran }}</h2>
                     <p class="text-white/75 text-sm mt-2 font-medium">
-                        Kelas {{ $jadwal->kelas }} &mdash; Jam ke-{{ $jadwal->jam_ke }}
-                        ({{ Carbon::parse($jadwal->jam_mulai)->format('H:i') }} – {{ Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WITA)
+                        <span>Kelas {{ $jadwal->kelas }}</span>
+                        <span class="hidden sm:inline"> &mdash; </span>
+                        <span class="block sm:inline mt-0.5 sm:mt-0">
+                            Jam ke-{{ $jadwal->jam_ke }} ({{ Carbon::parse($jadwal->jam_mulai)->format('H:i') }} – {{ Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WITA)
+                        </span>
                     </p>
                 </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="text-white/60 text-xs font-bold uppercase tracking-wider mb-1">Tanggal</p>
-                    <p class="text-white font-black text-lg">{{ Carbon::parse($today)->translatedFormat('d M Y') }}</p>
-                    @if($aktivitas->waktu_absen_masuk)
-                        <p class="text-[11px] text-white/75 mt-1 font-bold">Masuk: {{ Carbon::parse($aktivitas->waktu_absen_masuk)->format('H:i') }} WITA</p>
-                    @endif
-                    @if($aktivitas->waktu_absen_keluar)
-                        <p class="text-[11px] text-white/75 font-bold">Keluar: {{ Carbon::parse($aktivitas->waktu_absen_keluar)->format('H:i') }} WITA</p>
-                    @endif
-                    @if($sudahDiabsen)
-                        <span class="inline-flex items-center gap-1.5 bg-emerald-400/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs px-3 py-1 rounded-full mt-2">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            Sudah Diabsen
-                        </span>
-                    @else
-                        <span class="inline-flex items-center gap-1.5 bg-orange-400/20 border border-orange-400/40 text-orange-300 font-bold text-xs px-3 py-1 rounded-full mt-2">
-                            Belum Diabsen
-                        </span>
-                    @endif
+                <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 flex-shrink-0 pt-3 sm:pt-0 border-t border-white/10 sm:border-t-0">
+                    <div class="text-left sm:text-right">
+                        <p class="text-white/60 text-xs font-bold uppercase tracking-wider mb-1">Tanggal</p>
+                        <p class="text-white font-black text-base sm:text-lg">{{ Carbon::parse($today)->translatedFormat('d M Y') }}</p>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        @if($aktivitas->waktu_absen_masuk)
+                            <p class="text-[11px] text-white/75 font-bold">Masuk: {{ Carbon::parse($aktivitas->waktu_absen_masuk)->format('H:i') }} WITA</p>
+                        @endif
+                        @if($aktivitas->waktu_absen_keluar)
+                            <p class="text-[11px] text-white/75 font-bold">Keluar: {{ Carbon::parse($aktivitas->waktu_absen_keluar)->format('H:i') }} WITA</p>
+                        @endif
+                        @if($sudahDiabsen)
+                            <span class="inline-flex items-center gap-1.5 bg-emerald-400/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs px-3 py-1 rounded-full mt-1.5 sm:mt-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Sudah Diabsen
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 bg-orange-400/20 border border-orange-400/40 text-orange-300 font-bold text-xs px-3 py-1 rounded-full mt-1.5 sm:mt-2">
+                                Belum Diabsen
+                            </span>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -262,40 +269,44 @@
                                 <option value=";">Excel ID (;)</option>
                                 <option value=",">Excel EN (,)</option>
                             </select>
-                            <button type="submit" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                Download Rekap
+                            <button type="submit" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 sm:px-4 py-2 rounded-xl transition shadow-sm">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Download<span class="hidden sm:inline"> Rekap</span></span>
                             </button>
                             <a href="{{ route('guru.absen-kelas.show', ['jadwal' => $jadwal->id, 'edit' => 'true']) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-semibold text-xs transition duration-200 shadow-sm">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Edit Absensi
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span>Edit<span class="hidden sm:inline"> Absensi</span></span>
                             </a>
                         </form>
                     </div>
                     {{-- Summary badges --}}
-                    <div class="flex flex-wrap gap-2">
-                        @php
-                            $countHadir = $absensiHariIni->where('status','hadir')->count();
-                            $countAlpa  = $absensiHariIni->where('status','alpa')->count();
-                            $countSakit = $absensiHariIni->where('status','sakit')->count();
-                            $countIzin  = $absensiHariIni->where('status','izin')->count();
-                        @endphp
-                        <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
-                            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            Hadir: {{ $countHadir }}
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
-                            <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                            Alpa: {{ $countAlpa }}
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
-                            <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Sakit: {{ $countSakit }}
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
-                            <svg class="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                            Izin: {{ $countIzin }}
-                        </span>
+                    @php
+                        $countHadir = $absensiHariIni->where('status','hadir')->count();
+                        $countAlpa  = $absensiHariIni->where('status','alpa')->count();
+                        $countSakit = $absensiHariIni->where('status','sakit')->count();
+                        $countIzin  = $absensiHariIni->where('status','izin')->count();
+                    @endphp
+                    <div class="flex flex-col gap-2 w-full sm:w-auto items-center sm:items-start flex-shrink-0 pt-2 sm:pt-0">
+                        <div class="flex items-center justify-center sm:justify-start gap-2">
+                            <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
+                                <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                Hadir: {{ $countHadir }}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
+                                <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Alpa: {{ $countAlpa }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-center sm:justify-start gap-2">
+                            <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
+                                <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Sakit: {{ $countSakit }}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-600 border border-slate-200 font-semibold text-xs px-3 py-1.5 rounded-full">
+                                <svg class="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                Izin: {{ $countIzin }}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 @php $materiHariIni = $absensiHariIni->first()?->materi; @endphp
@@ -374,7 +385,7 @@
                     {{-- Hidden input for actual submission --}}
                     @foreach($siswas as $i => $siswa)
                     @php
-                        $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? 'hadir';
+                        $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? $absensiHarianSiswa->get($siswa->id)?->status ?? 'hadir';
                     @endphp
                     <input type="hidden" name="absensi[{{ $siswa->id }}][status]" id="status-hidden-{{ $siswa->id }}" value="{{ $currentStatus }}">
                     @endforeach
@@ -434,7 +445,7 @@
                             {{-- Status Buttons --}}
                             <div class="flex gap-4 flex-shrink-0 items-center">
                                 @php
-                                    $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? 'hadir';
+                                    $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? $absensiHarianSiswa->get($siswa->id)?->status ?? 'hadir';
                                 @endphp
                                 @foreach(['hadir' => 'Hadir', 'alpa' => 'Alpa', 'sakit' => 'Sakit', 'izin' => 'Izin'] as $val => $label)
                                 <label class="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 font-medium group">

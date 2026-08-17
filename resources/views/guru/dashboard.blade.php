@@ -33,11 +33,15 @@
         ->first();
 
     // 2. Data Jadwal Mengajar Hari Ini
-    $jadwalHariIni = \App\Models\JadwalMengajar::where('user_id', $userId)
-        ->where('hari', $hariIni)
-        ->whereIn('tipe_blok', ['Semua', $blokAktif])
-        ->orderBy('jam_ke')
-        ->get();
+    if ($blokAktif === 'TEFA') {
+        $jadwalHariIni = collect();
+    } else {
+        $jadwalHariIni = \App\Models\JadwalMengajar::where('user_id', $userId)
+            ->where('hari', $hariIni)
+            ->whereIn('tipe_blok', ['Semua', $blokAktif])
+            ->orderBy('jam_ke')
+            ->get();
+    }
     
     // Cek status absen tiap kelas (apakah guru sudah absen siswa di kelas tsb)
     foreach ($jadwalHariIni as $jadwal) {

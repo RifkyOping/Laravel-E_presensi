@@ -14,7 +14,7 @@
         <!-- Nomor Induk -->
         <div>
             <label for="nomor_induk" class="block font-bold text-sm text-[#24417c] mb-1">
-                {{ __('NISN / NIP') }}
+                {{ __('NIS / NISN / NIP') }}
             </label>
             <input id="nomor_induk" type="text" name="nomor_induk" value="{{ old('nomor_induk') }}" required autofocus
                 autocomplete="username"

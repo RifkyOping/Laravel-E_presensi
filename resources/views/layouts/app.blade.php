@@ -464,18 +464,28 @@
             <div class="min-w-0">
                 <p class="font-semibold text-slate-800 text-sm truncate">{{ Auth::user()->name }}</p>
                 @php
-                    $roleLabel = match (Auth::user()->role) {
-                        'admin' => ['Admin', 'bg-red-100 text-red-700'],
-                        'guru' => ['Guru', 'bg-blue-100 text-blue-700'],
-                        'pengawas' => ['Pengawas', 'bg-indigo-100 text-indigo-700'],
-                        'kurikulum' => ['Kurikulum', 'bg-teal-100 text-teal-700'],
-                        'murid' => ['Murid', 'bg-slate-100 text-slate-600'],
-                        default => [ucfirst(Auth::user()->role), 'bg-slate-100 text-slate-600'],
-                    };
+                    $isKepsek = Auth::user()->is_kepsek;
+                    $isKurikulum = Auth::user()->is_kurikulum;
+                    $jabatanLabel = Auth::user()->jabatan_label;
+
+                    if ($jabatanLabel) {
+                        $roleText = $jabatanLabel;
+                        $roleClass = $isKepsek ? 'bg-amber-100 text-amber-700' : 'bg-teal-100 text-teal-700';
+                    } else {
+                        $roleData = match (Auth::user()->role) {
+                            'admin' => ['Admin', 'bg-red-100 text-red-700'],
+                            'guru' => ['Guru', 'bg-blue-100 text-blue-700'],
+                            'pengawas' => ['Pengawas', 'bg-indigo-100 text-indigo-700'],
+                            'murid' => ['Murid', 'bg-slate-100 text-slate-600'],
+                            default => [ucfirst(Auth::user()->role), 'bg-slate-100 text-slate-600'],
+                        };
+                        $roleText = $roleData[0];
+                        $roleClass = $roleData[1];
+                    }
                 @endphp
                 <span
-                    class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide {{ $roleLabel[1] }}">
-                    {{ $roleLabel[0] }}
+                    class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide {{ $roleClass }}">
+                    {{ $roleText }}
                 </span>
             </div>
         </div>
@@ -650,7 +660,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    Literasi e-Book
+                    Literasi Buku
                 </a>
                 <a href="{{ route('guru.persetujuan-absensi') }}"
                     class="app-nav {{ request()->routeIs('guru.persetujuan-absensi') ? 'active' : '' }}">
@@ -709,7 +719,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
-                            Literasi e-Book
+                            Literasi Buku
                         </span>
                         <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-90': open }"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -801,25 +811,18 @@
                     Aktivitas Mengajar
                 </a>
 
-                {{-- === KURIKULUM === --}}
-            @elseif(Auth::user()->role === 'kurikulum')
-                <span class="app-section">Menu Utama</span>
-                <a href="{{ route('kurikulum.dashboard') }}"
-                    class="app-nav {{ request()->routeIs('kurikulum.dashboard') ? 'active' : '' }}">
+            @endif
+
+            {{-- === JABATAN (KEPSEK & KURIKULUM) === --}}
+            @if (Auth::user()->is_kepsek || Auth::user()->is_kurikulum)
+                <span class="app-section">Monitoring Sekolah</span>
+                <a href="{{ route('monitoring-sekolah.dashboard') }}"
+                    class="app-nav {{ request()->routeIs('monitoring-sekolah.dashboard') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
-                    Dashboard
-                </a>
-                <span class="app-section">Verifikasi Mengajar</span>
-                <a href="{{ route('kurikulum.monitoring-mengajar') }}"
-                    class="app-nav {{ request()->routeIs('kurikulum.monitoring-mengajar') ? 'active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Aktivitas Mengajar
+                    Dashboard Monitoring
                 </a>
             @endif
 
@@ -827,8 +830,8 @@
             @if (Auth::user()->is_piket_sholat || Auth::user()->is_piket_mengajar || Auth::user()->is_guru_bahasa || Auth::user()->is_piket_rpp || (Auth::user()->guruProfile && Auth::user()->guruProfile->is_piket_absen_qr))
                 <span class="app-section">Piket</span>
                 @if(Auth::user()->guruProfile && Auth::user()->guruProfile->is_piket_absen_qr)
-                    <a href="{{ route('guru.scan-qr') }}"
-                        class="app-nav {{ request()->routeIs('guru.scan-qr') ? 'active' : '' }}">
+                    <a href="{{ route('piket.scan-qr') }}"
+                        class="app-nav {{ request()->routeIs('piket.scan-qr') ? 'active' : '' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -866,16 +869,16 @@
                     </a>
                 @endif
                 @if(Auth::user()->is_guru_bahasa)
-                    <a href="{{ route('guru.literasi.jawaban-indikator') }}"
-                        class="app-nav {{ request()->routeIs('guru.literasi.jawaban-indikator') ? 'active' : '' }}">
+                    <a href="{{ route('piket.literasi.jawaban-indikator') }}"
+                        class="app-nav {{ request()->routeIs('piket.literasi.jawaban-indikator') ? 'active' : '' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
-                        Review Jawaban E-Book
+                        Jawaban Indikator
                     </a>
-                    <a href="{{ route('guru.indikator.index') }}"
-                        class="app-nav {{ request()->routeIs('guru.indikator*') ? 'active' : '' }}">
+                    <a href="{{ route('piket.indikator.index') }}"
+                        class="app-nav {{ request()->routeIs('piket.indikator*') ? 'active' : '' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />

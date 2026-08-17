@@ -93,7 +93,6 @@ class PiketSholatController extends Controller
 
         $tanggalMulai = Carbon::parse($request->tanggal_mulai);
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir);
-        $delimiter    = $request->input('delimiter', ';');
 
         if ($tanggalMulai->gt($tanggalAkhir)) {
             return back()->with('error', 'Tanggal mulai tidak boleh lebih dari tanggal akhir.');
@@ -121,51 +120,43 @@ class PiketSholatController extends Controller
             });
 
         $namaKelas = "{$kelas->tingkat} {$kelas->jurusan} {$kelas->rombel}";
-        $fileName = 'Rekap_Sholat_' . str_replace(' ', '_', $namaKelas) . '_' . $tanggalMulai->format('Ymd') . '-' . $tanggalAkhir->format('Ymd') . '.csv';
+        $fileName = 'Rekap_Sholat_' . str_replace(' ', '_', $namaKelas) . '_' . $tanggalMulai->format('Ymd') . '-' . $tanggalAkhir->format('Ymd') . '.xlsx';
 
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-
+        $rows = [];
+        $rows[] = ['Kelas:', $namaKelas];
+        $rows[] = ['Periode:', $tanggalMulai->translatedFormat('d M Y') . ' - ' . $tanggalAkhir->translatedFormat('d M Y')];
+        $rows[] = [];
+        
         $columns = ['No', 'Tanggal', 'Nama Siswa', 'NISN', 'Status'];
+        $rows[] = $columns;
 
-        $callback = function() use($siswas, $absensi, $columns, $namaKelas, $tanggalMulai, $tanggalAkhir, $delimiter) {
-            $file = fopen('php://output', 'w');
+        $no = 1;
+        $period = \Carbon\CarbonPeriod::create($tanggalMulai, $tanggalAkhir);
+        
+        foreach ($period as $date) {
+            $tanggal = $date->format('Y-m-d');
+            $records = $absensi->get($tanggal, collect());
+            $recordsBySiswa = $records->keyBy('user_id');
             
-            fputcsv($file, ['Kelas:', $namaKelas], $delimiter);
-            fputcsv($file, ['Periode:', $tanggalMulai->translatedFormat('d M Y') . ' - ' . $tanggalAkhir->translatedFormat('d M Y')], $delimiter);
-            fputcsv($file, [], $delimiter);
-            
-            fputcsv($file, $columns, $delimiter);
-
-            $no = 1;
-            $period = \Carbon\CarbonPeriod::create($tanggalMulai, $tanggalAkhir);
-            
-            foreach ($period as $date) {
-                $tanggal = $date->format('Y-m-d');
-                $records = $absensi->get($tanggal, collect());
-                $recordsBySiswa = $records->keyBy('user_id');
+            foreach ($siswas as $siswa) {
+                $statusData = $recordsBySiswa->get($siswa->id);
+                $statusText = $statusData ? ucfirst(str_replace('_', ' ', $statusData->status)) : 'Belum Diabsen';
                 
-                foreach ($siswas as $siswa) {
-                    $statusData = $recordsBySiswa->get($siswa->id);
-                    $statusText = $statusData ? ucfirst(str_replace('_', ' ', $statusData->status)) : 'Belum Diabsen';
-                    
-                    $row['No']          = $no++;
-                    $row['Tanggal']     = $date->translatedFormat('d/m/Y');
-                    $row['Nama Siswa']  = $siswa->name;
-                    $row['NISN']        = $siswa->nomor_induk ?? '-';
-                    $row['Status']      = $statusText;
-
-                    fputcsv($file, $row, $delimiter);
-                }
+                $rows[] = [
+                    $no++,
+                    $date->translatedFormat('d/m/Y'),
+                    $siswa->name,
+                    $siswa->nomor_induk ?? '-',
+                    $statusText
+                ];
             }
-            fclose($file);
-        };
+        }
+        
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
 
-        return response()->stream($callback, 200, $headers);
+        return response((string) $xlsx, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=$fileName",
+        ]);
     }
 }

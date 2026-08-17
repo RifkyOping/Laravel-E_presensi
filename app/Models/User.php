@@ -66,6 +66,31 @@ class User extends Authenticatable
         return $this->hasMany(CatatanLiterasiQuran::class, 'siswa_id');
     }
 
+    public function absensiGuru()
+    {
+        return $this->hasMany(AbsensiGuru::class);
+    }
+
+    public function aktivitasMengajar()
+    {
+        return $this->hasMany(AbsensiMengajar::class);
+    }
+
+    public function absensiSiswa()
+    {
+        return $this->hasMany(AbsensiSiswa::class);
+    }
+
+    public function absensiKelasSiswa()
+    {
+        return $this->hasMany(AbsensiKelasSiswa::class, 'siswa_id');
+    }
+
+    public function absensiSholat()
+    {
+        return $this->hasMany(AbsensiSholatSiswa::class);
+    }
+
     public function siswaProfile()
     {
         return $this->hasOne(SiswaProfile::class);
@@ -89,8 +114,22 @@ class User extends Authenticatable
     public function getIsPiketMengajarAttribute() { return $this->guruProfile?->is_piket_mengajar ?? false; }
     public function getIsPiketRppAttribute() { return $this->guruProfile?->is_piket_rpp ?? false; }
     public function getIsGuruBahasaAttribute() { return $this->guruProfile?->is_guru_bahasa ?? false; }
+    public function getIsKepsekAttribute() { return $this->guruProfile?->is_kepsek ?? false; }
+    public function getIsKurikulumAttribute() { return $this->guruProfile?->is_kurikulum ?? false; }
+    
+    public function getJabatanLabelAttribute() {
+        if ($this->is_kepsek) return 'Kepala Sekolah';
+        if ($this->is_kurikulum) return 'Kurikulum';
+        return null;
+    }
+
     public function getRppFileAttribute() { return $this->guruProfile?->rpp_file; }
-    public function getRppStatusAttribute() { return $this->guruProfile?->rpp_status; }
+    public function getRppStatusAttribute() { 
+        $profile = $this->guruProfile;
+        if (!$profile) return 'kosong';
+        if ($profile->rpp_periode !== date('Y-m')) return 'kosong';
+        return $profile->rpp_status ?? 'kosong';
+    }
     public function getRppPesanAttribute() { return $this->guruProfile?->rpp_pesan; }
 
     // Accessor for SiswaProfile skip_voice_verification

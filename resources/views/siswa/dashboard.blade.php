@@ -18,12 +18,16 @@ $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
 // 1. Jadwal Hari Ini
 $profile = $user->siswaProfile;
 $kelasLengkap = $profile ? trim("{$profile->kelas} {$profile->jurusan} {$profile->rombel}") : trim("{$user->kelas} {$user->jurusan} {$user->rombel}");
-$jadwalHariIni = JadwalMengajar::with(['user'])
-    ->where('hari', $hariIniStr)
-    ->where('kelas', $kelasLengkap)
-    ->whereIn('tipe_blok', ['Semua', $blokAktif])
-    ->orderBy('jam_mulai')
-    ->get();
+if ($blokAktif === 'TEFA') {
+    $jadwalHariIni = collect();
+} else {
+    $jadwalHariIni = JadwalMengajar::with(['user'])
+        ->where('hari', $hariIniStr)
+        ->where('kelas', $kelasLengkap)
+        ->whereIn('tipe_blok', ['Semua', $blokAktif])
+        ->orderBy('jam_mulai')
+        ->get();
+}
 
 // 2. Persentase Kehadiran Kelas (Dihitung dinamis dari tabel absensi_kelas_siswa)
 $totalAbsenKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->count();
@@ -104,9 +108,14 @@ $dailyQuote = $quotes[date('z') % count($quotes)];
                     <div>
                         <p class="text-blue-100 text-sm font-medium tracking-wide">{{ $sapaan }},</p>
                         <h1 class="text-white text-2xl font-bold tracking-tight">{{ $user->name }}</h1>
-                        <div class="flex items-center gap-3 mt-1.5 text-blue-50 text-sm">
-                            <span class="bg-black/20 px-2 py-0.5 rounded backdrop-blur-sm border border-white/10 font-semibold">{{ $user->kelas ?? 'Kelas -' }}</span>
-                            <span>NISN: {{ $user->nomor_induk ?? '-' }}</span>
+                        <div class="flex flex-wrap items-center gap-3 mt-1.5 text-blue-50 text-sm">
+                            <span class="bg-black/20 px-2 py-0.5 rounded backdrop-blur-sm border border-white/10 font-semibold">{{ $kelasLengkap ?: 'Kelas -' }}</span>
+                            @if($user->nomor_induk)
+                                <span>NISN: {{ $user->nomor_induk }}</span>
+                            @endif
+                            @if($profile?->nis)
+                                <span>NIS: {{ $profile->nis }}</span>
+                            @endif
                         </div>
                     </div>
                 </div>

@@ -17,7 +17,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>
-                Import CSV
+                Import Excel / CSV
             </button>
             <a href="{{ route('admin.users.create') }}"
                class="inline-flex items-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition duration-200 shadow-sm">
@@ -63,7 +63,7 @@
                     </div>
                     <div>
                         <h4 class="font-black text-rose-800 text-sm">Daftar Baris yang Gagal Diimport ({{ count(session('import_errors')) }} Baris)</h4>
-                        <p class="text-xs text-rose-600 mt-0.5">Periksa kembali data pada file Excel / CSV Anda atau pastikan data belum pernah terdaftar sebelumnya.</p>
+                        <p class="text-xs text-rose-600 mt-0.5">Periksa kembali data pada file Excel Anda atau pastikan data belum pernah terdaftar sebelumnya.</p>
                     </div>
                 </div>
             </div>
@@ -151,6 +151,11 @@
                 Total <span class="font-bold text-slate-800">{{ $users->total() }}</span> pengguna
             </p>
             <div id="bulkActionContainer" class="flex items-center gap-2">
+                <button type="button" id="btnEditBanyak" onclick="enableBulkEditMode()"
+                    class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit Banyak
+                </button>
                 <button type="button" id="btnPilihBanyak" onclick="enableBulkMode()"
                     class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -167,8 +172,23 @@
                         Hapus Terpilih
                     </button>
                 </div>
+                <div id="bulkEditActions" class="hidden items-center gap-2">
+                    <button type="button" onclick="disableBulkEditMode()"
+                        class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
+                        Batal
+                    </button>
+                    <button type="button" onclick="submitBulkEdit()"
+                        class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Simpan Perubahan
+                    </button>
+                </div>
             </div>
         </div>
+        <form id="bulkUpdateForm" action="{{ route('admin.users.bulk-update') }}" method="POST" class="hidden">
+            @csrf
+            @method('PUT')
+        </form>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
@@ -198,29 +218,54 @@
                                 <div class="w-8 h-8 rounded-full bg-[#1e3a6e] text-white flex items-center justify-center font-black text-xs flex-shrink-0">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
-                                <div>
-                                    <span class="font-semibold text-slate-800 text-sm block">{{ $user->name }}</span>
-                                    @if($user->role === 'murid')
-                                        <span class="text-xs text-slate-400 font-medium">NISN: {{ $user->nomor_induk ?? '-' }}</span>
-                                    @elseif($user->role === 'guru')
-                                        <span class="text-xs text-slate-400 font-medium">NIP: {{ $user->nomor_induk ?? '-' }}</span>
-                                    @else
-                                        <span class="text-xs text-slate-400 font-medium">ID: {{ $user->nomor_induk ?? '-' }}</span>
-                                    @endif
+                                <div class="w-full min-w-[150px]">
+                                    <span class="view-mode font-semibold text-slate-800 text-sm block">{{ $user->name }}</span>
+                                    <input form="bulkUpdateForm" type="text" name="users[{{ $user->id }}][name]" value="{{ $user->name }}" class="edit-mode hidden w-full text-sm border-slate-200 rounded-lg px-2 py-1 mb-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]" required>
+                                    
+                                    <div class="view-mode">
+                                        @if($user->role === 'murid')
+                                            <span class="text-xs text-slate-400 font-medium block">NISN: {{ $user->nomor_induk ?? '-' }}</span>
+                                            <span class="text-xs text-slate-400 font-medium block">NIS: {{ $user->siswaProfile?->nis ?? '-' }}</span>
+                                        @elseif($user->role === 'guru')
+                                            <span class="text-xs text-slate-400 font-medium block">NIP: {{ $user->nomor_induk ?? '-' }}</span>
+                                        @else
+                                            <span class="text-xs text-slate-400 font-medium block">ID: {{ $user->nomor_induk ?? '-' }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="edit-mode hidden flex flex-col gap-1 mt-1">
+                                        <input form="bulkUpdateForm" type="text" name="users[{{ $user->id }}][nomor_induk]" value="{{ $user->nomor_induk }}" class="w-full text-xs border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]" {{ $user->role !== 'murid' ? 'required' : '' }} placeholder="{{ $user->role === 'murid' ? 'NISN (opsional)' : 'NISN/NIP/ID' }}">
+                                        @if($user->role === 'murid')
+                                            <input form="bulkUpdateForm" type="text" name="users[{{ $user->id }}][nis]" value="{{ $user->siswaProfile?->nis }}" class="w-full text-xs border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]" placeholder="NIS (opsional)">
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3.5 px-5 text-sm text-slate-500">{{ $user->email }}</td>
+                        <td class="py-3.5 px-5 text-sm text-slate-500">
+                            <span class="view-mode">{{ $user->email }}</span>
+                            <input form="bulkUpdateForm" type="email" name="users[{{ $user->id }}][email]" value="{{ $user->email }}" class="edit-mode hidden w-full text-sm border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
+                        </td>
                         <td class="py-3.5 px-5">
-                            @php $rc = match($user->role) {
-                                'admin'    => 'bg-red-50 text-red-700 border-red-200',
-                                'guru'     => 'bg-blue-50 text-blue-700 border-blue-200',
-                                'pengawas' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                                default    => 'bg-slate-100 text-slate-600 border-slate-200',
-                            }; @endphp
-                            <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border capitalize {{ $rc }}">
-                                {{ $user->role }}
-                            </span>
+                            <div class="view-mode">
+                                @php $rc = match($user->role) {
+                                    'admin'    => 'bg-red-50 text-red-700 border-red-200',
+                                    'guru'     => 'bg-blue-50 text-blue-700 border-blue-200',
+                                    'pengawas' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                    default    => 'bg-slate-100 text-slate-600 border-slate-200',
+                                }; @endphp
+                                <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border capitalize {{ $rc }}">
+                                    {{ $user->role }}
+                                </span>
+                            </div>
+                            <div class="edit-mode hidden">
+                                <select form="bulkUpdateForm" name="users[{{ $user->id }}][role]" class="text-sm border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
+                                    <option value="murid" {{ $user->role == 'murid' ? 'selected' : '' }}>Murid</option>
+                                    <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
+                                    <option value="pengawas" {{ $user->role == 'pengawas' ? 'selected' : '' }}>Pengawas</option>
+                                    <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="kurikulum" {{ $user->role == 'kurikulum' ? 'selected' : '' }}>Kurikulum</option>
+                                </select>
+                            </div>
                         </td>
                         <td class="py-3.5 px-5 text-sm text-slate-400">{{ $user->created_at->translatedFormat('d M Y') }}</td>
                         <td class="py-3.5 px-5">
@@ -273,7 +318,7 @@
 <div id="importModal" class="fixed inset-0 z-[100] hidden bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 class="font-bold text-slate-800 text-lg">Import Pengguna (CSV / Excel)</h3>
+            <h3 class="font-bold text-slate-800 text-lg">Import Pengguna (Excel / CSV)</h3>
             <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -434,7 +479,35 @@
         }
     });
 
+    function enableBulkEditMode() {
+        document.getElementById('btnEditBanyak').classList.add('hidden');
+        document.getElementById('btnPilihBanyak').classList.add('hidden');
+        document.getElementById('bulkEditActions').classList.remove('hidden');
+        document.getElementById('bulkEditActions').classList.add('flex');
+        
+        document.querySelectorAll('.view-mode').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('hidden'));
+    }
+
+    function disableBulkEditMode() {
+        document.getElementById('btnEditBanyak').classList.remove('hidden');
+        document.getElementById('btnPilihBanyak').classList.remove('hidden');
+        document.getElementById('bulkEditActions').classList.add('hidden');
+        document.getElementById('bulkEditActions').classList.remove('flex');
+        
+        document.querySelectorAll('.view-mode').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.edit-mode').forEach(el => el.classList.add('hidden'));
+    }
+
+    function submitBulkEdit() {
+        const form = document.getElementById('bulkUpdateForm');
+        if(form.reportValidity()) {
+            form.submit();
+        }
+    }
+
     function enableBulkMode() {
+        document.getElementById('btnEditBanyak').classList.add('hidden');
         document.getElementById('btnPilihBanyak').classList.add('hidden');
         document.getElementById('bulkDeleteActions').classList.remove('hidden');
         document.getElementById('bulkDeleteActions').classList.add('flex');
@@ -444,6 +517,7 @@
     }
 
     function disableBulkMode() {
+        document.getElementById('btnEditBanyak').classList.remove('hidden');
         document.getElementById('btnPilihBanyak').classList.remove('hidden');
         document.getElementById('bulkDeleteActions').classList.add('hidden');
         document.getElementById('bulkDeleteActions').classList.remove('flex');

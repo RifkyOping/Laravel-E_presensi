@@ -3,7 +3,7 @@
         <span class="text-sm font-bold text-slate-800">Piket Absen Sholat Murid</span>
     </x-slot>
 
-    <div class="max-w-7xl space-y-6">
+    <div class="max-w-7xl -mt-2 sm:mt-0 space-y-2 md:space-y-6">
         @if(session('success'))
         <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-4 rounded-xl text-sm font-medium flex items-center gap-3">
             <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -18,30 +18,38 @@
         @endif
 
         <div x-data="{ 
-            showFilter: localStorage.getItem('filter_piket_sholat') === 'false' ? false : true 
+            showFilter: window.innerWidth >= 768 || localStorage.getItem('filter_piket_sholat') === 'true' 
         }" 
         x-init="$watch('showFilter', val => localStorage.setItem('filter_piket_sholat', val))"
-        class="bg-white rounded-xl border border-slate-200 p-6">
-            <button type="button" @click="showFilter = !showFilter" class="w-full text-left flex items-center justify-between group focus:outline-none">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shadow-sm border border-blue-100">
-                        <svg class="w-4 h-4 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        @resize.window="if (window.innerWidth >= 768) showFilter = true"
+        class="bg-white rounded-2xl border border-slate-200 p-1.5 sm:p-6 shadow-sm">
+            
+            {{-- Desktop Header (Hidden on Mobile) --}}
+            <div class="hidden md:block">
+                <h2 class="text-sm font-black text-slate-700 flex items-center gap-2 mb-2">
+                    <div class="w-5 h-5 rounded bg-[#1e3a6e]/10 flex items-center justify-center">
+                        <svg class="w-3 h-3 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
                         </svg>
                     </div>
-                    <div>
-                        <h2 class="text-sm font-black text-slate-700">Filter Kelas & Tanggal</h2>
-                        <p class="text-[0.65rem] text-slate-400 font-medium">Klik untuk memilih kelas dan tanggal pencatatan</p>
-                    </div>
-                </div>
-                <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 group-hover:bg-slate-100 transition-colors">
-                    <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="{ 'rotate-180': showFilter }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </div>
+                    Filter Kelas & Tanggal
+                </h2>
+                <p class="text-sm text-slate-500 mb-5 ml-7">Pilih kelas dan tanggal pencatatan absensi sholat murid.</p>
+            </div>
+
+            {{-- Mobile Button (Visible only on Mobile) --}}
+            <button @click="showFilter = !showFilter" type="button" 
+                    class="md:hidden -mt-2 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1e3a6e] text-white rounded-xl font-bold shadow-[0_4px_12px_rgba(30,58,110,0.2)] hover:bg-[#162d57] active:scale-[0.98] transition-all duration-300">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                </svg>
+                <span x-text="showFilter ? 'Tutup Filter' : 'Tampilkan Filter'" class="text-sm"></span>
+                <svg class="w-4 h-4 transition-transform duration-300" :class="showFilter ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
             </button>
             
-            <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
+            <div x-show="showFilter" x-transition class="mt-4 pt-4 sm:mt-5 sm:pt-5 border-t border-slate-100" style="display: none;">
                 <form id="filter-form" method="GET" action="{{ route('piket.sholat.index') }}" class="flex flex-row items-end gap-2 sm:gap-4 w-full">
                     <div class="flex-1 min-w-0">
                         <label class="block text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider mb-1 sm:mb-2 truncate">Tanggal</label>

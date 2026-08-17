@@ -140,6 +140,39 @@ class AdminEBookController extends Controller
         return back()->with('success', "E-Book \"{$ebook->judul}\" berhasil {$status}.");
     }
 
+    public function cleanText(Request $request)
+    {
+        $request->validate([
+            'text' => 'required|string'
+        ]);
+
+        $apiKey = env('GEMINI_API_KEY');
+        if (!$apiKey) {
+            return response()->json(['error' => 'API Key Gemini tidak ditemukan.'], 500);
+        }
+
+        $prompt = "Bersihkan teks berikut dari elemen yang tidak perlu (seperti nomor halaman, header, daftar isi, atau karakter aneh hasil copy-paste PDF). Kembalikan HANYA teks konten bacaan yang rapi dan siap dibaca tanpa tambahan kalimat pengantar. Teks:\n\n" . $request->text;
+
+        try {
+            $response = Http::timeout(120)->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+                'contents' => [
+                    ['parts' => [['text' => $prompt]]]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                $cleanedText = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                
+                return response()->json(['cleaned_text' => trim($cleanedText)]);
+            }
+
+            return response()->json(['error' => 'Gagal menghubungi API Gemini.'], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     protected function generateQuestions(EBook $ebook, $prompt)
     {
         $apiKey = env('GEMINI_API_KEY');
@@ -148,7 +181,7 @@ class AdminEBookController extends Controller
         $prompt = "Buat 10 pertanyaan pilihan ganda berdasarkan teks berikut. Teks: \"{$prompt}\".\nFormat JSON murni (array of objects), setiap object punya 'pertanyaan', 'opsi_jawaban' (array 4 string), dan 'kunci_jawaban' (string). Jangan tambahkan format markdown (seperti ```json).";
 
         try {
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+            $response = Http::timeout(120)->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
                 'contents' => [
                     ['parts' => [['text' => $prompt]]]
                 ]

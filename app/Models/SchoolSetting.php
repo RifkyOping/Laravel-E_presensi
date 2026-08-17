@@ -88,7 +88,7 @@ class SchoolSetting extends Model
      */
     public function isAbsensiTerbuka(string $type = 'datang', string $jenis = 'hadir'): array
     {
-        if (in_array($jenis, ['sakit', 'izin'])) {
+        if (in_array($jenis, ['sakit', 'izin', 'cuti', 'tugas'])) {
             return [true, 'Pengajuan selalu terbuka.'];
         }
         if ($this->status_absen === 'buka') {
@@ -112,13 +112,13 @@ class SchoolSetting extends Model
             'Saturday' => 'Sabtu',
             'Sunday' => 'Minggu'
         ];
-        $hariIni = $hariMap[$now->format('l')];
+        $hariIni = $hariMap[$now->format('l')] ?? 'Senin';
 
         $jadwal = \App\Models\JadwalAbsensi::where('hari', $hariIni)->first();
 
         // Jika hari ini libur atau tidak ada di database jadwal (misal Sabtu/Minggu yang tidak dimasukkan)
         if (!$jadwal || $jadwal->is_libur) {
-            return [false, "Hari ini ($hariIni) adalah hari libur, absen tutup."];
+            return [false, "Hari ini ($hariIni) adalah hari libur, absensi ditutup."];
         }
 
         if ($type === 'datang') {
@@ -142,8 +142,16 @@ class SchoolSetting extends Model
             $namaAksi = "Pengajuan Sakit";
         } elseif ($jenis === 'izin') {
             $namaAksi = "Pengajuan Izin";
+        } elseif ($jenis === 'cuti') {
+            $namaAksi = "Pengajuan Cuti";
+        } elseif ($jenis === 'tugas') {
+            $namaAksi = "Pengajuan Tugas";
         }
 
-        return [false, "{$namaAksi} hari ini ($hariIni) hanya bisa dilakukan antara pukul " . $buka->format('H:i') . " hingga " . $tutup->format('H:i') . " WITA."];
+        if ($currentTime < $bukaTime) {
+            return [false, "{$namaAksi} belum dibuka. Jam operasional hari ini ($hariIni) dimulai pukul " . $buka->format('H:i') . " hingga " . $tutup->format('H:i') . " WITA."];
+        } else {
+            return [false, "Waktu {$namaAksi} telah berakhir/lewat. Jam operasional hari ini ($hariIni) hanya sampai pukul " . $tutup->format('H:i') . " WITA."];
+        }
     }
 }

@@ -60,7 +60,12 @@
         {{-- Status absen hari ini --}}
         @if($absensiHariIni)
         <div class="relative z-10 mt-3 flex justify-center gap-3 flex-wrap">
-            @if(in_array($absensiHariIni->status, ['sakit', 'izin']))
+            @if($absensiHariIni->status_pengajuan === 'rejected' && !$absensiHariIni->waktu_datang)
+                <span class="bg-red-500/30 border border-red-400/40 text-red-100 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    Pengajuan {{ ucfirst($absensiHariIni->status) }} Ditolak &mdash; Silakan Absen Datang
+                </span>
+            @elseif(in_array($absensiHariIni->status, ['sakit', 'izin']) && $absensiHariIni->status_pengajuan !== 'rejected')
                 <span class="bg-amber-500/20 border border-amber-500/30 text-amber-100 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
                     @if($absensiHariIni->status === 'sakit')
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -72,8 +77,6 @@
                     
                     @if($absensiHariIni->status_pengajuan === 'pending')
                         (Menunggu Konfirmasi)
-                    @elseif($absensiHariIni->status_pengajuan === 'rejected' || $absensiHariIni->status_pengajuan === 'ditolak')
-                        (Ditolak)
                     @else
                         (Disetujui)
                     @endif
@@ -96,28 +99,45 @@
         @endif
     </div>
 
+    {{-- Alert jika pengajuan ditolak dan belum absen --}}
+    @php
+        $isRejectedToday = $absensiHariIni && $absensiHariIni->status_pengajuan === 'rejected' && !$absensiHariIni->waktu_datang;
+    @endphp
+    @if($isRejectedToday)
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 text-amber-800 text-sm shadow-sm">
+        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div class="flex-1">
+            <p class="font-bold text-amber-900">Pengajuan Izin/Sakit Anda Ditolak</p>
+            @if($absensiHariIni->alasan_ditolak)
+                <p class="text-xs text-amber-800 mt-1"><strong>Alasan Penolakan:</strong> {{ $absensiHariIni->alasan_ditolak }}</p>
+            @endif
+            <p class="text-xs text-amber-700 mt-1 font-medium">Anda masih dapat melakukan absen datang sekolah biasa dengan menekan tombol <strong>Hadir &mdash; Datang Sekolah</strong> di bawah ini.</p>
+        </div>
+    </div>
+    @endif
+
     {{-- Tombol Absen --}}
     @php
         $sudahDatang = $absensiHariIni && $absensiHariIni->waktu_datang;
         $sudahPulang = $absensiHariIni && $absensiHariIni->waktu_pulang;
         $bisaPulang  = $sudahDatang && !$sudahPulang;
 
-        // Status aktif sakit/izin hari ini
-        $statusAktif = null; // 'sakit', 'izin', 'hadir', null
-        if ($absensiHariIni) {
-            $statusAktif = $absensiHariIni->status;
-        }
+        // Status aktif sakit/izin hari ini (hanya jika approved)
+        $isPending = $absensiHariIni && $absensiHariIni->status_pengajuan === 'pending';
+        $isApprovedSakitIzin = $absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']) && $absensiHariIni->status_pengajuan === 'approved';
 
-        // Apakah sedang sakit/izin (digunakan untuk disable card)
-        $isSakitIzin = $statusAktif && in_array($statusAktif, ['sakit', 'izin']);
+        // Apakah sedang sakit/izin disetujui (digunakan untuk disable card)
+        $isSakitIzin = $isApprovedSakitIzin;
 
         // Teks overlay pada card sakit/izin
         $disableSakitIzin = false;
         $statusSakitIzin  = '';
-        if ($absensiHariIni && $absensiHariIni->status_pengajuan === 'pending') {
+        if ($isPending) {
             $disableSakitIzin = true;
             $statusSakitIzin = 'Menunggu Konfirmasi';
-        } elseif ($absensiHariIni && $isSakitIzin) {
+        } elseif ($isApprovedSakitIzin) {
             $disableSakitIzin = true;
             $statusSakitIzin = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
         } elseif (isset($sedangMasaSakitIzin) && $sedangMasaSakitIzin && !$absensiHariIni) {
@@ -156,14 +176,14 @@
                     $labelBatalkan = $jenisMasaAktif === 'izin' ? 'Batalkan Izin & Hadir' : 'Batalkan Sakit & Hadir';
                 @endphp
                 <button type="button" id="btn-datang"
-                        onclick="confirmDatang('{{ $jenisMasaAktif ?? 'none' }}')"
+                        onclick="confirmDatang('{{ ($sedangMasaSakitIzin && !$isRejectedToday) ? ($jenisMasaAktif ?? 'none') : 'none' }}')"
                         {{ $sudahDatang ? 'disabled' : '' }}
-                        class="w-full {{ $sedangMasaSakitIzin && !$sudahDatang ? 'bg-orange-600 hover:bg-orange-700' : 'bg-[#1e3a6e] hover:bg-[#162d57]' }} text-white font-bold py-3.5 rounded-xl text-sm
+                        class="w-full {{ ($sedangMasaSakitIzin && !$isRejectedToday && !$sudahDatang) ? 'bg-orange-600 hover:bg-orange-700' : 'bg-[#1e3a6e] hover:bg-[#162d57]' }} text-white font-bold py-3.5 rounded-xl text-sm
                                 transition duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 hidden" id="spin-datang" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    @if($sedangMasaSakitIzin && !$sudahDatang)
+                    @if($sedangMasaSakitIzin && !$isRejectedToday && !$sudahDatang)
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         {{ $labelBatalkan }}
                     @elseif($sudahDatang)
@@ -208,7 +228,7 @@
                     <svg class="w-4 h-4 hidden" id="spin-pulang" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    @if($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']))
+                    @if($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']) && $absensiHariIni->status_pengajuan === 'approved')
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Sedang {{ ucfirst($absensiHariIni->status) }}
                     @elseif($sudahPulang)
@@ -618,12 +638,12 @@ function requestGPS() {
         updateGpsStatus(true, 'Lokasi terverifikasi (akurasi ±' + Math.round(acc) + 'm)');
     }
 
-    // Timeout pengaman (maksimal 6 detik untuk menyelesaikan sampling)
+    // Timeout pengaman (maksimal 15 detik untuk menyelesaikan sampling)
     sampleTimeout = setTimeout(function() {
         if (!gpsReady && gpsSamples.length > 0) {
             evaluateSamples(true);
         }
-    }, 6000);
+    }, 15000);
 
     watchId = navigator.geolocation.watchPosition(
         function(pos) {
@@ -648,7 +668,7 @@ function requestGPS() {
                 : 'GPS tidak tersedia: ' + err.message;
             updateGpsStatus(false, msg);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
     );
 }
 

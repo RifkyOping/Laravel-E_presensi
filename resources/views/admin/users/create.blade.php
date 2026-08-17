@@ -53,7 +53,6 @@
                             <option value="murid"    {{ old('role')==='murid'    ?'selected':'' }}>Murid</option>
                             <option value="guru"     {{ old('role')==='guru'     ?'selected':'' }}>Guru</option>
                             <option value="pengawas" {{ old('role')==='pengawas' ?'selected':'' }}>Pengawas</option>
-                            <option value="kurikulum" {{ old('role')==='kurikulum' ?'selected':'' }}>Kurikulum</option>
                             <option value="admin"    {{ old('role')==='admin'    ?'selected':'' }}>Admin</option>
                         </select>
                     </div>
@@ -97,7 +96,12 @@
                 <p class="text-xs text-slate-400 mt-0.5">Data lengkap profil murid.</p>
             </div>
             <div class="px-6 py-6 space-y-5">
-                <div class="grid grid-cols-1 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">NIS (Opsional)</label>
+                        <input type="text" name="nis" value="{{ old('nis') }}" placeholder="Nomor Induk Siswa"
+                               class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
+                    </div>
                     <div>
                         <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Kelas</label>
                         <select name="kelas_id" class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
@@ -184,6 +188,38 @@
             </div>
         </div>
 
+        {{-- Jabatan Sekolah --}}
+        <div id="profilJabatan" class="{{ old('role') === 'guru' ? '' : 'hidden' }}
+                                      bg-white rounded-xl border border-indigo-200 overflow-hidden mt-5">
+            <div class="px-6 py-4 border-b border-indigo-100 bg-indigo-50/50">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-white text-[10px] font-black">J</span>
+                    Jabatan Sekolah
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Centang jika guru memiliki jabatan struktural.</p>
+            </div>
+            <div class="px-6 py-6 space-y-4">
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 bg-slate-50 hover:bg-indigo-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_kepsek" value="1"
+                           {{ old('is_kepsek') ? 'checked' : '' }}
+                           class="w-5 h-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-600">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-slate-700 group-hover:text-indigo-700 transition">Kepala Sekolah</span>
+                        <span class="text-xs text-slate-400">(Dapat mengakses Monitoring Sekolah)</span>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 bg-slate-50 hover:bg-indigo-50/30 cursor-pointer transition group">
+                    <input type="checkbox" name="is_kurikulum" value="1"
+                           {{ old('is_kurikulum') ? 'checked' : '' }}
+                           class="w-5 h-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-600">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-slate-700 group-hover:text-indigo-700 transition">Kurikulum</span>
+                        <span class="text-xs text-slate-400">(Dapat mengakses Monitoring Sekolah & Verifikasi)</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
         <div class="flex justify-end gap-3 pt-4">
             <a href="{{ route('admin.users') }}"
                class="px-5 py-2.5 rounded-xl border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm transition">
@@ -201,9 +237,11 @@
 document.getElementById('roleSelect').addEventListener('change', function () {
     const panelSiswa = document.getElementById('profilSiswa');
     const panelGuru = document.getElementById('profilGuru');
+    const panelJabatan = document.getElementById('profilJabatan');
 
     if (panelSiswa) panelSiswa.classList.toggle('hidden', this.value !== 'murid');
     if (panelGuru) panelGuru.classList.toggle('hidden', this.value !== 'guru');
+    if (panelJabatan) panelJabatan.classList.toggle('hidden', this.value !== 'guru');
 });
 </script>
 </x-app-layout>

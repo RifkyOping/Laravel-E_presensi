@@ -35,11 +35,15 @@ class AbsensiKelasController extends Controller
         $setting = \App\Models\SchoolSetting::get();
         $blokAktif = $setting->blok_jadwal_aktif;
 
-        $jadwals = JadwalMengajar::where('user_id', $guru->id)
-            ->where('hari', $hariIni)
-            ->whereIn('tipe_blok', ['Semua', $blokAktif])
-            ->orderBy('jam_ke')
-            ->get();
+        if ($blokAktif === 'TEFA') {
+            $jadwals = collect();
+        } else {
+            $jadwals = JadwalMengajar::where('user_id', $guru->id)
+                ->where('hari', $hariIni)
+                ->whereIn('tipe_blok', ['Semua', $blokAktif])
+                ->orderBy('jam_ke')
+                ->get();
+        }
 
         // Cek jadwal mana yang sudah pernah diabsen hari ini
         foreach ($jadwals as $jadwal) {
@@ -64,8 +68,8 @@ class AbsensiKelasController extends Controller
             abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
         }
 
-        // Cek apakah RPP sudah diupload (pending atau disetujui)
-        $rppStatus = $guru->guruProfile?->rpp_status ?? null;
+        // Cek apakah RPP sudah diupload (pending atau disetujui) untuk bulan ini
+        $rppStatus = $guru->rpp_status;
         if (!in_array($rppStatus, ['pending', 'disetujui'])) {
             return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
         }
@@ -85,6 +89,15 @@ class AbsensiKelasController extends Controller
             ->get()
             ->keyBy('siswa_id');
 
+        // Ambil pengajuan sakit/izin harian yang SUDAH DISETUJUI untuk default status (termasuk multi-hari)
+        $absensiHarianSiswa = \App\Models\AbsensiSiswa::whereIn('user_id', $siswas->pluck('id'))
+            ->whereIn('status', ['sakit', 'izin'])
+            ->where('status_pengajuan', 'approved')
+            ->whereDate('tanggal', '<=', $today)
+            ->whereDate('tanggal_selesai', '>=', $today)
+            ->get()
+            ->keyBy('user_id');
+
         $sudahDiabsen = $absensiHariIni->isNotEmpty();
 
         // Cari atau buat Jurnal/Aktivitas Mengajar untuk kelas ini hari ini
@@ -102,7 +115,7 @@ class AbsensiKelasController extends Controller
         $aktivitas->load('verifier');
 
         return view('guru.absen-kelas.show', compact(
-            'jadwal', 'siswas', 'absensiHariIni', 'sudahDiabsen', 'today', 'aktivitas'
+            'jadwal', 'siswas', 'absensiHariIni', 'absensiHarianSiswa', 'sudahDiabsen', 'today', 'aktivitas'
         ));
     }
 
@@ -119,8 +132,8 @@ class AbsensiKelasController extends Controller
             abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
         }
 
-        // Cek apakah RPP sudah diupload (pending atau disetujui)
-        $rppStatus = $guru->guruProfile?->rpp_status ?? null;
+        // Cek apakah RPP sudah diupload (pending atau disetujui) untuk bulan ini
+        $rppStatus = $guru->rpp_status;
         if (!in_array($rppStatus, ['pending', 'disetujui'])) {
             return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
         }
@@ -176,48 +189,35 @@ class AbsensiKelasController extends Controller
         }
 
         $materi = $absensiHariIni->first()->materi ?? '-';
-        $fileName = 'Rekap_Absensi_Kelas_' . str_replace(' ', '_', $jadwal->kelas) . '_' . date('Y-m-d') . '.csv';
+        $fileName = 'Rekap_Absensi_Kelas_' . str_replace(' ', '_', $jadwal->kelas) . '_' . date('Y-m-d') . '.xlsx';
 
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-
+        $rows = [];
+        $rows[] = ['Mata Pelajaran:', $jadwal->mata_pelajaran];
+        $rows[] = ['Kelas:', $jadwal->kelas];
+        $rows[] = ['Tanggal:', Carbon::parse($today)->translatedFormat('d F Y')];
+        $rows[] = ['Materi:', $materi];
+        $rows[] = [];
+        
         $columns = ['No', 'Nama Siswa', 'Nomor Induk', 'Status', 'Keterangan'];
+        $rows[] = $columns;
 
-        $delimiter = $request->input('delimiter', ';');
+        $no = 1;
+        foreach ($absensiHariIni as $absen) {
+            $rows[] = [
+                $no++,
+                $absen->siswa->name ?? '-',
+                $absen->siswa->nomor_induk ?? '-',
+                ucfirst($absen->status),
+                $absen->keterangan ?? '-'
+            ];
+        }
 
-        $callback = function() use($absensiHariIni, $columns, $materi, $jadwal, $today, $delimiter) {
-            $file = fopen('php://output', 'w');
-            
-            // Tulis header info
-            fputcsv($file, ['Mata Pelajaran:', $jadwal->mata_pelajaran], $delimiter);
-            fputcsv($file, ['Kelas:', $jadwal->kelas], $delimiter);
-            fputcsv($file, ['Tanggal:', Carbon::parse($today)->translatedFormat('d F Y')], $delimiter);
-            fputcsv($file, ['Materi:', $materi], $delimiter);
-            fputcsv($file, [], $delimiter);
-            
-            // Tulis kolom
-            fputcsv($file, $columns, $delimiter);
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
 
-            $no = 1;
-            foreach ($absensiHariIni as $absen) {
-                $row['No']          = $no++;
-                $row['Nama Siswa']  = $absen->siswa->name ?? '-';
-                $row['Nomor Induk'] = $absen->siswa->nomor_induk ?? '-';
-                $row['Status']      = ucfirst($absen->status);
-                $row['Keterangan']  = $absen->keterangan ?? '-';
-
-                fputcsv($file, $row, $delimiter);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return response((string) $xlsx, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=$fileName",
+        ]);
     }
 
     /**
@@ -240,9 +240,10 @@ class AbsensiKelasController extends Controller
         $guru->guruProfile()->updateOrCreate(
             ['user_id' => $guru->id],
             [
-                'rpp_file'   => $filePath,
-                'rpp_status' => 'pending',
-                'rpp_pesan'  => null,
+                'rpp_file'    => $filePath,
+                'rpp_status'  => 'pending',
+                'rpp_pesan'   => null,
+                'rpp_periode' => date('Y-m'),
             ]
         );
 
@@ -279,12 +280,16 @@ class AbsensiKelasController extends Controller
             $setting = \App\Models\SchoolSetting::get();
             $blokAktif = $setting->blok_jadwal_aktif;
 
-            $jadwalHariIni = \App\Models\JadwalMengajar::with('user')
-                ->where('hari', $hariIni)
-                ->where('kelas', $filterKelas)
-                ->whereIn('tipe_blok', ['Semua', $blokAktif])
-                ->orderBy('jam_ke')
-                ->get();
+            if ($blokAktif === 'TEFA') {
+                $jadwalHariIni = collect();
+            } else {
+                $jadwalHariIni = \App\Models\JadwalMengajar::with('user')
+                    ->where('hari', $hariIni)
+                    ->where('kelas', $filterKelas)
+                    ->whereIn('tipe_blok', ['Semua', $blokAktif])
+                    ->orderBy('jam_ke')
+                    ->get();
+            }
                 
             foreach ($jadwalHariIni as $jadwal) {
                 // Status Absensi Masuk & Pulang Guru (dari Aktivitas Mengajar)

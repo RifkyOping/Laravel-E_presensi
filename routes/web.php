@@ -120,9 +120,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/guru/absensi/datang', [AbsensiGuruController::class, 'absenDatang'])->name('guru.absensi.datang');
     Route::post('/guru/absensi/pulang', [AbsensiGuruController::class, 'absenPulang'])->name('guru.absensi.pulang');
 
-    // Guru - Scan Absen QR Code Siswa
-    Route::get('/guru/scan-qr', [\App\Http\Controllers\Guru\ScanQrController::class, 'index'])->name('guru.scan-qr');
-    Route::post('/guru/scan-qr/process', [\App\Http\Controllers\Guru\ScanQrController::class, 'processScan'])->name('guru.scan-qr.process');
 
     // Guru - Aktivitas Mengajar
     Route::get('/guru/aktivitas', [AbsensiMengajarController::class, 'index'])->name('guru.aktivitas');
@@ -140,14 +137,6 @@ Route::middleware('auth')->group(function () {
     // Guru - Catatan Membaca (Digital/Manual)
     Route::get('/guru/literasi/catatan-membaca', [\App\Http\Controllers\Guru\CatatanLiterasiController::class, 'index'])->name('guru.literasi.catatan');
 
-    // Guru - Review Jawaban Indikator E-Book
-    Route::get('/guru/literasi/jawaban-indikator', [\App\Http\Controllers\Guru\ReviewIndikatorController::class, 'index'])->name('guru.literasi.jawaban-indikator');
-    Route::post('/guru/literasi/jawaban-indikator/nilai', [\App\Http\Controllers\Guru\ReviewIndikatorController::class, 'storeNilai'])->name('guru.literasi.jawaban-indikator.nilai');
-
-    // Guru - Manajemen Pertanyaan Indikator Literasi
-    Route::resource('/guru/literasi/manajemen-indikator', IndikatorLiterasiController::class)->parameters([
-        'manajemen-indikator' => 'indikator'
-    ])->names('guru.indikator');
 
     // Guru - Jadwal Mengajar (read-only, dikelola oleh admin)
     Route::get('/guru/jadwal', [\App\Http\Controllers\JadwalMengajarController::class, 'index'])->name('guru.jadwal.index');
@@ -167,6 +156,9 @@ Route::middleware('auth')->group(function () {
     // Guru - Buku Kemajuan Kelas
     Route::get('/guru/buku-kemajuan', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'bukuKemajuan'])->name('guru.buku-kemajuan');
     Route::get('/guru/buku-kemajuan/cetak', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'cetakBukuKemajuan'])->name('guru.buku-kemajuan.cetak');
+    // Monitoring Sekolah (Kepsek & Kurikulum)
+    Route::get('/monitoring-sekolah', [\App\Http\Controllers\MonitoringSekolahController::class, 'dashboard'])->name('monitoring-sekolah.dashboard');
+
 });
 
 require __DIR__ . '/auth.php';
@@ -184,6 +176,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
     Route::delete('/users/bulk-delete', [AdminController::class, 'bulkDestroyUsers'])->name('users.bulk-delete');
+    Route::put('/users/bulk-update', [AdminController::class, 'bulkUpdateUsers'])->name('users.bulk-update');
     Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
@@ -222,6 +215,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/ebook', [AdminEBookController::class, 'index'])->name('ebook.index');
     Route::get('/ebook/students', [AdminEBookController::class, 'studentsVoiceAccess'])->name('ebook.students');
     Route::post('/ebook/students/{user}/toggle', [AdminEBookController::class, 'toggleVoiceAccess'])->name('ebook.students.toggle');
+    Route::post('/ebook/clean-text', [AdminEBookController::class, 'cleanText'])->name('ebook.clean-text');
     Route::get('/ebook/create', [AdminEBookController::class, 'create'])->name('ebook.create');
     Route::post('/ebook', [AdminEBookController::class, 'store'])->name('ebook.store');
     Route::get('/ebook/{ebook}/edit', [AdminEBookController::class, 'edit'])->name('ebook.edit');
@@ -281,6 +275,19 @@ Route::middleware(['auth'])->prefix('piket')->name('piket.')->group(function () 
     Route::get('/persetujuan-rpp', [PiketMengajarController::class, 'persetujuanRpp'])->name('persetujuan-rpp');
     Route::post('/persetujuan-rpp/{user}/approve', [PiketMengajarController::class, 'approveRpp'])->name('persetujuan-rpp.approve');
     Route::post('/persetujuan-rpp/{user}/reject', [PiketMengajarController::class, 'rejectRpp'])->name('persetujuan-rpp.reject');
+
+    // Piket - Scan Absen QR Code Siswa
+    Route::get('/scan-qr', [\App\Http\Controllers\Piket\ScanQrController::class, 'index'])->name('scan-qr');
+    Route::post('/scan-qr/process', [\App\Http\Controllers\Piket\ScanQrController::class, 'processScan'])->name('scan-qr.process');
+
+    // Piket - Review Jawaban Indikator E-Book
+    Route::get('/literasi/jawaban-indikator', [\App\Http\Controllers\Piket\ReviewIndikatorController::class, 'index'])->name('literasi.jawaban-indikator');
+    Route::post('/literasi/jawaban-indikator/nilai', [\App\Http\Controllers\Piket\ReviewIndikatorController::class, 'storeNilai'])->name('literasi.jawaban-indikator.nilai');
+
+    // Piket - Manajemen Pertanyaan Indikator Literasi
+    Route::resource('/literasi/manajemen-indikator', \App\Http\Controllers\Piket\IndikatorLiterasiController::class)->parameters([
+        'manajemen-indikator' => 'indikator'
+    ])->names('indikator');
 });
 
 // ──────────────────────────────────────────

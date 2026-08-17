@@ -64,8 +64,8 @@ class CekAlphaAbsensi extends Command
 
         $today = Carbon::today()->toDateString();
 
-        // 1. Proses Siswa
-        $siswaList = User::where('role', 'siswa')->get();
+        // 1. Proses Siswa / Murid
+        $siswaList = User::whereIn('role', ['murid', 'siswa'])->get();
         foreach ($siswaList as $siswa) {
             $absenHariIni = AbsensiSiswa::where('user_id', $siswa->id)->whereDate('tanggal', $today)->first();
             if (!$absenHariIni) {
@@ -81,9 +81,9 @@ class CekAlphaAbsensi extends Command
                     $status = 'izin';
                     $status_pengajuan = 'approved';
                 } else {
-                    // 2. Cek apakah sakit berlanjut (jika absen terakhir adalah sakit)
+                    // 2. Cek apakah sakit berlanjut (jika absen terakhir adalah sakit yang disetujui)
                     $lastAbsen = AbsensiSiswa::where('user_id', $siswa->id)->whereDate('tanggal', '<', $today)->orderByDesc('tanggal')->first();
-                    $status = ($lastAbsen && $lastAbsen->status === 'sakit') ? 'sakit' : 'alpa';
+                    $status = ($lastAbsen && $lastAbsen->status === 'sakit' && $lastAbsen->status_pengajuan === 'approved') ? 'sakit' : 'alpa';
                     $status_pengajuan = ($status === 'sakit' && $lastAbsen && $lastAbsen->status_pengajuan === 'approved') ? 'approved' : null;
                 }
                 
@@ -94,6 +94,14 @@ class CekAlphaAbsensi extends Command
                     'status_pengajuan' => $status_pengajuan,
                     'kategori' => ($status === 'alpa') ? 'alpa' : null,
                 ]);
+            } else {
+                // Jika pengajuan ditolak dan siswa belum/tidak melakukan absen datang setelah jam tutup
+                if ($absenHariIni->status_pengajuan === 'rejected' && !$absenHariIni->waktu_datang && $absenHariIni->status !== 'hadir') {
+                    $absenHariIni->update([
+                        'status'   => 'alpa',
+                        'kategori' => 'alpa',
+                    ]);
+                }
             }
         }
 
@@ -114,9 +122,9 @@ class CekAlphaAbsensi extends Command
                     $status = 'izin';
                     $status_pengajuan = 'approved';
                 } else {
-                    // 2. Cek apakah sakit berlanjut (jika absen terakhir adalah sakit)
+                    // 2. Cek apakah sakit berlanjut (jika absen terakhir adalah sakit yang disetujui)
                     $lastAbsen = AbsensiGuru::where('user_id', $guru->id)->whereDate('tanggal', '<', $today)->orderByDesc('tanggal')->first();
-                    $status = ($lastAbsen && $lastAbsen->status === 'sakit') ? 'sakit' : 'alpa';
+                    $status = ($lastAbsen && $lastAbsen->status === 'sakit' && $lastAbsen->status_pengajuan === 'approved') ? 'sakit' : 'alpa';
                     $status_pengajuan = ($status === 'sakit' && $lastAbsen && $lastAbsen->status_pengajuan === 'approved') ? 'approved' : null;
                 }
                 
@@ -127,6 +135,14 @@ class CekAlphaAbsensi extends Command
                     'status_pengajuan' => $status_pengajuan,
                     'kategori' => ($status === 'alpa') ? 'alpa' : null,
                 ]);
+            } else {
+                // Jika pengajuan cuti/tugas ditolak dan guru belum/tidak melakukan absen datang setelah jam tutup
+                if ($absenHariIni->status_pengajuan === 'rejected' && !$absenHariIni->waktu_datang && $absenHariIni->status !== 'hadir') {
+                    $absenHariIni->update([
+                        'status'   => 'alpa',
+                        'kategori' => 'alpa',
+                    ]);
+                }
             }
         }
 

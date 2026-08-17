@@ -112,7 +112,8 @@ class PiketMengajarController extends Controller
         
         if ($request->filled('status')) {
             $query->whereHas('guruProfile', function ($q) use ($request) {
-                $q->where('rpp_status', $request->status);
+                $q->where('rpp_status', $request->status)
+                  ->where('rpp_periode', date('Y-m'));
             });
         }
 

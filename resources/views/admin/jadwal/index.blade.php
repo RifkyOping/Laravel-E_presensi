@@ -72,7 +72,7 @@
                         </div>
                         <div>
                             <h4 class="font-black text-rose-800 text-sm">Daftar Baris yang Gagal Diimport ({{ count(session('import_errors')) }} Baris)</h4>
-                            <p class="text-xs text-rose-600 mt-0.5">Periksa kembali data pada file Excel / CSV Anda atau pastikan nama guru sudah terdaftar di sistem.</p>
+                            <p class="text-xs text-rose-600 mt-0.5">Periksa kembali data pada file Excel Anda atau pastikan NIP/nama guru sudah terdaftar di sistem.</p>
                         </div>
                     </div>
                 </div>
@@ -101,19 +101,24 @@
         {{-- Toggle Blok Aktif --}}
         <div class="bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-between shadow-sm">
             <div>
-                <h3 class="font-bold text-slate-800 text-lg">Jadwal Aktif: <span class="text-[#1e3a6e]">Blok {{ $blokAktif }}</span></h3>
-                <p class="text-sm text-slate-500 mt-1">Ubah ini setiap dua pekan sekali untuk merotasi mapel umum dan kejuruan.</p>
+                <h3 class="font-bold text-slate-800 text-lg">
+                    Jadwal Aktif: <span class="text-[#1e3a6e]">{{ $blokAktif === 'TEFA' ? 'TEFA' : "Blok {$blokAktif}" }}</span>
+                </h3>
+                <p class="text-sm text-slate-500 mt-1">Ubah ini untuk mengatur status jadwal (TEFA: jadwal reguler dinonaktifkan).</p>
             </div>
-            <form action="{{ route('admin.jadwal-mengajar.toggle-blok') }}" method="POST">
+            <form action="{{ route('admin.jadwal-mengajar.toggle-blok') }}" method="POST" class="flex items-center gap-2">
                 @csrf
-                <button type="submit" 
-                    class="relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#1e3a6e] focus:ring-offset-2 {{ $blokAktif === 'B' ? 'bg-[#1e3a6e]' : 'bg-slate-300' }}"
-                    role="switch" aria-checked="{{ $blokAktif === 'B' ? 'true' : 'false' }}">
-                    <span class="sr-only">Toggle Blok</span>
-                    <span aria-hidden="true" 
-                        class="pointer-events-none inline-block h-7 w-7 transform rounded-full shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center font-bold text-xs {{ $blokAktif === 'B' ? 'translate-x-6 bg-slate-200 text-[#1e3a6e]' : 'translate-x-0 bg-[#1e3a6e] text-white' }}">
-                        {{ $blokAktif }}
-                    </span>
+                <button type="submit" name="blok" value="A" 
+                    class="px-4 py-2 rounded-xl text-sm font-bold transition-all {{ $blokAktif === 'A' ? 'bg-[#1e3a6e] text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                    Blok A
+                </button>
+                <button type="submit" name="blok" value="B" 
+                    class="px-4 py-2 rounded-xl text-sm font-bold transition-all {{ $blokAktif === 'B' ? 'bg-[#1e3a6e] text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                    Blok B
+                </button>
+                <button type="submit" name="blok" value="TEFA" 
+                    class="px-4 py-2 rounded-xl text-sm font-bold transition-all {{ $blokAktif === 'TEFA' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                    TEFA
                 </button>
             </form>
         </div>
@@ -338,7 +343,7 @@
                     </button>
                 </div>
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">1. Download Template CSV</label>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">1. Download Template Excel</label>
                     <div class="flex gap-2">
                         <select id="templateDelimiterJadwal"
                             class="flex-1 text-sm border-slate-200 rounded-xl focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
@@ -361,10 +366,10 @@
                     @csrf
                     <div class="mb-5 space-y-4">
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">2. Upload File CSV / XLSX</label>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">2. Upload File XLSX / CSV</label>
                             <input type="file" name="file_csv" accept=".csv,.xlsx,.txt" required
                                 class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#1e3a6e] hover:file:bg-blue-100">
-                            <p class="text-xs text-slate-400 mt-2">Mendukung format CSV dan XLSX. Maksimal ukuran file 2MB.</p>
+                            <p class="text-xs text-slate-400 mt-2">Disarankan format XLSX. Maksimal ukuran file 2MB.</p>
                         </div>
                     </div>
                     <div class="flex items-center justify-end">

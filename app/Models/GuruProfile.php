@@ -14,12 +14,15 @@ class GuruProfile extends Model
         'is_jadwal_set',
         'rpp_file',
         'rpp_status',
+        'rpp_periode',
         'rpp_pesan',
         'is_piket_sholat',
         'is_piket_mengajar',
         'is_piket_rpp',
         'is_piket_absen_qr',
         'is_guru_bahasa',
+        'is_kepsek',
+        'is_kurikulum',
     ];
 
     protected $casts = [
@@ -29,6 +32,8 @@ class GuruProfile extends Model
         'is_piket_rpp'      => 'boolean',
         'is_piket_absen_qr' => 'boolean',
         'is_guru_bahasa'    => 'boolean',
+        'is_kepsek'         => 'boolean',
+        'is_kurikulum'      => 'boolean',
     ];
 
     public function user()

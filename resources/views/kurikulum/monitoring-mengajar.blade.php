@@ -55,14 +55,14 @@
         </button>
 
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-            <form method="GET" action="{{ route('kurikulum.monitoring-mengajar') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <form id="filter-form" onsubmit="event.preventDefault(); fetchFilteredData();" method="GET" action="{{ route('kurikulum.monitoring-mengajar') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
                     <label class="app-label">Tanggal</label>
-                    <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal') }}">
+                    <input type="date" name="tanggal" class="app-input" value="{{ request('tanggal') }}" onchange="fetchFilteredData()">
                 </div>
                 <div>
                     <label class="app-label">Filter Guru</label>
-                    <select name="guru_id" class="app-input">
+                    <select name="guru_id" class="app-input" onchange="fetchFilteredData()">
                         <option value="">— Semua Guru —</option>
                         @foreach($semuaGuru as $g)
                         <option value="{{ $g->id }}" {{ request('guru_id')==$g->id?'selected':'' }}>{{ $g->name }}</option>
@@ -71,46 +71,35 @@
                 </div>
                 <div>
                     <label class="app-label">Status Verifikasi</label>
-                    <select name="status_verif" class="app-input">
+                    <select name="status_verif" class="app-input" onchange="fetchFilteredData()">
                         <option value="">— Semua —</option>
                         <option value="belum" {{ request('status_verif')==='belum'?'selected':'' }}>Belum Diverifikasi</option>
                         <option value="mengajar" {{ request('status_verif')==='mengajar'?'selected':'' }}>Terverifikasi Mengajar</option>
                         <option value="tidak_mengajar" {{ request('status_verif')==='tidak_mengajar'?'selected':'' }}>Terverifikasi Tidak Mengajar</option>
                     </select>
                 </div>
-                <div class="flex items-end gap-3 pt-1">
-                    <button type="submit"
-                            class="bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-2.5 rounded-xl text-sm
-                                   transition duration-200 shadow-sm flex items-center gap-2 flex-shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
-                        </svg>
-                        Terapkan
-                    </button>
-                    @if($hasFilter)
-                    <a href="{{ route('kurikulum.monitoring-mengajar') }}"
-                       class="px-5 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm rounded-xl transition duration-200 flex items-center gap-1.5">
+                <div class="flex items-end pt-1" id="reset-btn-container" style="display: {{ $hasFilter ? 'block' : 'none' }}">
+                    <button type="button" onclick="resetFilter()" class="px-5 py-2.5 border border-slate-200 hover:border-slate-400 text-slate-600 font-semibold text-sm rounded-xl transition duration-200 flex items-center justify-center gap-1.5 w-full sm:w-auto h-[42px]">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         Reset
-                    </a>
-                    @endif
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     {{-- Tabel --}}
-    <div class="app-card overflow-hidden animate-up delay-2">
+    <div id="data-container" class="app-card overflow-hidden animate-up delay-2 transition-opacity duration-300">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
                 <h3 class="font-bold text-slate-800">Aktivitas Mengajar</h3>
                 <p class="text-xs text-slate-400 mt-0.5">{{ $aktivitas->total() }} sesi ditemukan</p>
             </div>
-            <div class="flex gap-2">
-                <span class="app-badge b-teal">
+            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2">
+                <span class="app-badge b-teal text-[10px] sm:text-xs">
                     {{ $aktivitas->filter(fn($a) => $a->verified_at)->count() }} diverifikasi
                 </span>
-                <span class="app-badge b-red">
+                <span class="app-badge b-red text-[10px] sm:text-xs">
                     {{ $aktivitas->filter(fn($a) => !$a->verified_at)->count() }} belum
                 </span>
             </div>
@@ -267,6 +256,98 @@ function showPhotoModal(src, name) {
 function closePhotoModal() {
     document.getElementById('photo-modal').classList.add('hidden');
 }
+
+let debounceTimer;
+
+function fetchFilteredData() {
+    const container = document.getElementById('data-container');
+    if (container) {
+        container.style.opacity = '0.5';
+        container.style.pointerEvents = 'none';
+    }
+
+    const form = document.getElementById('filter-form');
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    
+    const resetBtnContainer = document.getElementById('reset-btn-container');
+    if (resetBtnContainer) {
+        const hasFilter = Array.from(formData.values()).some(val => val.trim() !== '');
+        resetBtnContainer.style.display = hasFilter ? 'block' : 'none';
+    }
+    
+    const url = new URL(form.action);
+    url.search = params.toString();
+
+    // Update url without reloading
+    window.history.pushState({}, '', url);
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContainer = doc.getElementById('data-container');
+            
+            if (container && newContainer) {
+                container.innerHTML = newContainer.innerHTML;
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        })
+        .catch(err => {
+            console.error('Gagal mengambil data', err);
+            if (container) {
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        });
+}
+
+function resetFilter() {
+    const form = document.getElementById('filter-form');
+    form.querySelectorAll('select, input').forEach(el => el.value = '');
+    fetchFilteredData();
+}
+
+// Intercept pagination clicks for AJAX
+document.addEventListener('click', function(e) {
+    const link = e.target.closest('#data-container .pagination a, #data-container nav[role="navigation"] a');
+    if (link) {
+        e.preventDefault();
+        const url = new URL(link.href);
+        
+        const container = document.getElementById('data-container');
+        if (container) {
+            container.style.opacity = '0.5';
+            container.style.pointerEvents = 'none';
+        }
+
+        window.history.pushState({}, '', url);
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContainer = doc.getElementById('data-container');
+                
+                if (container && newContainer) {
+                    container.innerHTML = newContainer.innerHTML;
+                    container.style.opacity = '1';
+                    container.style.pointerEvents = 'auto';
+                    window.scrollTo({ top: document.getElementById('filter-form').offsetTop - 20, behavior: 'smooth' });
+                }
+            })
+            .catch(err => {
+                console.error('Gagal mengambil data pagination', err);
+                if (container) {
+                    container.style.opacity = '1';
+                    container.style.pointerEvents = 'auto';
+                }
+            });
+    }
+});
 </script>
 
 </x-app-layout>

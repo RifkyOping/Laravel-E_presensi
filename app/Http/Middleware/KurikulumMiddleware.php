@@ -10,7 +10,7 @@ class KurikulumMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || !in_array(Auth::user()->role, ['kurikulum', 'admin'])) {
+        if (!Auth::check() || (!Auth::user()->is_kurikulum && Auth::user()->role !== 'admin')) {
             abort(403, 'Akses ditolak. Halaman ini hanya untuk Tim Kurikulum.');
         }
 

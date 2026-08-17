@@ -201,29 +201,19 @@ class AdminJadwalMengajarController extends Controller
      */
     public function template(Request $request)
     {
-        $delimiter = $request->query('delimiter', ',');
-        
-        $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=template_jadwal_mengajar.csv",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+        $rows = [
+            ['nip', 'hari', 'tipe_blok', 'mata_pelajaran', 'kelas', 'jam_ke', 'jam_mulai', 'jam_selesai'],
+            ['198001012010011001', 'Senin', 'A', 'Mata Pelajaran 1', 'X JURUSAN 1', '1', '07:30', '08:15'],
+            ['198001012010011001', 'Senin', 'B', 'Mata Pelajaran 2', 'X JURUSAN 1', '1', '07:30', '08:15'],
+            ['198001012010011001', 'Selasa', 'Semua', 'Mata Pelajaran Umum', 'X JURUSAN 1', '2', '08:15', '09:00']
         ];
 
-        $columns = ['nama', 'hari', 'tipe_blok', 'mata_pelajaran', 'kelas', 'jam_ke', 'jam_mulai', 'jam_selesai'];
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
 
-        $callback = function() use ($columns, $delimiter) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns, $delimiter);
-            // Contoh isi
-            fputcsv($file, ['NAMA GURU', 'Senin', 'A', 'Mata Pelajaran 1', 'X JURUSAN 1', '1', '07:30', '08:15'], $delimiter);
-            fputcsv($file, ['NAMA GURU', 'Senin', 'B', 'Mata Pelajaran 2', 'X JURUSAN 1', '1', '07:30', '08:15'], $delimiter);
-            fputcsv($file, ['NAMA GURU', 'Selasa', 'Semua', 'Mata Pelajaran Umum', 'X JURUSAN 1', '2', '08:15', '09:00'], $delimiter);
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return response((string) $xlsx, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="template_jadwal_mengajar.xlsx"',
+        ]);
     }
 
     /**
@@ -276,14 +266,16 @@ class AdminJadwalMengajarController extends Controller
          // Mapping kolom standar
          // Validasi header minimum
          $identifierColumn = null;
-         if (in_array('nama', $header)) {
+         if (in_array('nip', $header)) {
+             $identifierColumn = 'nip';
+         } elseif (in_array('nama', $header)) {
              $identifierColumn = 'nama';
          } elseif (in_array('email_guru', $header)) {
              $identifierColumn = 'email_guru';
          }
  
          if (!$identifierColumn || !in_array('hari', $header) || !in_array('jam_ke', $header)) {
-             return redirect()->back()->with('error', 'Format header file tidak sesuai template. Pastikan ada kolom nama, hari, dan jam_ke.');
+             return redirect()->back()->with('error', 'Format header file tidak sesuai template. Pastikan ada kolom nip, hari, dan jam_ke.');
          }
  
          $berhasil = 0;
@@ -319,15 +311,17 @@ class AdminJadwalMengajarController extends Controller
              if ($namaOrEmail === '') {
                  $gagalRows[] = [
                      'baris' => $rowNum,
-                     'nama' => '(Nama/Email Kosong)',
+                     'nama' => '(NIP/Nama/Email Kosong)',
                      'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-') . " | Hari: " . ($hari ?: '-'),
-                     'alasan' => 'Kolom nama guru atau email guru tidak diisi.'
+                     'alasan' => 'Kolom identitas guru (NIP/Nama/Email) tidak diisi.'
                  ];
                  continue;
              }
              
-             // Cari user (guru) berdasarkan nama atau email
-             if ($identifierColumn === 'nama') {
+             // Cari user (guru) berdasarkan NIP, nama atau email
+             if ($identifierColumn === 'nip') {
+                 $guru = User::where('nomor_induk', $namaOrEmail)->where('role', 'guru')->first();
+             } elseif ($identifierColumn === 'nama') {
                  $guru = User::where('name', $namaOrEmail)->where('role', 'guru')->first();
                  if (!$guru) {
                      $guru = User::whereRaw('LOWER(name) = ?', [strtolower($namaOrEmail)])->where('role', 'guru')->first();
@@ -409,16 +403,15 @@ class AdminJadwalMengajarController extends Controller
      */
     public function toggleBlok(Request $request)
     {
+        $request->validate([
+            'blok' => 'required|in:A,B,TEFA'
+        ]);
+
         $setting = \App\Models\SchoolSetting::get();
-        
-        if ($setting->blok_jadwal_aktif === 'A') {
-            $setting->blok_jadwal_aktif = 'B';
-        } else {
-            $setting->blok_jadwal_aktif = 'A';
-        }
-        
+        $setting->blok_jadwal_aktif = $request->blok;
         $setting->save();
         
-        return redirect()->back()->with('success', "Blok jadwal aktif berhasil diubah menjadi Blok {$setting->blok_jadwal_aktif}.");
+        $namaBlok = $request->blok === 'TEFA' ? 'TEFA' : "Blok {$setting->blok_jadwal_aktif}";
+        return redirect()->back()->with('success', "Status jadwal aktif berhasil diubah menjadi {$namaBlok}.");
     }
 }

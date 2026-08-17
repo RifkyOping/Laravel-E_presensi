@@ -14,10 +14,14 @@ class JadwalMengajarController extends Controller
         $setting = \App\Models\SchoolSetting::get();
         $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
 
-        $jadwalRaw = $user->jadwalMengajars()
-            ->whereIn('tipe_blok', ['Semua', $blokAktif])
-            ->orderBy('jam_ke')
-            ->get();
+        if ($blokAktif === 'TEFA') {
+            $jadwalRaw = collect();
+        } else {
+            $jadwalRaw = $user->jadwalMengajars()
+                ->whereIn('tipe_blok', ['Semua', $blokAktif])
+                ->orderBy('jam_ke')
+                ->get();
+        }
 
         // Kelompokkan berdasarkan hari
         $jadwal = [

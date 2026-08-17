@@ -174,24 +174,30 @@ class AdminController extends Controller
     {
         $rules = [
             'name'        => 'required|string|max:255',
-            'nomor_induk' => 'required|string|max:255|unique:users,nomor_induk',
             'email'       => 'nullable|email|unique:users,email',
             'password'    => 'required|min:6|confirmed',
-            'role'        => 'required|in:murid,guru,admin,pengawas,kurikulum',
+            'role'        => 'required|in:murid,guru,admin,pengawas',
         ];
 
         if ($request->role === 'murid') {
+            $rules['nomor_induk']    = 'required_without:nis|nullable|string|max:255|unique:users,nomor_induk';
+            $rules['nis']            = 'required_without:nomor_induk|nullable|string|max:255|unique:siswa_profiles,nis';
             $rules['kelas_id']       = 'nullable|exists:kelas,id';
             $rules['jenis_kelamin']  = 'nullable|in:L,P';
             $rules['tempat_lahir']   = 'nullable|string|max:100';
             $rules['tanggal_lahir']  = 'nullable|date';
             $rules['agama']          = 'nullable|string|max:50';
+        } else {
+            $rules['nomor_induk']    = 'required|string|max:255|unique:users,nomor_induk';
         }
 
         $request->validate($rules, [
             'name.required'        => 'Nama lengkap wajib diisi.',
             'nomor_induk.required' => 'Nomor induk (NISN/NIP) wajib diisi.',
+            'nomor_induk.required_without' => 'NISN wajib diisi jika NIS kosong.',
             'nomor_induk.unique'   => 'Nomor induk ini sudah terdaftar.',
+            'nis.required_without' => 'NIS wajib diisi jika NISN kosong.',
+            'nis.unique'           => 'NIS ini sudah terdaftar.',
             'email.required'       => 'Email wajib diisi.',
             'email.unique'         => 'Email sudah terdaftar.',
             'password.required'    => 'Password wajib diisi.',
@@ -203,7 +209,7 @@ class AdminController extends Controller
 
         $data = [
             'name'        => $request->name,
-            'nomor_induk' => $request->nomor_induk,
+            'nomor_induk' => $request->nomor_induk ?: null,
             'email'       => $request->email,
             'password'    => Hash::make($request->password),
             'role'        => $request->role,
@@ -218,6 +224,8 @@ class AdminController extends Controller
                 'is_piket_rpp'      => $request->has('is_piket_rpp'),
                 'is_piket_absen_qr' => $request->has('is_piket_absen_qr'),
                 'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
+                'is_kepsek'         => $request->has('is_kepsek'),
+                'is_kurikulum'      => $request->has('is_kurikulum'),
             ]);
         }
 
@@ -227,6 +235,7 @@ class AdminController extends Controller
                 'kelas'         => $kelas ? $kelas->tingkat : null,
                 'jurusan'       => $kelas ? $kelas->jurusan : null,
                 'rombel'        => $kelas ? $kelas->rombel : null,
+                'nis'           => $request->nis ?: null,
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'tempat_lahir'  => $request->tempat_lahir,
                 'tanggal_lahir' => $request->tanggal_lahir,
@@ -239,24 +248,18 @@ class AdminController extends Controller
 
     public function downloadTemplateImport(Request $request)
     {
-        $delimiter = $request->query('delimiter', ',');
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="template_import_user.csv"',
+        $rows = [
+            ['nama', 'nomor_induk (NISN/NIP)', 'nis', 'email', 'role', 'password', 'kelas', 'agama'],
+            ['Murid Contoh 1', '0012345678', '21221001', 'murid1@smkn1majene.sch.id', 'murid', '12345678', 'X RPL 1', 'Islam'],
+            ['Guru Contoh 1', '198001012010011001', '', '', 'guru', '12345678', '', '']
         ];
 
-        $callback = function () use ($delimiter) {
-            $file = fopen('php://output', 'w');
-            // Header kolom
-            fputcsv($file, ['nama', 'nomor_induk (NISN/NIP)', 'email', 'role', 'password', 'kelas', 'agama'], $delimiter);
-            // Contoh data
-            fputcsv($file, ['Murid Contoh 1', '0012345678', 'murid1@smkn1majene.sch.id', 'murid', '12345678', 'X RPL 1', 'Islam'], $delimiter);
-            fputcsv($file, ['Guru Contoh 1', '198001012010011001', '', 'guru', '12345678', '', ''], $delimiter);
-            fclose($file);
-        };
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
 
-        return response()->stream($callback, 200, $headers);
+        return response((string) $xlsx, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="template_import_user.xlsx"',
+        ]);
     }
 
     public function importUsers(Request $request)
@@ -321,39 +324,60 @@ class AdminController extends Controller
 
             $name = trim($row[0]);
             $nomor_induk = trim($row[1]);
-            $email = trim($row[2]) === '' ? null : trim($row[2]);
-            $role = strtolower(trim($row[3]));
-            $password = isset($row[4]) && trim($row[4]) !== '' ? trim($row[4]) : '12345678';
-            $kelasStr = isset($row[5]) ? trim($row[5]) : null;
-            $agama = isset($row[6]) && trim($row[6]) !== '' ? trim($row[6]) : null;
+            $nis = isset($row[2]) && trim($row[2]) !== '' ? trim($row[2]) : null;
+            $email = isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : null;
+            $role = isset($row[4]) ? strtolower(trim($row[4])) : '';
+            $password = isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : '12345678';
+            $kelasStr = isset($row[6]) ? trim($row[6]) : null;
+            $agama = isset($row[7]) && trim($row[7]) !== '' ? trim($row[7]) : null;
 
-            if ($nomor_induk === '') {
+            if ($role !== 'murid' && $nomor_induk === '') {
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => $name ?: '(Kosong)',
+                    'detail' => "Role: {$role}",
+                    'alasan' => 'Nomor Induk / NIP / ID wajib diisi.'
+                ];
+                continue;
+            }
+
+            if ($role === 'murid' && $nomor_induk === '' && !$nis) {
                 $gagalRows[] = [
                     'baris' => $rowNum,
                     'nama' => $name ?: '(Kosong)',
                     'detail' => "Role: {$role}" . ($kelasStr ? " | Kelas: {$kelasStr}" : ''),
-                    'alasan' => 'Nomor Induk / NIP / NISN wajib diisi.'
+                    'alasan' => 'Untuk murid, minimal NIS atau NISN (Nomor Induk) harus diisi.'
                 ];
                 continue;
             }
 
             // Validasi role dan email
-            if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas', 'kurikulum'])) {
+            if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas'])) {
                 $gagalRows[] = [
                     'baris' => $rowNum,
                     'nama' => $name,
                     'detail' => "Nomor Induk: {$nomor_induk} | Role: {$role}",
-                    'alasan' => "Role '{$role}' tidak valid (pilihan: murid, guru, admin, pengawas, kurikulum)."
+                    'alasan' => "Role '{$role}' tidak valid (pilihan: murid, guru, admin, pengawas)."
                 ];
                 continue;
             }
 
-            if (User::where('nomor_induk', $nomor_induk)->exists()) {
+            if ($nomor_induk !== '' && User::where('nomor_induk', $nomor_induk)->exists()) {
                 $gagalRows[] = [
                     'baris' => $rowNum,
                     'nama' => $name,
                     'detail' => "Nomor Induk: {$nomor_induk}",
                     'alasan' => "Nomor Induk '{$nomor_induk}' sudah terdaftar di sistem."
+                ];
+                continue;
+            }
+
+            if ($role === 'murid' && $nis && \App\Models\SiswaProfile::where('nis', $nis)->exists()) {
+                $gagalRows[] = [
+                    'baris' => $rowNum,
+                    'nama' => $name,
+                    'detail' => "NIS: {$nis}",
+                    'alasan' => "NIS '{$nis}' sudah terdaftar di sistem."
                 ];
                 continue;
             }
@@ -371,7 +395,7 @@ class AdminController extends Controller
             try {
                 $user = User::create([
                     'name'        => $name,
-                    'nomor_induk' => $nomor_induk,
+                    'nomor_induk' => $nomor_induk !== '' ? $nomor_induk : null,
                     'email'       => $email,
                     'role'        => $role,
                     'password'    => Hash::make($password),
@@ -379,6 +403,9 @@ class AdminController extends Controller
 
                 if ($role === 'murid') {
                     $profileData = [];
+                    if ($nis) {
+                        $profileData['nis'] = $nis;
+                    }
                     if ($agama) {
                         $profileData['agama'] = $agama;
                     }
@@ -435,25 +462,31 @@ class AdminController extends Controller
     {
         $rules = [
             'name'        => 'required|string|max:255',
-            'nomor_induk' => 'required|string|max:255|unique:users,nomor_induk,' . $user->id,
             'email'       => 'nullable|email|unique:users,email,' . $user->id,
-            'role'        => 'required|in:murid,guru,admin,pengawas,kurikulum',
+            'role'        => 'required|in:murid,guru,admin,pengawas',
             'password'    => 'nullable|min:6|confirmed',
         ];
 
         if ($request->role === 'murid') {
             $profileId = $user->siswaProfile ? $user->siswaProfile->id : null;
+            $rules['nomor_induk']   = 'required_without:nis|nullable|string|max:255|unique:users,nomor_induk,' . $user->id;
+            $rules['nis']           = 'required_without:nomor_induk|nullable|string|max:255|unique:siswa_profiles,nis,' . $profileId;
             $rules['kelas_id']      = 'nullable|exists:kelas,id';
             $rules['jenis_kelamin'] = 'nullable|in:L,P';
             $rules['tempat_lahir']  = 'nullable|string|max:100';
             $rules['tanggal_lahir'] = 'nullable|date';
             $rules['agama']         = 'nullable|string|max:50';
+        } else {
+            $rules['nomor_induk']   = 'required|string|max:255|unique:users,nomor_induk,' . $user->id;
         }
 
         $request->validate($rules, [
             'name.required'        => 'Nama lengkap wajib diisi.',
             'nomor_induk.required' => 'Nomor induk (NISN/NIP) wajib diisi.',
+            'nomor_induk.required_without' => 'NISN wajib diisi jika NIS kosong.',
             'nomor_induk.unique'   => 'Nomor induk ini sudah digunakan.',
+            'nis.required_without' => 'NIS wajib diisi jika NISN kosong.',
+            'nis.unique'           => 'NIS ini sudah digunakan.',
             'email.required'       => 'Email wajib diisi.',
             'email.unique'         => 'Email sudah digunakan.',
             'role.required'        => 'Role wajib dipilih.',
@@ -464,7 +497,7 @@ class AdminController extends Controller
 
         $data = [
             'name'        => $request->name,
-            'nomor_induk' => $request->nomor_induk,
+            'nomor_induk' => $request->nomor_induk ?: null,
             'email'       => $request->email,
             'role'        => $request->role,
         ];
@@ -484,6 +517,8 @@ class AdminController extends Controller
                     'is_piket_rpp'      => $request->has('is_piket_rpp'),
                     'is_piket_absen_qr' => $request->has('is_piket_absen_qr'),
                     'is_guru_bahasa'    => $request->has('is_guru_bahasa'),
+                    'is_kepsek'         => $request->has('is_kepsek'),
+                    'is_kurikulum'      => $request->has('is_kurikulum'),
                 ]
             );
         }
@@ -496,6 +531,7 @@ class AdminController extends Controller
                     'kelas'         => $kelas ? $kelas->tingkat : null,
                     'jurusan'       => $kelas ? $kelas->jurusan : null,
                     'rombel'        => $kelas ? $kelas->rombel : null,
+                    'nis'           => $request->nis ?: null,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'tempat_lahir'  => $request->tempat_lahir,
                     'tanggal_lahir' => $request->tanggal_lahir,
@@ -538,6 +574,109 @@ class AdminController extends Controller
         User::whereIn('id', $ids)->delete();
 
         return redirect()->route('admin.users')->with('success', count($ids) . ' akun pengguna berhasil dihapus.');
+    }
+
+    public function bulkUpdateUsers(Request $request)
+    {
+        $request->validate([
+            'users' => 'required|array',
+            'users.*.name' => 'required|string|max:255',
+            'users.*.nomor_induk' => 'nullable|string|max:255',
+            'users.*.nis' => 'nullable|string|max:255',
+            'users.*.email' => 'nullable|email',
+            'users.*.role' => 'required|in:murid,guru,admin,pengawas',
+        ]);
+
+        $users = $request->users;
+        $berhasil = 0;
+        $gagal = 0;
+        $errorMessages = [];
+
+        foreach ($users as $id => $data) {
+            $user = User::find($id);
+            if (!$user) {
+                continue;
+            }
+
+            $nomor_induk = $data['nomor_induk'] ?? null;
+            $newRole = $data['role'];
+            $submittedNis = $data['nis'] ?? null;
+            $hasNisKey = array_key_exists('nis', $data);
+
+            if ($newRole !== 'murid' && empty($nomor_induk)) {
+                $errorMessages[] = "Gagal ({$user->name}): Nomor Induk wajib diisi untuk role {$newRole}.";
+                $gagal++;
+                continue;
+            }
+
+            if ($newRole === 'murid' && empty($nomor_induk)) {
+                $effectiveNis = $hasNisKey ? $submittedNis : $user->siswaProfile?->nis;
+                if (empty($effectiveNis)) {
+                    $errorMessages[] = "Gagal ({$user->name}): NISN atau NIS wajib diisi.";
+                    $gagal++;
+                    continue;
+                }
+            }
+
+            // Validasi Unik
+            if (!empty($nomor_induk) && User::where('nomor_induk', $nomor_induk)->where('id', '!=', $id)->exists()) {
+                $errorMessages[] = "Gagal ({$user->name}): Nomor Induk {$nomor_induk} sudah digunakan.";
+                $gagal++;
+                continue;
+            }
+
+            // Validasi Unik NIS
+            if ($newRole === 'murid' && $hasNisKey && !empty($submittedNis)) {
+                $profileId = $user->siswaProfile?->id;
+                $nisExists = \App\Models\SiswaProfile::where('nis', $submittedNis)
+                    ->when($profileId, function($q) use ($profileId) {
+                        return $q->where('id', '!=', $profileId);
+                    })->exists();
+                    
+                if ($nisExists) {
+                    $errorMessages[] = "Gagal ({$user->name}): NIS {$submittedNis} sudah digunakan.";
+                    $gagal++;
+                    continue;
+                }
+            }
+
+            if (!empty($data['email']) && User::where('email', $data['email'])->where('id', '!=', $id)->exists()) {
+                $errorMessages[] = "Gagal ({$user->name}): Email {$data['email']} sudah digunakan.";
+                $gagal++;
+                continue;
+            }
+
+            $oldRole = $user->role;
+
+            $user->update([
+                'name' => $data['name'],
+                'nomor_induk' => $nomor_induk,
+                'email' => $data['email'],
+                'role' => $newRole,
+            ]);
+
+            // Jika role diubah dari murid ke yang lain, hapus profil siswa
+            if ($oldRole === 'murid' && $newRole !== 'murid') {
+                if ($user->siswaProfile) {
+                    $user->siswaProfile()->delete();
+                }
+            } elseif ($newRole === 'murid' && $hasNisKey) {
+                // Update nis jika ada di submit
+                $user->siswaProfile()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    ['nis' => $submittedNis ?: null]
+                );
+            }
+
+            $berhasil++;
+        }
+
+        if ($gagal > 0) {
+            $msg = "Berhasil memperbarui {$berhasil} pengguna. Terdapat {$gagal} kegagalan: " . implode(' | ', $errorMessages);
+            return back()->with('warning', $msg);
+        }
+
+        return back()->with('success', "Berhasil memperbarui seluruh ({$berhasil}) pengguna di halaman ini.");
     }
 
     public function resetDevice(User $user)
@@ -591,7 +730,6 @@ class AdminController extends Controller
     {
         $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
         $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
-        $delimiter = $request->input('delimiter', ';');
         
         $riwayat = AbsensiGuru::with('user')
             ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
@@ -599,34 +737,31 @@ class AdminController extends Controller
             ->orderBy('user_id')
             ->get();
 
-        $filename = "absensi_guru_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".csv";
-
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $rows = [
+            ['No', 'Nama Guru', 'Tanggal', 'Jam Datang', 'Jam Pulang', 'Status Kehadiran', 'Kategori', 'Keterangan']
         ];
+        
+        $no = 1;
+        foreach ($riwayat as $data) {
+            $rows[] = [
+                $no++,
+                $data->user->name ?? '-',
+                $data->tanggal->format('Y-m-d'),
+                $data->waktu_datang ?? '-',
+                $data->waktu_pulang ?? '-',
+                $data->status,
+                $data->kategori ?? '-',
+                $data->keterangan ?? '-'
+            ];
+        }
 
-        $callback = function () use ($riwayat, $delimiter) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Nama Guru', 'Tanggal', 'Jam Datang', 'Jam Pulang', 'Status Kehadiran', 'Kategori', 'Keterangan'], $delimiter);
-            
-            $no = 1;
-            foreach ($riwayat as $data) {
-                fputcsv($file, [
-                    $no++,
-                    $data->user->name ?? '-',
-                    $data->tanggal->format('Y-m-d'),
-                    $data->waktu_datang ?? '-',
-                    $data->waktu_pulang ?? '-',
-                    $data->status,
-                    $data->kategori ?? '-',
-                    $data->keterangan ?? '-'
-                ], $delimiter);
-            }
-            fclose($file);
-        };
+        $filename = "absensi_guru_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".xlsx";
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
 
-        return response()->stream($callback, 200, $headers);
+        return response((string) $xlsx, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     // ──────────────────────────────────────────
@@ -670,7 +805,6 @@ class AdminController extends Controller
     {
         $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
         $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
-        $delimiter = $request->input('delimiter', ';');
         
         $riwayat = \App\Models\AbsensiMengajar::with(['user', 'verifier'])
             ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
@@ -679,39 +813,36 @@ class AdminController extends Controller
             ->orderBy('jam_ke')
             ->get();
 
-        $filename = "aktivitas_mengajar_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".csv";
-
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $rows = [
+            ['No', 'Nama Guru', 'Tanggal', 'Mata Pelajaran', 'Kelas', 'Jam Ke', 'Jam Mulai', 'Jam Selesai', 'Masuk', 'Keluar', 'Kategori', 'Status Verifikasi', 'Diverifikasi Oleh']
         ];
+        
+        $no = 1;
+        foreach ($riwayat as $data) {
+            $rows[] = [
+                $no++,
+                $data->user->name ?? '-',
+                Carbon::parse($data->tanggal)->format('Y-m-d'),
+                $data->mata_pelajaran,
+                $data->kelas,
+                $data->jam_ke,
+                $data->jam_mulai,
+                $data->jam_selesai,
+                $data->waktu_absen_masuk ?? '-',
+                $data->waktu_absen_keluar ?? '-',
+                $data->kategori ?? '-',
+                $data->status_verifikasi,
+                $data->verifier->name ?? '-'
+            ];
+        }
 
-        $callback = function () use ($riwayat, $delimiter) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Nama Guru', 'Tanggal', 'Mata Pelajaran', 'Kelas', 'Jam Ke', 'Jam Mulai', 'Jam Selesai', 'Masuk', 'Keluar', 'Kategori', 'Status Verifikasi', 'Diverifikasi Oleh'], $delimiter);
-            
-            $no = 1;
-            foreach ($riwayat as $data) {
-                fputcsv($file, [
-                    $no++,
-                    $data->user->name ?? '-',
-                    Carbon::parse($data->tanggal)->format('Y-m-d'),
-                    $data->mata_pelajaran,
-                    $data->kelas,
-                    $data->jam_ke,
-                    $data->jam_mulai,
-                    $data->jam_selesai,
-                    $data->waktu_absen_masuk ?? '-',
-                    $data->waktu_absen_keluar ?? '-',
-                    $data->kategori ?? '-',
-                    $data->status_verifikasi,
-                    $data->verifier->name ?? '-'
-                ], $delimiter);
-            }
-            fclose($file);
-        };
+        $filename = "aktivitas_mengajar_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".xlsx";
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
 
-        return response()->stream($callback, 200, $headers);
+        return response((string) $xlsx, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     // ──────────────────────────────────────────
@@ -903,7 +1034,6 @@ class AdminController extends Controller
     {
         $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
         $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
-        $delimiter = $request->input('delimiter', ';');
         
         $riwayat = AbsensiSiswa::with('user')
             ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
@@ -911,33 +1041,30 @@ class AdminController extends Controller
             ->orderBy('user_id')
             ->get();
 
-        $filename = "absensi_murid_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".csv";
-
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $rows = [
+            ['No', 'Nama Siswa', 'Tanggal', 'Waktu Datang', 'Waktu Pulang', 'Status Kehadiran', 'Keterangan']
         ];
+        
+        $no = 1;
+        foreach ($riwayat as $data) {
+            $rows[] = [
+                $no++,
+                $data->user->name ?? '-',
+                $data->tanggal->format('Y-m-d'),
+                $data->waktu_datang ?? '-',
+                $data->waktu_pulang ?? '-',
+                $data->status,
+                $data->keterangan ?? '-'
+            ];
+        }
 
-        $callback = function () use ($riwayat, $delimiter) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Nama Siswa', 'Tanggal', 'Waktu Datang', 'Waktu Pulang', 'Status Kehadiran', 'Keterangan'], $delimiter);
-            
-            $no = 1;
-            foreach ($riwayat as $data) {
-                fputcsv($file, [
-                    $no++,
-                    $data->user->name ?? '-',
-                    $data->tanggal->format('Y-m-d'),
-                    $data->waktu_datang ?? '-',
-                    $data->waktu_pulang ?? '-',
-                    $data->status,
-                    $data->keterangan ?? '-'
-                ], $delimiter);
-            }
-            fclose($file);
-        };
+        $filename = "absensi_murid_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".xlsx";
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
 
-        return response()->stream($callback, 200, $headers);
+        return response((string) $xlsx, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     // ──────────────────────────────────────────
@@ -1032,11 +1159,10 @@ class AdminController extends Controller
         
         $model->update([
             'status_pengajuan' => 'rejected',
-            'status' => 'alpa',
             'alasan_ditolak' => $request->alasan,
             'is_notified' => false,
         ]);
         
-        return back()->with('success', 'Pengajuan ditolak. Status kehadiran diubah menjadi Alpa.');
+        return back()->with('success', 'Pengajuan ditolak.');
     }
 }

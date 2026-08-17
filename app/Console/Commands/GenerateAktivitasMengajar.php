@@ -53,6 +53,10 @@ class GenerateAktivitasMengajar extends Command
 
         $setting = \App\Models\SchoolSetting::get();
         $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
+        
+        if ($blokAktif === 'TEFA') {
+            return; // Tidak ada jadwal mengajar pada saat TEFA
+        }
 
         // Cari semua jadwal untuk hari ini dan blok aktif (tanpa menunggu jam mulai)
         $jadwalCocok = JadwalMengajar::where('hari', $hariIni)

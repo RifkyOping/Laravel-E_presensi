@@ -12,7 +12,7 @@
         </div>
         @endif
 
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100" x-data="{ activeTab: '{{ $activeTab }}' }">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100" x-data="{ activeTab: '{{ $activeTab }}', expandedCard: null }">
             <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="w-full">
                     <h2 class="text-lg font-bold text-slate-800">Jadwal & Monitoring Kelas</h2>
@@ -86,8 +86,8 @@
                                         $muridStatus = $absenKelas->status;
                                     }
                                 @endphp
-                                <div x-data="{ expanded: false }" class="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all duration-200 shadow-sm">
-                                    <div @click="expanded = !expanded" class="p-4 cursor-pointer hover:bg-slate-100 transition-colors">
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all duration-200 shadow-sm">
+                                    <div @click="expandedCard = expandedCard === '{{ $j->id }}' ? null : '{{ $j->id }}'" class="p-4 cursor-pointer hover:bg-slate-100 transition-colors">
                                         <div class="flex items-start justify-between gap-3">
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex flex-wrap items-center gap-2 mb-1.5">
@@ -108,7 +108,7 @@
                                                     {{ $kondisiLabel }}
                                                 </span>
                                                 <div class="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
-                                                    <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg class="w-4 h-4 text-slate-500 transition-transform duration-300" :class="expandedCard === '{{ $j->id }}' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                                     </svg>
                                                 </div>
@@ -116,7 +116,7 @@
                                         </div>
                                     </div>
 
-                                    <div x-show="expanded" style="display: none;" class="px-4 pb-4 pt-3 border-t border-slate-200 bg-white">
+                                    <div x-show="expandedCard === '{{ $j->id }}'" style="display: none;" class="px-4 pb-4 pt-3 border-t border-slate-200 bg-white">
                                         <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Detail Absensi Sesi Ini</p>
                                         <div class="flex items-center justify-between mt-1 px-1">
                                             <div class="flex flex-col">

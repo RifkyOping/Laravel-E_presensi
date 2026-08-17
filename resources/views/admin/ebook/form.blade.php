@@ -76,14 +76,20 @@
                               class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm resize-none">{{ old('deskripsi', $ebook->deskripsi ?? '') }}</textarea>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-2">
-                        Teks Referensi Verifikasi Suara
-                        <span class="font-normal normal-case text-slate-400 ml-1">(teks yang harus dibacakan murid)</span>
-                    </label>
-                    <textarea name="konten_teks" rows="5"
+                <div class="relative">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <label class="block text-xs font-black text-slate-500 uppercase tracking-wider">
+                            Teks Referensi Verifikasi Suara
+                            <span class="font-normal normal-case text-slate-400 ml-1">(teks yang harus dibacakan murid)</span>
+                        </label>
+                        <button type="button" onclick="cleanTextWithAI()" id="btnCleanAI" class="flex items-center justify-center gap-1.5 text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors border border-indigo-200 shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span>Bersihkan Teks (AI)</span>
+                        </button>
+                    </div>
+                    <textarea name="konten_teks" id="konten_teks" rows="6"
                               placeholder="Masukkan paragraf atau kalimat yang akan dibacakan murid sebagai verifikasi sebelum lanjut ke level berikutnya..."
-                              class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm resize-none">{{ old('konten_teks', $ebook->konten_teks ?? '') }}</textarea>
+                              class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm resize-y">{{ old('konten_teks', $ebook->konten_teks ?? '') }}</textarea>
                     <p class="text-[.7rem] text-slate-400 mt-1.5">Sistem akan membandingkan suara murid dengan teks ini. Minimal kesamaan 60% untuk membuka level berikutnya.</p>
                 </div>
 
@@ -198,6 +204,53 @@
 </div>
 
 <script>
+async function cleanTextWithAI() {
+    const textarea = document.getElementById('konten_teks');
+    const btn = document.getElementById('btnCleanAI');
+    const text = textarea.value.trim();
+    
+    if (!text) {
+        alert('Teks referensi masih kosong. Silakan paste teks terlebih dahulu sebelum dibersihkan.');
+        return;
+    }
+    
+    // UI Loading state
+    const originalBtnText = btn.innerHTML;
+    btn.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span>Membersihkan...</span>`;
+    btn.disabled = true;
+    textarea.disabled = true;
+    
+    try {
+        const response = await fetch('{{ route('admin.ebook.clean-text') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ text: text })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            textarea.value = data.cleaned_text;
+            // Optionally, add a brief success highlight
+            textarea.classList.add('bg-green-50');
+            setTimeout(() => textarea.classList.remove('bg-green-50'), 1000);
+        } else {
+            alert('Gagal membersihkan teks: ' + (data.error || 'Terjadi kesalahan.'));
+        }
+    } catch (error) {
+        alert('Terjadi kesalahan jaringan atau server.');
+        console.error(error);
+    } finally {
+        // Restore UI
+        btn.innerHTML = originalBtnText;
+        btn.disabled = false;
+        textarea.disabled = false;
+    }
+}
+
 function previewFile(input) {
     const file = input.files[0];
     if (!file) return;
