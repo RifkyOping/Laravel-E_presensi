@@ -271,11 +271,17 @@
 
     {{-- QR Code Section --}}
     @if(Auth::user()->nomor_induk)
-    <div class="mt-4 relative bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start shadow-sm transition hover:shadow-md hover:border-slate-300">
+    <div x-data="{ showFullScreenQR: false }" class="mt-4 relative bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start shadow-sm transition hover:shadow-md hover:border-slate-300">
         {{-- QR Code --}}
         <div class="flex flex-col items-center flex-shrink-0">
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 mb-4" id="qr-code-container">
+            <div @click="showFullScreenQR = true" class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 mb-4 cursor-pointer hover:shadow-md transition-shadow group relative" id="qr-code-container" title="Klik untuk memperbesar">
                 {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(150)->style('round')->margin(1)->generate(Auth::user()->nomor_induk) !!}
+                <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center pointer-events-none">
+                    <div class="bg-white/90 text-slate-800 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm backdrop-blur-sm flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        Perbesar
+                    </div>
+                </div>
             </div>
             <div class="flex gap-2 w-full">
                 <button onclick="downloadPDFQR()" class="w-full justify-center bg-[#1e3a6e] hover:bg-[#162d57] text-white text-[11px] font-bold py-2.5 px-3 rounded-lg transition flex items-center gap-1.5 shadow-sm">
@@ -302,6 +308,34 @@
                 </ol>
             </div>
         </div>
+        
+        <!-- Fullscreen QR Modal -->
+        <template x-teleport="body">
+            <div x-show="showFullScreenQR" 
+                 style="display: none; z-index: 99999;" 
+                 class="fixed inset-0 bg-white flex flex-col items-center justify-center p-6"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0">
+                 
+                <button @click="showFullScreenQR = false" class="absolute top-6 right-6 text-slate-800 bg-slate-100 hover:bg-slate-200 p-3 rounded-full transition-colors shadow-sm cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                
+                <div class="flex flex-col items-center justify-center w-full max-w-lg mx-auto" @click.outside="showFullScreenQR = false">
+                    <div class="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl border border-slate-100 w-full flex justify-center items-center">
+                        <div class="w-full h-full flex justify-center items-center [&>svg]:w-full [&>svg]:h-auto [&>svg]:max-w-[400px]">
+                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(400)->style('round')->margin(1)->generate(Auth::user()->nomor_induk) !!}
+                        </div>
+                    </div>
+                    <h2 class="mt-8 text-2xl sm:text-4xl font-black text-slate-800 text-center">{{ Auth::user()->name }}</h2>
+                    <p class="mt-2 text-lg sm:text-2xl font-medium text-slate-500 text-center">NISN: {{ Auth::user()->nomor_induk }}</p>
+                </div>
+            </div>
+        </template>
     </div>
     @endif
 

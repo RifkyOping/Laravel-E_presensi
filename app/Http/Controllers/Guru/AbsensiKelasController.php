@@ -366,4 +366,36 @@ class AbsensiKelasController extends Controller
 
         return view('guru.buku-kemajuan.cetak', compact('kelas', 'tanggalMulai', 'tanggalAkhir', 'aktivitasPerMinggu'));
     }
+
+    /**
+     * Mengambil detail absensi kelas (JSON) untuk halaman buku kemajuan.
+     */
+    public function detailBukuKemajuan(JadwalMengajar $jadwal)
+    {
+        $today = Carbon::today()->toDateString();
+        
+        $absensi = AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
+            ->where('tanggal', $today)
+            ->with('siswa')
+            ->get();
+            
+        if ($absensi->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Belum ada absensi untuk jadwal ini.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'materi' => $absensi->first()->materi ?? '-',
+            'data' => $absensi->map(function($a) {
+                return [
+                    'nama' => $a->siswa->name ?? '-',
+                    'status' => $a->status,
+                    'keterangan' => $a->keterangan ?? '-'
+                ];
+            })
+        ]);
+    }
 }

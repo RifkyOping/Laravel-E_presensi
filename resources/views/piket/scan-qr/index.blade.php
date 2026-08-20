@@ -17,7 +17,12 @@
                     <div class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-100 flex items-start gap-3">
                         <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <div class="text-sm text-blue-800">
-                            <strong>Sistem Otomatis:</strong> Scan QR akan mendeteksi jenis absen (datang/pulang) secara otomatis berdasarkan jam absensi saat ini.
+                            <strong>Jadwal Absensi Hari Ini:</strong> 
+                            @if($jadwalAbsensi && !$jadwalAbsensi->is_libur)
+                                Absen Datang ({{ \Carbon\Carbon::parse($jadwalAbsensi->absen_datang_buka)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwalAbsensi->absen_datang_tutup)->format('H:i') }} WITA) dan Absen Pulang ({{ \Carbon\Carbon::parse($jadwalAbsensi->absen_pulang_buka)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwalAbsensi->absen_pulang_tutup)->format('H:i') }} WITA).
+                            @else
+                                Hari ini libur, tidak ada absensi.
+                            @endif
                         </div>
                     </div>
 

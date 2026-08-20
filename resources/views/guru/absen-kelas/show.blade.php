@@ -386,8 +386,10 @@
                     @foreach($siswas as $i => $siswa)
                     @php
                         $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? $absensiHarianSiswa->get($siswa->id)?->status ?? 'hadir';
+                        $currentKeterangan = $absensiHariIni->get($siswa->id)?->keterangan ?? '';
                     @endphp
                     <input type="hidden" name="absensi[{{ $siswa->id }}][status]" id="status-hidden-{{ $siswa->id }}" value="{{ $currentStatus }}">
+                    <input type="hidden" name="absensi[{{ $siswa->id }}][keterangan]" id="keterangan-hidden-{{ $siswa->id }}" value="{{ $currentKeterangan }}">
                     @endforeach
 
                     {{-- Mobile View --}}
@@ -403,22 +405,28 @@
                             @foreach($siswas as $i => $siswa)
                             @php
                                 $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? 'hadir';
+                                $currentKeterangan = $absensiHariIni->get($siswa->id)?->keterangan ?? '';
                             @endphp
-                            <div class="flex flex-row items-center gap-2 px-4 py-3 hover:bg-slate-50/50 transition">
-                                <div class="flex-1 min-w-0 pr-2">
-                                    <p class="font-bold text-slate-800 text-[12px] leading-tight break-words">{{ $siswa->name }}</p>
+                            <div class="flex flex-col border-b border-slate-100 hover:bg-slate-50/50 transition">
+                                <div class="flex flex-row items-center gap-2 px-4 py-3">
+                                    <div class="flex-1 min-w-0 pr-2">
+                                        <p class="font-bold text-slate-800 text-[12px] leading-tight break-words">{{ $siswa->name }}</p>
+                                    </div>
+                                    <div class="w-10 flex-shrink-0 flex justify-center">
+                                        <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="hadir" onchange="syncAbsenStatus({{ $siswa->id }}, 'hadir')" {{ 'hadir' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
+                                    </div>
+                                    <div class="w-10 flex-shrink-0 flex justify-center">
+                                        <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="alpa" onchange="syncAbsenStatus({{ $siswa->id }}, 'alpa')" {{ 'alpa' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
+                                    </div>
+                                    <div class="w-10 flex-shrink-0 flex justify-center">
+                                        <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="sakit" onchange="syncAbsenStatus({{ $siswa->id }}, 'sakit')" {{ 'sakit' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
+                                    </div>
+                                    <div class="w-10 flex-shrink-0 flex justify-center">
+                                        <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="izin" onchange="syncAbsenStatus({{ $siswa->id }}, 'izin')" {{ 'izin' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
+                                    </div>
                                 </div>
-                                <div class="w-10 flex-shrink-0 flex justify-center">
-                                    <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="hadir" onchange="syncAbsenStatus({{ $siswa->id }}, 'hadir')" {{ 'hadir' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
-                                </div>
-                                <div class="w-10 flex-shrink-0 flex justify-center">
-                                    <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="alpa" onchange="syncAbsenStatus({{ $siswa->id }}, 'alpa')" {{ 'alpa' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
-                                </div>
-                                <div class="w-10 flex-shrink-0 flex justify-center">
-                                    <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="sakit" onchange="syncAbsenStatus({{ $siswa->id }}, 'sakit')" {{ 'sakit' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
-                                </div>
-                                <div class="w-10 flex-shrink-0 flex justify-center">
-                                    <input type="radio" name="absensi_mobile[{{ $siswa->id }}][status]" value="izin" onchange="syncAbsenStatus({{ $siswa->id }}, 'izin')" {{ 'izin' === $currentStatus ? 'checked' : '' }} class="w-5 h-5 text-[#1e3a6e] focus:ring-[#1e3a6e] border-slate-300">
+                                <div class="px-4 pb-3">
+                                    <input type="text" name="absensi_mobile[{{ $siswa->id }}][keterangan]" placeholder="Keterangan (opsional)" class="w-full text-xs border-slate-200 rounded-md focus:border-[#1e3a6e] focus:ring-[#1e3a6e]/20" onchange="syncAbsenKeterangan({{ $siswa->id }}, this.value)" onkeyup="syncAbsenKeterangan({{ $siswa->id }}, this.value)" value="{{ $currentKeterangan }}">
                                 </div>
                             </div>
                             @endforeach
@@ -442,10 +450,11 @@
                                 </div>
                             </div>
 
-                            {{-- Status Buttons --}}
+                            {{-- Status Buttons & Keterangan --}}
                             <div class="flex gap-4 flex-shrink-0 items-center">
                                 @php
                                     $currentStatus = $absensiHariIni->get($siswa->id)?->status ?? $absensiHarianSiswa->get($siswa->id)?->status ?? 'hadir';
+                                    $currentKeterangan = $absensiHariIni->get($siswa->id)?->keterangan ?? '';
                                 @endphp
                                 @foreach(['hadir' => 'Hadir', 'alpa' => 'Alpa', 'sakit' => 'Sakit', 'izin' => 'Izin'] as $val => $label)
                                 <label class="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 font-medium group">
@@ -458,6 +467,9 @@
                                     <span class="group-hover:text-slate-900 transition">{{ $label }}</span>
                                 </label>
                                 @endforeach
+                                <div class="ml-4 w-48 flex-shrink-0">
+                                    <input type="text" name="absensi_desktop[{{ $siswa->id }}][keterangan]" placeholder="Keterangan (opsional)" class="w-full text-xs border-slate-200 rounded-md focus:border-[#1e3a6e] focus:ring-[#1e3a6e]/20" onchange="syncAbsenKeterangan({{ $siswa->id }}, this.value)" onkeyup="syncAbsenKeterangan({{ $siswa->id }}, this.value)" value="{{ $currentKeterangan }}">
+                                </div>
                             </div>
 
                         </div>
@@ -503,6 +515,18 @@
                     
                     document.querySelectorAll(`input[name="absensi_mobile[${id}][status]"][value="${value}"]`).forEach(r => r.checked = true);
                     document.querySelectorAll(`input[name="absensi_desktop[${id}][status]"][value="${value}"]`).forEach(r => r.checked = true);
+                }
+
+                function syncAbsenKeterangan(id, value) {
+                    let hidden = document.getElementById('keterangan-hidden-' + id);
+                    if(hidden) hidden.value = value;
+                    
+                    document.querySelectorAll(`input[name="absensi_mobile[${id}][keterangan]"]`).forEach(i => {
+                        if (i !== document.activeElement) i.value = value;
+                    });
+                    document.querySelectorAll(`input[name="absensi_desktop[${id}][keterangan]"]`).forEach(i => {
+                        if (i !== document.activeElement) i.value = value;
+                    });
                 }
 
                 function confirmSubmit(e, form) {

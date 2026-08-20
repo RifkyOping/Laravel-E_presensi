@@ -81,9 +81,6 @@ Route::middleware('auth')->group(function () {
     // Monitoring Kelas Murid
     Route::get('/murid/monitoring-kelas', [AbsensiSiswaController::class, 'monitoringKelas'])->name('murid.monitoring-kelas');
 
-    // QR Code Murid (Absensi Offline)
-    Route::get('/murid/qr-code', [\App\Http\Controllers\Siswa\QrCodeController::class, 'index'])->name('murid.qr-code');
-
     // Baca Al-Qur'an (Pure Arabic)
     Route::get('/murid/baca-quran', [\App\Http\Controllers\QuranController::class, 'index'])->name('murid.baca-quran.index');
     Route::get('/murid/baca-quran/surah/{nomor}', [\App\Http\Controllers\QuranController::class, 'show'])->name('murid.baca-quran.show');
@@ -156,6 +153,7 @@ Route::middleware('auth')->group(function () {
     // Guru - Buku Kemajuan Kelas
     Route::get('/guru/buku-kemajuan', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'bukuKemajuan'])->name('guru.buku-kemajuan');
     Route::get('/guru/buku-kemajuan/cetak', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'cetakBukuKemajuan'])->name('guru.buku-kemajuan.cetak');
+    Route::get('/guru/buku-kemajuan/{jadwal}/detail', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'detailBukuKemajuan'])->name('guru.buku-kemajuan.detail');
     // Monitoring Sekolah (Kepsek & Kurikulum)
     Route::get('/monitoring-sekolah', [\App\Http\Controllers\MonitoringSekolahController::class, 'dashboard'])->name('monitoring-sekolah.dashboard');
 

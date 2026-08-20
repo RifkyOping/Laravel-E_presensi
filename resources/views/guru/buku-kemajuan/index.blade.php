@@ -93,10 +93,10 @@
                                         <div class="flex flex-col items-end">
                                             <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Absen Kelas</p>
                                             @if($jadwal->sudah_absen_kelas)
-                                                <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                                                <button type="button" onclick="showDetailAbsen({{ $jadwal->id }})" class="text-xs font-bold text-emerald-600 flex items-center gap-1 hover:underline text-left">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                    Sudah
-                                                </span>
+                                                    Detail
+                                                </button>
                                             @else
                                                 <span class="text-xs font-semibold text-slate-400">-</span>
                                             @endif
@@ -180,10 +180,10 @@
                                             <div class="flex justify-between md:block items-center md:mt-1">
                                                 <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Absen Kelas</span>
                                                 @if($jadwal->sudah_absen_kelas)
-                                                    <span class="min-w-[80px] justify-center inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200">
+                                                    <button type="button" onclick="showDetailAbsen({{ $jadwal->id }})" class="min-w-[80px] justify-center inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-200 hover:bg-emerald-100 transition">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                                        Sudah
-                                                    </span>
+                                                        Detail
+                                                    </button>
                                                 @else
                                                     <span class="min-w-[80px] justify-center inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -274,6 +274,63 @@
         </div>
     </div>
 
+    {{-- MODAL DETAIL ABSENSI KELAS --}}
+    <div id="modal-detail-absen" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl transform transition-all flex flex-col max-h-[90vh]">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                    <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Detail Absensi Kelas
+                    </h3>
+                    <button type="button" onclick="closeDetailAbsen()" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full p-2 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto grow">
+                    <div id="detail-absen-loading" class="flex flex-col items-center justify-center py-10">
+                        <svg class="animate-spin h-8 w-8 text-[#1e3a6e] mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-sm font-semibold text-slate-500 tracking-wide uppercase">Memuat Data...</p>
+                    </div>
+
+                    <div id="detail-absen-content" class="hidden space-y-5">
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                            <h4 class="text-xs font-black text-blue-800 uppercase tracking-wider mb-1">Materi Pembelajaran:</h4>
+                            <p id="detail-materi" class="text-sm text-blue-900 font-medium"></p>
+                        </div>
+                        
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3 font-bold text-slate-600 uppercase text-xs">No</th>
+                                        <th class="p-3 font-bold text-slate-600 uppercase text-xs">Nama Siswa</th>
+                                        <th class="p-3 font-bold text-slate-600 uppercase text-xs text-center">Status</th>
+                                        <th class="p-3 font-bold text-slate-600 uppercase text-xs">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-absen-tbody" class="divide-y divide-slate-100">
+                                    <!-- Rows rendered via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="detail-absen-error" class="hidden text-center py-8">
+                        <p class="text-rose-500 font-semibold mb-1">Gagal memuat data.</p>
+                        <p class="text-sm text-slate-500">Silakan coba lagi nanti.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const selectKelas = document.getElementById('filter_kelas');
@@ -329,5 +386,69 @@
                 });
             }
         });
+
+        // Modal Functions
+        function showDetailAbsen(jadwalId) {
+            const modal = document.getElementById('modal-detail-absen');
+            const loading = document.getElementById('detail-absen-loading');
+            const content = document.getElementById('detail-absen-content');
+            const error = document.getElementById('detail-absen-error');
+            const tbody = document.getElementById('detail-absen-tbody');
+            const materi = document.getElementById('detail-materi');
+            
+            modal.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            content.classList.add('hidden');
+            error.classList.add('hidden');
+            
+            fetch(`/guru/buku-kemajuan/${jadwalId}/detail`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                loading.classList.add('hidden');
+                if(data.success) {
+                    content.classList.remove('hidden');
+                    materi.textContent = data.materi;
+                    
+                    tbody.innerHTML = '';
+                    data.data.forEach((item, index) => {
+                        let statusColor = 'bg-slate-100 text-slate-600 border-slate-200';
+                        if(item.status === 'hadir') statusColor = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                        if(item.status === 'sakit') statusColor = 'bg-sky-100 text-sky-700 border-sky-200';
+                        if(item.status === 'izin') statusColor = 'bg-amber-100 text-amber-700 border-amber-200';
+                        if(item.status === 'alpa') statusColor = 'bg-rose-100 text-rose-700 border-rose-200';
+                        
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 text-slate-500">${index + 1}</td>
+                                <td class="p-3 font-semibold text-slate-700">${item.nama}</td>
+                                <td class="p-3 text-center">
+                                    <span class="inline-block px-2 py-0.5 rounded text-xs font-bold uppercase border ${statusColor}">
+                                        ${item.status}
+                                    </span>
+                                </td>
+                                <td class="p-3 text-slate-500 text-xs">${item.keterangan || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    error.classList.remove('hidden');
+                    error.innerHTML = `<p class="text-slate-500 font-semibold">${data.message}</p>`;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+            });
+        }
+
+        function closeDetailAbsen() {
+            document.getElementById('modal-detail-absen').classList.add('hidden');
+        }
     </script>
 </x-app-layout>

@@ -142,8 +142,8 @@
                     <select name="agama"
                             class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
                         <option value="">-- Pilih Agama --</option>
-                        @foreach(['Islam','Kristen','Katolik','Hindu','Buddha','Konghucu'] as $ag)
-                        <option value="{{ $ag }}" {{ old('agama')===$ag ? 'selected' : '' }}>{{ $ag }}</option>
+                        @foreach(['Islam','Kristen','Katolik','Hindu','Buddha','Konghucu','Kepercayaan kpd Tuhan YME'] as $ag)
+                        <option value="{{ $ag }}" {{ strtolower(old('agama')) === strtolower($ag) ? 'selected' : '' }}>{{ $ag }}</option>
                         @endforeach
                     </select>
                 </div>

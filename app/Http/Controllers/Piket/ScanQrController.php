@@ -19,8 +19,22 @@ class ScanQrController extends Controller
         if (auth()->user()->role !== 'guru') {
             abort(403, 'Anda tidak memiliki akses ke fitur Scan Absen QR.');
         }
+        
+        $setting = SchoolSetting::first();
 
-        return view('piket.scan-qr.index');
+        $hariMap = [
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu'
+        ];
+        $hariIni = $hariMap[now()->format('l')] ?? 'Senin';
+        $jadwalAbsensi = \App\Models\JadwalAbsensi::where('hari', $hariIni)->first();
+
+        return view('piket.scan-qr.index', compact('setting', 'jadwalAbsensi'));
     }
 
     /**
@@ -63,7 +77,7 @@ class ScanQrController extends Controller
         if (!$isOpenDatang && !$isOpenPulang) {
             return response()->json([
                 'success' => false,
-                'message' => "Saat ini tidak dalam jam absen datang maupun pulang.\nDetail: " . $reasonDatang
+                'message' => "Saat ini tidak dalam jam absen datang maupun pulang."
             ], 422);
         }
 
