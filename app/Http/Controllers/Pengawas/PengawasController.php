@@ -9,6 +9,7 @@ use App\Models\AbsensiSiswa;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PengawasController extends Controller
 {
@@ -19,20 +20,22 @@ class PengawasController extends Controller
     {
         $today = Carbon::today();
 
-        $stats = [
-            'total_guru'    => User::where('role', 'guru')->count(),
-            'total_siswa'   => User::where('role', 'murid')->count(),
-            'guru_hadir'    => AbsensiGuru::whereDate('tanggal', $today)
-                                ->whereNotNull('waktu_datang')->count(),
-            'guru_izin'     => AbsensiGuru::whereDate('tanggal', $today)
-                                ->where('status', 'izin')->count(),
-            'guru_sakit'    => AbsensiGuru::whereDate('tanggal', $today)
-                                ->where('status', 'sakit')->count(),
-            'guru_alpa'    => AbsensiGuru::whereDate('tanggal', $today)
-                                ->where('status', 'alpa')->count(),
-            'siswa_hadir'   => AbsensiSiswa::whereDate('tanggal', $today)
-                                ->where('status', 'hadir')->count(),
-        ];
+        $stats = Cache::remember('pengawas_dashboard_stats', 600, function () use ($today) {
+            return [
+                'total_guru'    => User::where('role', 'guru')->count(),
+                'total_siswa'   => User::where('role', 'murid')->count(),
+                'guru_hadir'    => AbsensiGuru::whereDate('tanggal', $today)
+                                    ->whereNotNull('waktu_datang')->count(),
+                'guru_izin'     => AbsensiGuru::whereDate('tanggal', $today)
+                                    ->where('status', 'izin')->count(),
+                'guru_sakit'    => AbsensiGuru::whereDate('tanggal', $today)
+                                    ->where('status', 'sakit')->count(),
+                'guru_alpa'    => AbsensiGuru::whereDate('tanggal', $today)
+                                    ->where('status', 'alpa')->count(),
+                'siswa_hadir'   => AbsensiSiswa::whereDate('tanggal', $today)
+                                    ->where('status', 'hadir')->count(),
+            ];
+        });
 
         // Guru yang sudah absen hari ini (5 terbaru)
         $guruHadirHariIni = AbsensiGuru::with('user')
@@ -151,13 +154,17 @@ class PengawasController extends Controller
         }
         $riwayat = $riwayatQuery->paginate(20)->withQueryString();
 
-        $stats = [
-            'total'  => User::where('role', 'murid')->count(),
-            'hadir'  => $absensi->where('status', 'hadir')->count(),
-            'izin'   => $absensi->where('status', 'izin')->count(),
-            'sakit'  => $absensi->where('status', 'sakit')->count(),
-            'belum'  => User::where('role', 'murid')->count() - $absensi->count(),
-        ];
+        $cacheKey = 'pengawas_absensi_siswa_stats_' . $tanggal->format('Y-m-d');
+        $stats = Cache::remember($cacheKey, 600, function () use ($absensi) {
+            $totalMurid = User::where('role', 'murid')->count();
+            return [
+                'total'  => $totalMurid,
+                'hadir'  => $absensi->where('status', 'hadir')->count(),
+                'izin'   => $absensi->where('status', 'izin')->count(),
+                'sakit'  => $absensi->where('status', 'sakit')->count(),
+                'belum'  => $totalMurid - $absensi->count(),
+            ];
+        });
 
         return view('pengawas.absensi-siswa', compact(
             'semuaSiswa', 'absensi', 'siswaHadir', 'siswaBelum',

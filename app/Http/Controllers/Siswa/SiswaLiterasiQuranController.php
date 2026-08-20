@@ -12,13 +12,17 @@ class SiswaLiterasiQuranController extends Controller
     {
         $siswa = Auth::user();
 
-        // Ambil semua catatan untuk siswa ini, grup per jenis
-        $catatan = CatatanLiterasiQuran::with('guru')
-            ->where('siswa_id', $siswa->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $cacheKey = 'siswa_lit_quran_' . $siswa->id;
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($siswa) {
+            $catatan = CatatanLiterasiQuran::with('guru')
+                ->where('siswa_id', $siswa->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        $totalCatatan = CatatanLiterasiQuran::where('siswa_id', $siswa->id)->count();
+            $totalCatatan = CatatanLiterasiQuran::where('siswa_id', $siswa->id)->count();
+            return compact('catatan', 'totalCatatan');
+        });
+        extract($data);
 
         return view('siswa.literasi_quran_siswa', compact('siswa', 'catatan', 'totalCatatan'));
     }

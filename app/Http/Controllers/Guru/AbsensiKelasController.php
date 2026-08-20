@@ -35,22 +35,28 @@ class AbsensiKelasController extends Controller
         $setting = \App\Models\SchoolSetting::get();
         $blokAktif = $setting->blok_jadwal_aktif;
 
-        if ($blokAktif === 'TEFA') {
-            $jadwals = collect();
-        } else {
-            $jadwals = JadwalMengajar::where('user_id', $guru->id)
-                ->where('hari', $hariIni)
-                ->whereIn('tipe_blok', ['Semua', $blokAktif])
-                ->orderBy('jam_ke')
-                ->get();
-        }
+        $cacheKey = 'guru_absen_kelas_index_' . $guru->id . '_' . $today;
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($guru, $hariIni, $today, $blokAktif) {
+            if ($blokAktif === 'TEFA') {
+                $jadwals = collect();
+            } else {
+                $jadwals = JadwalMengajar::where('user_id', $guru->id)
+                    ->where('hari', $hariIni)
+                    ->whereIn('tipe_blok', ['Semua', $blokAktif])
+                    ->orderBy('jam_ke')
+                    ->get();
+            }
 
-        // Cek jadwal mana yang sudah pernah diabsen hari ini
-        foreach ($jadwals as $jadwal) {
-            $jadwal->sudah_diabsen = AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
-                ->where('tanggal', $today)
-                ->exists();
-        }
+            // Cek jadwal mana yang sudah pernah diabsen hari ini
+            foreach ($jadwals as $jadwal) {
+                $jadwal->sudah_diabsen = AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
+                    ->where('tanggal', $today)
+                    ->exists();
+            }
+            
+            return compact('jadwals');
+        });
+        extract($data);
 
         return view('guru.absen-kelas.index', compact('jadwals', 'hariIni'));
     }
@@ -74,31 +80,37 @@ class AbsensiKelasController extends Controller
             return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
         }
 
-        // Ambil murid berdasarkan rombel/kelas yang sesuai dengan jadwal
-        $siswas = User::where('role', 'murid')
-            ->whereHas('siswaProfile', function ($q) use ($jadwal) {
-                $q->whereRaw("CONCAT(kelas, ' ', jurusan, ' ', rombel) = ?", [$jadwal->kelas]);
-            })
-            ->with('siswaProfile')
-            ->orderBy('name')
-            ->get();
+        $cacheKey = 'guru_absen_kelas_show_' . $jadwal->id . '_' . $today;
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($jadwal, $today) {
+            // Ambil murid berdasarkan rombel/kelas yang sesuai dengan jadwal
+            $siswas = User::where('role', 'murid')
+                ->whereHas('siswaProfile', function ($q) use ($jadwal) {
+                    $q->whereRaw("CONCAT(kelas, ' ', jurusan, ' ', rombel) = ?", [$jadwal->kelas]);
+                })
+                ->with('siswaProfile')
+                ->orderBy('name')
+                ->get();
 
-        // Ambil absensi yang sudah ada hari ini (jika sudah pernah disubmit)
-        $absensiHariIni = AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
-            ->where('tanggal', $today)
-            ->get()
-            ->keyBy('siswa_id');
+            // Ambil absensi yang sudah ada hari ini (jika sudah pernah disubmit)
+            $absensiHariIni = AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
+                ->where('tanggal', $today)
+                ->get()
+                ->keyBy('siswa_id');
 
-        // Ambil pengajuan sakit/izin harian yang SUDAH DISETUJUI untuk default status (termasuk multi-hari)
-        $absensiHarianSiswa = \App\Models\AbsensiSiswa::whereIn('user_id', $siswas->pluck('id'))
-            ->whereIn('status', ['sakit', 'izin'])
-            ->where('status_pengajuan', 'approved')
-            ->whereDate('tanggal', '<=', $today)
-            ->whereDate('tanggal_selesai', '>=', $today)
-            ->get()
-            ->keyBy('user_id');
+            // Ambil pengajuan sakit/izin harian yang SUDAH DISETUJUI untuk default status (termasuk multi-hari)
+            $absensiHarianSiswa = \App\Models\AbsensiSiswa::whereIn('user_id', $siswas->pluck('id'))
+                ->whereIn('status', ['sakit', 'izin'])
+                ->where('status_pengajuan', 'approved')
+                ->whereDate('tanggal', '<=', $today)
+                ->whereDate('tanggal_selesai', '>=', $today)
+                ->get()
+                ->keyBy('user_id');
 
-        $sudahDiabsen = $absensiHariIni->isNotEmpty();
+            $sudahDiabsen = $absensiHariIni->isNotEmpty();
+            
+            return compact('siswas', 'absensiHariIni', 'absensiHarianSiswa', 'sudahDiabsen');
+        });
+        extract($data);
 
         // Cari atau buat Jurnal/Aktivitas Mengajar untuk kelas ini hari ini
         $aktivitas = \App\Models\AbsensiMengajar::firstOrCreate([
@@ -126,6 +138,9 @@ class AbsensiKelasController extends Controller
     {
         $guru  = Auth::user();
         $today = Carbon::today()->toDateString();
+        
+        \Illuminate\Support\Facades\Cache::forget('guru_absen_kelas_index_' . $guru->id . '_' . $today);
+        \Illuminate\Support\Facades\Cache::forget('guru_absen_kelas_show_' . $jadwal->id . '_' . $today);
 
         // Pastikan guru ini yang punya jadwal ini
         if ($jadwal->user_id !== $guru->id) {

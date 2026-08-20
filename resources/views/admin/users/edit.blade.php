@@ -231,7 +231,7 @@
                            class="w-5 h-5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-600">
                     <div class="flex flex-col">
                         <span class="text-sm font-semibold text-slate-700 group-hover:text-indigo-700 transition">Kurikulum</span>
-                        <span class="text-xs text-slate-400">(Dapat mengakses Monitoring Sekolah & Verifikasi)</span>
+                        <span class="text-xs text-slate-400">(Dapat mengakses Monitoring Sekolah)</span>
                     </div>
                 </label>
             </div>

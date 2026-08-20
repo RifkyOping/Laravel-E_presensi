@@ -16,7 +16,7 @@ class ScanQrController extends Controller
      */
     public function index()
     {
-        if (!auth()->user()->guruProfile || !auth()->user()->guruProfile->is_piket_absen_qr) {
+        if (auth()->user()->role !== 'guru') {
             abort(403, 'Anda tidak memiliki akses ke fitur Scan Absen QR.');
         }
 
@@ -28,10 +28,10 @@ class ScanQrController extends Controller
      */
     public function processScan(Request $request)
     {
-        if (!auth()->user()->guruProfile || !auth()->user()->guruProfile->is_piket_absen_qr) {
+        if (auth()->user()->role !== 'guru') {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses piket untuk fitur ini.'
+                'message' => 'Anda tidak memiliki akses untuk fitur ini.'
             ], 403);
         }
 

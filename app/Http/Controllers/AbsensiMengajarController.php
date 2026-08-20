@@ -21,14 +21,24 @@ class AbsensiMengajarController extends Controller
             ? $request->input('tanggal_riwayat') 
             : Carbon::today()->format('Y-m-d');
 
-        // Daftar hari ini (selalu hari ini untuk widget atas)
-        $hariIni = AbsensiMengajar::with('verifier')
-            ->where('user_id', $user->id)
-            ->whereDate('tanggal', Carbon::today())
-            ->orderBy('jam_ke')
-            ->get();
+        $cacheKey = 'guru_aktivitas_base_' . $user->id . '_' . Carbon::today()->toDateString();
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($user) {
+            // Daftar hari ini (selalu hari ini untuk widget atas)
+            $hariIni = AbsensiMengajar::with('verifier')
+                ->where('user_id', $user->id)
+                ->whereDate('tanggal', Carbon::today())
+                ->orderBy('jam_ke')
+                ->get();
 
-        // Query Riwayat
+            // Ambil data unik untuk dropdown kelas
+            $kelasList = \App\Models\Kelas::where('status', true)->orderBy('tingkat')->orderBy('jurusan')->orderBy('rombel')->get();
+            $mapels   = \App\Models\MataPelajaran::where('aktif', true)->orderBy('nama')->pluck('nama');
+
+            return compact('hariIni', 'kelasList', 'mapels');
+        });
+        extract($data);
+
+        // Query Riwayat (Diluar cache karena menggunakan pagination)
         $riwayatQuery = AbsensiMengajar::with('verifier')->where('user_id', $user->id);
         
         if (!empty($tanggalRiwayat)) {
@@ -40,10 +50,6 @@ class AbsensiMengajarController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        // Ambil data unik untuk dropdown kelas
-        $kelasList = \App\Models\Kelas::where('status', true)->orderBy('tingkat')->orderBy('jurusan')->orderBy('rombel')->get();
-        $mapels   = \App\Models\MataPelajaran::where('aktif', true)->orderBy('nama')->pluck('nama');
-
         return view('guru.aktivitas', compact('hariIni', 'riwayat', 'tanggalRiwayat', 'kelasList', 'mapels'));
     }
 
@@ -52,6 +58,8 @@ class AbsensiMengajarController extends Controller
      */
     public function store(Request $request)
     {
+        \Illuminate\Support\Facades\Cache::forget('guru_aktivitas_base_' . Auth::id() . '_' . Carbon::today()->toDateString());
+
         $request->validate([
             'mata_pelajaran'    => 'required|string|max:100',
             'kelas'             => 'required|string',
@@ -83,6 +91,8 @@ class AbsensiMengajarController extends Controller
      */
     public function destroy(AbsensiMengajar $aktivitas)
     {
+        \Illuminate\Support\Facades\Cache::forget('guru_aktivitas_base_' . Auth::id() . '_' . Carbon::today()->toDateString());
+
         // Hanya bisa menghapus milik sendiri
         if ($aktivitas->user_id !== Auth::id()) {
             return back()->with('error', 'Anda tidak memiliki akses untuk menghapus data ini.');
@@ -97,6 +107,8 @@ class AbsensiMengajarController extends Controller
      */
     public function absenMasuk(AbsensiMengajar $aktivitas)
     {
+        \Illuminate\Support\Facades\Cache::forget('guru_aktivitas_base_' . Auth::id() . '_' . Carbon::today()->toDateString());
+
         if ($aktivitas->user_id !== Auth::id()) {
             return back()->with('error', 'Anda tidak memiliki akses ke sesi ini.');
         }
@@ -125,6 +137,8 @@ class AbsensiMengajarController extends Controller
      */
     public function absenKeluar(AbsensiMengajar $aktivitas)
     {
+        \Illuminate\Support\Facades\Cache::forget('guru_aktivitas_base_' . Auth::id() . '_' . Carbon::today()->toDateString());
+
         if ($aktivitas->user_id !== Auth::id()) {
             return back()->with('error', 'Anda tidak memiliki akses ke sesi ini.');
         }

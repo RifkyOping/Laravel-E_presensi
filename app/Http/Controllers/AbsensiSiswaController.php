@@ -18,14 +18,49 @@ class AbsensiSiswaController extends Controller
         $today = Carbon::today();
         $user = Auth::user();
 
-        $absensiHariIni = AbsensiSiswa::where('user_id', $user->id)
-            ->whereDate('tanggal', $today)
-            ->first();
+        $cacheKey = 'siswa_absensi_index_' . $user->id . '_' . $today->toDateString();
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($user, $today) {
+            $absensiHariIni = AbsensiSiswa::where('user_id', $user->id)
+                ->whereDate('tanggal', $today)
+                ->first();
 
-        $riwayat = AbsensiSiswa::where('user_id', $user->id)
-            ->orderByDesc('tanggal')
-            ->take(30)
-            ->get();
+            $riwayat = AbsensiSiswa::where('user_id', $user->id)
+                ->orderByDesc('tanggal')
+                ->take(30)
+                ->get();
+                
+            $sedangMasaSakitIzin = false;
+            $jenisMasaAktif = null; // 'sakit' atau 'izin'
+            if ($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']) && $absensiHariIni->status_pengajuan === 'approved') {
+                $sedangMasaSakitIzin = true;
+                $jenisMasaAktif = $absensiHariIni->status;
+            } elseif (!$absensiHariIni) {
+                $activeIzin = AbsensiSiswa::where('user_id', $user->id)
+                    ->where('status', 'izin')
+                    ->where('status_pengajuan', 'approved')
+                    ->whereDate('tanggal', '<=', $today)
+                    ->whereDate('tanggal_selesai', '>=', $today)
+                    ->exists();
+                if ($activeIzin) {
+                    $sedangMasaSakitIzin = true;
+                    $jenisMasaAktif = 'izin';
+                } else {
+                    $lastAbsen = AbsensiSiswa::where('user_id', $user->id)
+                        ->whereDate('tanggal', '<', $today)
+                        ->orderByDesc('tanggal')
+                        ->first();
+                    if ($lastAbsen && $lastAbsen->status === 'sakit' && $lastAbsen->status_pengajuan === 'approved') {
+                        $sedangMasaSakitIzin = true;
+                        $jenisMasaAktif = 'sakit';
+                    }
+                }
+            }
+
+            $setting = SchoolSetting::get();
+            $semuaGuru = \App\Models\User::where('role', 'guru')->orderBy('name')->get();
+
+            return compact('absensiHariIni', 'riwayat', 'sedangMasaSakitIzin', 'jenisMasaAktif', 'setting', 'semuaGuru');
+        });
 
         // Check for unread approval/rejection notifications
         $notif = AbsensiSiswa::where('user_id', $user->id)
@@ -51,35 +86,7 @@ class AbsensiSiswaController extends Controller
                 ->update(['is_notified' => true]);
         }
 
-        $sedangMasaSakitIzin = false;
-        $jenisMasaAktif = null; // 'sakit' atau 'izin'
-        if ($absensiHariIni && in_array($absensiHariIni->status, ['sakit', 'izin']) && $absensiHariIni->status_pengajuan === 'approved') {
-            $sedangMasaSakitIzin = true;
-            $jenisMasaAktif = $absensiHariIni->status;
-        } elseif (!$absensiHariIni) {
-            $activeIzin = AbsensiSiswa::where('user_id', $user->id)
-                ->where('status', 'izin')
-                ->where('status_pengajuan', 'approved')
-                ->whereDate('tanggal', '<=', $today)
-                ->whereDate('tanggal_selesai', '>=', $today)
-                ->exists();
-            if ($activeIzin) {
-                $sedangMasaSakitIzin = true;
-                $jenisMasaAktif = 'izin';
-            } else {
-                $lastAbsen = AbsensiSiswa::where('user_id', $user->id)
-                    ->whereDate('tanggal', '<', $today)
-                    ->orderByDesc('tanggal')
-                    ->first();
-                if ($lastAbsen && $lastAbsen->status === 'sakit' && $lastAbsen->status_pengajuan === 'approved') {
-                    $sedangMasaSakitIzin = true;
-                    $jenisMasaAktif = 'sakit';
-                }
-            }
-        }
-
-        $setting = SchoolSetting::get();
-        $semuaGuru = \App\Models\User::where('role', 'guru')->orderBy('name')->get();
+        extract($data);
 
         return view('siswa.absensi', compact('absensiHariIni', 'riwayat', 'setting', 'sedangMasaSakitIzin', 'jenisMasaAktif', 'semuaGuru'));
     }
@@ -89,6 +96,8 @@ class AbsensiSiswaController extends Controller
      */
     public function absenDatang(Request $request)
     {
+        \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . Auth::id() . '_' . Carbon::today()->toDateString());
+        
         $jenis = $request->input('jenis_absen', 'hadir');
 
         $rules = [];
@@ -224,6 +233,8 @@ class AbsensiSiswaController extends Controller
      */
     public function absenPulang(Request $request)
     {
+        \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . Auth::id() . '_' . Carbon::today()->toDateString());
+
         $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
@@ -328,15 +339,21 @@ class AbsensiSiswaController extends Controller
 
         $kelasStr = trim("{$profile->kelas} {$profile->jurusan} {$profile->rombel}");
 
-        $setting = \App\Models\SchoolSetting::get();
-        $blokAktif = $setting->blok_jadwal_aktif;
+        $cacheKey = 'siswa_monitoring_jadwal_' . md5($kelasStr);
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($kelasStr) {
+            $setting = \App\Models\SchoolSetting::get();
+            $blokAktif = $setting->blok_jadwal_aktif;
 
-        $jadwalList = \App\Models\JadwalMengajar::with('user')
-            ->where('kelas', $kelasStr)
-            ->whereIn('tipe_blok', ['Semua', $blokAktif])
-            ->orderBy('jam_mulai')
-            ->get()
-            ->groupBy('hari');
+            $jadwalList = \App\Models\JadwalMengajar::with('user')
+                ->where('kelas', $kelasStr)
+                ->whereIn('tipe_blok', ['Semua', $blokAktif])
+                ->orderBy('jam_mulai')
+                ->get()
+                ->groupBy('hari');
+
+            return compact('blokAktif', 'jadwalList');
+        });
+        extract($data);
 
         $hariIniStr = [
             'Monday' => 'Senin',

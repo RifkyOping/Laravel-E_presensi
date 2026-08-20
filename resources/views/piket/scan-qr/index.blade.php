@@ -79,7 +79,7 @@
                 // Pause scanner sebentar agar tidak terscan berulang saat sedang request
                 html5QrCode.pause();
 
-                fetch("{{ route('piket.scan-qr.process') }}", {
+                fetch("{{ route('guru.scan-qr.process') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

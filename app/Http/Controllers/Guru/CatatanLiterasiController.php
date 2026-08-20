@@ -14,11 +14,14 @@ class CatatanLiterasiController extends Controller
     public function index(Request $request)
     {
         // Daftar kelas untuk filter
-        $kelasList = Kelas::where('status', true)
-            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
-            ->orderBy('jurusan')
-            ->orderBy('rombel')
-            ->get();
+        $cacheKey = 'guru_catatan_literasi_base';
+        $kelasList = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() {
+            return Kelas::where('status', true)
+                ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+                ->orderBy('jurusan')
+                ->orderBy('rombel')
+                ->get();
+        });
 
         // Ambil semua catatan, dikelompokkan berdasarkan siswa
         $query = CatatanMembaca::with('user.siswaProfile')

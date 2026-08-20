@@ -11,30 +11,35 @@ class JadwalMengajarController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $setting = \App\Models\SchoolSetting::get();
-        $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
+        $cacheKey = 'guru_jadwal_' . $user->id;
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($user) {
+            $setting = \App\Models\SchoolSetting::get();
+            $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
 
-        if ($blokAktif === 'TEFA') {
-            $jadwalRaw = collect();
-        } else {
-            $jadwalRaw = $user->jadwalMengajars()
-                ->whereIn('tipe_blok', ['Semua', $blokAktif])
-                ->orderBy('jam_ke')
-                ->get();
-        }
+            if ($blokAktif === 'TEFA') {
+                $jadwalRaw = collect();
+            } else {
+                $jadwalRaw = $user->jadwalMengajars()
+                    ->whereIn('tipe_blok', ['Semua', $blokAktif])
+                    ->orderBy('jam_ke')
+                    ->get();
+            }
 
-        // Kelompokkan berdasarkan hari
-        $jadwal = [
-            'Senin'  => [],
-            'Selasa' => [],
-            'Rabu'   => [],
-            'Kamis'  => [],
-            'Jumat'  => [],
-        ];
+            // Kelompokkan berdasarkan hari
+            $jadwal = [
+                'Senin'  => [],
+                'Selasa' => [],
+                'Rabu'   => [],
+                'Kamis'  => [],
+                'Jumat'  => [],
+            ];
 
-        foreach ($jadwalRaw as $j) {
-            $jadwal[$j->hari][] = $j;
-        }
+            foreach ($jadwalRaw as $j) {
+                $jadwal[$j->hari][] = $j;
+            }
+            return compact('jadwal', 'blokAktif');
+        });
+        extract($data);
 
         return view('guru.jadwal.index', compact('jadwal', 'blokAktif'));
     }
@@ -55,6 +60,7 @@ class JadwalMengajarController extends Controller
         ]);
 
         $user = Auth::user();
+        \Illuminate\Support\Facades\Cache::forget('guru_jadwal_' . $user->id);
 
         // Hapus semua jadwal lama
         $user->jadwalMengajars()->delete();

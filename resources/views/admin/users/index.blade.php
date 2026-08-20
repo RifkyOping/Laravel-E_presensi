@@ -130,7 +130,7 @@
             <form method="GET" action="{{ route('admin.users') }}" class="flex gap-3" id="searchForm">
                 <input type="hidden" name="tab" value="{{ $tab }}">
                 <input type="text" name="search" id="searchInput" value="{{ request('search') }}"
-                       placeholder="Cari nama, NISN, NIP atau ID..."
+                       placeholder="Cari nama, NIS, NISN, NIP atau ID..."
                        oninput="handleSearchInput(this)"
                        class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
                 @if(request('search'))
@@ -263,7 +263,6 @@
                                     <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
                                     <option value="pengawas" {{ $user->role == 'pengawas' ? 'selected' : '' }}>Pengawas</option>
                                     <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="kurikulum" {{ $user->role == 'kurikulum' ? 'selected' : '' }}>Kurikulum</option>
                                 </select>
                             </div>
                         </td>

@@ -27,36 +27,40 @@
     $setting = \App\Models\SchoolSetting::get();
     $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
 
-    // 1. Data Absensi Pribadi Guru (Masuk/Pulang)
-    $absenPribadi = \App\Models\AbsensiGuru::where('user_id', $userId)
-        ->where('tanggal', $today)
-        ->first();
-
-    // 2. Data Jadwal Mengajar Hari Ini
-    if ($blokAktif === 'TEFA') {
-        $jadwalHariIni = collect();
-    } else {
-        $jadwalHariIni = \App\Models\JadwalMengajar::where('user_id', $userId)
-            ->where('hari', $hariIni)
-            ->whereIn('tipe_blok', ['Semua', $blokAktif])
-            ->orderBy('jam_ke')
-            ->get();
-    }
-    
-    // Cek status absen tiap kelas (apakah guru sudah absen siswa di kelas tsb)
-    foreach ($jadwalHariIni as $jadwal) {
-        $jadwal->sudah_absen_kelas = \App\Models\AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
+    // Membungkus query dalam cache (10 Menit)
+    $cacheKeyGuru = 'guru_dashboard_' . $userId . '_' . $today;
+    $dashboardData = \Illuminate\Support\Facades\Cache::remember($cacheKeyGuru, 600, function() use ($userId, $today, $blokAktif, $hariIni) {
+        $absenPribadi = \App\Models\AbsensiGuru::where('user_id', $userId)
             ->where('tanggal', $today)
-            ->exists();
-    }
-    
-    $totalKelas = $jadwalHariIni->count();
-    $kelasSelesai = $jadwalHariIni->where('sudah_absen_kelas', true)->count();
+            ->first();
 
-    // 3. Persetujuan Tertunda
-    $pendingCount = \App\Models\AbsensiSiswa::where('guru_id', $userId)
-        ->where('status_pengajuan', 'pending')
-        ->count();
+        if ($blokAktif === 'TEFA') {
+            $jadwalHariIni = collect();
+        } else {
+            $jadwalHariIni = \App\Models\JadwalMengajar::where('user_id', $userId)
+                ->where('hari', $hariIni)
+                ->whereIn('tipe_blok', ['Semua', $blokAktif])
+                ->orderBy('jam_ke')
+                ->get();
+        }
+        
+        foreach ($jadwalHariIni as $jadwal) {
+            $jadwal->sudah_absen_kelas = \App\Models\AbsensiKelasSiswa::where('jadwal_mengajar_id', $jadwal->id)
+                ->where('tanggal', $today)
+                ->exists();
+        }
+        
+        $totalKelas = $jadwalHariIni->count();
+        $kelasSelesai = $jadwalHariIni->where('sudah_absen_kelas', true)->count();
+
+        $pendingCount = \App\Models\AbsensiSiswa::where('guru_id', $userId)
+            ->where('status_pengajuan', 'pending')
+            ->count();
+
+        return compact('absenPribadi', 'jadwalHariIni', 'totalKelas', 'kelasSelesai', 'pendingCount');
+    });
+
+    extract($dashboardData);
 
     // Penentuan NIP/Nomor Induk
     $nip = $user->nomor_induk ?? '-';

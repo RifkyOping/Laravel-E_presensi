@@ -11,6 +11,7 @@ use App\Models\SchoolSetting;
 use App\Models\AbsensiSiswa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Shuchkin\SimpleXLSX;
 
@@ -24,15 +25,17 @@ class AdminController extends Controller
     {
         $today = Carbon::today();
 
-        $stats = [
-            'total_siswa'    => User::where('role', 'murid')->count(),
-            'total_guru'     => User::where('role', 'guru')->count(),
-            'guru_hadir'     => AbsensiGuru::whereDate('tanggal', $today)->whereNotNull('waktu_datang')->count(),
-            'guru_mengajar'  => AbsensiMengajar::whereDate('tanggal', $today)->distinct('user_id')->count(),
-            'total_mapel'    => MataPelajaran::count(),
-            'mapel_aktif'    => MataPelajaran::where('aktif', true)->count(),
-            'siswa_hadir'    => AbsensiSiswa::whereDate('tanggal', $today)->where('status', 'hadir')->count(),
-        ];
+        $stats = Cache::remember('admin_dashboard_stats', 600, function () use ($today) {
+            return [
+                'total_siswa'    => User::where('role', 'murid')->count(),
+                'total_guru'     => User::where('role', 'guru')->count(),
+                'guru_hadir'     => AbsensiGuru::whereDate('tanggal', $today)->whereNotNull('waktu_datang')->count(),
+                'guru_mengajar'  => AbsensiMengajar::whereDate('tanggal', $today)->distinct('user_id')->count(),
+                'total_mapel'    => MataPelajaran::count(),
+                'mapel_aktif'    => MataPelajaran::where('aktif', true)->count(),
+                'siswa_hadir'    => AbsensiSiswa::whereDate('tanggal', $today)->where('status', 'hadir')->count(),
+            ];
+        });
 
         // Guru yang sudah absen sekolah hari ini
         $guruHadir = AbsensiGuru::with('user')
@@ -113,18 +116,20 @@ class AdminController extends Controller
         $aktivitasHariIni = $aktivitas->sortByDesc('last_activity')->unique('name')->take(10)->values();
 
         // Status Sistem (Job Queue)
-        $pendingJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('jobs') 
-            ? \Illuminate\Support\Facades\DB::table('jobs')->count() 
-            : 0;
-            
-        $failedJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('failed_jobs') 
-            ? \Illuminate\Support\Facades\DB::table('failed_jobs')->count() 
-            : 0;
+        $systemStatus = Cache::remember('admin_dashboard_system_status', 600, function () {
+            $pendingJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('jobs') 
+                ? \Illuminate\Support\Facades\DB::table('jobs')->count() 
+                : 0;
+                
+            $failedJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('failed_jobs') 
+                ? \Illuminate\Support\Facades\DB::table('failed_jobs')->count() 
+                : 0;
 
-        $systemStatus = [
-            'pending_jobs' => $pendingJobs,
-            'failed_jobs'  => $failedJobs,
-        ];
+            return [
+                'pending_jobs' => $pendingJobs,
+                'failed_jobs'  => $failedJobs,
+            ];
+        });
 
         return view('admin.dashboard', compact('stats', 'guruHadir', 'aktivitasHariIni', 'systemStatus'));
     }
@@ -146,7 +151,10 @@ class AdminController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('nomor_induk', 'like', '%' . $request->search . '%');
+                  ->orWhere('nomor_induk', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('siswaProfile', function ($profileQuery) use ($request) {
+                      $profileQuery->where('nis', 'like', '%' . $request->search . '%');
+                  });
             });
         }
 

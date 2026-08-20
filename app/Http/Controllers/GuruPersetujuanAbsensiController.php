@@ -10,25 +10,31 @@ class GuruPersetujuanAbsensiController extends Controller
 {
     public function index()
     {
-        $pengajuanSiswa = AbsensiSiswa::with('user')
-            ->where('guru_id', Auth::id())
-            ->where('status_pengajuan', 'pending')
-            ->orderByDesc('tanggal')
-            ->get();
-            
-        $riwayatSiswa = AbsensiSiswa::with('user')
-            ->where('guru_id', Auth::id())
-            ->whereNotNull('status_pengajuan')
-            ->where('status_pengajuan', '!=', 'pending')
-            ->orderByDesc('updated_at')
-            ->take(30)
-            ->get();
+        $cacheKey = 'guru_persetujuan_' . Auth::id();
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() {
+            $pengajuanSiswa = AbsensiSiswa::with('user')
+                ->where('guru_id', Auth::id())
+                ->where('status_pengajuan', 'pending')
+                ->orderByDesc('tanggal')
+                ->get();
+                
+            $riwayatSiswa = AbsensiSiswa::with('user')
+                ->where('guru_id', Auth::id())
+                ->whereNotNull('status_pengajuan')
+                ->where('status_pengajuan', '!=', 'pending')
+                ->orderByDesc('updated_at')
+                ->take(30)
+                ->get();
+            return compact('pengajuanSiswa', 'riwayatSiswa');
+        });
+        extract($data);
 
         return view('guru.persetujuan-absensi', compact('pengajuanSiswa', 'riwayatSiswa'));
     }
 
     public function approve($id)
     {
+        \Illuminate\Support\Facades\Cache::forget('guru_persetujuan_' . Auth::id());
         $pengajuan = AbsensiSiswa::where('guru_id', Auth::id())->findOrFail($id);
 
         if ($pengajuan->status_pengajuan !== 'pending') {
@@ -51,6 +57,7 @@ class GuruPersetujuanAbsensiController extends Controller
             'alasan.required' => 'Alasan penolakan wajib diisi.'
         ]);
 
+        \Illuminate\Support\Facades\Cache::forget('guru_persetujuan_' . Auth::id());
         $pengajuan = AbsensiSiswa::where('guru_id', Auth::id())->findOrFail($id);
 
         if ($pengajuan->status_pengajuan !== 'pending') {

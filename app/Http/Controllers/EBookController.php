@@ -15,31 +15,37 @@ class EBookController extends Controller
      */
     public function index()
     {
-        $ebooks = EBook::aktif()->orderBy('level')->get();
         $user   = Auth::user();
 
-        // Ambil semua progres user ini
-        $progresData = ProgresEbook::where('user_id', $user->id)
-            ->get()->keyBy('e_book_id');
+        $cacheKey = 'siswa_ebook_index_' . $user->id;
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 43200, function() use ($user) {
+            $ebooks = EBook::aktif()->orderBy('level')->get();
 
-        // Tentukan e-book mana yang terbuka (unlocked)
-        $ebooks = $ebooks->map(function ($ebook) use ($progresData) {
-            $progres = $progresData[$ebook->id] ?? null;
-            $ebook->sudah_selesai = $progres ? $progres->selesai : false;
-            $ebook->lulus_kuis = $progres ? $progres->lulus_kuis : false;
-            $ebook->lulus_suara = $progres ? $progres->lulus_suara : false;
+            // Ambil semua progres user ini
+            $progresData = ProgresEbook::where('user_id', $user->id)
+                ->get()->keyBy('e_book_id');
 
-            // Level 1 selalu terbuka; level > 1 terbuka jika level sebelumnya selesai
-            if ($ebook->level === 1) {
-                $ebook->terbuka = true;
-            } else {
-                $prevBook = EBook::where('level', $ebook->level - 1)->first();
-                $ebook->terbuka = $prevBook
-                    ? ($progresData[$prevBook->id]->selesai ?? false)
-                    : false;
-            }
-            return $ebook;
+            // Tentukan e-book mana yang terbuka (unlocked)
+            $ebooks = $ebooks->map(function ($ebook) use ($progresData) {
+                $progres = $progresData[$ebook->id] ?? null;
+                $ebook->sudah_selesai = $progres ? $progres->selesai : false;
+                $ebook->lulus_kuis = $progres ? $progres->lulus_kuis : false;
+                $ebook->lulus_suara = $progres ? $progres->lulus_suara : false;
+
+                // Level 1 selalu terbuka; level > 1 terbuka jika level sebelumnya selesai
+                if ($ebook->level === 1) {
+                    $ebook->terbuka = true;
+                } else {
+                    $prevBook = EBook::where('level', $ebook->level - 1)->first();
+                    $ebook->terbuka = $prevBook
+                        ? ($progresData[$prevBook->id]->selesai ?? false)
+                        : false;
+                }
+                return $ebook;
+            });
+            return compact('ebooks');
         });
+        extract($data);
 
         return view('siswa.ebook.index', compact('ebooks'));
     }
@@ -71,6 +77,10 @@ class EBookController extends Controller
             ['user_id' => $user->id, 'e_book_id' => $ebook->id],
             ['selesai' => false]
         );
+
+        if ($progres->wasRecentlyCreated) {
+            \Illuminate\Support\Facades\Cache::forget('siswa_ebook_index_' . $user->id);
+        }
 
         if ($progres->lulus_suara && !$progres->selesai) {
             if ($progres->lulus_kuis) {
@@ -154,21 +164,48 @@ class EBookController extends Controller
     public function checkVoice(Request $request, EBook $ebook)
     {
         $request->validate([
-            'teks_suara' => 'required|string|min:10',
+            'teks_suara' => 'required|string|min:3',
         ]);
 
         $progres  = ProgresEbook::where('user_id', Auth::id())
                       ->where('e_book_id', $ebook->id)
                       ->first();
 
-        // Update teks terbaru saat verifikasi akhir
-        if ($progres) {
-            $progres->update(['akumulasi_teks' => $request->teks_suara]);
+        // 1. Perbaiki teks dengan Gemini API (Algoritma Perbaikan Kata/Kalimat)
+        $teksBaru = trim($request->teks_suara);
+        $apiKey = env('GEMINI_API_KEY');
+        if ($apiKey && !empty($teksBaru)) {
+            $prompt = "Perbaiki typo atau salah eja dari hasil transkripsi suara berikut menjadi bahasa Indonesia baku tanpa mengubah maksud asli. JANGAN beri basa-basi atau kalimat pembuka, HANYA kembalikan teks hasil perbaikan secara langsung. Teks: \"{$teksBaru}\"";
+            
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(5)->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}", [
+                    'contents' => [['parts' => [['text' => $prompt]]]]
+                ]);
+                
+                if ($response->successful()) {
+                    $result = $response->json();
+                    $corrected = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    if (!empty(trim($corrected))) {
+                        $teksBaru = trim(str_replace(["\r", "\n", '"'], '', $corrected));
+                    }
+                }
+            } catch (\Exception $e) {
+                // Abaikan error API agar tidak menghalangi murid (fallback ke teks mentah)
+            }
         }
 
+        // 2. Akumulasi Teks Baru ke dalam Database
+        $akumulasi = $teksBaru;
+        if ($progres) {
+            if (!empty($progres->akumulasi_teks)) {
+                $akumulasi = $progres->akumulasi_teks . ' ' . $teksBaru;
+            }
+            $progres->update(['akumulasi_teks' => $akumulasi]);
+        }
+        \Illuminate\Support\Facades\Cache::forget('siswa_ebook_index_' . Auth::id());
+
         $referensi = strtolower($ebook->konten_teks ?? '');
-        // Gunakan akumulasi_teks jika request teks_suara kosong? Tidak, request teks_suara membawa seluruh progres terbaru dari frontend.
-        $suara     = strtolower($request->teks_suara);
+        $suara     = strtolower($akumulasi);
 
         $wordsRef   = array_filter(str_word_count($referensi, 1));
         $wordsSuara = array_filter(str_word_count($suara, 1));
@@ -202,9 +239,10 @@ class EBookController extends Controller
             'skor'   => $skor,
             'lulus'  => $lulus,
             'has_quiz' => $ebook->questions()->count() > 0,
+            'teks_diperbaiki' => $teksBaru,
             'pesan'  => $lulus
-                ? 'Selamat! Kesamaan bacaan Anda ' . $skor . '%. Lanjut ke tahap kuis.'
-                : 'Kesamaan bacaan Anda ' . $skor . '%. Minimal 60% untuk melanjutkan. Coba lagi!',
+                ? 'Selamat! Kesamaan total bacaan Anda mencapai ' . $skor . '%. Lanjut ke tahap kuis.'
+                : 'Tahap disimpan. Progres kesamaan: ' . $skor . '% (Target: 60%). Lanjutkan membaca!',
         ]);
     }
 
@@ -229,6 +267,7 @@ class EBookController extends Controller
                 // Selesai akan diupdate setelah mengisi indikator
             }
             $progres->update($updateData);
+            \Illuminate\Support\Facades\Cache::forget('siswa_ebook_index_' . $user->id);
         }
 
         return response()->json([
@@ -341,6 +380,7 @@ class EBookController extends Controller
         }
 
         $progres->update($updateData);
+        \Illuminate\Support\Facades\Cache::forget('siswa_ebook_index_' . Auth::id());
 
         return response()->json([
             'skor' => $skor,

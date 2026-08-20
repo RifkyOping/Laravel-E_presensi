@@ -18,39 +18,45 @@ $blokAktif = $setting->blok_jadwal_aktif ?? 'A';
 // 1. Jadwal Hari Ini
 $profile = $user->siswaProfile;
 $kelasLengkap = $profile ? trim("{$profile->kelas} {$profile->jurusan} {$profile->rombel}") : trim("{$user->kelas} {$user->jurusan} {$user->rombel}");
-if ($blokAktif === 'TEFA') {
-    $jadwalHariIni = collect();
-} else {
-    $jadwalHariIni = JadwalMengajar::with(['user'])
-        ->where('hari', $hariIniStr)
-        ->where('kelas', $kelasLengkap)
-        ->whereIn('tipe_blok', ['Semua', $blokAktif])
-        ->orderBy('jam_mulai')
-        ->get();
-}
+$cacheKeySiswa = 'siswa_dashboard_' . $user->id . '_' . $tanggalSekarang;
+$dashboardData = \Illuminate\Support\Facades\Cache::remember($cacheKeySiswa, 600, function() use ($user, $hariIniStr, $tanggalSekarang, $blokAktif, $kelasLengkap) {
+    if ($blokAktif === 'TEFA') {
+        $jadwalHariIni = collect();
+    } else {
+        $jadwalHariIni = JadwalMengajar::with(['user'])
+            ->where('hari', $hariIniStr)
+            ->where('kelas', $kelasLengkap)
+            ->whereIn('tipe_blok', ['Semua', $blokAktif])
+            ->orderBy('jam_mulai')
+            ->get();
+    }
 
-// 2. Persentase Kehadiran Kelas (Dihitung dinamis dari tabel absensi_kelas_siswa)
-$totalAbsenKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->count();
-$totalHadirKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'hadir')->count();
-$totalIzinKelas  = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'izin')->count();
-$totalSakitKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'sakit')->count();
-$totalAlpaKelas  = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'alpa')->count();
+    $totalAbsenKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->count();
+    $totalHadirKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'hadir')->count();
+    $totalIzinKelas  = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'izin')->count();
+    $totalSakitKelas = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'sakit')->count();
+    $totalAlpaKelas  = AbsensiKelasSiswa::where('siswa_id', $user->id)->where('status', 'alpa')->count();
 
-$persentaseKehadiran = $totalAbsenKelas > 0 ? round(($totalHadirKelas / $totalAbsenKelas) * 100) : 100;
+    $persentaseKehadiran = $totalAbsenKelas > 0 ? round(($totalHadirKelas / $totalAbsenKelas) * 100) : 100;
 
-// 2.5. Kehadiran Sekolah
-$absenSekolah = \App\Models\AbsensiSiswa::where('user_id', $user->id)
-    ->where('tanggal', Carbon::today())
-    ->first();
+    $absenSekolah = \App\Models\AbsensiSiswa::where('user_id', $user->id)
+        ->where('tanggal', Carbon::today())
+        ->first();
 
-// 3. Statistik Literasi E-book
-$totalBukuDibaca = ProgresEbook::where('user_id', $user->id)->count();
-if($totalBukuDibaca == 0) $totalBukuDibaca = "Belum Ada";
+    $totalBukuDibaca = ProgresEbook::where('user_id', $user->id)->count();
+    if($totalBukuDibaca == 0) $totalBukuDibaca = "Belum Ada";
 
-// 4. Status Sholat Hari Ini
-$sholatHariIni = AbsensiSholatSiswa::where('user_id', $user->id)
-    ->whereDate('tanggal', Carbon::today())
-    ->first();
+    $sholatHariIni = AbsensiSholatSiswa::where('user_id', $user->id)
+        ->whereDate('tanggal', Carbon::today())
+        ->first();
+
+    return compact(
+        'jadwalHariIni', 'totalAbsenKelas', 'totalHadirKelas', 'totalIzinKelas', 'totalSakitKelas', 'totalAlpaKelas',
+        'persentaseKehadiran', 'absenSekolah', 'totalBukuDibaca', 'sholatHariIni'
+    );
+});
+
+extract($dashboardData);
 
 $statusSholatStr = 'Belum Absen';
 if ($sholatHariIni) {

@@ -26,28 +26,28 @@ class AdminEBookController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'level'       => 'required|integer|min:1|unique:e_books,level',
-            'judul'       => 'required|string|max:255',
-            'deskripsi'   => 'nullable|string|max:500',
+            'level' => 'required|integer|min:1|unique:e_books,level',
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string|max:500',
             'konten_teks' => 'nullable|string',
-            'file_pdf'    => 'nullable|file|mimes:pdf|max:20480', // max 20MB
-            'aktif'       => 'boolean',
+            'file_pdf' => 'nullable|file|mimes:pdf|max:20480', // max 20MB
+            'aktif' => 'boolean',
         ], [
             'level.required' => 'Level wajib diisi.',
-            'level.unique'   => 'Level ini sudah ada.',
-            'level.min'      => 'Level minimal 1.',
+            'level.unique' => 'Level ini sudah ada.',
+            'level.min' => 'Level minimal 1.',
             'judul.required' => 'Judul wajib diisi.',
             'file_pdf.mimes' => 'File harus berformat PDF.',
-            'file_pdf.max'   => 'Ukuran file maksimal 20MB.',
+            'file_pdf.max' => 'Ukuran file maksimal 20MB.',
         ]);
 
         $data = [
-            'level'       => $request->level,
-            'judul'       => $request->judul,
-            'deskripsi'   => $request->deskripsi,
+            'level' => $request->level,
+            'judul' => $request->judul,
+            'deskripsi' => $request->deskripsi,
             'konten_teks' => $request->konten_teks,
-            'aktif'       => $request->boolean('aktif', true),
-            'file_pdf'    => null,
+            'aktif' => $request->boolean('aktif', true),
+            'file_pdf' => null,
         ];
 
         if ($request->hasFile('file_pdf')) {
@@ -73,25 +73,25 @@ class AdminEBookController extends Controller
     public function update(Request $request, EBook $ebook)
     {
         $request->validate([
-            'level'       => 'required|integer|min:1|unique:e_books,level,' . $ebook->id,
-            'judul'       => 'required|string|max:255',
-            'deskripsi'   => 'nullable|string|max:500',
+            'level' => 'required|integer|min:1|unique:e_books,level,' . $ebook->id,
+            'judul' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string|max:500',
             'konten_teks' => 'nullable|string',
-            'file_pdf'    => 'nullable|file|mimes:pdf|max:20480',
-            'aktif'       => 'boolean',
+            'file_pdf' => 'nullable|file|mimes:pdf|max:20480',
+            'aktif' => 'boolean',
         ], [
-            'level.unique'   => 'Level ini sudah digunakan.',
+            'level.unique' => 'Level ini sudah digunakan.',
             'judul.required' => 'Judul wajib diisi.',
             'file_pdf.mimes' => 'File harus berformat PDF.',
-            'file_pdf.max'   => 'Ukuran file maksimal 20MB.',
+            'file_pdf.max' => 'Ukuran file maksimal 20MB.',
         ]);
 
         $data = [
-            'level'       => $request->level,
-            'judul'       => $request->judul,
-            'deskripsi'   => $request->deskripsi,
+            'level' => $request->level,
+            'judul' => $request->judul,
+            'deskripsi' => $request->deskripsi,
             'konten_teks' => $request->konten_teks,
-            'aktif'       => $request->boolean('aktif', true),
+            'aktif' => $request->boolean('aktif', true),
         ];
 
         if ($request->hasFile('file_pdf')) {
@@ -154,7 +154,7 @@ class AdminEBookController extends Controller
         $prompt = "Bersihkan teks berikut dari elemen yang tidak perlu (seperti nomor halaman, header, daftar isi, atau karakter aneh hasil copy-paste PDF). Kembalikan HANYA teks konten bacaan yang rapi dan siap dibaca tanpa tambahan kalimat pengantar. Teks:\n\n" . $request->text;
 
         try {
-            $response = Http::timeout(120)->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+            $response = Http::timeout(120)->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}", [
                 'contents' => [
                     ['parts' => [['text' => $prompt]]]
                 ]
@@ -163,11 +163,11 @@ class AdminEBookController extends Controller
             if ($response->successful()) {
                 $result = $response->json();
                 $cleanedText = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                
+
                 return response()->json(['cleaned_text' => trim($cleanedText)]);
             }
 
-            return response()->json(['error' => 'Gagal menghubungi API Gemini.'], 500);
+            return response()->json(['error' => 'API Gemini Error: ' . $response->body()], 500);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -176,12 +176,13 @@ class AdminEBookController extends Controller
     protected function generateQuestions(EBook $ebook, $prompt)
     {
         $apiKey = env('GEMINI_API_KEY');
-        if (!$apiKey || empty($prompt)) return false;
+        if (!$apiKey || empty($prompt))
+            return false;
 
         $prompt = "Buat 10 pertanyaan pilihan ganda berdasarkan teks berikut. Teks: \"{$prompt}\".\nFormat JSON murni (array of objects), setiap object punya 'pertanyaan', 'opsi_jawaban' (array 4 string), dan 'kunci_jawaban' (string). Jangan tambahkan format markdown (seperti ```json).";
 
         try {
-            $response = Http::timeout(120)->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+            $response = Http::timeout(120)->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}", [
                 'contents' => [
                     ['parts' => [['text' => $prompt]]]
                 ]
@@ -227,7 +228,7 @@ class AdminEBookController extends Controller
 
         if ($tab === 'wajib') {
             $query->whereHas('siswaProfile', fn($q) => $q->where('skip_voice_verification', false))
-                  ->orWhereDoesntHave('siswaProfile');
+                ->orWhereDoesntHave('siswaProfile');
         } elseif ($tab === 'bypass') {
             $query->whereHas('siswaProfile', fn($q) => $q->where('skip_voice_verification', true));
         }
@@ -235,7 +236,7 @@ class AdminEBookController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nomor_induk', 'like', "%{$search}%");
+                    ->orWhere('nomor_induk', 'like', "%{$search}%");
             });
         }
 
@@ -248,7 +249,7 @@ class AdminEBookController extends Controller
         if ($user->role !== 'murid') {
             abort(403);
         }
-        
+
         $profile = $user->siswaProfile;
         if (!$profile) {
             $profile = $user->siswaProfile()->create(['skip_voice_verification' => true]);
@@ -258,7 +259,7 @@ class AdminEBookController extends Controller
             $profile->update(['skip_voice_verification' => $newStatus]);
             $status = $newStatus ? 'dimatikan' : 'diaktifkan kembali';
         }
-        
+
         return back()->with('success', "Verifikasi suara untuk {$user->name} berhasil {$status}.");
     }
 }

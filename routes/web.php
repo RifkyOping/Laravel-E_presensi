@@ -13,7 +13,6 @@ use App\Http\Controllers\Admin\MataPelajaranController;
 use App\Http\Controllers\Admin\AdminJadwalMengajarController;
 use App\Http\Controllers\Admin\IndikatorLiterasiController as AdminIndikatorController;
 use App\Http\Controllers\Pengawas\PengawasController;
-use App\Http\Controllers\Kurikulum\KurikulumController;
 use App\Http\Controllers\Piket\PiketSholatController;
 use App\Http\Controllers\Piket\PiketMengajarController;
 use App\Http\Controllers\BukuManualController;
@@ -47,9 +46,6 @@ Route::get('/dashboard', function () {
     }
     if ($user->role === 'pengawas') {
         return redirect()->route('pengawas.dashboard');
-    }
-    if ($user->role === 'kurikulum') {
-        return redirect()->route('kurikulum.dashboard');
     }
     return redirect()->route('murid.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -119,6 +115,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/guru/absensi', [AbsensiGuruController::class, 'index'])->name('guru.absensi');
     Route::post('/guru/absensi/datang', [AbsensiGuruController::class, 'absenDatang'])->name('guru.absensi.datang');
     Route::post('/guru/absensi/pulang', [AbsensiGuruController::class, 'absenPulang'])->name('guru.absensi.pulang');
+
+    // Guru - Scan Absen QR Code Siswa
+    Route::get('/guru/scan-qr', [\App\Http\Controllers\Piket\ScanQrController::class, 'index'])->name('guru.scan-qr');
+    Route::post('/guru/scan-qr/process', [\App\Http\Controllers\Piket\ScanQrController::class, 'processScan'])->name('guru.scan-qr.process');
 
 
     // Guru - Aktivitas Mengajar
@@ -245,18 +245,6 @@ Route::middleware(['auth', 'pengawas'])->prefix('pengawas')->name('pengawas.')->
 });
 
 // ──────────────────────────────────────────
-// KURIKULUM ROUTES
-// ──────────────────────────────────────────
-Route::middleware(['auth', 'kurikulum'])->prefix('kurikulum')->name('kurikulum.')->group(function () {
-    Route::get('/dashboard', [KurikulumController::class, 'dashboard'])->name('dashboard');
-    Route::get('/monitoring-mengajar', [KurikulumController::class, 'monitoringMengajar'])->name('monitoring-mengajar');
-    Route::get('/verifikasi/{aktivitas}', [KurikulumController::class, 'verifikasi'])->name('verifikasi');
-    Route::put('/verifikasi/{aktivitas}', [KurikulumController::class, 'storeVerifikasi'])->name('store-verifikasi');
-    Route::delete('/verifikasi/{aktivitas}', [KurikulumController::class, 'hapusVerifikasi'])->name('hapus-verifikasi');
-
-});
-
-// ──────────────────────────────────────────
 // PIKET ROUTES
 // ──────────────────────────────────────────
 Route::middleware(['auth'])->prefix('piket')->name('piket.')->group(function () {
@@ -276,9 +264,6 @@ Route::middleware(['auth'])->prefix('piket')->name('piket.')->group(function () 
     Route::post('/persetujuan-rpp/{user}/approve', [PiketMengajarController::class, 'approveRpp'])->name('persetujuan-rpp.approve');
     Route::post('/persetujuan-rpp/{user}/reject', [PiketMengajarController::class, 'rejectRpp'])->name('persetujuan-rpp.reject');
 
-    // Piket - Scan Absen QR Code Siswa
-    Route::get('/scan-qr', [\App\Http\Controllers\Piket\ScanQrController::class, 'index'])->name('scan-qr');
-    Route::post('/scan-qr/process', [\App\Http\Controllers\Piket\ScanQrController::class, 'processScan'])->name('scan-qr.process');
 
     // Piket - Review Jawaban Indikator E-Book
     Route::get('/literasi/jawaban-indikator', [\App\Http\Controllers\Piket\ReviewIndikatorController::class, 'index'])->name('literasi.jawaban-indikator');
