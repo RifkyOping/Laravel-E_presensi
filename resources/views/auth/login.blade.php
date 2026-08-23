@@ -84,7 +84,7 @@
         </div>
 
         <!-- Tombol Login -->
-        <div class="pt-6">
+        <div class="pt-6 space-y-4">
             <button type="submit"
                 class="w-full flex justify-center items-center bg-gradient-to-r from-[#24417c] to-blue-600 text-white font-bold text-lg px-6 py-3.5 rounded-xl border border-blue-400 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group">
                 <span class="relative z-10">{{ __('Masuk Sekarang') }}</span>
@@ -92,6 +92,17 @@
                     class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out">
                 </div>
             </button>
+
+            <!-- Tombol Kembali -->
+            <div class="text-center pt-2">
+                <a href="{{ url('/') }}"
+                    class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-[#24417c] transition-colors duration-300">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    {{ __('Kembali ke Beranda') }}
+                </a>
+            </div>
         </div>
     </form>
 </x-guest-layout>

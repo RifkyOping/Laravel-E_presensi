@@ -116,7 +116,7 @@
                     @if($ebook->file_pdf)
                         @php
                             $pdfUrl = asset('storage/' . $ebook->file_pdf);
-                            $pdfPath = storage_path('app/public/' . $ebook->file_pdf);
+                            $pdfPath = public_path('storage/' . $ebook->file_pdf);
                             $pdfExists = file_exists($pdfPath);
                         @endphp
 

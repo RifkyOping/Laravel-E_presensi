@@ -41,10 +41,8 @@
 
     <!-- Hero Section -->
     <main class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <!-- Dekorasi Latar Belakang Abstrak -->
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-50/30 to-white z-0"></div>
-        <div class="absolute -top-20 -right-20 w-96 h-96 bg-[#24417c] rounded-full opacity-[0.03] blur-3xl animate-pulse"></div>
-        <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-[#24417c] rounded-full opacity-[0.03] blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        <!-- Latar Belakang -->
+        <div class="absolute inset-0 bg-white z-0"></div>
 
         <div class="max-w-5xl mx-auto text-center relative z-10 py-12">
             
@@ -57,8 +55,9 @@
                 <span class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#24417c]/80 uppercase">{{ \App\Models\SchoolSetting::get()->nama_sekolah }}</span>
             </h1>
             
-            <p class="animate-fade-in-up delay-200 mt-6 text-lg sm:text-2xl max-w-3xl mx-auto leading-relaxed font-medium mb-10">
-                Melakukan absensi kehadiran dan mengakses buku digital kini lebih mudah, cepat, dan terpadu dalam satu sistem.
+            <p class="animate-fade-in-up delay-200 mt-6 text-lg sm:text-xl max-w-4xl mx-auto leading-relaxed font-medium mb-10">
+                <strong class="text-[#24417c] block text-xl sm:text-2xl mb-2">SMI PM & KKA | Sekolah Model TEFA</strong>
+                Penerapan metode belajar berbasis Pembelajaran Mendalam (PM) & Kecerdasan Artifisial (KKA) yang terintegrasi dengan standar kerja industri.
             </p>
             
             <div class="animate-fade-in-up delay-300 flex flex-col sm:flex-row justify-center items-center gap-4">
@@ -103,7 +102,7 @@
 
             <!-- Kolom 3: Tautan -->
             <div class="animate-fade-in-up delay-300">
-                <h3 class="text-xl font-bold mb-6 text-blue-200">Tautan Cepat</h3>
+                <h3 class="text-xl font-bold mb-6 text-blue-200">Tautan</h3>
                 <ul class="space-y-3 font-medium text-white/80">
                     <li><a href="https://smkn1majene.sch.id/" target="_blank" class="hover:text-blue-200 hover:translate-x-2 transition inline-flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> smkn1majene.sch.id </a></li>
                     <li><a href="https://web.facebook.com/smkn1majene" target="_blank" class="hover:text-blue-200 hover:translate-x-2 transition inline-flex items-center gap-2">

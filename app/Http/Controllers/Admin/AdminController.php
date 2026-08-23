@@ -330,112 +330,171 @@ class AdminController extends Controller
                 continue;
             }
 
-            $name = trim($row[0]);
-            $nomor_induk = trim($row[1]);
+            $name = trim($row[0] ?? '');
+            $nomor_induk = trim($row[1] ?? '');
             $nis = isset($row[2]) && trim($row[2]) !== '' ? trim($row[2]) : null;
             $email = isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : null;
-            $role = isset($row[4]) ? strtolower(trim($row[4])) : '';
-            $password = isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : '12345678';
+            $roleExcel = isset($row[4]) ? strtolower(trim($row[4])) : '';
+            $password = isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : null;
             $kelasStr = isset($row[6]) ? trim($row[6]) : null;
             $agama = isset($row[7]) && trim($row[7]) !== '' ? trim($row[7]) : null;
 
-            if ($role !== 'murid' && $nomor_induk === '') {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => $name ?: '(Kosong)',
-                    'detail' => "Role: {$role}",
-                    'alasan' => 'Nomor Induk / NIP / ID wajib diisi.'
-                ];
-                continue;
+            // 1. Cari User (Upsert Logic)
+            $user = null;
+            if ($nomor_induk !== '') {
+                $user = User::where('nomor_induk', $nomor_induk)->first();
+            }
+            if (!$user && $nis) {
+                $siswaProfile = \App\Models\SiswaProfile::where('nis', $nis)->first();
+                if ($siswaProfile) {
+                    $user = $siswaProfile->user;
+                }
             }
 
-            if ($role === 'murid' && $nomor_induk === '' && !$nis) {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => $name ?: '(Kosong)',
-                    'detail' => "Role: {$role}" . ($kelasStr ? " | Kelas: {$kelasStr}" : ''),
-                    'alasan' => 'Untuk murid, minimal NIS atau NISN (Nomor Induk) harus diisi.'
-                ];
-                continue;
-            }
+            if ($user) {
+                // UPDATE LOGIC
+                $role = $user->role;
 
-            // Validasi role dan email
-            if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas'])) {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => $name,
-                    'detail' => "Nomor Induk: {$nomor_induk} | Role: {$role}",
-                    'alasan' => "Role '{$role}' tidak valid (pilihan: murid, guru, admin, pengawas)."
-                ];
-                continue;
-            }
-
-            if ($nomor_induk !== '' && User::where('nomor_induk', $nomor_induk)->exists()) {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => $name,
-                    'detail' => "Nomor Induk: {$nomor_induk}",
-                    'alasan' => "Nomor Induk '{$nomor_induk}' sudah terdaftar di sistem."
-                ];
-                continue;
-            }
-
-            if ($role === 'murid' && $nis && \App\Models\SiswaProfile::where('nis', $nis)->exists()) {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => $name,
-                    'detail' => "NIS: {$nis}",
-                    'alasan' => "NIS '{$nis}' sudah terdaftar di sistem."
-                ];
-                continue;
-            }
-
-            if ($email && User::where('email', $email)->exists()) {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => $name,
-                    'detail' => "Email: {$email}",
-                    'alasan' => "Email '{$email}' sudah digunakan oleh pengguna lain."
-                ];
-                continue;
-            }
-
-            try {
-                $user = User::create([
-                    'name'        => $name,
-                    'nomor_induk' => $nomor_induk !== '' ? $nomor_induk : null,
-                    'email'       => $email,
-                    'role'        => $role,
-                    'password'    => Hash::make($password),
-                ]);
-
-                if ($role === 'murid') {
-                    $profileData = [];
-                    if ($nis) {
-                        $profileData['nis'] = $nis;
-                    }
-                    if ($agama) {
-                        $profileData['agama'] = $agama;
-                    }
-                    if ($kelasStr) {
-                        $parts = explode(' ', $kelasStr);
-                        $profileData['kelas'] = $parts[0] ?? null;
-                        $profileData['rombel'] = end($parts) ?: null;
-                        if (count($parts) > 2) {
-                            $profileData['jurusan'] = implode(' ', array_slice($parts, 1, -1));
-                        }
-                    }
-                    $user->siswaProfile()->create($profileData);
+                if ($email && $email !== $user->email && User::where('email', $email)->exists()) {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name ?: $user->name,
+                        'detail' => "Email: {$email}",
+                        'alasan' => "Email '{$email}' sudah digunakan oleh pengguna lain."
+                    ];
+                    continue;
                 }
 
-                $berhasil++;
-            } catch (\Exception $e) {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => $name,
-                    'detail' => "Nomor Induk: {$nomor_induk}",
-                    'alasan' => 'Gagal menyimpan ke database: ' . $e->getMessage()
-                ];
+                if ($role === 'murid' && $nis) {
+                    $profile = $user->siswaProfile;
+                    if ($profile && $profile->nis !== $nis && \App\Models\SiswaProfile::where('nis', $nis)->exists()) {
+                        $gagalRows[] = [
+                            'baris' => $rowNum,
+                            'nama' => $name ?: $user->name,
+                            'detail' => "NIS: {$nis}",
+                            'alasan' => "NIS '{$nis}' sudah digunakan oleh pengguna lain."
+                        ];
+                        continue;
+                    }
+                }
+
+                try {
+                    if ($name !== '') $user->name = $name;
+                    if ($email !== null) $user->email = $email;
+                    if ($password !== null) $user->password = Hash::make($password);
+                    $user->save();
+
+                    if ($role === 'murid') {
+                        $profile = $user->siswaProfile ?: new \App\Models\SiswaProfile(['user_id' => $user->id]);
+                        if ($nis !== null) $profile->nis = $nis;
+                        if ($agama !== null) $profile->agama = $agama;
+                        if ($kelasStr !== null) {
+                            $parts = explode(' ', $kelasStr);
+                            $profile->kelas = $parts[0] ?? null;
+                            $profile->rombel = end($parts) ?: null;
+                            if (count($parts) > 2) {
+                                $profile->jurusan = implode(' ', array_slice($parts, 1, -1));
+                            } else {
+                                $profile->jurusan = null;
+                            }
+                        }
+                        $profile->save();
+                    }
+                    $berhasil++;
+                } catch (\Exception $e) {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name ?: $user->name,
+                        'detail' => "Update ID: {$user->id}",
+                        'alasan' => 'Gagal update ke database: ' . $e->getMessage()
+                    ];
+                }
+
+            } else {
+                // INSERT LOGIC
+                $role = $roleExcel;
+                if ($role !== 'murid' && $nomor_induk === '') {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name ?: '(Kosong)',
+                        'detail' => "Role: {$role}",
+                        'alasan' => 'Nomor Induk / NIP / ID wajib diisi.'
+                    ];
+                    continue;
+                }
+
+                if ($role === 'murid' && $nomor_induk === '' && !$nis) {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name ?: '(Kosong)',
+                        'detail' => "Role: {$role}",
+                        'alasan' => 'Untuk murid, minimal NIS atau NISN (Nomor Induk) harus diisi.'
+                    ];
+                    continue;
+                }
+
+                if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas'])) {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name,
+                        'detail' => "Role: {$role}",
+                        'alasan' => "Role '{$role}' tidak valid."
+                    ];
+                    continue;
+                }
+
+                if ($email && User::where('email', $email)->exists()) {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name,
+                        'detail' => "Email: {$email}",
+                        'alasan' => "Email '{$email}' sudah digunakan."
+                    ];
+                    continue;
+                }
+
+                if ($role === 'murid' && $nis && \App\Models\SiswaProfile::where('nis', $nis)->exists()) {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name,
+                        'detail' => "NIS: {$nis}",
+                        'alasan' => "NIS '{$nis}' sudah terdaftar di sistem."
+                    ];
+                    continue;
+                }
+
+                try {
+                    $newUser = User::create([
+                        'name'        => $name !== '' ? $name : 'Tanpa Nama',
+                        'nomor_induk' => $nomor_induk !== '' ? $nomor_induk : null,
+                        'email'       => $email,
+                        'role'        => $role,
+                        'password'    => Hash::make($password ?: '12345678'),
+                    ]);
+
+                    if ($role === 'murid') {
+                        $profileData = [];
+                        if ($nis) $profileData['nis'] = $nis;
+                        if ($agama) $profileData['agama'] = $agama;
+                        if ($kelasStr) {
+                            $parts = explode(' ', $kelasStr);
+                            $profileData['kelas'] = $parts[0] ?? null;
+                            $profileData['rombel'] = end($parts) ?: null;
+                            if (count($parts) > 2) {
+                                $profileData['jurusan'] = implode(' ', array_slice($parts, 1, -1));
+                            }
+                        }
+                        $newUser->siswaProfile()->create($profileData);
+                    }
+                    $berhasil++;
+                } catch (\Exception $e) {
+                    $gagalRows[] = [
+                        'baris' => $rowNum,
+                        'nama' => $name,
+                        'detail' => "Nomor Induk: {$nomor_induk}",
+                        'alasan' => 'Gagal insert ke database: ' . $e->getMessage()
+                    ];
+                }
             }
         }
 
