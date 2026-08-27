@@ -166,7 +166,7 @@
                     <th>Guru</th>
                     <th>Mata Pelajaran</th>
                     <th>Kelas</th>
-                    <th class="text-center">Jam ke-</th>
+                    <th class="text-center">Mapel ke-</th>
                     <th>Waktu</th>
                     <th class="text-center">Foto</th>
                     <th class="text-center">Status</th>

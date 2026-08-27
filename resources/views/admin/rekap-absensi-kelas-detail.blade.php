@@ -24,7 +24,7 @@
                 <p class="text-white/60 text-xs font-bold uppercase tracking-wider mb-1">Detail Absensi Kelas</p>
                 <h2 class="text-2xl font-black">{{ $jadwal->mata_pelajaran }}</h2>
                 <p class="text-white/75 text-sm mt-2 font-medium">
-                    Kelas {{ $jadwal->kelas }} &mdash; Jam ke-{{ $jadwal->jam_ke }}
+                    Kelas {{ $jadwal->kelas }} &mdash; Mapel ke-{{ $jadwal->jam_ke }}
                     ({{ Carbon::parse($jadwal->jam_mulai)->format('H:i') }} – {{ Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WITA)
                 </p>
                 <p class="text-white/60 text-xs mt-1.5 font-semibold flex items-center gap-1.5">

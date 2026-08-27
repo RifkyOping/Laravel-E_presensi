@@ -91,7 +91,7 @@
                                         <div class="flex items-start justify-between gap-3">
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                                    <span class="bg-[#1e3a6e]/10 text-[#1e3a6e] text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">Jam ke-{{ $j->jam_ke }}</span>
+                                                    <span class="bg-[#1e3a6e]/10 text-[#1e3a6e] text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">Mapel ke-{{ $j->jam_ke }}</span>
                                                     <span class="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 shadow-sm px-2 py-0.5 rounded-md">
                                                         {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }}
                                                         @if($j->jam_selesai) - {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }} @endif
@@ -168,7 +168,7 @@
                             <table class="w-full text-left text-sm border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
-                                        <th class="p-3 font-semibold text-center w-20 whitespace-nowrap">Jam Ke-</th>
+                                        <th class="p-3 font-semibold text-center w-20 whitespace-nowrap">Mapel Ke-</th>
                                         <th class="p-3 font-semibold text-center w-32 whitespace-nowrap">Waktu</th>
                                         <th class="p-3 font-semibold min-w-[180px]">Mata Pelajaran</th>
                                         <th class="p-3 font-semibold min-w-[150px]">Guru</th>

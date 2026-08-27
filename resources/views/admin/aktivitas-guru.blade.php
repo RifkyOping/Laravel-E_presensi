@@ -164,7 +164,7 @@
                                 Kelas</th>
                             <th
                                 class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
-                                Jam ke-</th>
+                                Mapel ke-</th>
                             <th
                                 class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
                                 Waktu</th>
@@ -199,7 +199,7 @@
                                     </span>
                                 </td>
 
-                                {{-- Jam ke- --}}
+                                {{-- Mapel ke- --}}
                                 <td class="py-2 md:py-3.5 px-2 md:px-5 text-center font-bold text-slate-700 text-[0.65rem] md:text-sm">
                                     {{ $item->jam_ke }}
                                 </td>

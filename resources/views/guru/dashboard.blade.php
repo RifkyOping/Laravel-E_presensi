@@ -222,7 +222,7 @@
                                 <div class="bg-white border {{ $isBerlangsung ? 'border-blue-300 shadow-md ring-1 ring-blue-100' : 'border-slate-100' }} rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
                                     <div class="flex items-center gap-4">
                                         <div class="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 text-center shrink-0 min-w-[80px]">
-                                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Jam Ke-{{ $jadwal->jam_ke }}</p>
+                                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Mapel Ke-{{ $jadwal->jam_ke }}</p>
                                             <p class="text-sm font-bold text-[#1e3a6e]">{{ $waktuMulai }}</p>
                                         </div>
                                         <div>

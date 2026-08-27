@@ -69,7 +69,7 @@ class AbsensiMengajarController extends Controller
         ], [
             'mata_pelajaran.required' => 'Mata pelajaran wajib diisi.',
             'kelas.required'          => 'Kelas wajib dipilih.',
-            'jam_ke.required'         => 'Jam ke- wajib diisi.',
+            'jam_ke.required'         => 'Mapel ke- wajib diisi.',
             'jam_mulai.required'      => 'Jam mulai wajib diisi.',
         ]);
 

@@ -45,7 +45,7 @@
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="flex-1 min-w-0">
                                             <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                                                <span class="bg-[#1e3a6e]/10 text-[#1e3a6e] text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">Jam ke-{{ $jadwal->jam_ke }}</span>
+                                                <span class="bg-[#1e3a6e]/10 text-[#1e3a6e] text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">Mapel ke-{{ $jadwal->jam_ke }}</span>
                                                 <span class="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 shadow-sm px-2 py-0.5 rounded-md">
                                                     {{ $jadwal->jam_mulai }} - {{ $jadwal->jam_selesai }}
                                                 </span>
@@ -127,7 +127,7 @@
                                             <div class="flex justify-between md:block items-center">
                                                 <span class="md:hidden font-bold text-slate-500 text-xs uppercase">Waktu</span>
                                                 <div class="text-right md:text-left">
-                                                    <span class="font-semibold text-slate-800">Jam ke-{{ $jadwal->jam_ke }}</span>
+                                                    <span class="font-semibold text-slate-800">Mapel ke-{{ $jadwal->jam_ke }}</span>
                                                     <div class="text-xs text-slate-500 mt-0.5 md:mt-1">{{ $jadwal->jam_mulai }} - {{ $jadwal->jam_selesai }}</div>
                                                 </div>
                                             </div>

@@ -97,7 +97,7 @@
                     <th class="text-center">Guru</th>
                     <th class="text-center">Mata Pelajaran</th>
                     <th class="text-center">Kelas</th>
-                    <th class="text-center">Jam ke-</th>
+                    <th class="text-center">Mapel ke-</th>
                     <th class="text-center">Waktu</th>
                 </tr></thead>
                 <tbody>

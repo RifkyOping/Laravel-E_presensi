@@ -67,9 +67,9 @@ class AbsensiGuruController extends Controller
             session()->now('popup_notification', [
                 'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
                 'text' => $isApproved
-                    ? 'Pengajuan izin/sakit Anda telah disetujui.'
-                    : 'Pengajuan izin/sakit Anda ditolak, sehingga status Anda menjadi Alpa.' . ($notif->alasan_ditolak ? ' Alasan penolakan: ' . $notif->alasan_ditolak : ''),
-                'icon' => $isApproved ? 'success' : 'error'
+                    ? 'Pengajuan Cuti/Tugas Anda telah disetujui.'
+                    : 'Pengajuan Cuti/Tugas Anda ditolak.' . ($notif->alasan_ditolak ? '<br><br><strong>Alasan:</strong> ' . e($notif->alasan_ditolak) : ''),
+                'icon' => $isApproved ? 'success' : 'warning'
             ]);
 
             // Mark all as notified to avoid repeated popups

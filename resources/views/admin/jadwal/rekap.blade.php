@@ -55,7 +55,7 @@
                             <tr class="bg-slate-50 text-slate-700">
                                 <th class="p-4 font-black border-b border-r border-slate-200 text-center sticky left-0 bg-slate-50 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] w-40">Kelas</th>
                                 @for($i = 1; $i <= $maxJam; $i++)
-                                    <th class="p-3 font-bold border-b border-r border-slate-200 text-center min-w-[200px] w-[200px]">Jam Ke-{{ $i }}</th>
+                                    <th class="p-3 font-bold border-b border-r border-slate-200 text-center min-w-[200px] w-[200px]">Mapel Ke-{{ $i }}</th>
                                 @endfor
                             </tr>
                         </thead>

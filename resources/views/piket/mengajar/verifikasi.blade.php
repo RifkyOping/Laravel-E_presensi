@@ -35,7 +35,7 @@
                         {{ Carbon::parse($aktivitas->tanggal)->translatedFormat('d F Y') }}</p>
                 </div>
                 <div>
-                    <p class="app-label">Jam ke-</p>
+                    <p class="app-label">Mapel ke-</p>
                     <span class="font-semibold text-slate-800">{{ $aktivitas->jam_ke }}</span>
                 </div>
                 <div>

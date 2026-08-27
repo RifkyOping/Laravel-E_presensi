@@ -6,7 +6,7 @@
 
     @php
         $pageTitle    = 'Absen Kelas: ' . $jadwal->kelas;
-        $pageSubtitle = $jadwal->mata_pelajaran . ' · Jam ke-' . $jadwal->jam_ke . ' · ' . Carbon::parse($jadwal->jam_mulai)->format('H:i') . '–' . Carbon::parse($jadwal->jam_selesai)->format('H:i') . ' WITA';
+        $pageSubtitle = $jadwal->mata_pelajaran . ' · Mapel ke-' . $jadwal->jam_ke . ' · ' . Carbon::parse($jadwal->jam_mulai)->format('H:i') . '–' . Carbon::parse($jadwal->jam_selesai)->format('H:i') . ' WITA';
     @endphp
 
     <div class="space-y-6">
@@ -32,7 +32,7 @@
                         <span>Kelas {{ $jadwal->kelas }}</span>
                         <span class="hidden sm:inline"> &mdash; </span>
                         <span class="block sm:inline mt-0.5 sm:mt-0">
-                            Jam ke-{{ $jadwal->jam_ke }} ({{ Carbon::parse($jadwal->jam_mulai)->format('H:i') }} – {{ Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WITA)
+                            Mapel ke-{{ $jadwal->jam_ke }} ({{ Carbon::parse($jadwal->jam_mulai)->format('H:i') }} – {{ Carbon::parse($jadwal->jam_selesai)->format('H:i') }} WITA)
                         </span>
                     </p>
                 </div>

@@ -67,7 +67,7 @@
                                 @foreach($jadwalHari as $j)
                                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                                         <div class="flex items-center justify-between">
-                                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Jam ke-{{ $j->jam_ke }}</span>
+                                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mapel ke-{{ $j->jam_ke }}</span>
                                             <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
                                                 {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }}
                                                 @if($j->jam_selesai) – {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }} @endif
@@ -93,7 +93,7 @@
                                 <table class="w-full text-left text-sm border-collapse">
                                     <thead>
                                         <tr class="bg-slate-50 text-slate-600">
-                                            <th class="p-3 font-semibold rounded-tl-lg w-16 text-center">Jam Ke-</th>
+                                            <th class="p-3 font-semibold rounded-tl-lg w-16 text-center">Mapel Ke-</th>
                                             <th class="p-3 font-semibold">Mata Pelajaran</th>
                                             <th class="p-3 font-semibold">Kelas</th>
                                             <th class="p-3 font-semibold rounded-tr-lg w-40 text-center">Jam</th>

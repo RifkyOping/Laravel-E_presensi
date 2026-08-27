@@ -156,9 +156,9 @@ class AdminJadwalMengajarController extends Controller
             'jadwal.*.mata_pelajaran.required'  => 'Mata pelajaran wajib diisi.',
             'jadwal.*.kelas_id.required'       => 'Kelas wajib dipilih.',
             'jadwal.*.kelas_id.exists'         => 'Kelas yang dipilih tidak ditemukan.',
-            'jadwal.*.jam_ke.required'         => 'Jam ke- wajib diisi.',
-            'jadwal.*.jam_ke.integer'          => 'Jam ke- harus berupa angka.',
-            'jadwal.*.jam_ke.min'              => 'Jam ke- minimal 1.',
+            'jadwal.*.jam_ke.required'         => 'Mapel ke- wajib diisi.',
+            'jadwal.*.jam_ke.integer'          => 'Mapel ke- harus berupa angka.',
+            'jadwal.*.jam_ke.min'              => 'Mapel ke- minimal 1.',
             'jadwal.*.jam_mulai.required'      => 'Jam mulai wajib diisi.',
         ]);
 
@@ -334,7 +334,7 @@ class AdminJadwalMengajarController extends Controller
                  $gagalRows[] = [
                      'baris' => $rowNum,
                      'nama' => $namaOrEmail,
-                     'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-') . " | Hari: " . ($hari ?: '-') . " (Jam ke-" . ($jamKe ?: '-') . ")",
+                     'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-') . " | Hari: " . ($hari ?: '-') . " (Mapel ke-" . ($jamKe ?: '-') . ")",
                      'alasan' => "Akun guru \"{$namaOrEmail}\" tidak ditemukan di sistem."
                  ];
                  continue;
@@ -345,7 +345,7 @@ class AdminJadwalMengajarController extends Controller
                      'baris' => $rowNum,
                      'nama' => $guru->name,
                      'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-'),
-                     'alasan' => 'Kolom Hari atau Jam ke- tidak boleh kosong.'
+                     'alasan' => 'Kolom Hari atau Mapel ke- tidak boleh kosong.'
                  ];
                  continue;
              }
@@ -404,14 +404,14 @@ class AdminJadwalMengajarController extends Controller
     public function toggleBlok(Request $request)
     {
         $request->validate([
-            'blok' => 'required|in:A,B,TEFA'
+            'blok' => 'required|in:A,B'
         ]);
 
         $setting = \App\Models\SchoolSetting::get();
         $setting->blok_jadwal_aktif = $request->blok;
         $setting->save();
         
-        $namaBlok = $request->blok === 'TEFA' ? 'TEFA' : "Blok {$setting->blok_jadwal_aktif}";
+        $namaBlok = "Blok {$setting->blok_jadwal_aktif}";
         return redirect()->back()->with('success', "Status jadwal aktif berhasil diubah menjadi {$namaBlok}.");
     }
 }

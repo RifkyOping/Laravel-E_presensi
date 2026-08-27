@@ -881,7 +881,7 @@ class AdminController extends Controller
             ->get();
 
         $rows = [
-            ['No', 'Nama Guru', 'Tanggal', 'Mata Pelajaran', 'Kelas', 'Jam Ke', 'Jam Mulai', 'Jam Selesai', 'Masuk', 'Keluar', 'Kategori', 'Status Verifikasi', 'Diverifikasi Oleh']
+            ['No', 'Nama Guru', 'Tanggal', 'Mata Pelajaran', 'Kelas', 'Mapel Ke', 'Jam Mulai', 'Jam Selesai', 'Masuk', 'Keluar', 'Kategori', 'Status Verifikasi', 'Diverifikasi Oleh']
         ];
         
         $no = 1;
@@ -1175,6 +1175,8 @@ class AdminController extends Controller
                 'status_pengajuan' => 'approved',
                 'is_notified' => false,
             ]);
+            \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::parse($model->tanggal)->toDateString());
+            \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::today()->toDateString());
         } else {
             // Guru
             $model = AbsensiGuru::findOrFail($id);
@@ -1182,6 +1184,8 @@ class AdminController extends Controller
                 'status_pengajuan' => 'approved',
                 'is_notified' => false,
             ]);
+            \Illuminate\Support\Facades\Cache::forget('guru_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::parse($model->tanggal)->toDateString());
+            \Illuminate\Support\Facades\Cache::forget('guru_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::today()->toDateString());
 
             // Jika status adalah cuti atau tugas, otomatis isi presensi
             // untuk setiap tanggal dari tanggal mulai s/d tanggal selesai
@@ -1229,6 +1233,14 @@ class AdminController extends Controller
             'alasan_ditolak' => $request->alasan,
             'is_notified' => false,
         ]);
+        
+        if ($type === 'murid') {
+            \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::parse($model->tanggal)->toDateString());
+            \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::today()->toDateString());
+        } else {
+            \Illuminate\Support\Facades\Cache::forget('guru_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::parse($model->tanggal)->toDateString());
+            \Illuminate\Support\Facades\Cache::forget('guru_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::today()->toDateString());
+        }
         
         return back()->with('success', 'Pengajuan ditolak.');
     }

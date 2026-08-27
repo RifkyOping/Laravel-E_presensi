@@ -109,7 +109,7 @@
                     <tr class="border-b border-slate-100 bg-slate-50/70">
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Guru / Mata Pelajaran</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider">Kelas</th>
-                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Jam ke-</th>
+                        <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Mapel ke-</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Hadir</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Alpa</th>
                         <th class="py-3.5 px-5 text-[.7rem] font-black text-slate-400 uppercase tracking-wider text-center">Sakit</th>
@@ -142,7 +142,7 @@
                             </span>
                         </td>
 
-                        {{-- Jam ke- --}}
+                        {{-- Mapel ke- --}}
                         <td class="py-4 px-5 text-center font-bold text-slate-700 text-sm">
                             {{ $jadwal->jam_ke }}
                         </td>

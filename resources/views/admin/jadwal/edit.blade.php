@@ -106,7 +106,7 @@
                                         {{-- Jam --}}
                                         <div class="grid grid-cols-3 gap-2">
                                             <div>
-                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Jam Ke-</label>
+                                                <label class="block text-xs font-semibold text-slate-500 mb-1">Mapel Ke-</label>
                                                 <input type="number" :name="`jadwal[${item.id}][jam_ke]`" x-model="item.jam_ke" min="1" class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e] text-center">
                                             </div>
                                             <div>
@@ -133,7 +133,7 @@
                                             <th class="p-3 font-semibold rounded-tl-lg">Mata Pelajaran</th>
                                             <th class="p-3 font-semibold">Kelas</th>
                                             <th class="p-3 font-semibold w-28">Tipe Blok</th>
-                                            <th class="p-3 font-semibold w-24 text-center">Jam Ke-</th>
+                                            <th class="p-3 font-semibold w-24 text-center">Mapel Ke-</th>
                                             <th class="p-3 font-semibold w-32">Jam Mulai</th>
                                             <th class="p-3 font-semibold w-32">Jam Selesai</th>
                                             <th class="p-3 font-semibold rounded-tr-lg w-16 text-center">Aksi</th>

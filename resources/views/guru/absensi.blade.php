@@ -240,7 +240,7 @@
         if ($absensiHariIni && $absensiHariIni->status_pengajuan === 'pending') {
             $disableCutiTugas = true;
             $statusCutiTugas = 'Menunggu Konfirmasi Admin';
-        } elseif ($absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas'])) {
+        } elseif ($absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas']) && $absensiHariIni->status_pengajuan === 'approved') {
             $disableCutiTugas = true;
             $statusCutiTugas = 'Sedang dalam masa ' . ucfirst($absensiHariIni->status);
         } elseif ($sedangMasaCutiTugas && !$absensiHariIni) {

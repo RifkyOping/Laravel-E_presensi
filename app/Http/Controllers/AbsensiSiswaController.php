@@ -76,7 +76,7 @@ class AbsensiSiswaController extends Controller
                 'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
                 'text' => $isApproved
                     ? 'Pengajuan izin/sakit Anda telah disetujui.'
-                    : 'Pengajuan izin/sakit Anda ditolak. Silakan melakukan absensi sekolah biasa hari ini.' . ($notif->alasan_ditolak ? '<br><br><strong>Alasan:</strong> ' . e($notif->alasan_ditolak) : ''),
+                    : 'Pengajuan izin/sakit Anda ditolak.' . ($notif->alasan_ditolak ? '<br><br><strong>Alasan:</strong> ' . e($notif->alasan_ditolak) : ''),
                 'icon' => $isApproved ? 'success' : 'warning'
             ]);
 

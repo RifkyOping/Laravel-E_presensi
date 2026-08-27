@@ -46,6 +46,9 @@ class GuruPersetujuanAbsensiController extends Controller
             'is_notified'      => false,
         ]);
 
+        \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::parse($pengajuan->tanggal)->toDateString());
+        \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::today()->toDateString());
+
         return back()->with('success', 'Pengajuan berhasil disetujui.');
     }
 
@@ -69,6 +72,9 @@ class GuruPersetujuanAbsensiController extends Controller
             'alasan_ditolak'   => $request->alasan,
             'is_notified'      => false,
         ]);
+
+        \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::parse($pengajuan->tanggal)->toDateString());
+        \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::today()->toDateString());
 
         return back()->with('success', 'Pengajuan ditolak. Murid masih dapat melakukan absen sekolah biasa.');
     }

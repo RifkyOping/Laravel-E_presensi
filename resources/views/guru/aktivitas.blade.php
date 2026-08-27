@@ -265,10 +265,10 @@
                             </select>
                         </div>
 
-                        {{-- Jam Ke- --}}
+                        {{-- Mapel Ke- --}}
                         <div class="col-span-1">
                             <label class="block text-xs font-black text-[#24417c] mb-1.5 uppercase tracking-wider">
-                                Jam Ke- <span class="text-red-500">*</span>
+                                Mapel Ke- <span class="text-red-500">*</span>
                             </label>
                             <input type="number" name="jam_ke" value="{{ old('jam_ke') }}" min="1" required
                                 class="w-full border-2 border-[#24417c]/20 focus:border-[#24417c] rounded-xl px-3 py-2.5 text-[#24417c] font-medium focus:outline-none transition duration-200 text-sm">
@@ -329,7 +329,7 @@
                             <p class="font-black text-[#24417c] text-sm">{{ $item->mata_pelajaran }}</p>
                             <p class="text-xs text-[#24417c]/60 font-semibold mt-0.5">{{ $item->kelas }}</p>
                         </div>
-                        <span class="shrink-0 text-xs font-bold text-[#24417c]/70 bg-[#24417c]/10 px-2 py-0.5 rounded-lg">Jam ke-{{ $item->jam_ke }}</span>
+                        <span class="shrink-0 text-xs font-bold text-[#24417c]/70 bg-[#24417c]/10 px-2 py-0.5 rounded-lg">Mapel ke-{{ $item->jam_ke }}</span>
                     </div>
                     <div class="flex items-center justify-between text-xs text-slate-500 font-semibold">
                         <span>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</span>
@@ -385,7 +385,7 @@
                             <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Tanggal</th>
                             <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Mata Pelajaran</th>
                             <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Kelas</th>
-                            <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Jam ke-</th>
+                            <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Mapel ke-</th>
                             <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Waktu</th>
                             <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Status Verifikasi</th>
                             <th class="py-3 px-4 font-bold text-xs uppercase tracking-wider">Aksi</th>
@@ -510,7 +510,7 @@
                             </div>
                             <div class="text-left">
                                 <p class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Waktu Sesi</p>
-                                <p class="font-bold text-slate-800 mt-0.5" x-text="'Jam ke-' + modalData.jamKe + ' (' + modalData.waktu + ')'"></p>
+                                <p class="font-bold text-slate-800 mt-0.5" x-text="'Mapel ke-' + modalData.jamKe + ' (' + modalData.waktu + ')'"></p>
                             </div>
                             <div class="text-left">
                                 <p class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Diverifikasi Oleh</p>

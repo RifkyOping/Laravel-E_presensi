@@ -161,7 +161,7 @@
                                 <p class="font-bold text-slate-700 text-sm">{{ $jadwal->kelas }}</p>
                             </div>
                             <div class="bg-slate-50 rounded-xl p-3">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Jam Ke</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Mapel Ke</p>
                                 <p class="font-bold text-slate-700 text-sm">{{ $jadwal->jam_ke }}</p>
                             </div>
                             <div class="bg-[#1e3a6e]/5 rounded-xl p-3 col-span-2">

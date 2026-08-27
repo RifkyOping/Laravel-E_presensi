@@ -102,9 +102,9 @@
         <div class="bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-between shadow-sm">
             <div>
                 <h3 class="font-bold text-slate-800 text-lg">
-                    Jadwal Aktif: <span class="text-[#1e3a6e]">{{ $blokAktif === 'TEFA' ? 'TEFA' : "Blok {$blokAktif}" }}</span>
+                    Jadwal Aktif: <span class="text-[#1e3a6e]">Blok {{ $blokAktif }}</span>
                 </h3>
-                <p class="text-sm text-slate-500 mt-1">Ubah ini untuk mengatur status jadwal (TEFA: jadwal reguler dinonaktifkan).</p>
+                <p class="text-sm text-slate-500 mt-1">Ubah ini untuk mengatur status jadwal yang sedang aktif.</p>
             </div>
             <form action="{{ route('admin.jadwal-mengajar.toggle-blok') }}" method="POST" class="flex items-center gap-2">
                 @csrf
@@ -115,10 +115,6 @@
                 <button type="submit" name="blok" value="B" 
                     class="px-4 py-2 rounded-xl text-sm font-bold transition-all {{ $blokAktif === 'B' ? 'bg-[#1e3a6e] text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                     Blok B
-                </button>
-                <button type="submit" name="blok" value="TEFA" 
-                    class="px-4 py-2 rounded-xl text-sm font-bold transition-all {{ $blokAktif === 'TEFA' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    TEFA
                 </button>
             </form>
         </div>
