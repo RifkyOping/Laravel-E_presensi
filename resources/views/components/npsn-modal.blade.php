@@ -2,7 +2,7 @@
      POPUP NPSN VERIFIKASI — Muncul setelah login setiap sesi baru
 ═══════════════════════════════════════════════════════ --}}
 @auth
-@if(!session('npsn_verified'))
+@if(!session('npsn_verified') && auth()->user()->role !== 'admin')
 <div id="npsn-modal" class="fixed inset-0 z-[9999] flex items-center justify-center" style="backdrop-filter: blur(8px); background: rgba(15,23,42,0.65);">
     {{-- Pointer events blocker for anything behind --}}
     <div class="absolute inset-0" style="pointer-events: all;"></div>

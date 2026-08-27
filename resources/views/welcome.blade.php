@@ -57,7 +57,7 @@
             
             <p class="animate-fade-in-up delay-200 mt-6 text-lg sm:text-xl max-w-4xl mx-auto leading-relaxed font-medium mb-10">
                 <strong class="text-[#24417c] block text-xl sm:text-2xl mb-2">SMI PM & KKA | Sekolah Model TEFA</strong>
-                Penerapan metode belajar berbasis Pembelajaran Mendalam (PM) & Kecerdasan Artifisial (KKA) yang terintegrasi dengan standar kerja industri.
+                Implementasi Model Pembelajaran TEFA dengan Pendekatan Pembelajaran Mendalam (PM)  dan Koding dan Kecerdasan Artificial (KKA)
             </p>
             
             <div class="animate-fade-in-up delay-300 flex flex-col sm:flex-row justify-center items-center gap-4">

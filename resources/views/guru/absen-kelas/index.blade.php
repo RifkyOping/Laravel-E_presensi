@@ -88,6 +88,7 @@
                                       file:text-[11px] sm:file:text-sm file:font-semibold
                                       file:bg-slate-100 file:text-slate-700
                                       hover:file:bg-slate-200 file:transition">
+                        <p class="text-[10px] text-slate-400 mt-1.5">*Format: PDF, DOC, DOCX. Maks: 5MB</p>
                         @error('rpp_file')
                             <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                         @enderror
@@ -101,7 +102,6 @@
             </div>
         </div>
 
-        {{-- Daftar Jadwal Hari Ini --}}
         {{-- Daftar Jadwal Hari Ini --}}
         @if(auth()->user()->rpp_status === 'kosong')
             <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">

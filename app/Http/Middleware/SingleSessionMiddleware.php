@@ -16,6 +16,10 @@ class SingleSessionMiddleware
 
         $user = Auth::user();
 
+        if ($user->role === 'admin') {
+            return $next($request);
+        }
+
         $currentToken = session('session_token');
 
         \Illuminate\Support\Facades\Log::info("SingleSessionMiddleware Debug: User ID: {$user->id}, User Token: {$user->session_token}, Current Token: {$currentToken}");

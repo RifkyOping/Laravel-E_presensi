@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
         // Langkah 3: Cek kunci perangkat — ambil fresh dari DB agar pasti akurat
         $freshDeviceId = DB::table('users')->where('id', $user->id)->value('device_id');
 
-        if (!empty($freshDeviceId)) {
+        if (!empty($freshDeviceId) && $user->role !== 'admin') {
             // Akun sudah terikat ke perangkat tertentu.
             // Jika cookie di browser ini BERBEDA atau TIDAK ADA → TOLAK LOGIN
             if ($cookieDeviceId !== $freshDeviceId) {
