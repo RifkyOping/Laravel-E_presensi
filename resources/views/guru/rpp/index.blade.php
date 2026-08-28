@@ -64,8 +64,10 @@
                 </div>
             @else
                 {{-- Mobile View --}}
-                <div class="block sm:hidden divide-y divide-slate-100">
-                    @foreach($rppSlots as $slot)
+                <form action="{{ route('guru.upload-rpp') }}" method="POST" enctype="multipart/form-data" class="block sm:hidden">
+                    @csrf
+                    <div class="divide-y divide-slate-100">
+                        @foreach($rppSlots as $slot)
                         @php
                             $statusData = match($slot['status']) {
                                 'kosong'    => ['Belum Upload', 'bg-red-50 text-red-700 border-red-200'],
@@ -103,32 +105,37 @@
                                     Dokumen RPP telah diunggah
                                 </div>
                             @else
-                                <form action="{{ route('guru.upload-rpp') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-2">
-                                    @csrf
-                                    <input type="hidden" name="tingkat" value="{{ $slot['tingkat'] }}">
-                                    <input type="hidden" name="jurusan" value="{{ $slot['jurusan'] }}">
-                                    <input type="hidden" name="target_periode" value="{{ $slot['target_periode'] }}">
-                                    
-                                    <input type="file" name="rpp_file" accept=".pdf,.doc,.docx" required
+                                <div class="flex flex-col gap-2">
+                                    <input type="file" name="rpp_files[{{ $slot['tingkat'] }}|{{ $slot['jurusan'] }}|{{ $slot['target_periode'] }}]" accept=".pdf,.doc,.docx"
                                            class="block w-full text-[11px] text-slate-500
                                                   file:mr-2 file:py-2 file:px-4
                                                   file:rounded-xl file:border-0
                                                   file:text-[11px] file:font-bold
                                                   file:bg-slate-100 file:text-slate-700
                                                   hover:file:bg-slate-200 file:transition">
-                                    
-                                    <button type="submit" class="w-full flex items-center justify-center gap-1.5 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                        Upload untuk {{ $targetLabel }}
-                                    </button>
-                                </form>
+                                </div>
                             @endif
                         </div>
                     @endforeach
-                </div>
+                    </div>
+                    @php
+                        $hasPending = collect($rppSlots)->contains(function($slot) {
+                            return !in_array($slot['status'], ['pending', 'disetujui']);
+                        });
+                    @endphp
+                    @if($hasPending)
+                        <div class="p-5 border-t border-slate-100 bg-slate-50 flex justify-end">
+                            <button type="submit" class="w-full flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-3 rounded-xl text-sm transition shadow-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Upload Semua RPP
+                            </button>
+                        </div>
+                    @endif
+                </form>
 
                 {{-- Desktop Table View --}}
-                <div class="hidden sm:block overflow-x-auto">
+                <form action="{{ route('guru.upload-rpp') }}" method="POST" enctype="multipart/form-data" class="hidden sm:block overflow-x-auto">
+                    @csrf
                     <table class="w-full text-left text-sm text-slate-600">
                         <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
                             <tr>
@@ -186,33 +193,30 @@
                                                 Selesai
                                             </div>
                                         @else
-                                            <form action="{{ route('guru.upload-rpp') }}" method="POST" enctype="multipart/form-data" class="flex flex-col xl:flex-row items-center gap-2">
-                                                @csrf
-                                                <input type="hidden" name="tingkat" value="{{ $slot['tingkat'] }}">
-                                                <input type="hidden" name="jurusan" value="{{ $slot['jurusan'] }}">
-                                                <input type="hidden" name="target_periode" value="{{ $slot['target_periode'] }}">
-                                                
-                                                <div class="flex-1 min-w-0 w-full xl:w-auto">
-                                                    <input type="file" name="rpp_file" accept=".pdf,.doc,.docx" required
-                                                           class="block w-full text-xs text-slate-500
-                                                                  file:mr-2 file:py-2.5 file:px-4
-                                                                  file:rounded-xl file:border-0
-                                                                  file:text-xs file:font-bold
-                                                                  file:bg-slate-100 file:text-slate-700
-                                                                  hover:file:bg-slate-200 file:transition">
-                                                </div>
-                                                <button type="submit" class="w-full xl:w-auto flex-shrink-0 flex items-center justify-center gap-1.5 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                                    Upload
-                                                </button>
-                                            </form>
+                                            <div class="w-full">
+                                                <input type="file" name="rpp_files[{{ $slot['tingkat'] }}|{{ $slot['jurusan'] }}|{{ $slot['target_periode'] }}]" accept=".pdf,.doc,.docx"
+                                                       class="block w-full text-xs text-slate-500
+                                                              file:mr-2 file:py-2.5 file:px-4
+                                                              file:rounded-xl file:border-0
+                                                              file:text-xs file:font-bold
+                                                              file:bg-slate-100 file:text-slate-700
+                                                              hover:file:bg-slate-200 file:transition">
+                                            </div>
                                         @endif
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
-                </div>
+                    @if($hasPending)
+                        <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+                            <button type="submit" class="flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-sm w-full sm:w-auto">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Upload Semua RPP
+                            </button>
+                        </div>
+                    @endif
+                </form>
             @endif
         </div>
     </div>

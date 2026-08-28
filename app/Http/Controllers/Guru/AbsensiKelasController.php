@@ -324,42 +324,48 @@ class AbsensiKelasController extends Controller
         $guru = Auth::user();
 
         $request->validate([
-            'rpp_file'       => 'required|file|mimes:pdf,doc,docx|max:5120',
-            'tingkat'        => 'required|string',
-            'jurusan'        => 'required|string',
-            'target_periode' => 'required|string|date_format:Y-m',
+            'rpp_files'   => 'required|array',
+            'rpp_files.*' => 'file|mimes:pdf,doc,docx|max:5120',
         ], [
-            'rpp_file.required' => 'File RPP wajib diunggah.',
-            'rpp_file.mimes'    => 'Format file harus berupa PDF, DOC, atau DOCX.',
-            'rpp_file.max'      => 'Ukuran file maksimal 5MB.',
-            'tingkat.required'  => 'Tingkat kelas wajib dipilih.',
-            'jurusan.required'  => 'Jurusan wajib dipilih.',
-            'target_periode.required' => 'Periode target tidak ditemukan.',
+            'rpp_files.required' => 'Setidaknya satu file RPP wajib dipilih untuk diunggah.',
+            'rpp_files.*.mimes'  => 'Format file harus berupa PDF, DOC, atau DOCX.',
+            'rpp_files.*.max'    => 'Ukuran masing-masing file maksimal 5MB.',
         ]);
 
-        $filePath = $request->file('rpp_file')->store('rpp', 'public');
-        $targetPeriode = $request->target_periode;
+        $uploadedCount = 0;
+        foreach ($request->file('rpp_files') as $key => $file) {
+            // Key is in format: "Tingkat|Jurusan|Periode", e.g., "X|RPL|2026-08"
+            $parts = explode('|', $key);
+            if (count($parts) === 3) {
+                $tingkat       = $parts[0];
+                $jurusan       = $parts[1];
+                $targetPeriode = $parts[2];
+
+                $filePath = $file->store('rpp', 'public');
+
+                RppGuru::updateOrCreate(
+                    [
+                        'user_id'     => $guru->id,
+                        'tingkat'     => $tingkat,
+                        'jurusan'     => $jurusan,
+                        'rpp_periode' => $targetPeriode,
+                    ],
+                    [
+                        'rpp_file'   => $filePath,
+                        'rpp_status' => 'pending',
+                        'rpp_pesan'  => null,
+                    ]
+                );
+                
+                $uploadedCount++;
+            }
+        }
 
         // Invalidate cache
         $today = Carbon::today()->toDateString();
         \Illuminate\Support\Facades\Cache::forget('guru_absen_kelas_index_' . $guru->id . '_' . $today);
 
-        RppGuru::updateOrCreate(
-            [
-                'user_id'     => $guru->id,
-                'tingkat'     => $request->tingkat,
-                'jurusan'     => $request->jurusan,
-                'rpp_periode' => $targetPeriode,
-            ],
-            [
-                'rpp_file'   => $filePath,
-                'rpp_status' => 'pending',
-                'rpp_pesan'  => null,
-            ]
-        );
-
-        $periodeLabel = Carbon::createFromFormat('Y-m', $targetPeriode)->translatedFormat('F Y');
-        return back()->with('success', 'File RPP untuk kelas ' . $request->tingkat . ' ' . $request->jurusan . ' periode ' . $periodeLabel . ' berhasil diunggah dan sedang menunggu persetujuan.');
+        return back()->with('success', $uploadedCount . ' Dokumen RPP berhasil diunggah dan sedang menunggu persetujuan.');
     }
 
     /**
