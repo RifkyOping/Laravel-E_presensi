@@ -104,43 +104,51 @@ class PiketMengajarController extends Controller
     // ─────────────────────────────────────────────────
     public function persetujuanRpp(Request $request)
     {
-        $query = User::where('role', 'guru')
-                     ->whereHas('guruProfile', function ($q) {
-                         $q->whereNotNull('rpp_file');
-                     })
-                     ->with('guruProfile');
+        $query = \App\Models\RppGuru::with('user')
+            ->where('rpp_periode', '>=', date('Y-m'));
         
         if ($request->filled('status')) {
-            $query->whereHas('guruProfile', function ($q) use ($request) {
-                $q->where('rpp_status', $request->status)
-                  ->where('rpp_periode', date('Y-m'));
-            });
+            $query->where('rpp_status', $request->status);
+        }
+        if ($request->filled('tingkat')) {
+            $query->where('tingkat', $request->tingkat);
+        }
+        if ($request->filled('jurusan')) {
+            $query->where('jurusan', $request->jurusan);
         }
 
-        $gurus = $query->orderBy('name')->paginate(20)->withQueryString();
+        $rppList = $query->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('piket.persetujuan-rpp', compact('gurus'));
+        // Ambil daftar tingkat dan jurusan unik untuk filter
+        $tingkatList = \App\Models\RppGuru::where('rpp_periode', '>=', date('Y-m'))
+            ->select('tingkat')->distinct()->orderBy('tingkat')->pluck('tingkat');
+        $jurusanList = \App\Models\RppGuru::where('rpp_periode', '>=', date('Y-m'))
+            ->select('jurusan')->distinct()->orderBy('jurusan')->pluck('jurusan');
+
+        return view('piket.persetujuan-rpp', compact('rppList', 'tingkatList', 'jurusanList'));
     }
 
-    public function approveRpp(User $user)
+    public function approveRpp(\App\Models\RppGuru $rppGuru)
     {
-        $user->guruProfile()->updateOrCreate(
-            ['user_id' => $user->id],
-            ['rpp_status' => 'disetujui', 'rpp_pesan' => null]
-        );
-        return back()->with('success', 'RPP milik ' . $user->name . ' telah disetujui.');
+        $rppGuru->update([
+            'rpp_status' => 'disetujui',
+            'rpp_pesan'  => null,
+        ]);
+        return back()->with('success', 'RPP milik ' . $rppGuru->user->name . ' (Kelas ' . $rppGuru->tingkat . ' ' . $rppGuru->jurusan . ') telah disetujui.');
     }
 
-    public function rejectRpp(Request $request, User $user)
+    public function rejectRpp(Request $request, \App\Models\RppGuru $rppGuru)
     {
         $request->validate([
             'pesan' => 'required|string|max:500'
         ]);
 
-        $user->guruProfile()->updateOrCreate(
-            ['user_id' => $user->id],
-            ['rpp_status' => 'ditolak', 'rpp_pesan' => $request->pesan]
-        );
-        return back()->with('success', 'RPP milik ' . $user->name . ' telah ditolak.');
+        $rppGuru->update([
+            'rpp_status' => 'ditolak',
+            'rpp_pesan'  => $request->pesan,
+        ]);
+        return back()->with('success', 'RPP milik ' . $rppGuru->user->name . ' (Kelas ' . $rppGuru->tingkat . ' ' . $rppGuru->jurusan . ') telah ditolak.');
     }
 }

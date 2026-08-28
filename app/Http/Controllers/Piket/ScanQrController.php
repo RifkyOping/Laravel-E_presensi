@@ -111,6 +111,7 @@ class ScanQrController extends Controller
                         'file_bukti' => null,
                         'status_pengajuan' => null,
                     ]);
+                    \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $siswa->id . '_' . $today->toDateString());
                     return response()->json([
                         'success' => true,
                         'message' => "Masa Sakit/Izin dihentikan. Absen datang {$siswa->name} berhasil dicatat."
@@ -123,6 +124,11 @@ class ScanQrController extends Controller
                         'message' => "{$siswa->name} sudah melakukan absen datang hari ini."
                     ], 422);
                 }
+
+                $existing->update([
+                    'status' => 'hadir',
+                    'waktu_datang' => now()->format('H:i:s'),
+                ]);
             } else {
                 AbsensiSiswa::create([
                     'user_id'      => $siswa->id,
@@ -131,6 +137,8 @@ class ScanQrController extends Controller
                     'status'       => 'hadir',
                 ]);
             }
+
+            \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $siswa->id . '_' . $today->toDateString());
 
             return response()->json([
                 'success' => true,
@@ -156,6 +164,8 @@ class ScanQrController extends Controller
             $existing->update([
                 'waktu_pulang' => now()->format('H:i:s'),
             ]);
+
+            \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $siswa->id . '_' . $today->toDateString());
 
             return response()->json([
                 'success' => true,

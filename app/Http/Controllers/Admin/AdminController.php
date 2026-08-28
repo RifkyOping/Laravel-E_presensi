@@ -134,6 +134,18 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('stats', 'guruHadir', 'aktivitasHariIni', 'systemStatus'));
     }
 
+    /**
+     * Clear application cache.
+     */
+    public function clearCache()
+    {
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        
+        return redirect()->back()->with('success', 'Semua cache sistem berhasil dibersihkan.');
+    }
+
     // ──────────────────────────────────────────
     //  MANAJEMEN USER (CRUD)
     // ──────────────────────────────────────────

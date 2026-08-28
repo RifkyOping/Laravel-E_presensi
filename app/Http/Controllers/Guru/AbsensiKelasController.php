@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\JadwalMengajar;
 use App\Models\AbsensiKelasSiswa;
+use App\Models\RppGuru;
 use App\Models\SiswaProfile;
 use App\Models\User;
 use Carbon\Carbon;
@@ -16,6 +17,18 @@ class AbsensiKelasController extends Controller
     /**
      * Tampilkan jadwal mengajar guru hari ini.
      */
+    /**
+     * Helper: Parse string kelas (e.g. "X RPL 1") menjadi ['tingkat' => 'X', 'jurusan' => 'RPL'].
+     */
+    private function parseKelas($kelasString)
+    {
+        $parts = explode(' ', $kelasString);
+        return [
+            'tingkat' => $parts[0] ?? '',
+            'jurusan' => $parts[1] ?? '',
+        ];
+    }
+
     public function index()
     {
         $guru = Auth::user();
@@ -58,7 +71,71 @@ class AbsensiKelasController extends Controller
         });
         extract($data);
 
+        // Ambil status RPP untuk setiap kombinasi (periode bulan ini saja untuk absensi)
+        $periodeSekarang = date('Y-m');
+        
+        // Tambahkan info RPP status per jadwal (untuk tombol Mulai Absen)
+        foreach ($jadwals as $jadwal) {
+            $parsed = $this->parseKelas($jadwal->kelas);
+            $rpp = RppGuru::where('user_id', $guru->id)
+                ->where('tingkat', $parsed['tingkat'])
+                ->where('jurusan', $parsed['jurusan'])
+                ->where('rpp_periode', $periodeSekarang)
+                ->first();
+            $jadwal->rpp_status_kelas = $rpp ? $rpp->rpp_status : 'kosong';
+        }
+
         return view('guru.absen-kelas.index', compact('jadwals', 'hariIni'));
+    }
+
+    /**
+     * Halaman khusus untuk upload RPP
+     */
+    public function rppIndex()
+    {
+        $guru = Auth::user();
+        $kelasYangDiajar = $guru->getKelasYangDiajar();
+        $today = Carbon::now();
+        $currentPeriode = $today->format('Y-m');
+        
+        $rppSlots = $kelasYangDiajar->map(function ($kelas) use ($guru, $currentPeriode, $today) {
+            // Cek RPP periode bulan ini
+            $rppCurrent = RppGuru::where('user_id', $guru->id)
+                ->where('tingkat', $kelas['tingkat'])
+                ->where('jurusan', $kelas['jurusan'])
+                ->where('rpp_periode', $currentPeriode)
+                ->first();
+                
+            $targetPeriode = $currentPeriode;
+            $rpp = $rppCurrent;
+            $status = $rpp ? $rpp->rpp_status : 'kosong';
+            
+            // Jika bulan ini sudah aman (pending/disetujui) dan tgl >= 25, maka target ke bulan depan
+            if (in_array($status, ['pending', 'disetujui']) && $today->day >= 25) {
+                $nextPeriode = $today->copy()->addMonth()->format('Y-m');
+                $rppNext = RppGuru::where('user_id', $guru->id)
+                    ->where('tingkat', $kelas['tingkat'])
+                    ->where('jurusan', $kelas['jurusan'])
+                    ->where('rpp_periode', $nextPeriode)
+                    ->first();
+                
+                $targetPeriode = $nextPeriode;
+                $rpp = $rppNext;
+                $status = $rpp ? $rpp->rpp_status : 'kosong';
+            }
+            
+            return [
+                'tingkat'        => $kelas['tingkat'],
+                'jurusan'        => $kelas['jurusan'],
+                'target_periode' => $targetPeriode,
+                'rpp'            => $rpp,
+                'status'         => $status,
+                'file'           => $rpp ? $rpp->rpp_file : null,
+                'pesan'          => $rpp ? $rpp->rpp_pesan : null,
+            ];
+        });
+
+        return view('guru.rpp.index', compact('rppSlots'));
     }
 
     /**
@@ -74,10 +151,12 @@ class AbsensiKelasController extends Controller
             abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
         }
 
-        // Cek apakah RPP sudah diupload (pending atau disetujui) untuk bulan ini
-        $rppStatus = $guru->rpp_status;
+        // Cek apakah RPP sudah diupload (pending atau disetujui) untuk tingkat+jurusan ini bulan ini
+        $parsed = $this->parseKelas($jadwal->kelas);
+        $rppKelas = $guru->getRppForKelas($parsed['tingkat'], $parsed['jurusan']);
+        $rppStatus = $rppKelas ? $rppKelas->rpp_status : 'kosong';
         if (!in_array($rppStatus, ['pending', 'disetujui'])) {
-            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
+            return redirect()->route('guru.rpp.index')->with('error', 'Anda tidak dapat mengisi absensi kelas ' . $jadwal->kelas . ' karena RPP untuk kelas ' . $parsed['tingkat'] . ' ' . $parsed['jurusan'] . ' bulan ini belum diunggah atau ditolak. Silakan unggah RPP terlebih dahulu.');
         }
 
         $cacheKey = 'guru_absen_kelas_show_' . $jadwal->id . '_' . $today;
@@ -147,10 +226,12 @@ class AbsensiKelasController extends Controller
             abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
         }
 
-        // Cek apakah RPP sudah diupload (pending atau disetujui) untuk bulan ini
-        $rppStatus = $guru->rpp_status;
+        // Cek apakah RPP sudah diupload (pending atau disetujui) untuk tingkat+jurusan ini bulan ini
+        $parsed = $this->parseKelas($jadwal->kelas);
+        $rppKelas = $guru->getRppForKelas($parsed['tingkat'], $parsed['jurusan']);
+        $rppStatus = $rppKelas ? $rppKelas->rpp_status : 'kosong';
         if (!in_array($rppStatus, ['pending', 'disetujui'])) {
-            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas karena Anda belum mengunggah RPP atau RPP ditolak.');
+            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas ' . $jadwal->kelas . ' karena RPP untuk kelas ' . $parsed['tingkat'] . ' ' . $parsed['jurusan'] . ' belum diunggah atau ditolak.');
         }
 
         // Allow update by removing the early return for $sudahAda
@@ -236,33 +317,84 @@ class AbsensiKelasController extends Controller
     }
 
     /**
-     * Upload RPP guru (dilakukan 1 kali).
+     * Upload RPP guru berdasarkan tingkat+jurusan.
      */
     public function uploadRpp(Request $request)
     {
         $guru = Auth::user();
 
         $request->validate([
-            'rpp_file' => 'required|file|mimes:pdf,doc,docx|max:5120', // Maks 5MB
+            'rpp_file'       => 'required|file|mimes:pdf,doc,docx|max:5120',
+            'tingkat'        => 'required|string',
+            'jurusan'        => 'required|string',
+            'target_periode' => 'required|string|date_format:Y-m',
         ], [
             'rpp_file.required' => 'File RPP wajib diunggah.',
             'rpp_file.mimes'    => 'Format file harus berupa PDF, DOC, atau DOCX.',
             'rpp_file.max'      => 'Ukuran file maksimal 5MB.',
+            'tingkat.required'  => 'Tingkat kelas wajib dipilih.',
+            'jurusan.required'  => 'Jurusan wajib dipilih.',
+            'target_periode.required' => 'Periode target tidak ditemukan.',
         ]);
 
         $filePath = $request->file('rpp_file')->store('rpp', 'public');
+        $targetPeriode = $request->target_periode;
 
-        $guru->guruProfile()->updateOrCreate(
-            ['user_id' => $guru->id],
+        // Invalidate cache
+        $today = Carbon::today()->toDateString();
+        \Illuminate\Support\Facades\Cache::forget('guru_absen_kelas_index_' . $guru->id . '_' . $today);
+
+        RppGuru::updateOrCreate(
             [
-                'rpp_file'    => $filePath,
-                'rpp_status'  => 'pending',
-                'rpp_pesan'   => null,
-                'rpp_periode' => date('Y-m'),
+                'user_id'     => $guru->id,
+                'tingkat'     => $request->tingkat,
+                'jurusan'     => $request->jurusan,
+                'rpp_periode' => $targetPeriode,
+            ],
+            [
+                'rpp_file'   => $filePath,
+                'rpp_status' => 'pending',
+                'rpp_pesan'  => null,
             ]
         );
 
-        return back()->with('success', 'File RPP berhasil diunggah dan sedang menunggu persetujuan dari Guru Piket.');
+        $periodeLabel = Carbon::createFromFormat('Y-m', $targetPeriode)->translatedFormat('F Y');
+        return back()->with('success', 'File RPP untuk kelas ' . $request->tingkat . ' ' . $request->jurusan . ' periode ' . $periodeLabel . ' berhasil diunggah dan sedang menunggu persetujuan.');
+    }
+
+    /**
+     * Tampilkan rekap/histori RPP milik guru.
+     */
+    public function rekapRpp(Request $request)
+    {
+        $guru = Auth::user();
+
+        $query = RppGuru::where('user_id', $guru->id);
+
+        if ($request->filled('tingkat')) {
+            $query->where('tingkat', $request->tingkat);
+        }
+        if ($request->filled('jurusan')) {
+            $query->where('jurusan', $request->jurusan);
+        }
+        if ($request->filled('periode')) {
+            $query->where('rpp_periode', $request->periode);
+        }
+
+        $rppList = $query->orderByDesc('rpp_periode')
+            ->orderBy('tingkat')
+            ->orderBy('jurusan')
+            ->paginate(20)
+            ->withQueryString();
+
+        // Ambil daftar periode unik untuk filter
+        $periodeList = RppGuru::where('user_id', $guru->id)
+            ->select('rpp_periode')
+            ->distinct()
+            ->orderByDesc('rpp_periode')
+            ->pluck('rpp_periode');
+
+        return view('guru.rekap-rpp', compact('rppList', 'periodeList'));
     }
 
     /**

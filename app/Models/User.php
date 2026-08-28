@@ -123,14 +123,46 @@ class User extends Authenticatable
         return null;
     }
 
-    public function getRppFileAttribute() { return $this->guruProfile?->rpp_file; }
-    public function getRppStatusAttribute() { 
-        $profile = $this->guruProfile;
-        if (!$profile) return 'kosong';
-        if ($profile->rpp_periode !== date('Y-m')) return 'kosong';
-        return $profile->rpp_status ?? 'kosong';
+    /**
+     * Relasi ke semua RPP milik guru ini.
+     */
+    public function rppGurus()
+    {
+        return $this->hasMany(RppGuru::class);
     }
-    public function getRppPesanAttribute() { return $this->guruProfile?->rpp_pesan; }
+
+    /**
+     * Ambil RPP aktif (periode bulan ini) untuk tingkat+jurusan tertentu.
+     */
+    public function getRppForKelas($tingkat, $jurusan)
+    {
+        return $this->rppGurus()
+            ->where('tingkat', $tingkat)
+            ->where('jurusan', $jurusan)
+            ->where('rpp_periode', date('Y-m'))
+            ->first();
+    }
+
+    /**
+     * Ambil daftar kombinasi unik tingkat+jurusan dari jadwal mengajar guru.
+     * Return: Collection of ['tingkat' => 'X', 'jurusan' => 'RPL']
+     */
+    public function getKelasYangDiajar()
+    {
+        return JadwalMengajar::where('user_id', $this->id)
+            ->get()
+            ->map(function ($jadwal) {
+                $parts = explode(' ', $jadwal->kelas);
+                return [
+                    'tingkat' => $parts[0] ?? '',
+                    'jurusan' => $parts[1] ?? '',
+                ];
+            })
+            ->unique(function ($item) {
+                return $item['tingkat'] . '|' . $item['jurusan'];
+            })
+            ->values();
+    }
 
     // Accessor for SiswaProfile skip_voice_verification
     public function getSkipVoiceVerificationAttribute() { return $this->siswaProfile?->skip_voice_verification ?? false; }

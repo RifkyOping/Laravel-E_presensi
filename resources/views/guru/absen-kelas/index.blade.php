@@ -39,82 +39,10 @@
             </div>
         @endif
 
-        {{-- Status & Upload RPP --}}
-        @php
-            $rppStatus = auth()->user()->rpp_status;
-            $rppFile = auth()->user()->rpp_file;
-            $statusData = match($rppStatus) {
-                'kosong' => ['Belum Upload', 'bg-red-50 text-red-700 border-red-200', 'Mulai absen kelas dikunci. Silakan unggah RPP terlebih dahulu.'],
-                'pending' => ['Menunggu Persetujuan', 'bg-amber-50 text-amber-700 border-amber-200', 'RPP Anda sedang menunggu persetujuan Kurikulum. Absen kelas akan terbuka setelah RPP disetujui.'],
-                'disetujui' => ['Disetujui', 'bg-emerald-50 text-emerald-700 border-emerald-200', 'RPP disetujui. Anda dapat mulai mengisi absen kelas.'],
-                'ditolak' => ['Ditolak', 'bg-red-50 text-red-700 border-red-200', 'RPP Anda ditolak. Silakan perbaiki dan unggah ulang.'],
-                default => ['Belum Upload', 'bg-slate-50 text-slate-700 border-slate-200', 'Silakan unggah RPP Anda.'],
-            };
-        @endphp
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-                        <svg class="w-5 h-5 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Status RPP Anda
-                    </h3>
-                    <p class="text-sm text-slate-500 mt-1 max-w-lg">{{ $statusData[2] }}</p>
-                    <div class="mt-3 flex items-center gap-3">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border {{ $statusData[1] }}">
-                            {{ $statusData[0] }}
-                        </span>
-                        @if($rppFile)
-                            <a href="{{ Storage::url($rppFile) }}" target="_blank" class="text-sm font-semibold text-[#1e3a6e] hover:underline flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                Lihat File
-                            </a>
-                        @endif
-                    </div>
-                    @if($rppStatus === 'ditolak' && auth()->user()->rpp_pesan)
-                        <div class="mt-4 p-4 bg-red-50/50 border border-red-100 rounded-xl max-w-lg">
-                            <p class="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Alasan Penolakan:</p>
-                            <p class="text-sm text-red-800 font-medium">{{ auth()->user()->rpp_pesan }}</p>
-                        </div>
-                    @endif
-                </div>
-                
-                <form action="{{ route('guru.upload-rpp') }}" method="POST" enctype="multipart/form-data" class="w-full md:w-auto flex flex-row items-center gap-2 sm:gap-3">
-                    @csrf
-                    <div class="flex-1 min-w-0">
-                        <input type="file" name="rpp_file" accept=".pdf,.doc,.docx" required
-                               class="block w-full text-[11px] sm:text-sm text-slate-500
-                                      file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:py-2.5 sm:file:px-4
-                                      file:rounded-xl file:border-0
-                                      file:text-[11px] sm:file:text-sm file:font-semibold
-                                      file:bg-slate-100 file:text-slate-700
-                                      hover:file:bg-slate-200 file:transition">
-                        <p class="text-[10px] text-slate-400 mt-1.5">*Format: PDF, DOC, DOCX. Maks: 5MB</p>
-                        @error('rpp_file')
-                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <button type="submit" class="flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl text-[11px] sm:text-sm transition duration-200 shadow-sm mt-0">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        <span class="sm:hidden">Unggah</span>
-                        <span class="hidden sm:inline">Unggah RPP</span>
-                    </button>
-                </form>
-            </div>
-        </div>
+
 
         {{-- Daftar Jadwal Hari Ini --}}
-        @if(auth()->user()->rpp_status === 'kosong')
-            <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
-                <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
-                </div>
-                <h3 class="font-bold text-slate-700 text-lg">Jadwal Mengajar Dikunci</h3>
-                <p class="text-slate-400 text-sm mt-2">Silakan unggah file RPP Anda terlebih dahulu untuk melihat jadwal mengajar dan melakukan absensi kelas.</p>
-            </div>
-        @elseif($jadwals->isEmpty())
+        @if($jadwals->isEmpty())
             <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
                 <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,6 +56,9 @@
         @else
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 @foreach($jadwals as $jadwal)
+                @php
+                    $rppOk = in_array($jadwal->rpp_status_kelas, ['pending', 'disetujui']);
+                @endphp
                 <div class="bg-white rounded-2xl border {{ $jadwal->sudah_diabsen ? 'border-emerald-200' : 'border-slate-200' }} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
                     
                     {{-- Card Header --}}
@@ -143,6 +74,13 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                                     </svg>
                                     Selesai
+                                </span>
+                            @elseif(!$rppOk)
+                                <span class="flex-shrink-0 inline-flex items-center gap-1.5 bg-red-100 text-red-700 font-bold text-xs px-3 py-1 rounded-full">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    RPP Terkunci
                                 </span>
                             @else
                                 <span class="flex-shrink-0 inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 font-bold text-xs px-3 py-1 rounded-full">
@@ -185,22 +123,20 @@
                                 </svg>
                                 Lihat Rekap
                             </a>
-                        @elseif(auth()->user()->rpp_status === 'pending')
-                            <button type="button" disabled
-                               class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold bg-slate-100 text-slate-400 cursor-not-allowed" title="Menunggu persetujuan Kurikulum">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                Menunggu Persetujuan
-                            </button>
-                        @elseif(auth()->user()->rpp_status === 'ditolak')
-                            <button type="button" disabled
-                               class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold bg-slate-100 text-slate-400 cursor-not-allowed">
+                        @elseif(!$rppOk)
+                            <a href="{{ route('guru.rpp.index') }}"
+                               class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold transition duration-200 bg-red-50 text-red-600 hover:bg-red-100 shadow-sm" title="Upload RPP untuk kelas ini terlebih dahulu">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                RPP Ditolak
-                            </button>
+                                @if($jadwal->rpp_status_kelas === 'ditolak')
+                                    RPP Ditolak
+                                @elseif($jadwal->rpp_status_kelas === 'pending')
+                                    Menunggu Persetujuan RPP
+                                @else
+                                    Upload RPP Dulu
+                                @endif
+                            </a>
                         @else
                             <a href="{{ route('guru.absen-kelas.show', $jadwal->id) }}"
                                class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold transition duration-200 bg-[#1e3a6e] text-white hover:bg-[#162d57] shadow-sm hover:shadow-md">
@@ -217,4 +153,5 @@
         @endif
 
     </div>
+
 </x-app-layout>

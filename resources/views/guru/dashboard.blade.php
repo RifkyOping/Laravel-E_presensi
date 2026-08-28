@@ -183,8 +183,8 @@
                         Aksi Cepat
                     </h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <a href="{{ route('guru.absen-kelas.index') }}" class="flex flex-col items-center justify-center gap-2 p-3 bg-blue-50 text-[#1e3a6e] rounded-xl hover:bg-[#1e3a6e] hover:text-white hover:shadow-lg transition-all duration-300 group">
-                            <span class="text-xs font-semibold text-center">Input Absen Kelas</span>
+                        <a href="{{ route('guru.absensi') }}" class="flex flex-col items-center justify-center gap-2 p-3 bg-blue-50 text-[#1e3a6e] rounded-xl hover:bg-[#1e3a6e] hover:text-white hover:shadow-lg transition-all duration-300 group">
+                            <span class="text-xs font-semibold text-center">Presensi Sekarang</span>
                         </a>
                         <a href="{{ route('guru.literasi.catatan') }}" class="flex flex-col items-center justify-center gap-2 p-3 bg-blue-50 text-[#1e3a6e] rounded-xl hover:bg-[#1e3a6e] hover:text-white hover:shadow-lg transition-all duration-300 group">
                             <span class="text-xs font-semibold text-center">Literasi E-Book</span>

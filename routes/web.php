@@ -9,6 +9,7 @@ use App\Http\Controllers\LiterasiQuranController;
 use App\Http\Controllers\Guru\IndikatorLiterasiController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminEBookController;
+use App\Http\Controllers\Admin\AdminRppController;
 use App\Http\Controllers\Admin\MataPelajaranController;
 use App\Http\Controllers\Admin\AdminJadwalMengajarController;
 use App\Http\Controllers\Admin\IndikatorLiterasiController as AdminIndikatorController;
@@ -149,6 +150,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/guru/absen-kelas/{jadwal}/export', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'export'])->name('guru.absen-kelas.export');
     Route::post('/guru/absen-kelas/{jadwal}', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'store'])->name('guru.absen-kelas.store');
     Route::post('/guru/upload-rpp', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'uploadRpp'])->name('guru.upload-rpp');
+    Route::get('/guru/rpp', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'rppIndex'])->name('guru.rpp.index');
+    Route::get('/guru/rekap-rpp', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'rekapRpp'])->name('guru.rekap-rpp');
     
     // Guru - Buku Kemajuan Kelas
     Route::get('/guru/buku-kemajuan', [App\Http\Controllers\Guru\AbsensiKelasController::class, 'bukuKemajuan'])->name('guru.buku-kemajuan');
@@ -166,6 +169,7 @@ require __DIR__ . '/auth.php';
 // ──────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('/clear-cache', [AdminController::class, 'clearCache'])->name('clear-cache');
 
     // Manajemen User
     Route::get('/users', [AdminController::class, 'users'])->name('users');
@@ -230,6 +234,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/jadwal-mengajar/{user}', [AdminJadwalMengajarController::class, 'update'])->name('jadwal-mengajar.update');
     Route::post('/jadwal-mengajar-toggle-blok', [AdminJadwalMengajarController::class, 'toggleBlok'])->name('jadwal-mengajar.toggle-blok');
 
+    // Rekap RPP
+    Route::get('/rekap-rpp', [AdminRppController::class, 'index'])->name('rekap-rpp');
+
 });
 
 // ──────────────────────────────────────────
@@ -259,8 +266,8 @@ Route::middleware(['auth'])->prefix('piket')->name('piket.')->group(function () 
 
     // Piket Persetujuan RPP
     Route::get('/persetujuan-rpp', [PiketMengajarController::class, 'persetujuanRpp'])->name('persetujuan-rpp');
-    Route::post('/persetujuan-rpp/{user}/approve', [PiketMengajarController::class, 'approveRpp'])->name('persetujuan-rpp.approve');
-    Route::post('/persetujuan-rpp/{user}/reject', [PiketMengajarController::class, 'rejectRpp'])->name('persetujuan-rpp.reject');
+    Route::post('/persetujuan-rpp/{rppGuru}/approve', [PiketMengajarController::class, 'approveRpp'])->name('persetujuan-rpp.approve');
+    Route::post('/persetujuan-rpp/{rppGuru}/reject', [PiketMengajarController::class, 'rejectRpp'])->name('persetujuan-rpp.reject');
 
 
     // Piket - Review Jawaban Indikator E-Book

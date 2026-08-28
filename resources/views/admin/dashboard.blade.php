@@ -62,6 +62,14 @@
                             </span>
                             <span class="text-sm font-medium text-blue-50">Sistem Normal @if($systemStatus['pending_jobs'] > 0)({{ $systemStatus['pending_jobs'] }} Antrean)@endif</span>
                         @endif
+
+                        <form action="{{ route('admin.clear-cache') }}" method="POST" class="ml-3 border-l border-white/20 pl-3 m-0 flex items-center">
+                            @csrf
+                            <button type="submit" class="text-[10px] font-semibold bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded transition-colors flex items-center gap-1" title="Bersihkan Semua Cache Sistem">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Clear Cache
+                            </button>
+                        </form>
                     </div>
                     <div class="flex flex-col items-start sm:items-end w-full sm:w-auto">
                         <p class="text-white font-bold text-2xl" id="realtime-clock">--:--:--</p>

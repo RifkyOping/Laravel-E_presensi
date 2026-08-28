@@ -12,10 +12,6 @@ class GuruProfile extends Model
     protected $fillable = [
         'user_id',
         'is_jadwal_set',
-        'rpp_file',
-        'rpp_status',
-        'rpp_periode',
-        'rpp_pesan',
         'is_piket_sholat',
         'is_piket_mengajar',
         'is_piket_rpp',
