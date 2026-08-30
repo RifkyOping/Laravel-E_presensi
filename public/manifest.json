@@ -4,7 +4,7 @@
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#4338ca",
+    "theme_color": "#000000",
     "description": "Aplikasi E-Presensi SMKN 1 Majene",
     "orientation": "portrait-primary",
     "icons": [
