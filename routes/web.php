@@ -23,7 +23,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
     return view('welcome');
+});
+
+// PWA Offline Route
+Route::get('/offline', function () {
+    return view('offline');
 });
 
 // NPSN Verification
@@ -178,11 +186,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
     Route::delete('/users/bulk-delete', [AdminController::class, 'bulkDestroyUsers'])->name('users.bulk-delete');
+    Route::get('/users/bulk-edit', [AdminController::class, 'bulkEdit'])->name('users.bulk-edit');
     Route::put('/users/bulk-update', [AdminController::class, 'bulkUpdateUsers'])->name('users.bulk-update');
+    Route::post('/users/bulk-download-qr', [AdminController::class, 'bulkDownloadQr'])->name('users.bulk-download-qr');
     Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
     Route::patch('/users/{user}/reset-device', [AdminController::class, 'resetDevice'])->name('users.reset-device');
+    Route::get('/users/{user}/download-qr', [AdminController::class, 'downloadQr'])->name('users.download-qr');
 
     // Monitoring
     Route::get('/absensi-guru', [AdminController::class, 'absensiGuru'])->name('absensi-guru');

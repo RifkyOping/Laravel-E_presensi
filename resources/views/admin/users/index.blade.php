@@ -151,14 +151,22 @@
                     @endforeach
                 </div>
                 {{-- Search --}}
-                <form method="GET" action="{{ route('admin.users') }}" class="flex gap-3" id="searchForm">
+                <form method="GET" action="{{ route('admin.users') }}" class="flex flex-col md:flex-row gap-3 w-full" id="searchForm">
                     <input type="hidden" name="tab" value="{{ $tab }}">
+                    @if ($tab === 'murid' && isset($kelasList) && count($kelasList) > 0)
+                        <select name="kelas_filter" onchange="this.form.submit()" class="border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
+                            <option value="">Semua Kelas</option>
+                            @foreach ($kelasList as $k)
+                                <option value="{{ $k }}" {{ request('kelas_filter') == $k ? 'selected' : '' }}>{{ $k }}</option>
+                            @endforeach
+                        </select>
+                    @endif
                     <input type="text" name="search" id="searchInput" value="{{ request('search') }}"
                         placeholder="Cari nama, NIS, NISN, NIP atau ID..." oninput="handleSearchInput(this)"
                         class="flex-1 border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm">
-                    @if (request('search'))
+                    @if (request('search') || request('kelas_filter'))
                         <a href="{{ route('admin.users', ['tab' => $tab]) }}"
-                            class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-sm transition flex items-center gap-2">
+                            class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-sm transition flex items-center gap-2 shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -177,26 +185,33 @@
                     Total <span class="font-bold text-slate-800">{{ $users->total() }}</span> pengguna
                 </p>
                 <div id="bulkActionContainer" class="flex items-center gap-2">
-                    <button type="button" id="btnEditBanyak" onclick="enableBulkEditMode()"
-                        class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit Banyak
-                    </button>
                     <button type="button" id="btnPilihBanyak" onclick="enableBulkMode()"
                         class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Hapus Banyak
+                        Pilih Banyak
                     </button>
-                    <div id="bulkDeleteActions" class="hidden items-center gap-2">
+                    <div id="bulkDeleteActions" class="hidden items-center gap-2 flex-wrap">
                         <button type="button" onclick="disableBulkMode()"
                             class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
                             Batal
+                        </button>
+                        <button type="button" id="btnBulkEdit" onclick="submitBulkEdit()" disabled
+                            class="inline-flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit
+                        </button>
+                        <button type="button" id="btnBulkDownloadQr" onclick="submitBulkDownloadQr()" disabled
+                            class="inline-flex items-center gap-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-600 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download QR
                         </button>
                         <button type="button" id="btnBulkDelete" onclick="submitBulkDelete()" disabled
                             class="inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-600 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
@@ -204,29 +219,25 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            Hapus Terpilih
-                        </button>
-                    </div>
-                    <div id="bulkEditActions" class="hidden items-center gap-2">
-                        <button type="button" onclick="disableBulkEditMode()"
-                            class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
-                            Batal
-                        </button>
-                        <button type="button" onclick="submitBulkEdit()"
-                            class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition duration-200 shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                            Simpan Perubahan
+                            Hapus
                         </button>
                     </div>
                 </div>
             </div>
-            <form id="bulkUpdateForm" action="{{ route('admin.users.bulk-update') }}" method="POST"
+            <form id="bulkDeleteForm" action="{{ route('admin.users.bulk-delete') }}" method="POST"
                 class="hidden">
                 @csrf
-                @method('PUT')
+                @method('DELETE')
+                <div id="bulkDeleteInputs"></div>
+            </form>
+            <form id="bulkDownloadQrForm" action="{{ route('admin.users.bulk-download-qr') }}" method="POST"
+                class="hidden">
+                @csrf
+                <div id="bulkDownloadQrInputs"></div>
+            </form>
+            <form id="bulkEditForm" action="{{ route('admin.users.bulk-edit') }}" method="GET"
+                class="hidden">
+                <div id="bulkEditInputs"></div>
             </form>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
@@ -270,79 +281,38 @@
                                             {{ strtoupper(substr($user->name, 0, 1)) }}
                                         </div>
                                         <div class="w-full min-w-[150px]">
-                                            <span
-                                                class="view-mode font-semibold text-slate-800 text-sm block">{{ $user->name }}</span>
-                                            <input form="bulkUpdateForm" type="text"
-                                                name="users[{{ $user->id }}][name]" value="{{ $user->name }}"
-                                                class="edit-mode hidden w-full text-sm border-slate-200 rounded-lg px-2 py-1 mb-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]"
-                                                required>
-
-                                            <div class="view-mode">
-                                                @if ($user->role === 'murid')
-                                                    <span class="text-xs text-slate-400 font-medium block">NISN:
-                                                        {{ $user->nomor_induk ?? '-' }}</span>
-                                                    <span class="text-xs text-slate-400 font-medium block">NIS:
-                                                        {{ $user->siswaProfile?->nis ?? '-' }}</span>
-                                                @elseif($user->role === 'guru')
-                                                    <span class="text-xs text-slate-400 font-medium block">NIP:
-                                                        {{ $user->nomor_induk ?? '-' }}</span>
-                                                @else
-                                                    <span class="text-xs text-slate-400 font-medium block">ID:
-                                                        {{ $user->nomor_induk ?? '-' }}</span>
-                                                @endif
-                                            </div>
-                                            <div class="edit-mode hidden flex flex-col gap-1 mt-1">
-                                                <input form="bulkUpdateForm" type="text"
-                                                    name="users[{{ $user->id }}][nomor_induk]"
-                                                    value="{{ $user->nomor_induk }}"
-                                                    class="w-full text-xs border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]"
-                                                    {{ $user->role !== 'murid' ? 'required' : '' }}
-                                                    placeholder="{{ $user->role === 'murid' ? 'NISN (opsional)' : 'NISN/NIP/ID' }}">
-                                                @if ($user->role === 'murid')
-                                                    <input form="bulkUpdateForm" type="text"
-                                                        name="users[{{ $user->id }}][nis]"
-                                                        value="{{ $user->siswaProfile?->nis }}"
-                                                        class="w-full text-xs border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]"
-                                                        placeholder="NIS (opsional)">
-                                                @endif
-                                            </div>
+                                            <span class="font-semibold text-slate-800 text-sm block">{{ $user->name }}</span>
+                                            @if ($user->role === 'murid')
+                                                <span class="text-xs text-slate-400 font-medium block">NISN:
+                                                    {{ $user->nomor_induk ?? '-' }}</span>
+                                                <span class="text-xs text-slate-400 font-medium block">NIS:
+                                                    {{ $user->siswaProfile?->nis ?? '-' }}</span>
+                                            @elseif($user->role === 'guru')
+                                                <span class="text-xs text-slate-400 font-medium block">NIP:
+                                                    {{ $user->nomor_induk ?? '-' }}</span>
+                                            @else
+                                                <span class="text-xs text-slate-400 font-medium block">ID:
+                                                    {{ $user->nomor_induk ?? '-' }}</span>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
                                 <td class="py-3.5 px-5 text-sm text-slate-500">
-                                    <span class="view-mode">{{ $user->email }}</span>
-                                    <input form="bulkUpdateForm" type="email"
-                                        name="users[{{ $user->id }}][email]" value="{{ $user->email }}"
-                                        class="edit-mode hidden w-full text-sm border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
+                                    {{ $user->email }}
                                 </td>
                                 <td class="py-3.5 px-5">
-                                    <div class="view-mode">
-                                        @php
-                                            $rc = match ($user->role) {
-                                                'admin' => 'bg-red-50 text-red-700 border-red-200',
-                                                'guru' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                                'pengawas' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                                                default => 'bg-slate-100 text-slate-600 border-slate-200',
-                                            };
-                                        @endphp
-                                        <span
-                                            class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border capitalize {{ $rc }}">
-                                            {{ $user->role }}
-                                        </span>
-                                    </div>
-                                    <div class="edit-mode hidden">
-                                        <select form="bulkUpdateForm" name="users[{{ $user->id }}][role]"
-                                            class="text-sm border-slate-200 rounded-lg px-2 py-1 focus:ring-[#1e3a6e] focus:border-[#1e3a6e]">
-                                            <option value="murid" {{ $user->role == 'murid' ? 'selected' : '' }}>
-                                                Murid</option>
-                                            <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru
-                                            </option>
-                                            <option value="pengawas"
-                                                {{ $user->role == 'pengawas' ? 'selected' : '' }}>Pengawas</option>
-                                            <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>
-                                                Admin</option>
-                                        </select>
-                                    </div>
+                                    @php
+                                        $rc = match ($user->role) {
+                                            'admin' => 'bg-red-50 text-red-700 border-red-200',
+                                            'guru' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                            'pengawas' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                            default => 'bg-slate-100 text-slate-600 border-slate-200',
+                                        };
+                                    @endphp
+                                    <span
+                                        class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border capitalize {{ $rc }}">
+                                        {{ $user->role }}
+                                    </span>
                                 </td>
                                 <td class="py-3.5 px-5 text-sm text-slate-400">
                                     {{ $user->created_at->translatedFormat('d M Y') }}</td>
@@ -363,6 +333,15 @@
                                                 Reset
                                             </button>
                                         </form>
+                                        @if ($user->role === 'murid')
+                                            <button type="button" onclick="processDownloadQr(['{{ $user->id }}'])"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-500 hover:text-white font-semibold text-xs transition duration-200">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                                QR
+                                            </button>
+                                        @endif
                                         <a href="{{ route('admin.users.edit', $user->id) }}"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1e3a6e]/30 text-[#1e3a6e] hover:bg-[#1e3a6e] hover:text-white font-semibold text-xs transition duration-200">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
@@ -509,7 +488,6 @@
                     });
                     const html = await response.text();
 
-                    // Parse HTML respons untuk mengambil tabel yang baru
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     const newTable = doc.getElementById('table-container');
@@ -517,6 +495,29 @@
                     if (newTable) {
                         // Update isi tabel
                         tableContainer.innerHTML = newTable.innerHTML;
+                    }
+
+                    // Update form pencarian agar filter kelas muncul/hilang sesuai tab
+                    const newForm = doc.getElementById('searchForm');
+                    const oldForm = document.getElementById('searchForm');
+                    if (newForm && oldForm) {
+                        // Simpan state fokus dan kursor input pencarian
+                        const oldSearchInput = oldForm.querySelector('#searchInput');
+                        const isFocused = document.activeElement === oldSearchInput;
+                        const selectionStart = oldSearchInput ? oldSearchInput.selectionStart : null;
+                        const selectionEnd = oldSearchInput ? oldSearchInput.selectionEnd : null;
+
+                        // Perbarui isi form
+                        oldForm.innerHTML = newForm.innerHTML;
+
+                        // Kembalikan fokus jika sebelumnya sedang mengetik
+                        const newSearchInput = oldForm.querySelector('#searchInput');
+                        if (newSearchInput && isFocused) {
+                            newSearchInput.focus();
+                            try {
+                                newSearchInput.setSelectionRange(selectionStart, selectionEnd);
+                            } catch (e) {} // Abaikan jika tipe input tidak mendukung selectionRange
+                        }
                     }
 
                     // Update URL di browser agar user bisa refresh/copy-paste URL tanpa kehilangan filter
@@ -593,53 +594,36 @@
                 }
             });
 
-            function enableBulkEditMode() {
-                document.getElementById('btnEditBanyak').classList.add('hidden');
-                document.getElementById('btnPilihBanyak').classList.add('hidden');
-                document.getElementById('bulkEditActions').classList.remove('hidden');
-                document.getElementById('bulkEditActions').classList.add('flex');
-
-                document.querySelectorAll('.view-mode').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('hidden'));
-            }
-
-            function disableBulkEditMode() {
-                document.getElementById('btnEditBanyak').classList.remove('hidden');
-                document.getElementById('btnPilihBanyak').classList.remove('hidden');
-                document.getElementById('bulkEditActions').classList.add('hidden');
-                document.getElementById('bulkEditActions').classList.remove('flex');
-
-                document.querySelectorAll('.view-mode').forEach(el => el.classList.remove('hidden'));
-                document.querySelectorAll('.edit-mode').forEach(el => el.classList.add('hidden'));
-            }
-
             function submitBulkEdit() {
-                const form = document.getElementById('bulkUpdateForm');
-                if (form.reportValidity()) {
-                    form.submit();
-                }
+                const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+                if (checkboxes.length === 0) return;
+                const form = document.getElementById('bulkEditForm');
+                const inputsContainer = document.getElementById('bulkEditInputs');
+                inputsContainer.innerHTML = '';
+                checkboxes.forEach(cb => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'user_ids[]';
+                    input.value = cb.value;
+                    inputsContainer.appendChild(input);
+                });
+                form.submit();
             }
 
             function enableBulkMode() {
-                document.getElementById('btnEditBanyak').classList.add('hidden');
                 document.getElementById('btnPilihBanyak').classList.add('hidden');
                 document.getElementById('bulkDeleteActions').classList.remove('hidden');
                 document.getElementById('bulkDeleteActions').classList.add('flex');
-
                 const cols = document.querySelectorAll('.bulk-mode-col');
                 cols.forEach(col => col.classList.remove('hidden'));
             }
 
             function disableBulkMode() {
-                document.getElementById('btnEditBanyak').classList.remove('hidden');
                 document.getElementById('btnPilihBanyak').classList.remove('hidden');
                 document.getElementById('bulkDeleteActions').classList.add('hidden');
                 document.getElementById('bulkDeleteActions').classList.remove('flex');
-
                 const cols = document.querySelectorAll('.bulk-mode-col');
                 cols.forEach(col => col.classList.add('hidden'));
-
-                // Reset checkboxes
                 document.getElementById('selectAll').checked = false;
                 const checkboxes = document.querySelectorAll('.user-checkbox');
                 checkboxes.forEach(cb => cb.checked = false);
@@ -656,16 +640,32 @@
 
             function updateBulkDeleteButton() {
                 const checkboxes = document.querySelectorAll('.user-checkbox:checked');
-                const btn = document.getElementById('btnBulkDelete');
-                if (btn) {
-                    btn.disabled = checkboxes.length === 0;
-                    if (checkboxes.length > 0) {
-                        btn.innerHTML =
-                            `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus Terpilih (${checkboxes.length})`;
-                    } else {
-                        btn.innerHTML =
-                            `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus Terpilih`;
-                    }
+                const btnDelete = document.getElementById('btnBulkDelete');
+                const btnDownload = document.getElementById('btnBulkDownloadQr');
+                const btnEdit = document.getElementById('btnBulkEdit');
+                
+                const count = checkboxes.length;
+                const disabled = count === 0;
+
+                if (btnEdit) {
+                    btnEdit.disabled = disabled;
+                    btnEdit.innerHTML = count > 0
+                        ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit (${count})`
+                        : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit`;
+                }
+
+                if (btnDelete) {
+                    btnDelete.disabled = disabled;
+                    btnDelete.innerHTML = count > 0
+                        ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus (${count})`
+                        : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Hapus`;
+                }
+
+                if (btnDownload) {
+                    btnDownload.disabled = disabled;
+                    btnDownload.innerHTML = count > 0
+                        ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Download QR (${count})`
+                        : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Download QR`;
                 }
             }
 
@@ -706,6 +706,182 @@
                         form.submit();
                     }
                 });
+            }
+
+            async function submitBulkDownloadQr() {
+                const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+                if (checkboxes.length === 0) return;
+                const userIds = Array.from(checkboxes).map(cb => cb.value);
+                await processDownloadQr(userIds);
+            }
+
+            async function processDownloadQr(userIds) {
+                // Pilihan ekstensi
+                const result = await Swal.fire({
+                    title: 'Pilih Format Download',
+                    text: 'Silakan pilih format ekstensi file yang diinginkan:',
+                    icon: 'question',
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonText: 'Download PDF',
+                    denyButtonText: 'Download JPG (ZIP)',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#dc2626',
+                    denyButtonColor: '#0284c7',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                        title: 'text-xl font-black text-slate-800',
+                        confirmButton: 'font-bold rounded-xl px-5 py-2.5 shadow-sm text-white',
+                        denyButton: 'font-bold rounded-xl px-5 py-2.5 shadow-sm text-white',
+                        cancelButton: 'font-bold rounded-xl px-5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shadow-sm'
+                    }
+                });
+
+                if (!result.isConfirmed && !result.isDenied) return;
+                
+                const format = result.isConfirmed ? 'pdf' : 'jpg';
+
+                Swal.fire({
+                    title: 'Menyiapkan File...',
+                    html: 'Sedang mengambil data QR dan memproses file.<br><span class="text-xs text-slate-500 mt-2 block">(Tunggu sebentar, jangan tutup halaman ini)</span>',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                try {
+                    const response = await fetch('{{ route("admin.users.bulk-download-qr", [], false) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ user_ids: userIds })
+                    });
+                    
+                    if (!response.ok) throw new Error('Gagal mengambil data dari server. Pastikan koneksi internet stabil.');
+                    const data = await response.json();
+                    
+                    if (data.length === 0) {
+                        Swal.fire('Gagal', 'Tidak ada murid terpilih yang memiliki NISN (Nomor Induk) untuk dibuatkan QR Code.', 'error');
+                        return;
+                    }
+
+                    // Buat elemen template tersembunyi
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'absolute';
+                    wrapper.style.left = '-9999px';
+                    wrapper.style.top = '0';
+                    document.body.appendChild(wrapper);
+
+                    if (format === 'pdf') {
+                        // PDF Mode - Gabungkan semua ke dalam satu container
+                        let htmlPages = '';
+                        data.forEach((user, index) => {
+                            let svg = user.svg.replace(/<\?xml[^>]*\?>/gi, '').trim();
+                            if(!svg.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+                                svg = svg.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+                            }
+                            // Pastikan ukuran SVG mengikuti ukuran container 200x200
+                            svg = svg.replace(/width="[^"]*"/i, 'width="100%"').replace(/height="[^"]*"/i, 'height="100%"');
+                            
+                            htmlPages += `
+                                <div class="pdf-page" style="width: 559px; height: 793px; background: #ffffff; padding-top: 130px; box-sizing: border-box; page-break-after: ${index < data.length-1 ? 'always' : 'auto'};">
+                                    <div style="width: 420px; margin: 0 auto; padding: 40px; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 24px; box-sizing: border-box;">
+                                        <p style="margin: 0 0 25px 0; color: #1e3a6e; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">
+                                            QR Code Absensi
+                                        </p>
+                                        <div style="width: 200px; height: 200px; margin: 0 auto 25px auto; display: block;">
+                                            ${svg}
+                                        </div>
+                                        <h2 style="margin: 0 0 8px 0; color: #1e293b; font-size: 24px; font-weight: 800;">${user.name}</h2>
+                                        <p style="margin: 0 0 15px 0; color: #64748b; font-size: 16px; font-weight: 600;">NISN: ${user.nomor_induk}</p>
+                                        
+                                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+                                        
+                                        <p style="margin: 0; color: #94a3b8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                            E-Presensi {{ \App\Models\SchoolSetting::first()->nama_sekolah ?? 'SMK' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        wrapper.innerHTML = `<div id="pdf-container">${htmlPages}</div>`;
+                        
+                        const opt = {
+                            margin:       0,
+                            filename:     'QR_Code_Murid_Bulk.pdf',
+                            image:        { type: 'jpeg', quality: 1 },
+                            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                            jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+                        };
+                        
+                        html2pdf().set(opt).from(wrapper.querySelector('#pdf-container')).save().then(() => {
+                            document.body.removeChild(wrapper);
+                            Swal.fire('Berhasil', 'PDF berhasil di-download.', 'success');
+                        });
+                    } else {
+                        // JPG Mode (ZIP)
+                        const zip = new JSZip();
+                        let completed = 0;
+                        
+                        for (let i = 0; i < data.length; i++) {
+                            const user = data[i];
+                            let svg = user.svg.replace(/<\?xml[^>]*\?>/gi, '').trim();
+                            if(!svg.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+                                svg = svg.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+                            }
+                            svg = svg.replace(/width="[^"]*"/i, 'width="100%"').replace(/height="[^"]*"/i, 'height="100%"');
+                            
+                            wrapper.innerHTML = `
+                                <div id="jpg-card-${i}" style="width: 559px; height: 793px; background: #ffffff; padding-top: 130px; box-sizing: border-box;">
+                                    <div style="width: 420px; margin: 0 auto; padding: 40px; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 24px; box-sizing: border-box;">
+                                        <p style="margin: 0 0 25px 0; color: #1e3a6e; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">
+                                            QR Code Absensi
+                                        </p>
+                                        <div style="width: 200px; height: 200px; margin: 0 auto 25px auto; display: block;">
+                                            ${svg}
+                                        </div>
+                                        <h2 style="margin: 0 0 8px 0; color: #1e293b; font-size: 24px; font-weight: 800;">${user.name}</h2>
+                                        <p style="margin: 0 0 15px 0; color: #64748b; font-size: 16px; font-weight: 600;">NISN: ${user.nomor_induk}</p>
+                                        
+                                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+                                        
+                                        <p style="margin: 0; color: #94a3b8; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                            E-Presensi {{ \App\Models\SchoolSetting::first()->nama_sekolah ?? 'SMK' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            const canvas = await html2canvas(wrapper.querySelector(`#jpg-card-${i}`), {
+                                scale: 2, 
+                                useCORS: true, 
+                                backgroundColor: '#ffffff'
+                            });
+                            
+                            const imgData = canvas.toDataURL('image/jpeg', 1.0).split(',')[1];
+                            const safeName = user.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                            zip.file(`QR_${safeName}_${user.nomor_induk}.jpg`, imgData, {base64: true});
+                            
+                            completed++;
+                            Swal.update({ html: `Sedang memproses ${completed} dari ${data.length} gambar...<br><span class="text-xs text-slate-500 mt-2 block">(Jangan tutup halaman ini)</span>` });
+                        }
+                        
+                        document.body.removeChild(wrapper);
+                        
+                        Swal.update({ html: 'Membuat file ZIP...<br><span class="text-xs text-slate-500 mt-2 block">(Jangan tutup halaman ini)</span>' });
+                        
+                        const content = await zip.generateAsync({type:"blob"});
+                        saveAs(content, "QR_Code_Murid_Bulk_JPG.zip");
+                        Swal.fire('Berhasil', 'ZIP berisi JPG berhasil di-download.', 'success');
+                    }
+                    
+                } catch (e) {
+                    Swal.fire('Error', 'Terjadi kesalahan: ' + e.message, 'error');
+                    console.error(e);
+                }
             }
 
             function confirmResetDevice(event, form, userName) {
@@ -758,6 +934,11 @@
                 });
             }
         </script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     @endpush
 
 </x-app-layout>

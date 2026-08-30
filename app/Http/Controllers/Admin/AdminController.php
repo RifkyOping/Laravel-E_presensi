@@ -170,9 +170,28 @@ class AdminController extends Controller
             });
         }
 
+        // Add filter by class if tab is 'murid'
+        if ($tab === 'murid' && $request->filled('kelas_filter')) {
+            $query->whereHas('siswaProfile', function($q) use ($request) {
+                $q->whereRaw("CONCAT(kelas, ' ', jurusan, ' ', rombel) = ?", [$request->kelas_filter]);
+            });
+        }
+
         $users = $query->orderBy('role')->orderBy('name')->paginate(50)->withQueryString();
 
-        return view('admin.users.index', compact('users', 'tab'));
+        $kelasList = [];
+        if ($tab === 'murid') {
+            $kelasList = \App\Models\Kelas::where('status', true)
+                ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+                ->orderBy('jurusan')
+                ->orderBy('rombel')
+                ->get()
+                ->map(function($k) {
+                    return trim($k->tingkat . ' ' . $k->jurusan . ' ' . $k->rombel);
+                });
+        }
+
+        return view('admin.users.index', compact('users', 'tab', 'kelasList'));
     }
 
     public function createUser()
@@ -654,7 +673,31 @@ class AdminController extends Controller
 
         return redirect()->route('admin.users')->with('success', count($ids) . ' akun pengguna berhasil dihapus.');
     }
+    public function bulkEdit(Request $request)
+    {
+        $userIds = $request->input('user_ids');
+        if (empty($userIds) || !is_array($userIds)) {
+            return redirect()->route('admin.users')->with('error', 'Tidak ada pengguna yang dipilih untuk diedit.');
+        }
 
+        $users = User::with('siswaProfile')->whereIn('id', $userIds)->get();
+
+        if ($users->isEmpty()) {
+            return redirect()->route('admin.users')->with('error', 'Pengguna tidak ditemukan.');
+        }
+        
+        $kelasList = \App\Models\Kelas::where('status', true)
+            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+            ->orderBy('jurusan')
+            ->orderBy('rombel')
+            ->get();
+            
+        $tingkats = $kelasList->pluck('tingkat')->unique()->values();
+        $jurusans = $kelasList->pluck('jurusan')->unique()->values();
+        $rombels = $kelasList->pluck('rombel')->unique()->values();
+
+        return view('admin.users.bulk-edit', compact('users', 'kelasList', 'tingkats', 'jurusans', 'rombels'));
+    }
     public function bulkUpdateUsers(Request $request)
     {
         $request->validate([
@@ -664,6 +707,11 @@ class AdminController extends Controller
             'users.*.nis' => 'nullable|string|max:255',
             'users.*.email' => 'nullable|email',
             'users.*.role' => 'required|in:murid,guru,admin,pengawas',
+            'users.*.kelas_id' => 'nullable|exists:kelas,id',
+            'users.*.jenis_kelamin' => 'nullable|in:L,P',
+            'users.*.tempat_lahir' => 'nullable|string|max:100',
+            'users.*.tanggal_lahir' => 'nullable|date',
+            'users.*.agama' => 'nullable|string|max:50',
         ]);
 
         $users = $request->users;
@@ -730,7 +778,7 @@ class AdminController extends Controller
             $user->update([
                 'name' => $data['name'],
                 'nomor_induk' => $nomor_induk,
-                'email' => $data['email'],
+                'email' => $data['email'] ?? null,
                 'role' => $newRole,
             ]);
 
@@ -739,12 +787,43 @@ class AdminController extends Controller
                 if ($user->siswaProfile) {
                     $user->siswaProfile()->delete();
                 }
-            } elseif ($newRole === 'murid' && $hasNisKey) {
-                // Update nis jika ada di submit
-                $user->siswaProfile()->updateOrCreate(
-                    ['user_id' => $user->id],
-                    ['nis' => $submittedNis ?: null]
-                );
+            } elseif ($newRole === 'murid') {
+                // Siapkan data profil siswa
+                $profileData = [];
+                
+                if ($hasNisKey) {
+                    $profileData['nis'] = $submittedNis ?: null;
+                }
+
+                // Handle kelas_id -> kelas, jurusan, rombel
+                if (!empty($data['kelas_id'])) {
+                    $kelas = \App\Models\Kelas::find($data['kelas_id']);
+                    if ($kelas) {
+                        $profileData['kelas'] = $kelas->tingkat;
+                        $profileData['jurusan'] = $kelas->jurusan;
+                        $profileData['rombel'] = $kelas->rombel;
+                    }
+                }
+
+                if (array_key_exists('jenis_kelamin', $data)) {
+                    $profileData['jenis_kelamin'] = $data['jenis_kelamin'] ?: null;
+                }
+                if (array_key_exists('tempat_lahir', $data)) {
+                    $profileData['tempat_lahir'] = $data['tempat_lahir'] ?: null;
+                }
+                if (array_key_exists('tanggal_lahir', $data)) {
+                    $profileData['tanggal_lahir'] = $data['tanggal_lahir'] ?: null;
+                }
+                if (array_key_exists('agama', $data)) {
+                    $profileData['agama'] = $data['agama'] ?: null;
+                }
+
+                if (!empty($profileData)) {
+                    $user->siswaProfile()->updateOrCreate(
+                        ['user_id' => $user->id],
+                        $profileData
+                    );
+                }
             }
 
             $berhasil++;
@@ -752,10 +831,10 @@ class AdminController extends Controller
 
         if ($gagal > 0) {
             $msg = "Berhasil memperbarui {$berhasil} pengguna. Terdapat {$gagal} kegagalan: " . implode(' | ', $errorMessages);
-            return back()->with('warning', $msg);
+            return redirect()->route('admin.users')->with('warning', $msg);
         }
 
-        return back()->with('success', "Berhasil memperbarui seluruh ({$berhasil}) pengguna di halaman ini.");
+        return redirect()->route('admin.users')->with('success', "Berhasil memperbarui seluruh ({$berhasil}) pengguna.");
     }
 
     public function resetDevice(User $user)
@@ -764,6 +843,52 @@ class AdminController extends Controller
         $user->update(['device_id' => null]);
 
         return redirect()->route('admin.users')->with('success', "Perangkat untuk akun {$name} berhasil direset.");
+    }
+
+    public function downloadQr(User $user)
+    {
+        if ($user->role !== 'murid') {
+            return back()->with('error', 'Hanya QR Code murid yang dapat diunduh.');
+        }
+
+        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(400)
+            ->format('svg')
+            ->margin(1)
+            ->generate($user->nomor_induk);
+            
+        $fileName = 'QR_Code_' . $user->nomor_induk . '.svg';
+
+        return response($qrCode)
+            ->header('Content-type', 'image/svg+xml')
+            ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+    }
+
+    public function bulkDownloadQr(Request $request)
+    {
+        $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id'
+        ]);
+
+        $users = User::whereIn('id', $request->user_ids)->where('role', 'murid')->get();
+        $data = [];
+
+        foreach ($users as $user) {
+            if (!$user->nomor_induk) continue;
+            
+            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(400)
+                ->format('svg')
+                ->margin(1)
+                ->generate($user->nomor_induk);
+                
+            $data[] = [
+                'name' => $user->name,
+                'nomor_induk' => $user->nomor_induk,
+                'svg' => (string) $qrCode
+            ];
+        }
+
+        return response()->json($data);
     }
 
     // ──────────────────────────────────────────

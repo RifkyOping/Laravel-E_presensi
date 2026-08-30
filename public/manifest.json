@@ -1,0 +1,24 @@
+{
+    "name": "E-Presensi SMKN 1 Majene",
+    "short_name": "E-Presensi",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4338ca",
+    "description": "Aplikasi E-Presensi SMKN 1 Majene",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/images/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}
