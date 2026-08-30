@@ -9,7 +9,7 @@
     
     <!-- PWA -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4338ca">
+    <meta name="theme-color" content="#000000">
     <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
@@ -19,7 +19,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         @keyframes fadeInUpDashboard {
-            from {
+            from { 
                 opacity: 0;
                 transform: translateY(20px);
             }
@@ -1223,12 +1223,74 @@
         });
     </script>
     
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration & Web Push -->
     <script>
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        function subscribeUserToPush() {
+            if (!('serviceWorker' in navigator)) return;
+
+            navigator.serviceWorker.ready.then(function(registration) {
+                const vapidPublicKey = '{{ env('VAPID_PUBLIC_KEY') }}';
+                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+                registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: convertedVapidKey
+                }).then(function(subscription) {
+                    // Kirim ke server
+                    fetch('/push-subscribe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(subscription)
+                    }).then(response => {
+                        console.log('Berhasil subscribe push notification');
+                        // Sembunyikan tombol di dashboard jika ada
+                        const btn = document.getElementById('btn-enable-notif');
+                        if (btn) btn.style.display = 'none';
+                    }).catch(error => console.error('Gagal subscribe', error));
+                }).catch(function(err) {
+                    console.log('Gagal subscribe push:', err);
+                });
+            });
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    console.log('ServiceWorker registration successful');
+                    
+                    @auth
+                    // Minta izin notifikasi jika belum pernah ditanyakan (default)
+                    if (Notification.permission === 'default') {
+                        Notification.requestPermission().then(function(permission) {
+                            if (permission === 'granted') {
+                                subscribeUserToPush();
+                            }
+                        });
+                    } else if (Notification.permission === 'granted') {
+                        // Jika sudah granted, pastikan subscribe (mungkin session beda device)
+                        registration.pushManager.getSubscription().then(function(sub) {
+                            if (!sub) subscribeUserToPush();
+                        });
+                    }
+                    @endauth
                 }).catch(err => {
                     console.log('ServiceWorker registration failed: ', err);
                 });

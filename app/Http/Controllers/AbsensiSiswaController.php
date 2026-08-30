@@ -195,6 +195,9 @@ class AbsensiSiswaController extends Controller
                         'status_pengajuan' => null,
                         'alasan_ditolak' => null,
                     ]);
+
+                    $user->notify(new \App\Notifications\AbsensiBerhasilNotification('datang', now()->format('H:i:s')));
+
                     return back()->with('success', $pesan);
                 }
                 return back()->with('error', 'Anda sudah melakukan absen hari ini.');
@@ -206,6 +209,8 @@ class AbsensiSiswaController extends Controller
                 'waktu_datang' => now()->format('H:i:s'),
                 'status' => 'hadir',
             ]);
+
+            $user->notify(new \App\Notifications\AbsensiBerhasilNotification('datang', now()->format('H:i:s')));
 
             return back()->with('success', 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
 
@@ -308,6 +313,8 @@ class AbsensiSiswaController extends Controller
         $existing->update([
             'waktu_pulang' => now()->format('H:i:s'),
         ]);
+
+        $user->notify(new \App\Notifications\AbsensiBerhasilNotification('pulang', now()->format('H:i:s')));
 
         return redirect()->route('absensi')
             ->with('success', 'Absen pulang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');

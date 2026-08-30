@@ -61,3 +61,49 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
+self.addEventListener('push', function (event) {
+  if (!(self.Notification && self.Notification.permission === 'granted')) {
+    return;
+  }
+
+  let data = {};
+  if (event.data) {
+    data = event.data.json();
+  }
+
+  const title = data.title || 'Notifikasi E-Presensi';
+  const options = {
+    body: data.body || 'Anda mendapat pemberitahuan baru.',
+    icon: data.icon || '/images/logo.png',
+    badge: '/images/logo.png',
+    data: {
+      url: data.action_url || '/'
+    }
+  };
+
+  if (data.actions) {
+    options.actions = data.actions;
+  }
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  const urlToOpen = event.notification.data.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (windowClients) {
+      for (let i = 0; i < windowClients.length; i++) {
+        let client = windowClients[i];
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});
