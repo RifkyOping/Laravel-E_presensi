@@ -232,170 +232,21 @@ class AdminJadwalMengajarController extends Controller
          $file = $request->file('file_csv');
          $extension = strtolower($file->getClientOriginalExtension());
          
-         $rows = [];
- 
-         if ($extension === 'xlsx') {
-             if ($xlsx = SimpleXLSX::parse($file->getRealPath())) {
-                 $rows = $xlsx->rows();
-             } else {
-                 return back()->with('error', 'Gagal membaca file XLSX: ' . SimpleXLSX::parseError());
-             }
-         } else {
-             $handle = fopen($file->getRealPath(), 'r');
-             $firstLine = fgets($handle);
-             $delimiter = strpos($firstLine, ';') !== false ? ';' : ',';
-             rewind($handle);
- 
-             while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
-                 $rows[] = $row;
-             }
-             fclose($handle);
-         }
- 
-         if (count($rows) < 2) {
-             return redirect()->back()->with('error', 'File kosong atau format tidak sesuai.');
-         }
- 
-         $header = array_shift($rows); // Hapus baris header
-         
-         // Membersihkan header jika ada karakter tidak terlihat (BOM, spasi, dll)
-         $header = array_map(function($h) {
-             return strtolower(trim(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', (string)$h)));
-         }, $header);
-         
-         // Mapping kolom standar
-         // Validasi header minimum
-         $identifierColumn = null;
-         if (in_array('nip', $header)) {
-             $identifierColumn = 'nip';
-         } elseif (in_array('nama', $header)) {
-             $identifierColumn = 'nama';
-         } elseif (in_array('email_guru', $header)) {
-             $identifierColumn = 'email_guru';
-         }
- 
-         if (!$identifierColumn || !in_array('hari', $header) || !in_array('jam_ke', $header)) {
-             return redirect()->back()->with('error', 'Format header file tidak sesuai template. Pastikan ada kolom nip, hari, dan jam_ke.');
-         }
- 
-         $berhasil = 0;
-         $usersUpdated = [];
-         $gagalRows = [];
+         // Simpan file sementara untuk diproses oleh Job
+        $filename = 'temp_import_jadwal_' . time() . '_' . uniqid() . '.' . $extension;
+        $file->storeAs('temp', $filename);
 
-         foreach ($rows as $index => $row) {
-             $rowNum = $index + 2; // Baris riil di file Excel / CSV (karena baris 1 adalah header)
+        // Buat Job Tracker
+        $tracker = \App\Models\JobTracker::create([
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'type' => 'import_jadwal',
+            'status' => 'pending'
+        ]);
 
-             // Abaikan jika baris kosong
-             if (empty($row) || count(array_filter($row, fn($val) => trim((string)$val) !== '')) === 0) {
-                 continue;
-             }
-             
-             // Samakan jumlah kolom dengan header
-             if (count($row) < count($header)) {
-                 $row = array_pad($row, count($header), '');
-             } elseif (count($row) > count($header)) {
-                 $row = array_slice($row, 0, count($header));
-             }
-             
-             $rowAssoc = array_combine($header, $row);
+        // Dispatch Job
+        \App\Jobs\ImportJadwalJob::dispatch('temp/' . $filename, $tracker->id, $extension);
 
-             $namaOrEmail = trim((string)($rowAssoc[$identifierColumn] ?? ''));
-             $hari = trim((string)($rowAssoc['hari'] ?? ''));
-             $mapel = trim((string)($rowAssoc['mata_pelajaran'] ?? ''));
-             $kelasStr = trim((string)($rowAssoc['kelas'] ?? ''));
-             $jamKe = trim((string)($rowAssoc['jam_ke'] ?? ''));
-             $jamMulai = trim((string)($rowAssoc['jam_mulai'] ?? ''));
-             $jamSelesai = isset($rowAssoc['jam_selesai']) && trim((string)$rowAssoc['jam_selesai']) !== '' ? trim((string)$rowAssoc['jam_selesai']) : null;
-             $tipeBlok = isset($rowAssoc['tipe_blok']) && trim((string)$rowAssoc['tipe_blok']) !== '' ? ucfirst(strtolower(trim((string)$rowAssoc['tipe_blok']))) : 'Semua';
-
-             if ($namaOrEmail === '') {
-                 $gagalRows[] = [
-                     'baris' => $rowNum,
-                     'nama' => '(NIP/Nama/Email Kosong)',
-                     'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-') . " | Hari: " . ($hari ?: '-'),
-                     'alasan' => 'Kolom identitas guru (NIP/Nama/Email) tidak diisi.'
-                 ];
-                 continue;
-             }
-             
-             // Cari user (guru) berdasarkan NIP, nama atau email
-             if ($identifierColumn === 'nip') {
-                 $guru = User::where('nomor_induk', $namaOrEmail)->where('role', 'guru')->first();
-             } elseif ($identifierColumn === 'nama') {
-                 $guru = User::where('name', $namaOrEmail)->where('role', 'guru')->first();
-                 if (!$guru) {
-                     $guru = User::whereRaw('LOWER(name) = ?', [strtolower($namaOrEmail)])->where('role', 'guru')->first();
-                 }
-             } else {
-                 $guru = User::where('email', $namaOrEmail)->where('role', 'guru')->first();
-             }
-             
-             if (!$guru) {
-                 $gagalRows[] = [
-                     'baris' => $rowNum,
-                     'nama' => $namaOrEmail,
-                     'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-') . " | Hari: " . ($hari ?: '-') . " (Mapel ke-" . ($jamKe ?: '-') . ")",
-                     'alasan' => "Akun guru \"{$namaOrEmail}\" tidak ditemukan di sistem."
-                 ];
-                 continue;
-             }
-
-             if ($hari === '' || $jamKe === '') {
-                 $gagalRows[] = [
-                     'baris' => $rowNum,
-                     'nama' => $guru->name,
-                     'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-'),
-                     'alasan' => 'Kolom Hari atau Mapel ke- tidak boleh kosong.'
-                 ];
-                 continue;
-             }
-
-             try {
-                 // Hapus jadwal sebelumnya hanya jika user ini baru pertama kali diproses di file ini
-                 if (!in_array($guru->id, $usersUpdated)) {
-                     $guru->jadwalMengajars()->delete();
-                     $usersUpdated[] = $guru->id;
-                 }
-                 
-                 JadwalMengajar::create([
-                     'user_id' => $guru->id,
-                     'hari' => ucfirst(strtolower($hari)), // Senin, Selasa...
-                     'tipe_blok' => in_array($tipeBlok, ['A', 'B', 'Semua']) ? $tipeBlok : 'Semua',
-                     'mata_pelajaran' => $mapel,
-                     'kelas' => $kelasStr,
-                     'jam_ke' => (int)$jamKe,
-                     'jam_mulai' => $jamMulai ?: '07:30',
-                     'jam_selesai' => $jamSelesai,
-                 ]);
-                 $berhasil++;
-             } catch (\Exception $e) {
-                 $gagalRows[] = [
-                     'baris' => $rowNum,
-                     'nama' => $guru->name,
-                     'detail' => "Mapel: " . ($mapel ?: '-') . " | Kelas: " . ($kelasStr ?: '-'),
-                     'alasan' => 'Gagal menyimpan: ' . $e->getMessage()
-                 ];
-             }
-         }
-         
-         // Update status is_jadwal_set untuk guru-guru yang berhasil diimport
-         foreach ($usersUpdated as $userId) {
-             \App\Models\GuruProfile::updateOrCreate(
-                 ['user_id' => $userId],
-                 ['is_jadwal_set' => true]
-             );
-         }
-
-         $totalGagal = count($gagalRows);
-
-         if ($totalGagal > 0) {
-             $msg = "Import selesai. Berhasil: {$berhasil} jadwal. Terdapat {$totalGagal} baris yang gagal diimport.";
-             return redirect()->back()
-                 ->with($berhasil > 0 ? 'warning' : 'error', $msg)
-                 ->with('import_errors', $gagalRows);
-         }
-
-         return redirect()->back()->with('success', "Import berhasil! Sebanyak {$berhasil} jadwal mengajar berhasil dimasukkan.");
+        return redirect()->back()->with('success', 'Data Jadwal sedang diproses di latar belakang. Silakan perhatikan notifikasi di pojok kanan bawah layar Anda.');
      }
 
     /**

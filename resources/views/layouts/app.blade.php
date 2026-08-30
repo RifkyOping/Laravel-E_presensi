@@ -1215,6 +1215,134 @@
                 });
             }
         });
+        });
+    </script>
+
+    <!-- Job Tracker Toast UI -->
+    <div id="job-tracker-toast" class="fixed bottom-4 right-4 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 flex items-center gap-3 transition-transform duration-300 transform translate-y-24 z-50 border dark:border-gray-700 hidden">
+        <div id="job-spinner" class="animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full hidden"></div>
+        <svg id="job-success-icon" class="w-6 h-6 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <svg id="job-error-icon" class="w-6 h-6 text-red-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        
+        <div class="flex flex-col">
+            <span id="job-title" class="text-sm font-semibold text-gray-800 dark:text-gray-200">Proses Berjalan...</span>
+            <span id="job-desc" class="text-xs text-gray-500 dark:text-gray-400">Mohon tunggu</span>
+            <a id="job-download-btn" href="#" class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mt-1 hidden hover:underline">Download Hasil</a>
+        </div>
+        <button id="job-close-btn" class="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hidden">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <script>
+        // Job Tracker Polling
+        document.addEventListener("DOMContentLoaded", function() {
+            let pollingInterval;
+            let currentJobId = null;
+            const toast = document.getElementById('job-tracker-toast');
+            const spinner = document.getElementById('job-spinner');
+            const successIcon = document.getElementById('job-success-icon');
+            const errorIcon = document.getElementById('job-error-icon');
+            const title = document.getElementById('job-title');
+            const desc = document.getElementById('job-desc');
+            const downloadBtn = document.getElementById('job-download-btn');
+            const closeBtn = document.getElementById('job-close-btn');
+
+            function showToast() {
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.remove('translate-y-24'), 50);
+            }
+
+            function hideToast() {
+                toast.classList.add('translate-y-24');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }
+
+            function checkJobStatus() {
+                fetch('/api/job-status', {
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const job = data.job;
+                    if (!job) {
+                        if (currentJobId && (desc.innerText === 'Mohon tunggu' || desc.innerText.includes('Memproses'))) {
+                            // Job probably got deleted or finished on another tab
+                            hideToast();
+                            currentJobId = null;
+                        }
+                        return;
+                    }
+
+                    currentJobId = job.id;
+                    showToast();
+
+                    if (job.status === 'pending' || job.status === 'running') {
+                        spinner.classList.remove('hidden');
+                        successIcon.classList.add('hidden');
+                        errorIcon.classList.add('hidden');
+                        downloadBtn.classList.add('hidden');
+                        closeBtn.classList.add('hidden');
+                        
+                        let typeText = job.type.includes('import') ? 'Import Data' : 'Export Laporan';
+                        title.innerText = typeText + ' Berjalan';
+                        desc.innerText = 'Mohon tunggu...';
+                    } else if (job.status === 'completed') {
+                        spinner.classList.add('hidden');
+                        successIcon.classList.remove('hidden');
+                        errorIcon.classList.add('hidden');
+                        closeBtn.classList.remove('hidden');
+
+                        let typeText = job.type.includes('import') ? 'Import Data' : 'Export Laporan';
+                        title.innerText = typeText + ' Selesai!';
+                        desc.innerText = 'Proses berhasil.';
+
+                        if (job.result_url) {
+                            downloadBtn.href = '/api/job-download/' + job.id;
+                            downloadBtn.classList.remove('hidden');
+                        }
+                        
+                        // Stop polling for this job since it's done
+                        clearInterval(pollingInterval);
+                    } else if (job.status === 'failed') {
+                        spinner.classList.add('hidden');
+                        successIcon.classList.add('hidden');
+                        errorIcon.classList.remove('hidden');
+                        closeBtn.classList.remove('hidden');
+                        title.innerText = 'Proses Gagal';
+                        desc.innerText = 'Terjadi kesalahan sistem.';
+                        clearInterval(pollingInterval);
+                    }
+                })
+                .catch(err => console.error(err));
+            }
+
+            closeBtn.addEventListener('click', () => {
+                hideToast();
+                if (currentJobId) {
+                    fetch('/api/job-acknowledge', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({ id: currentJobId })
+                    });
+                    currentJobId = null;
+                    // Resume polling in case there are other jobs
+                    pollingInterval = setInterval(checkJobStatus, 5000);
+                }
+            });
+
+            downloadBtn.addEventListener('click', () => {
+                // Also acknowledge when they click download so it dismisses
+                setTimeout(() => closeBtn.click(), 1000);
+            });
+
+            // Start polling every 5 seconds
+            checkJobStatus();
+            pollingInterval = setInterval(checkJobStatus, 5000);
+        });
     </script>
 </body>
 

@@ -295,231 +295,21 @@ class AdminController extends Controller
         $file = $request->file('file_csv');
         $extension = strtolower($file->getClientOriginalExtension());
         
-        $rows = [];
+        // Simpan file sementara untuk diproses oleh Job
+        $filename = 'temp_import_' . time() . '_' . uniqid() . '.' . $extension;
+        $file->storeAs('temp', $filename); // Menyimpan di storage/app/temp
 
-        if ($extension === 'xlsx') {
-            if ($xlsx = SimpleXLSX::parse($file->getRealPath())) {
-                $rows = $xlsx->rows();
-            } else {
-                return back()->with('error', 'Gagal membaca file XLSX: ' . SimpleXLSX::parseError());
-            }
-        } else {
-            $handle = fopen($file->getRealPath(), 'r');
-            $firstLine = fgets($handle);
-            $delimiter = strpos($firstLine, ';') !== false ? ';' : ',';
-            rewind($handle);
+        // Buat Job Tracker
+        $tracker = \App\Models\JobTracker::create([
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'type' => 'import_users',
+            'status' => 'pending'
+        ]);
 
-            while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
-                $rows[] = $row;
-            }
-            fclose($handle);
-        }
+        // Dispatch Job
+        \App\Jobs\ImportUsersJob::dispatch('temp/' . $filename, $tracker->id, $extension);
 
-        if (count($rows) < 2) {
-            return back()->with('error', 'File kosong atau format tidak sesuai.');
-        }
-
-        $berhasil = 0;
-        $gagalRows = [];
-
-        // Skip header at index 0
-        for ($i = 1; $i < count($rows); $i++) {
-            $rowNum = $i + 1;
-            $row = $rows[$i];
-            
-            // Abaikan baris kosong
-            if (empty($row) || count(array_filter($row, fn($val) => trim((string)$val) !== '')) === 0) {
-                continue;
-            }
-
-            if (count($row) < 4) {
-                $gagalRows[] = [
-                    'baris' => $rowNum,
-                    'nama' => trim($row[0] ?? '(Kosong)'),
-                    'detail' => 'Data kolom tidak lengkap (kurang dari 4 kolom)',
-                    'alasan' => 'Jumlah kolom kurang dari ketentuan minimal template.'
-                ];
-                continue;
-            }
-
-            $name = trim($row[0] ?? '');
-            $nomor_induk = trim($row[1] ?? '');
-            $nis = isset($row[2]) && trim($row[2]) !== '' ? trim($row[2]) : null;
-            $email = isset($row[3]) && trim($row[3]) !== '' ? trim($row[3]) : null;
-            $roleExcel = isset($row[4]) ? strtolower(trim($row[4])) : '';
-            $password = isset($row[5]) && trim($row[5]) !== '' ? trim($row[5]) : null;
-            $kelasStr = isset($row[6]) ? trim($row[6]) : null;
-            $agama = isset($row[7]) && trim($row[7]) !== '' ? trim($row[7]) : null;
-
-            // 1. Cari User (Upsert Logic)
-            $user = null;
-            if ($nomor_induk !== '') {
-                $user = User::where('nomor_induk', $nomor_induk)->first();
-            }
-            if (!$user && $nis) {
-                $siswaProfile = \App\Models\SiswaProfile::where('nis', $nis)->first();
-                if ($siswaProfile) {
-                    $user = $siswaProfile->user;
-                }
-            }
-
-            if ($user) {
-                // UPDATE LOGIC
-                $role = $user->role;
-
-                if ($email && $email !== $user->email && User::where('email', $email)->exists()) {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name ?: $user->name,
-                        'detail' => "Email: {$email}",
-                        'alasan' => "Email '{$email}' sudah digunakan oleh pengguna lain."
-                    ];
-                    continue;
-                }
-
-                if ($role === 'murid' && $nis) {
-                    $profile = $user->siswaProfile;
-                    if ($profile && $profile->nis !== $nis && \App\Models\SiswaProfile::where('nis', $nis)->exists()) {
-                        $gagalRows[] = [
-                            'baris' => $rowNum,
-                            'nama' => $name ?: $user->name,
-                            'detail' => "NIS: {$nis}",
-                            'alasan' => "NIS '{$nis}' sudah digunakan oleh pengguna lain."
-                        ];
-                        continue;
-                    }
-                }
-
-                try {
-                    if ($name !== '') $user->name = $name;
-                    if ($email !== null) $user->email = $email;
-                    if ($password !== null) $user->password = Hash::make($password);
-                    $user->save();
-
-                    if ($role === 'murid') {
-                        $profile = $user->siswaProfile ?: new \App\Models\SiswaProfile(['user_id' => $user->id]);
-                        if ($nis !== null) $profile->nis = $nis;
-                        if ($agama !== null) $profile->agama = $agama;
-                        if ($kelasStr !== null) {
-                            $parts = explode(' ', $kelasStr);
-                            $profile->kelas = $parts[0] ?? null;
-                            $profile->rombel = end($parts) ?: null;
-                            if (count($parts) > 2) {
-                                $profile->jurusan = implode(' ', array_slice($parts, 1, -1));
-                            } else {
-                                $profile->jurusan = null;
-                            }
-                        }
-                        $profile->save();
-                    }
-                    $berhasil++;
-                } catch (\Exception $e) {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name ?: $user->name,
-                        'detail' => "Update ID: {$user->id}",
-                        'alasan' => 'Gagal update ke database: ' . $e->getMessage()
-                    ];
-                }
-
-            } else {
-                // INSERT LOGIC
-                $role = $roleExcel;
-                if ($role !== 'murid' && $nomor_induk === '') {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name ?: '(Kosong)',
-                        'detail' => "Role: {$role}",
-                        'alasan' => 'Nomor Induk / NIP / ID wajib diisi.'
-                    ];
-                    continue;
-                }
-
-                if ($role === 'murid' && $nomor_induk === '' && !$nis) {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name ?: '(Kosong)',
-                        'detail' => "Role: {$role}",
-                        'alasan' => 'Untuk murid, minimal NIS atau NISN (Nomor Induk) harus diisi.'
-                    ];
-                    continue;
-                }
-
-                if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas'])) {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name,
-                        'detail' => "Role: {$role}",
-                        'alasan' => "Role '{$role}' tidak valid."
-                    ];
-                    continue;
-                }
-
-                if ($email && User::where('email', $email)->exists()) {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name,
-                        'detail' => "Email: {$email}",
-                        'alasan' => "Email '{$email}' sudah digunakan."
-                    ];
-                    continue;
-                }
-
-                if ($role === 'murid' && $nis && \App\Models\SiswaProfile::where('nis', $nis)->exists()) {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name,
-                        'detail' => "NIS: {$nis}",
-                        'alasan' => "NIS '{$nis}' sudah terdaftar di sistem."
-                    ];
-                    continue;
-                }
-
-                try {
-                    $newUser = User::create([
-                        'name'        => $name !== '' ? $name : 'Tanpa Nama',
-                        'nomor_induk' => $nomor_induk !== '' ? $nomor_induk : null,
-                        'email'       => $email,
-                        'role'        => $role,
-                        'password'    => Hash::make($password ?: '12345678'),
-                    ]);
-
-                    if ($role === 'murid') {
-                        $profileData = [];
-                        if ($nis) $profileData['nis'] = $nis;
-                        if ($agama) $profileData['agama'] = $agama;
-                        if ($kelasStr) {
-                            $parts = explode(' ', $kelasStr);
-                            $profileData['kelas'] = $parts[0] ?? null;
-                            $profileData['rombel'] = end($parts) ?: null;
-                            if (count($parts) > 2) {
-                                $profileData['jurusan'] = implode(' ', array_slice($parts, 1, -1));
-                            }
-                        }
-                        $newUser->siswaProfile()->create($profileData);
-                    }
-                    $berhasil++;
-                } catch (\Exception $e) {
-                    $gagalRows[] = [
-                        'baris' => $rowNum,
-                        'nama' => $name,
-                        'detail' => "Nomor Induk: {$nomor_induk}",
-                        'alasan' => 'Gagal insert ke database: ' . $e->getMessage()
-                    ];
-                }
-            }
-        }
-
-        $totalGagal = count($gagalRows);
-
-        if ($totalGagal > 0) {
-            $msg = "Import selesai. Berhasil: {$berhasil} akun. Terdapat {$totalGagal} baris yang gagal diimport.";
-            return back()
-                ->with($berhasil > 0 ? 'warning' : 'error', $msg)
-                ->with('import_errors', $gagalRows);
-        }
-
-        return back()->with('success', "Import selesai! Seluruh {$berhasil} akun berhasil ditambahkan.");
+        return back()->with('success', 'Data sedang diproses di latar belakang. Silakan perhatikan notifikasi di pojok kanan bawah layar Anda.');
     }
 
     public function editUser(User $user)
@@ -809,38 +599,20 @@ class AdminController extends Controller
     {
         $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
         $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
-        
-        $riwayat = AbsensiGuru::with('user')
-            ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
-            ->orderBy('tanggal')
-            ->orderBy('user_id')
-            ->get();
 
-        $rows = [
-            ['No', 'Nama Guru', 'Tanggal', 'Jam Datang', 'Jam Pulang', 'Status Kehadiran', 'Kategori', 'Keterangan']
-        ];
-        
-        $no = 1;
-        foreach ($riwayat as $data) {
-            $rows[] = [
-                $no++,
-                $data->user->name ?? '-',
-                $data->tanggal->format('Y-m-d'),
-                $data->waktu_datang ?? '-',
-                $data->waktu_pulang ?? '-',
-                $data->status,
-                $data->kategori ?? '-',
-                $data->keterangan ?? '-'
-            ];
-        }
-
-        $filename = "absensi_guru_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".xlsx";
-        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
-
-        return response((string) $xlsx, 200, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $tracker = \App\Models\JobTracker::create([
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'type' => 'export_absensi_guru',
+            'status' => 'pending'
         ]);
+
+        \App\Jobs\ExportAbsensiGuruJob::dispatch(
+            $tanggalMulai->format('Y-m-d'),
+            $tanggalAkhir->format('Y-m-d'),
+            $tracker->id
+        );
+
+        return back()->with('success', 'Pembuatan laporan Excel sedang diproses di latar belakang. Silakan perhatikan notifikasi di pojok kanan bawah layar.');
     }
 
     // ──────────────────────────────────────────
@@ -1050,8 +822,8 @@ class AdminController extends Controller
         }
 
         if ($request->status_absen === 'tutup') {
-            \Illuminate\Support\Facades\Artisan::call('presensi:cek-alpha');
-            \Illuminate\Support\Facades\Artisan::call('presensi:cek-lupa-pulang');
+            \Illuminate\Support\Facades\Artisan::queue('presensi:cek-alpha');
+            \Illuminate\Support\Facades\Artisan::queue('presensi:cek-lupa-pulang');
         }
 
         return redirect()->route('admin.geofence')
@@ -1114,36 +886,19 @@ class AdminController extends Controller
         $tanggalMulai = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : Carbon::today()->startOfMonth();
         $tanggalAkhir = $request->filled('tanggal_akhir') ? Carbon::parse($request->tanggal_akhir) : Carbon::today();
         
-        $riwayat = AbsensiSiswa::with('user')
-            ->whereBetween('tanggal', [$tanggalMulai->format('Y-m-d'), $tanggalAkhir->format('Y-m-d')])
-            ->orderBy('tanggal')
-            ->orderBy('user_id')
-            ->get();
-
-        $rows = [
-            ['No', 'Nama Siswa', 'Tanggal', 'Waktu Datang', 'Waktu Pulang', 'Status Kehadiran', 'Keterangan']
-        ];
-        
-        $no = 1;
-        foreach ($riwayat as $data) {
-            $rows[] = [
-                $no++,
-                $data->user->name ?? '-',
-                $data->tanggal->format('Y-m-d'),
-                $data->waktu_datang ?? '-',
-                $data->waktu_pulang ?? '-',
-                $data->status,
-                $data->keterangan ?? '-'
-            ];
-        }
-
-        $filename = "absensi_murid_" . $tanggalMulai->format('Y-m-d') . "_sd_" . $tanggalAkhir->format('Y-m-d') . ".xlsx";
-        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($rows);
-
-        return response((string) $xlsx, 200, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $tracker = \App\Models\JobTracker::create([
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'type' => 'export_absensi_siswa',
+            'status' => 'pending'
         ]);
+
+        \App\Jobs\ExportAbsensiSiswaJob::dispatch(
+            $tanggalMulai->format('Y-m-d'),
+            $tanggalAkhir->format('Y-m-d'),
+            $tracker->id
+        );
+
+        return back()->with('success', 'Pembuatan laporan Excel sedang diproses di latar belakang. Silakan perhatikan notifikasi di pojok kanan bawah layar.');
     }
 
     // ──────────────────────────────────────────

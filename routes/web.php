@@ -19,8 +19,16 @@ use App\Http\Controllers\Piket\PiketMengajarController;
 use App\Http\Controllers\BukuManualController;
 use App\Http\Controllers\IndikatorLiterasiController as SiswaIndikatorController;
 use App\Http\Controllers\CatatanMembacaController;
+use App\Http\Controllers\JobTrackerController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+// Job Tracker API Routes (Accessible to authenticated users)
+Route::middleware('auth')->group(function () {
+    Route::get('/api/job-status', [JobTrackerController::class, 'checkStatus'])->name('job.status');
+    Route::post('/api/job-acknowledge', [JobTrackerController::class, 'acknowledge'])->name('job.acknowledge');
+    Route::get('/api/job-download/{id}', [JobTrackerController::class, 'download'])->name('job.download');
+});
 
 Route::get('/', function () {
     return view('welcome');
