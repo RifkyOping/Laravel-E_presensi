@@ -89,8 +89,11 @@
 
         </div>
         
-        <!-- PWA Service Worker Registration -->
+        <!-- PWA Service Worker Registration & Session Reset -->
         <script>
+            // Reset status agar pop-up bisa muncul lagi setelah berhasil login
+            sessionStorage.removeItem('pwaPromptShown');
+
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/sw.js').then(registration => {

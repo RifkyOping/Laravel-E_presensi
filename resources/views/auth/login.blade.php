@@ -8,7 +8,7 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+    <form id="form-login" method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
 
         <!-- Nomor Induk -->
@@ -17,8 +17,9 @@
                 {{ __('NIS / NISN / NIP') }}
             </label>
             <input id="nomor_induk" type="text" name="nomor_induk" value="{{ old('nomor_induk') }}" required autofocus
-                autocomplete="username"
+                autocomplete="username" list="saved_nomor_induk"
                 class="block w-full rounded-xl border-2 {{ $errors->has('nomor_induk') ? 'border-red-400 bg-red-50 focus:border-red-500' : 'border-[#24417c]/20 focus:border-[#24417c]' }} focus:ring-0 text-[#24417c] shadow-sm transition duration-300">
+            <datalist id="saved_nomor_induk"></datalist>
             @if ($errors->has('nomor_induk'))
                 <div
                     class="mt-2 flex items-center gap-2 text-red-600 font-semibold text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -105,4 +106,43 @@
             </div>
         </div>
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const datalist = document.getElementById('saved_nomor_induk');
+            const form = document.getElementById('form-login');
+            const inputNomor = document.getElementById('nomor_induk');
+
+            // 1. Muat riwayat NIS/NIP/NISN yang tersimpan
+            let savedLogins = JSON.parse(localStorage.getItem('riwayat_login_nomor') || '[]');
+            
+            // Tampilkan ke datalist
+            savedLogins.forEach(nomor => {
+                let option = document.createElement('option');
+                option.value = nomor;
+                datalist.appendChild(option);
+            });
+
+            // 2. Simpan input saat tombol Masuk (submit) ditekan
+            if (form) {
+                form.addEventListener('submit', function() {
+                    const currentVal = inputNomor.value.trim();
+                    if (currentVal) {
+                        // Hapus jika sudah ada (agar nanti bisa ditaruh di urutan pertama)
+                        savedLogins = savedLogins.filter(n => n !== currentVal);
+                        
+                        // Tambahkan di awal
+                        savedLogins.unshift(currentVal);
+                        
+                        // Batasi maksimal 5 nomor saja yang disimpan
+                        if (savedLogins.length > 5) {
+                            savedLogins = savedLogins.slice(0, 5);
+                        }
+                        
+                        localStorage.setItem('riwayat_login_nomor', JSON.stringify(savedLogins));
+                    }
+                });
+            }
+        });
+    </script>
 </x-guest-layout>

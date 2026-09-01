@@ -127,7 +127,7 @@
                         <div class="p-5 border-t border-slate-100 bg-slate-50 flex justify-end">
                             <button type="submit" class="w-full flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-5 py-3 rounded-xl text-sm transition shadow-sm">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                Upload Semua RPP
+                                Upload RPP
                             </button>
                         </div>
                     @endif
@@ -212,7 +212,7 @@
                         <div class="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
                             <button type="submit" class="flex items-center justify-center gap-2 bg-[#1e3a6e] hover:bg-[#162d57] text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-sm w-full sm:w-auto">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                Upload Semua RPP
+                                Upload RPP
                             </button>
                         </div>
                     @endif

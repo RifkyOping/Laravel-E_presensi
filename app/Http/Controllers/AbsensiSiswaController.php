@@ -97,6 +97,7 @@ class AbsensiSiswaController extends Controller
     public function absenDatang(Request $request)
     {
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . Auth::id() . '_' . Carbon::today()->toDateString());
+        \Illuminate\Support\Facades\Cache::forget('siswa_dashboard_' . Auth::id() . '_' . Carbon::today()->toDateString());
         
         $jenis = $request->input('jenis_absen', 'hadir');
 
@@ -234,6 +235,7 @@ class AbsensiSiswaController extends Controller
     public function absenPulang(Request $request)
     {
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . Auth::id() . '_' . Carbon::today()->toDateString());
+        \Illuminate\Support\Facades\Cache::forget('siswa_dashboard_' . Auth::id() . '_' . Carbon::today()->toDateString());
 
         $request->validate([
             'latitude' => 'required|numeric',

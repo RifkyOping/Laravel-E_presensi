@@ -112,7 +112,7 @@ class AbsensiKelasController extends Controller
             
             // Jika bulan ini sudah aman (pending/disetujui) dan tgl >= 25, maka target ke bulan depan
             if (in_array($status, ['pending', 'disetujui']) && $today->day >= 25) {
-                $nextPeriode = $today->copy()->addMonth()->format('Y-m');
+                $nextPeriode = $today->copy()->addMonthNoOverflow()->format('Y-m');
                 $rppNext = RppGuru::where('user_id', $guru->id)
                     ->where('tingkat', $kelas['tingkat'])
                     ->where('jurusan', $kelas['jurusan'])
@@ -220,6 +220,7 @@ class AbsensiKelasController extends Controller
         
         \Illuminate\Support\Facades\Cache::forget('guru_absen_kelas_index_' . $guru->id . '_' . $today);
         \Illuminate\Support\Facades\Cache::forget('guru_absen_kelas_show_' . $jadwal->id . '_' . $today);
+        \Illuminate\Support\Facades\Cache::forget('guru_dashboard_' . $guru->id . '_' . $today);
 
         // Pastikan guru ini yang punya jadwal ini
         if ($jadwal->user_id !== $guru->id) {

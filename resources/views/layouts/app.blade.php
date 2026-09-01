@@ -1223,7 +1223,29 @@
         });
     </script>
     
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Install Prompt -->
+    <div id="pwa-install-prompt" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-white p-4 rounded-2xl shadow-xl border border-slate-200 z-[9999] transform transition-transform translate-y-full">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center shadow-inner overflow-hidden border border-slate-100 shrink-0">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain">
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm">Install Aplikasi</h4>
+                    <p class="text-xs text-slate-500">Akses lebih cepat & mudah</p>
+                </div>
+            </div>
+            <button id="pwa-close-btn" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full p-1.5 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <button id="pwa-install-btn" class="w-full bg-[#1e3a6e] hover:bg-[#162d57] text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Install Sekarang
+        </button>
+    </div>
+
+    <!-- PWA Service Worker Registration & Prompt Logic -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -1232,6 +1254,65 @@
                 }).catch(err => {
                     console.log('ServiceWorker registration failed: ', err);
                 });
+            });
+        }
+
+        // PWA Install Prompt Logic
+        let deferredPrompt;
+        const pwaPrompt = document.getElementById('pwa-install-prompt');
+        const pwaInstallBtn = document.getElementById('pwa-install-btn');
+        const pwaCloseBtn = document.getElementById('pwa-close-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            
+            // Tampilkan hanya 1x per sesi
+            if (sessionStorage.getItem('pwaPromptShown')) {
+                return;
+            }
+
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            
+            // Show the prompt UI
+            if (pwaPrompt) {
+                pwaPrompt.classList.remove('hidden');
+                // Slight delay for animation
+                setTimeout(() => {
+                    pwaPrompt.classList.remove('translate-y-full');
+                }, 100);
+                
+                // Tandai sudah ditampilkan di sesi ini
+                sessionStorage.setItem('pwaPromptShown', 'true');
+            }
+        });
+
+        if (pwaInstallBtn) {
+            pwaInstallBtn.addEventListener('click', async () => {
+                if (pwaPrompt) {
+                    pwaPrompt.classList.add('translate-y-full');
+                    setTimeout(() => {
+                        pwaPrompt.classList.add('hidden');
+                    }, 300);
+                }
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to the install prompt: ${outcome}`);
+                    deferredPrompt = null;
+                }
+            });
+        }
+
+        if (pwaCloseBtn) {
+            pwaCloseBtn.addEventListener('click', () => {
+                if (pwaPrompt) {
+                    pwaPrompt.classList.add('translate-y-full');
+                    setTimeout(() => {
+                        pwaPrompt.classList.add('hidden');
+                    }, 300);
+                }
             });
         }
     </script>
