@@ -42,7 +42,17 @@
             @csrf
 
             {{-- Form Jadwal Absensi --}}
-            <div class="app-card p-6 anim-up" x-data="{ activeTab: 'Senin', days: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] }">
+            @php
+                $currentDayIndo = match(now()->format('l')) {
+                    'Monday' => 'Senin',
+                    'Tuesday' => 'Selasa',
+                    'Wednesday' => 'Rabu',
+                    'Thursday' => 'Kamis',
+                    'Friday' => 'Jumat',
+                    default => 'Senin',
+                };
+            @endphp
+            <div class="app-card p-6 anim-up" x-data="{ activeTab: '{{ $currentDayIndo }}', days: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] }">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">
                     <div>
                         <h3 class="font-bold text-slate-800 flex items-center gap-2">

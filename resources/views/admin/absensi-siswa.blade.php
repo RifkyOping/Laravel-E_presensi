@@ -69,10 +69,21 @@
         </button>
 
         <div x-show="showFilter" x-transition class="mt-5 pt-5 border-t border-slate-100" style="display: none;">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="app-label">Tanggal</label>
                     <input type="date" id="filter-tanggal" class="app-input" value="{{ request('tanggal', $tanggal->format('Y-m-d')) }}" onchange="fetchData()">
+                </div>
+                <div>
+                    <label class="app-label">Kelas</label>
+                    <select id="filter-kelas" class="app-input" onchange="fetchData()">
+                        <option value="">Semua Kelas</option>
+                        @foreach($kelasList as $k)
+                            <option value="{{ $k->id }}" {{ $selectedKelasId == $k->id ? 'selected' : '' }}>
+                                {{ $k->tingkat }} {{ $k->jurusan }} {{ $k->rombel }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label class="app-label">Cari Nama Murid</label>
@@ -183,14 +194,29 @@
                             @if($rec && $rec->waktu_pulang) · Pulang: {{ Carbon::parse($rec->waktu_pulang)->format('H:i') }} WITA @endif
                         </p>
                     </div>
-                    @php $cls = match($rec?->status) {
-                        'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
-                    }; @endphp
-                    <span class="app-badge {{ $cls }} capitalize">
-                        {{ $rec?->status ?? '—' }}
-                        @if($rec && $rec->status_pengajuan === 'pending') (Pending) @endif
-                        @if($rec && $rec->status_pengajuan === 'rejected') (Ditolak) @endif
-                    </span>
+                    <div class="flex flex-col items-end gap-1">
+                        @php $cls = match($rec?->status) {
+                            'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
+                        }; @endphp
+                        <span class="app-badge {{ $cls }} capitalize">
+                            {{ $rec?->status ?? '—' }}
+                            @if($rec && $rec->status_pengajuan === 'pending') (Pending) @endif
+                            @if($rec && $rec->status_pengajuan === 'rejected') (Ditolak) @endif
+                        </span>
+                        @if($rec && $rec->kategori && $rec->status === 'hadir')
+                            @php
+                                $katCls = match($rec->kategori) {
+                                    'tepat_waktu' => 'text-emerald-600',
+                                    'terlambat' => 'text-orange-600',
+                                    'bolos' => 'text-red-600',
+                                    default => 'text-slate-500'
+                                };
+                            @endphp
+                            <span class="text-[0.65rem] font-bold {{ $katCls }} uppercase">
+                                {{ str_replace('_', ' ', $rec->kategori) }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
                 @empty
                 <p class="px-5 py-8 text-center text-slate-400 text-sm">Belum ada murid yang absen hari ini.</p>
@@ -250,14 +276,29 @@
                         <td class="text-center">{{ $r->waktu_datang ? Carbon::parse($r->waktu_datang)->format('H:i').' WITA' : '—' }}</td>
                         <td class="text-center">{{ $r->waktu_pulang ? Carbon::parse($r->waktu_pulang)->format('H:i').' WITA' : '—' }}</td>
                         <td class="text-center">
-                            @php $cls = match($r->status) {
-                                'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
-                            }; @endphp
-                            <span class="app-badge {{ $cls }} capitalize">
-                                {{ $r->status }}
-                                @if($r->status_pengajuan === 'pending') (Pending) @endif
-                                @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
-                            </span>
+                            <div class="flex flex-col items-center gap-1">
+                                @php $cls = match($r->status) {
+                                    'hadir'=>'b-blue','izin'=>'b-amber','sakit'=>'b-slate',default=>'b-red'
+                                }; @endphp
+                                <span class="app-badge {{ $cls }} capitalize">
+                                    {{ $r->status }}
+                                    @if($r->status_pengajuan === 'pending') (Pending) @endif
+                                    @if($r->status_pengajuan === 'rejected') (Ditolak) @endif
+                                </span>
+                                @if($r->kategori && $r->status === 'hadir')
+                                    @php
+                                        $katCls = match($r->kategori) {
+                                            'tepat_waktu' => 'text-emerald-600',
+                                            'terlambat' => 'text-orange-600',
+                                            'bolos' => 'text-red-600',
+                                            default => 'text-slate-500'
+                                        };
+                                    @endphp
+                                    <span class="text-[0.65rem] font-bold {{ $katCls }} uppercase">
+                                        {{ str_replace('_', ' ', $r->kategori) }}
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -284,12 +325,16 @@
     function fetchData() {
         const tanggal = document.getElementById('filter-tanggal').value;
         const search = document.getElementById('filter-search').value;
+        const kelas_id = document.getElementById('filter-kelas').value;
         const url = new URL(window.location.href);
         
         if (tanggal) url.searchParams.set('tanggal', tanggal);
         
         if (search) url.searchParams.set('search', search);
         else url.searchParams.delete('search');
+
+        if (kelas_id) url.searchParams.set('kelas_id', kelas_id);
+        else url.searchParams.delete('kelas_id');
 
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.text())
@@ -315,9 +360,11 @@
             
             const tanggal = document.getElementById('filter-tanggal').value;
             const search = document.getElementById('filter-search').value;
+            const kelas_id = document.getElementById('filter-kelas').value;
             
             if (tanggal) url.searchParams.set('tanggal', tanggal);
             if (search) url.searchParams.set('search', search);
+            if (kelas_id) url.searchParams.set('kelas_id', kelas_id);
             
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(res => res.text())

@@ -455,6 +455,17 @@
                     <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border {{ $cls }} capitalize">
                         {{ $r->status ?? 'hadir' }}
                     </span>
+                    @if($r->kategori && $r->status === 'hadir')
+                        @php
+                            $katCls = match($r->kategori) {
+                                'tepat_waktu' => 'text-emerald-600',
+                                'terlambat' => 'text-orange-600',
+                                'bolos' => 'text-red-600',
+                                default => 'text-slate-500'
+                            };
+                        @endphp
+                        <p class="text-[0.65rem] font-bold mt-1 {{ $katCls }}">{{ ucwords(str_replace('_', ' ', $r->kategori)) }}</p>
+                    @endif
                     @if($r->status_pengajuan === 'pending')
                         <p class="text-[0.6rem] text-slate-400 font-semibold mt-0.5">Pending</p>
                     @elseif($r->status_pengajuan === 'rejected')
@@ -510,6 +521,17 @@
                                 <span class="inline-block px-2.5 py-1 rounded-lg text-[.7rem] font-bold border {{ $cls }} capitalize">
                                     {{ $r->status ?? 'hadir' }}
                                 </span>
+                                @if($r->kategori && $r->status === 'hadir')
+                                    @php
+                                        $katCls = match($r->kategori) {
+                                            'tepat_waktu' => 'text-emerald-600',
+                                            'terlambat' => 'text-orange-600',
+                                            'bolos' => 'text-red-600',
+                                            default => 'text-slate-500'
+                                        };
+                                    @endphp
+                                    <span class="text-[0.65rem] font-bold {{ $katCls }}">{{ ucwords(str_replace('_', ' ', $r->kategori)) }}</span>
+                                @endif
                                 @if($r->status_pengajuan === 'pending')
                                     <span class="text-[0.6rem] text-slate-400 font-semibold flex items-center gap-1">
                                         <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

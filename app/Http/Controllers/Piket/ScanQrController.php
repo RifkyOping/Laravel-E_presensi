@@ -146,12 +146,16 @@ class ScanQrController extends Controller
             ]);
 
         } else { // Pulang
-            if (!$existing || !$existing->waktu_datang) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "{$siswa->name} belum melakukan absen datang. Tidak dapat absen pulang.",
-                    'show_popup' => true
-                ], 422);
+            if (!$existing) {
+                $existing = AbsensiSiswa::create([
+                    'user_id' => $siswa->id,
+                    'tanggal' => $today,
+                    'status' => 'hadir',
+                    'kategori' => 'bolos',
+                ]);
+            } elseif (!$existing->waktu_datang) {
+                $existing->status = 'hadir';
+                $existing->kategori = 'bolos';
             }
 
             if ($existing->waktu_pulang) {

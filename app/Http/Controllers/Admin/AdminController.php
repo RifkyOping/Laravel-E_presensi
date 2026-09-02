@@ -1193,11 +1193,35 @@ class AdminController extends Controller
             ? Carbon::parse($request->tanggal)
             : Carbon::today();
 
-        // Semua siswa (dengan opsional filter nama)
+        // Daftar kelas untuk filter
+        $kelasList = \App\Models\Kelas::where('status', true)
+            ->orderByRaw("FIELD(tingkat,'X','XI','XII')")
+            ->orderBy('jurusan')
+            ->orderBy('rombel')
+            ->get();
+            
+        $selectedKelasId = $request->input('kelas_id');
+        $selectedKelas = $selectedKelasId ? \App\Models\Kelas::find($selectedKelasId) : null;
+
+        // Semua siswa (dengan opsional filter nama dan kelas)
         $siswaQuery = User::where('role', 'murid')->orderBy('name');
+        
         if ($request->filled('search')) {
             $siswaQuery->where('name', 'like', '%' . $request->search . '%');
         }
+        
+        if ($selectedKelas) {
+            $tingkat = $selectedKelas->tingkat;
+            $jurusan = $selectedKelas->jurusan;
+            $rombel  = $selectedKelas->rombel;
+            
+            $siswaQuery->whereHas('siswaProfile', function ($q) use ($tingkat, $jurusan, $rombel) {
+                $q->where('kelas', $tingkat)
+                  ->where('jurusan', $jurusan)
+                  ->where('rombel', $rombel);
+            });
+        }
+        
         $semuaSiswa = $siswaQuery->get();
 
         // Absensi siswa pada tanggal yang dipilih (keyBy user_id untuk lookup O(1))
@@ -1215,22 +1239,36 @@ class AdminController extends Controller
             ->whereDate('tanggal', $tanggal)
             ->orderByDesc('tanggal')
             ->orderBy('user_id');
+            
         if ($request->filled('search')) {
             $riwayatQuery->whereHas('user', fn($q) => $q->where('name', 'like', '%'.$request->search.'%'));
         }
+        
+        if ($selectedKelas) {
+            $tingkat = $selectedKelas->tingkat;
+            $jurusan = $selectedKelas->jurusan;
+            $rombel  = $selectedKelas->rombel;
+            
+            $riwayatQuery->whereHas('user.siswaProfile', function ($q) use ($tingkat, $jurusan, $rombel) {
+                $q->where('kelas', $tingkat)
+                  ->where('jurusan', $jurusan)
+                  ->where('rombel', $rombel);
+            });
+        }
+        
         $riwayat = $riwayatQuery->paginate(20)->withQueryString();
 
         $stats = [
-            'total'  => User::where('role', 'murid')->count(),
-            'hadir'  => $absensi->where('status', 'hadir')->count(),
-            'izin'   => $absensi->where('status', 'izin')->count(),
-            'sakit'  => $absensi->where('status', 'sakit')->count(),
-            'belum'  => $semuaSiswa->count() - $absensi->count(),
+            'total'  => $semuaSiswa->count(), // Sesuaikan total dengan filter kelas
+            'hadir'  => $siswaHadir->count(),
+            'izin'   => $absensi->whereIn('user_id', $semuaSiswa->pluck('id'))->where('status', 'izin')->count(),
+            'sakit'  => $absensi->whereIn('user_id', $semuaSiswa->pluck('id'))->where('status', 'sakit')->count(),
+            'belum'  => $siswaBelum->count(),
         ];
 
         return view('admin.absensi-siswa', compact(
             'semuaSiswa', 'absensi', 'siswaHadir', 'siswaBelum',
-            'riwayat', 'stats', 'tanggal'
+            'riwayat', 'stats', 'tanggal', 'kelasList', 'selectedKelasId'
         ));
     }
 

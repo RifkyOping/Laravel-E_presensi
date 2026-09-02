@@ -206,7 +206,7 @@
                                             <td class="px-6 py-4 text-sm font-semibold text-slate-600">{{ $idx + 1 }}</td>
                                             <td class="px-6 py-4">
                                                 <div class="font-bold text-slate-800">{{ $s->name }}</div>
-                                                <div class="text-xs text-slate-500">{{ $s->nomor_induk }}</div>
+                                                <div class="text-xs text-slate-500">NIS: {{ $s->siswaProfile->nis ?? '-' }}</div>
                                             </td>
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center gap-4">

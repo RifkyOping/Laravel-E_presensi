@@ -107,16 +107,12 @@
 
                     <span class="text-xs font-black text-slate-300 w-6 text-center flex-shrink-0">{{ $idx + 1 }}</span>
 
-                    <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                         style="background: {{ $siswa->jenis_kelamin === 'P' ? 'linear-gradient(135deg,#db2777,#e11d48)' : 'linear-gradient(135deg,#1e3a6e,#2d5299)' }};">
-                        <span class="text-white font-black text-sm">{{ strtoupper(substr($siswa->name, 0, 2)) }}</span>
-                    </div>
 
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-slate-800 text-sm truncate">{{ $siswa->name }}</p>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
-                            @if($siswa->nomor_induk)
-                            <span class="text-[.65rem] text-slate-400 font-medium">NISN: {{ $siswa->nomor_induk }}</span>
+                            @if($siswa->siswaProfile && $siswa->siswaProfile->nis)
+                            <span class="text-[.65rem] text-slate-400 font-medium">NIS: {{ $siswa->siswaProfile->nis }}</span>
                             @endif
                             @if($siswa->jenis_kelamin)
                             <span class="text-[.65rem] text-slate-400 font-medium">{{ $siswa->jenis_kelamin_lengkap }}</span>
