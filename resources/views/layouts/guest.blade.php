@@ -68,7 +68,7 @@
             <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 relative bg-slate-50 lg:bg-white">
                 
                 <!-- Decorative element for mobile -->
-                <div class="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-blue-50 to-transparent lg:hidden"></div>
+                <div class="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-blue-50 to-transparent lg:hidden pointer-events-none"></div>
                 
                 <!-- Mobile Logo -->
                 <div class="lg:hidden mb-10 relative z-10 w-full max-w-md flex justify-center">

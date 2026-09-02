@@ -512,7 +512,7 @@
             // Handle libur toggles
             if(isAuto) {
                 document.querySelectorAll('.status-libur-checkbox').forEach(cb => {
-                    const row = cb.closest('tr');
+                    const row = cb.closest('.space-y-6');
                     const inputs = row.querySelectorAll('.time-input');
                     const labelText = cb.parentElement.querySelector('.toggle-text');
                     

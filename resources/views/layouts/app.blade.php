@@ -1017,7 +1017,7 @@
             setInterval(tick, 1000);
         })();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const forms = document.querySelectorAll('form');
@@ -1033,27 +1033,33 @@
 
                     form.addEventListener('submit', function(e) {
                         e.preventDefault();
-                        Swal.fire({
-                            title: 'Konfirmasi',
-                            text: message,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#dc2626',
-                            cancelButtonColor: '#64748b',
-                            confirmButtonText: 'Ya, Lanjutkan!',
-                            cancelButtonText: 'Batal',
-                            reverseButtons: true,
-                            customClass: {
-                                popup: 'rounded-2xl shadow-2xl border border-slate-100',
-                                title: 'text-xl font-black text-slate-800',
-                                confirmButton: 'font-bold rounded-xl px-6 py-2.5 shadow-sm',
-                                cancelButton: 'font-bold rounded-xl px-6 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shadow-sm'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
+                        if (typeof window.Swal !== 'undefined') {
+                            window.Swal.fire({
+                                title: 'Konfirmasi',
+                                text: message,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#dc2626',
+                                cancelButtonColor: '#64748b',
+                                confirmButtonText: 'Ya, Lanjutkan!',
+                                cancelButtonText: 'Batal',
+                                reverseButtons: true,
+                                customClass: {
+                                    popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                                    title: 'text-xl font-black text-slate-800',
+                                    confirmButton: 'font-bold rounded-xl px-6 py-2.5 shadow-sm',
+                                    cancelButton: 'font-bold rounded-xl px-6 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shadow-sm'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    form.submit();
+                                }
+                            });
+                        } else {
+                            if (confirm(message)) {
                                 form.submit();
                             }
-                        });
+                        }
                     });
                 }
             });

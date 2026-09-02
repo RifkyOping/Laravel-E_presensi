@@ -326,10 +326,10 @@ class AbsensiKelasController extends Controller
 
         $request->validate([
             'rpp_files'   => 'required|array',
-            'rpp_files.*' => 'file|mimes:pdf,doc,docx|max:5120',
+            'rpp_files.*' => 'file|extensions:pdf,doc,docx|max:5120',
         ], [
             'rpp_files.required' => 'Setidaknya satu file RPP wajib dipilih untuk diunggah.',
-            'rpp_files.*.mimes'  => 'Format file harus berupa PDF, DOC, atau DOCX.',
+            'rpp_files.*.extensions' => 'Format file harus berupa PDF, DOC, atau DOCX.',
             'rpp_files.*.max'    => 'Ukuran masing-masing file maksimal 5MB.',
         ]);
 

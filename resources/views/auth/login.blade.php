@@ -90,7 +90,7 @@
                 class="w-full flex justify-center items-center bg-gradient-to-r from-[#24417c] to-blue-600 text-white font-bold text-lg px-6 py-3.5 rounded-xl border border-blue-400 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group">
                 <span class="relative z-10">{{ __('Masuk Sekarang') }}</span>
                 <div
-                    class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out">
+                    class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out pointer-events-none">
                 </div>
             </button>
 
@@ -114,32 +114,41 @@
             const inputNomor = document.getElementById('nomor_induk');
 
             // 1. Muat riwayat NIS/NIP/NISN yang tersimpan
-            let savedLogins = JSON.parse(localStorage.getItem('riwayat_login_nomor') || '[]');
-            
-            // Tampilkan ke datalist
-            savedLogins.forEach(nomor => {
-                let option = document.createElement('option');
-                option.value = nomor;
-                datalist.appendChild(option);
-            });
+            let savedLogins = [];
+            try {
+                savedLogins = JSON.parse(localStorage.getItem('riwayat_login_nomor') || '[]');
+                
+                // Tampilkan ke datalist
+                savedLogins.forEach(nomor => {
+                    let option = document.createElement('option');
+                    option.value = nomor;
+                    datalist.appendChild(option);
+                });
+            } catch (e) {
+                console.error('Local storage error:', e);
+            }
 
             // 2. Simpan input saat tombol Masuk (submit) ditekan
             if (form) {
                 form.addEventListener('submit', function() {
-                    const currentVal = inputNomor.value.trim();
-                    if (currentVal) {
-                        // Hapus jika sudah ada (agar nanti bisa ditaruh di urutan pertama)
-                        savedLogins = savedLogins.filter(n => n !== currentVal);
-                        
-                        // Tambahkan di awal
-                        savedLogins.unshift(currentVal);
-                        
-                        // Batasi maksimal 5 nomor saja yang disimpan
-                        if (savedLogins.length > 5) {
-                            savedLogins = savedLogins.slice(0, 5);
+                    try {
+                        const currentVal = inputNomor.value.trim();
+                        if (currentVal) {
+                            // Hapus jika sudah ada (agar nanti bisa ditaruh di urutan pertama)
+                            savedLogins = savedLogins.filter(n => n !== currentVal);
+                            
+                            // Tambahkan di awal
+                            savedLogins.unshift(currentVal);
+                            
+                            // Batasi maksimal 5 nomor saja yang disimpan
+                            if (savedLogins.length > 5) {
+                                savedLogins = savedLogins.slice(0, 5);
+                            }
+                            
+                            localStorage.setItem('riwayat_login_nomor', JSON.stringify(savedLogins));
                         }
-                        
-                        localStorage.setItem('riwayat_login_nomor', JSON.stringify(savedLogins));
+                    } catch (e) {
+                        console.error('Error saving login history:', e);
                     }
                 });
             }
