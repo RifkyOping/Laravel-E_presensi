@@ -73,6 +73,42 @@
 
     <div class="space-y-6 pb-10 bg-slate-50 min-h-screen">
         
+        {{-- Tombol Aktifkan Notifikasi (Akan disembunyikan via JS jika sudah aktif) --}}
+        <div id="btn-enable-notif" style="display: none;" class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-3 text-blue-800">
+                <svg class="w-8 h-8 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <div>
+                    <h3 class="font-bold text-sm">Aktifkan Notifikasi Push</h3>
+                    <p class="text-xs opacity-90">Dapatkan pemberitahuan langsung saat Anda berhasil absen atau ada pengajuan masuk.</p>
+                </div>
+            </div>
+            <button onclick="requestNotificationPermission()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-5 rounded-lg whitespace-nowrap transition-colors shadow">
+                Aktifkan Sekarang
+            </button>
+        </div>
+        
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                if ('Notification' in window && Notification.permission !== 'granted') {
+                    document.getElementById('btn-enable-notif').style.display = 'flex';
+                }
+            });
+            function requestNotificationPermission() {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === 'granted') {
+                        if (typeof subscribeUserToPush === 'function') {
+                            subscribeUserToPush();
+                        }
+                        document.getElementById('btn-enable-notif').style.display = 'none';
+                    } else {
+                        alert('Anda memblokir notifikasi. Silakan izinkan melalui pengaturan browser.');
+                    }
+                });
+            }
+        </script>
+        
         {{-- 1. Header Profil & Sapaan Profesional --}}
         <div class="relative overflow-hidden rounded-2xl bg-[#1e3a6e] p-6 sm:p-8 shadow-md">
             <!-- Elemen Dekoratif -->

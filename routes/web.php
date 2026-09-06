@@ -70,6 +70,7 @@ Route::get('/guru/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('guru.dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/push-subscribe', [\App\Http\Controllers\PushNotificationController::class, 'subscribe'])->name('push.subscribe');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 

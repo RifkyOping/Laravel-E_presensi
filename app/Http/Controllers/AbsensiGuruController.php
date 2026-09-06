@@ -205,6 +205,9 @@ class AbsensiGuruController extends Controller
                         'judul_pengajuan' => null,
                         'alasan_ditolak' => null,
                     ]);
+
+                    $user->notify(new \App\Notifications\AbsensiBerhasilNotification('datang', now()->format('H:i:s')));
+
                     return back()->with('success', $pesan);
                 }
                 return back()->with('error', 'Anda sudah melakukan absen hari ini.');
@@ -217,6 +220,8 @@ class AbsensiGuruController extends Controller
                 'status' => 'hadir',
                 'kategori' => $kategori,
             ]);
+
+            $user->notify(new \App\Notifications\AbsensiBerhasilNotification('datang', now()->format('H:i:s')));
 
             return back()->with('success', 'Absen datang berhasil dicatat pukul ' . now()->format('H:i') . ' WITA.');
 
@@ -337,6 +342,8 @@ class AbsensiGuruController extends Controller
                 'kategori' => $kategori,
             ]);
 
+            $user->notify(new \App\Notifications\AbsensiBerhasilNotification('pulang', Carbon::now()->format('H:i:s')));
+
             return back()->with('success', 'Absen pulang berhasil dicatat pada pukul ' . Carbon::now()->format('H:i') . ' WITA.');
         }
 
@@ -358,6 +365,8 @@ class AbsensiGuruController extends Controller
                 'judul_pengajuan' => null,
             ]);
 
+            $user->notify(new \App\Notifications\AbsensiBerhasilNotification('pulang', Carbon::now()->format('H:i:s')));
+
             return back()->with('success', 'Absen pulang berhasil dicatat pada pukul ' . Carbon::now()->format('H:i') . ' WITA.');
         }
 
@@ -375,6 +384,8 @@ class AbsensiGuruController extends Controller
             'waktu_pulang' => Carbon::now()->format('H:i:s'),
             'kategori' => $kategori,
         ]);
+
+        $user->notify(new \App\Notifications\AbsensiBerhasilNotification('pulang', Carbon::now()->format('H:i:s')));
 
         return back()->with('success', 'Absen pulang berhasil dicatat pada pukul ' . Carbon::now()->format('H:i') . ' WITA.');
     }
