@@ -149,9 +149,9 @@ class SchoolSetting extends Model
         }
 
         if ($currentTime < $bukaTime) {
-            return [false, "{$namaAksi} belum dibuka. Jam operasional hari ini ($hariIni) dimulai pukul " . $buka->format('H:i') . " hingga " . $tutup->format('H:i') . " WITA."];
+            return [false, "{$namaAksi} belum dibuka. Jam operasional hari " . strtolower($hariIni) . " dimulai pukul " . $buka->format('H:i') . " hingga " . $tutup->format('H:i') . " WITA."];
         } else {
-            return [false, "Waktu {$namaAksi} telah berakhir/lewat. Jam operasional hari ini ($hariIni) hanya sampai pukul " . $tutup->format('H:i') . " WITA."];
+            return [false, "Waktu {$namaAksi} telah berakhir. Jam operasional hari " . strtolower($hariIni) . " hanya sampai pukul " . $tutup->format('H:i') . " WITA."];
         }
     }
 }

@@ -178,6 +178,12 @@ require __DIR__ . '/auth.php';
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/clear-cache', [AdminController::class, 'clearCache'])->name('clear-cache');
+    
+    // System Status & Job Queue
+    Route::get('/system-status', [AdminController::class, 'systemStatus'])->name('system-status');
+    Route::post('/system-status/retry-job/{id}', [AdminController::class, 'retryFailedJob'])->name('system-status.retry-job');
+    Route::delete('/system-status/forget-job/{id}', [AdminController::class, 'forgetFailedJob'])->name('system-status.forget-job');
+    Route::delete('/system-status/flush-jobs', [AdminController::class, 'flushFailedJobs'])->name('system-status.flush-jobs');
 
     // Manajemen User
     Route::get('/users', [AdminController::class, 'users'])->name('users');

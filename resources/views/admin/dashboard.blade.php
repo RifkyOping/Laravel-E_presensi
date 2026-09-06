@@ -43,25 +43,27 @@
                 <!-- Waktu & Status Sistem (Realtime) -->
                 <div class="flex flex-col items-start sm:items-end w-full sm:w-auto bg-black/10 sm:bg-transparent p-4 sm:p-0 rounded-xl border border-white/10 sm:border-none gap-3 sm:gap-2">
                     <div class="flex items-center bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm border border-white/20 w-full sm:w-auto justify-center sm:justify-start">
-                        @if($systemStatus['failed_jobs'] > 0)
-                            <span class="relative flex h-3 w-3 mr-3" title="Ada Job Gagal">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                            </span>
-                            <span class="text-sm font-medium text-red-100">Error ({{ $systemStatus['failed_jobs'] }} Job Gagal)</span>
-                        @elseif($systemStatus['pending_jobs'] > 5)
-                            <span class="relative flex h-3 w-3 mr-3" title="Antrean Padat">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
-                            </span>
-                            <span class="text-sm font-medium text-amber-100">Sibuk ({{ $systemStatus['pending_jobs'] }} Antrean)</span>
-                        @else
-                            <span class="relative flex h-3 w-3 mr-3">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                            </span>
-                            <span class="text-sm font-medium text-blue-50">Sistem Normal @if($systemStatus['pending_jobs'] > 0)({{ $systemStatus['pending_jobs'] }} Antrean)@endif</span>
-                        @endif
+                        <a href="{{ route('admin.system-status') }}" class="flex items-center hover:bg-white/20 px-2 py-1 -ml-2 rounded transition-colors" title="Lihat Detail Status Sistem & Antrean Pekerjaan">
+                            @if($systemStatus['failed_jobs'] > 0)
+                                <span class="relative flex h-3 w-3 mr-3">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                </span>
+                                <span class="text-sm font-medium text-red-100">Error ({{ $systemStatus['failed_jobs'] }} Job Gagal)</span>
+                            @elseif($systemStatus['pending_jobs'] > 5)
+                                <span class="relative flex h-3 w-3 mr-3">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                                </span>
+                                <span class="text-sm font-medium text-amber-100">Sibuk ({{ $systemStatus['pending_jobs'] }} Antrean)</span>
+                            @else
+                                <span class="relative flex h-3 w-3 mr-3">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                                </span>
+                                <span class="text-sm font-medium text-blue-50">Sistem Normal @if($systemStatus['pending_jobs'] > 0)({{ $systemStatus['pending_jobs'] }} Antrean)@endif</span>
+                            @endif
+                        </a>
 
                         <form action="{{ route('admin.clear-cache') }}" method="POST" class="ml-3 border-l border-white/20 pl-3 m-0 flex items-center">
                             @csrf

@@ -155,8 +155,8 @@ class AbsensiKelasController extends Controller
         $parsed = $this->parseKelas($jadwal->kelas);
         $rppKelas = $guru->getRppForKelas($parsed['tingkat'], $parsed['jurusan']);
         $rppStatus = $rppKelas ? $rppKelas->rpp_status : 'kosong';
-        if (!in_array($rppStatus, ['pending', 'disetujui'])) {
-            return redirect()->route('guru.rpp.index')->with('error', 'Anda tidak dapat mengisi absensi kelas ' . $jadwal->kelas . ' karena RPP untuk kelas ' . $parsed['tingkat'] . ' ' . $parsed['jurusan'] . ' bulan ini belum diunggah atau ditolak. Silakan unggah RPP terlebih dahulu.');
+        if ($rppStatus !== 'disetujui') {
+            return redirect()->route('guru.rpp.index')->with('error', 'Anda tidak dapat mengisi absensi kelas ' . $jadwal->kelas . ' karena RPP untuk kelas ' . $parsed['tingkat'] . ' ' . $parsed['jurusan'] . ' bulan ini belum disetujui (masih pending/ditolak/belum diunggah). Silakan pastikan RPP disetujui terlebih dahulu.');
         }
 
         $cacheKey = 'guru_absen_kelas_show_' . $jadwal->id . '_' . $today;
@@ -231,8 +231,8 @@ class AbsensiKelasController extends Controller
         $parsed = $this->parseKelas($jadwal->kelas);
         $rppKelas = $guru->getRppForKelas($parsed['tingkat'], $parsed['jurusan']);
         $rppStatus = $rppKelas ? $rppKelas->rpp_status : 'kosong';
-        if (!in_array($rppStatus, ['pending', 'disetujui'])) {
-            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat mengisi absensi kelas ' . $jadwal->kelas . ' karena RPP untuk kelas ' . $parsed['tingkat'] . ' ' . $parsed['jurusan'] . ' belum diunggah atau ditolak.');
+        if ($rppStatus !== 'disetujui') {
+            return redirect()->route('guru.absen-kelas.index')->with('error', 'Anda tidak dapat menyimpan absensi kelas ' . $jadwal->kelas . ' karena RPP untuk kelas ' . $parsed['tingkat'] . ' ' . $parsed['jurusan'] . ' belum disetujui.');
         }
 
         // Allow update by removing the early return for $sudahAda

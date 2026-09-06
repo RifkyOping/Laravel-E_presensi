@@ -1419,4 +1419,39 @@ class AdminController extends Controller
         
         return back()->with('success', 'Pengajuan ditolak.');
     }
+
+    // ──────────────────────────────────────────
+    //  SYSTEM STATUS & JOBS
+    // ──────────────────────────────────────────
+
+    public function systemStatus()
+    {
+        $pendingJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('jobs') 
+            ? \Illuminate\Support\Facades\DB::table('jobs')->orderBy('id', 'asc')->get() 
+            : collect();
+            
+        $failedJobs = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('failed_jobs') 
+            ? \Illuminate\Support\Facades\DB::table('failed_jobs')->orderBy('failed_at', 'desc')->get() 
+            : collect();
+
+        return view('admin.system-status', compact('pendingJobs', 'failedJobs'));
+    }
+
+    public function retryFailedJob($id)
+    {
+        \Illuminate\Support\Facades\Artisan::call('queue:retry', ['id' => $id]);
+        return redirect()->back()->with('success', 'Job berhasil dicoba kembali.');
+    }
+
+    public function forgetFailedJob($id)
+    {
+        \Illuminate\Support\Facades\Artisan::call('queue:forget', ['id' => $id]);
+        return redirect()->back()->with('success', 'Job berhasil dihapus.');
+    }
+
+    public function flushFailedJobs()
+    {
+        \Illuminate\Support\Facades\Artisan::call('queue:flush');
+        return redirect()->back()->with('success', 'Semua Job gagal berhasil dibersihkan.');
+    }
 }

@@ -130,8 +130,14 @@
                 </div>
                 <div class="w-full overflow-hidden">
                     <p class="text-xs sm:text-sm text-slate-500 font-medium truncate">Absen Sekolah</p>
-                    <h3 class="text-sm sm:text-lg font-bold truncate {{ ($absenPribadi && $absenPribadi->waktu_datang) ? 'text-[#1e3a6e]' : 'text-slate-800' }}">
-                        {{ ($absenPribadi && $absenPribadi->waktu_datang) ? 'Sudah Hadir' : 'Belum Hadir' }}
+                    <h3 class="text-sm sm:text-lg font-bold truncate {{ ($absenPribadi && ($absenPribadi->waktu_datang || $absenPribadi->waktu_pulang)) ? 'text-emerald-600' : 'text-slate-800' }}">
+                        @if($absenPribadi && $absenPribadi->waktu_pulang)
+                            Sudah Pulang
+                        @elseif($absenPribadi && $absenPribadi->waktu_datang)
+                            Sudah Hadir
+                        @else
+                            Belum Hadir
+                        @endif
                     </h3>
                 </div>
             </div>

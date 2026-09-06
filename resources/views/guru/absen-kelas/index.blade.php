@@ -57,7 +57,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 @foreach($jadwals as $jadwal)
                 @php
-                    $rppOk = in_array($jadwal->rpp_status_kelas, ['pending', 'disetujui']);
+                    $rppOk = $jadwal->rpp_status_kelas === 'disetujui';
                 @endphp
                 <div class="bg-white rounded-2xl border {{ $jadwal->sudah_diabsen ? 'border-emerald-200' : 'border-slate-200' }} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
                     

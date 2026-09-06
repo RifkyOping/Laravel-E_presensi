@@ -1322,6 +1322,131 @@
             });
         }
     </script>
+
+    @if(Auth::check() && in_array(Auth::user()->role, ['guru', 'murid']))
+    <!-- Global GPS Background Script -->
+    <script>
+        window.globalGpsState = {
+            lat: sessionStorage.getItem('gps_lat') ? parseFloat(sessionStorage.getItem('gps_lat')) : null,
+            lng: sessionStorage.getItem('gps_lng') ? parseFloat(sessionStorage.getItem('gps_lng')) : null,
+            acc: sessionStorage.getItem('gps_acc') ? parseFloat(sessionStorage.getItem('gps_acc')) : null,
+            timestamp: sessionStorage.getItem('gps_ts') ? parseInt(sessionStorage.getItem('gps_ts')) : null,
+            ready: false,
+            errorTitle: 'GPS Belum Siap',
+            errorMsg: 'Sistem masih memuat lokasi GPS Anda. Pastikan izin lokasi aktif dan tunggu sebentar...'
+        };
+
+        if (window.globalGpsState.timestamp && (Date.now() - window.globalGpsState.timestamp) < 300000) {
+            window.globalGpsState.ready = true;
+            window.globalGpsState.errorTitle = '';
+            window.globalGpsState.errorMsg = 'Lokasi dipulihkan (akurasi ±' + Math.round(window.globalGpsState.acc) + 'm)';
+        }
+
+        function startBackgroundGps() {
+            if (!navigator.geolocation) {
+                window.globalGpsState.errorTitle = 'GPS Gagal';
+                window.globalGpsState.errorMsg = 'Browser tidak mendukung GPS';
+                window.dispatchEvent(new CustomEvent('gps-updated', { detail: window.globalGpsState }));
+                return;
+            }
+
+            let gpsSamples = [];
+            try {
+                const savedSamples = JSON.parse(sessionStorage.getItem('gps_samples'));
+                if (Array.isArray(savedSamples)) {
+                    gpsSamples = savedSamples.filter(s => (Date.now() - s.timestamp) < 120000);
+                }
+            } catch(e) {}
+
+            const REQUIRED_SAMPLES = 3;
+            
+            navigator.geolocation.watchPosition(
+                function(pos) {
+                    const simplePos = {
+                        coords: {
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude,
+                            accuracy: pos.coords.accuracy,
+                            altitude: pos.coords.altitude
+                        },
+                        timestamp: pos.timestamp || Date.now()
+                    };
+
+                    gpsSamples.push(simplePos);
+                    if (gpsSamples.length > 10) gpsSamples.shift();
+                    
+                    sessionStorage.setItem('gps_samples', JSON.stringify(gpsSamples));
+
+                    if (gpsSamples.length < REQUIRED_SAMPLES && !window.globalGpsState.ready) {
+                        window.globalGpsState.errorTitle = 'GPS Belum Siap';
+                        window.globalGpsState.errorMsg = 'Menguji keaslian sinyal GPS... (' + gpsSamples.length + '/' + REQUIRED_SAMPLES + ')';
+                        window.dispatchEvent(new CustomEvent('gps-updated', { detail: window.globalGpsState }));
+                    }
+
+                    if (gpsSamples.length >= REQUIRED_SAMPLES) {
+                        const latestPos = gpsSamples[gpsSamples.length - 1];
+                        const acc = latestPos.coords.accuracy;
+
+                        const isRoundAccuracy = Number.isInteger(acc) && (acc % 10 === 0 || acc === 65);
+                        const isMissingAltitude = (latestPos.coords.altitude === null || latestPos.coords.altitude === 0);
+                        const isTooPerfectAccuracy = acc < 5;
+
+                        if ((isRoundAccuracy && isMissingAltitude) || isTooPerfectAccuracy) {
+                            window.globalGpsState.ready = false;
+                            window.globalGpsState.errorTitle = 'Peringatan Keamanan!';
+                            window.globalGpsState.errorMsg = 'Terdeteksi penggunaan Aplikasi Fake GPS / Lokasi Palsu!';
+                            window.dispatchEvent(new CustomEvent('gps-updated', { detail: window.globalGpsState }));
+                            return;
+                        }
+
+                        const lats = gpsSamples.slice(-3).map(s => s.coords.latitude);
+                        const lngs = gpsSamples.slice(-3).map(s => s.coords.longitude);
+                        const accs = gpsSamples.slice(-3).map(s => s.coords.accuracy);
+
+                        const latDiff = Math.max(...lats) - Math.min(...lats);
+                        const lngDiff = Math.max(...lngs) - Math.min(...lngs);
+                        const accDiff = Math.max(...accs) - Math.min(...accs);
+
+                        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                        const timeSpan = (gpsSamples[gpsSamples.length - 1].timestamp - gpsSamples[gpsSamples.length - 3].timestamp);
+
+                        if (isMobile && timeSpan >= 1000 && latDiff === 0 && lngDiff === 0 && accDiff === 0) {
+                            window.globalGpsState.ready = false;
+                            window.globalGpsState.errorTitle = 'Peringatan Keamanan!';
+                            window.globalGpsState.errorMsg = 'Terdeteksi Lokasi Palsu (Sinyal GPS Statis Tanpa Jitter Satelit)!';
+                            window.dispatchEvent(new CustomEvent('gps-updated', { detail: window.globalGpsState }));
+                            return;
+                        }
+
+                        window.globalGpsState.lat = latestPos.coords.latitude;
+                        window.globalGpsState.lng = latestPos.coords.longitude;
+                        window.globalGpsState.acc = latestPos.coords.accuracy;
+                        window.globalGpsState.timestamp = latestPos.timestamp;
+                        window.globalGpsState.ready = true;
+                        window.globalGpsState.errorTitle = '';
+                        window.globalGpsState.errorMsg = 'Lokasi terverifikasi (akurasi ±' + Math.round(acc) + 'm)';
+                        
+                        sessionStorage.setItem('gps_lat', window.globalGpsState.lat);
+                        sessionStorage.setItem('gps_lng', window.globalGpsState.lng);
+                        sessionStorage.setItem('gps_acc', window.globalGpsState.acc);
+                        sessionStorage.setItem('gps_ts', window.globalGpsState.timestamp);
+
+                        window.dispatchEvent(new CustomEvent('gps-updated', { detail: window.globalGpsState }));
+                    }
+                },
+                function(err) {
+                    window.globalGpsState.ready = false;
+                    window.globalGpsState.errorTitle = err.code === 1 ? 'Izin Ditolak' : 'GPS Gagal';
+                    window.globalGpsState.errorMsg = err.code === 1 ? 'Izin lokasi ditolak. Tekan untuk mengizinkan.' : 'GPS tidak tersedia: ' + err.message;
+                    window.dispatchEvent(new CustomEvent('gps-updated', { detail: window.globalGpsState }));
+                },
+                { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+            );
+        }
+        
+        window.addEventListener('load', startBackgroundGps);
+    </script>
+    @endif
 </body>
 
 </html>

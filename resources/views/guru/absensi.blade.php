@@ -7,32 +7,6 @@
 <div class="space-y-6">
 
     {{-- Alerts --}}
-    @if(session('success'))
-    <div class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 font-semibold px-5 py-3.5 rounded-xl text-sm">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-        {{ session('success') }}
-    </div>
-    @endif
-    @if(session('error'))
-    <div class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 font-semibold px-5 py-3.5 rounded-xl text-sm mb-6">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        {{ session('error') }}
-    </div>
-    @endif
-
-    @if($errors->any())
-    <div class="bg-red-50 border border-red-200 text-red-800 px-5 py-4 rounded-xl text-sm mb-6">
-        <div class="flex items-center gap-3 font-semibold mb-2">
-            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Gagal Mengirim Pengajuan
-        </div>
-        <ul class="list-disc ml-8 text-red-700">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
 
     {{-- Tanggal --}}
     <div class="relative overflow-hidden bg-[#1e3a6e] rounded-2xl px-5 py-5 sm:px-8 sm:py-6 shadow-xl"
@@ -155,18 +129,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         {{-- Datang --}}
+        @if(!$absensiHariIni || !$absensiHariIni->waktu_datang)
         <div class="bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-5 hover:border-[#1e3a6e]/40 hover:shadow-md transition-all duration-200">
             <div>
                 <div class="w-8 h-1 rounded-full bg-[#1e3a6e] mb-4"></div>
                 <h3 class="text-lg font-black text-slate-800">Absen Datang</h3>
                 <p class="text-sm text-slate-500 mt-1">Catat kehadiran saat tiba di sekolah.</p>
             </div>
-            @if($absensiHariIni && $absensiHariIni->waktu_datang)
-            <div class="mt-auto flex items-center gap-3 bg-blue-50 border border-blue-100 text-[#1e3a6e] font-bold px-5 py-3.5 rounded-xl text-sm">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Sudah tercatat pukul {{ Carbon::parse($absensiHariIni->waktu_datang)->format('H:i') }} WITA
-            </div>
-            @else
             @php
                 $labelBatalkanGuru = $jenisMasaAktif === 'cuti' ? 'Batalkan Cuti & Hadir' : 'Batalkan Tugas & Hadir';
             @endphp
@@ -190,22 +159,17 @@
                     @endif
                 </button>
             </form>
-            @endif
         </div>
+        @endif
 
         {{-- Pulang --}}
+        @if(!$absensiHariIni || !$absensiHariIni->waktu_pulang)
         <div class="bg-white rounded-xl border border-slate-200 p-6 flex flex-col gap-5 hover:border-[#1e3a6e]/40 hover:shadow-md transition-all duration-200">
             <div>
                 <div class="w-8 h-1 rounded-full {{ $absensiHariIni && $absensiHariIni->waktu_pulang ? 'bg-green-500' : 'bg-[#1e3a6e]' }} mb-4"></div>
                 <h3 class="text-lg font-black text-slate-800">Absen Pulang</h3>
                 <p class="text-sm text-slate-500 mt-1">Catat kehadiran saat jam sekolah usai.</p>
             </div>
-            @if($absensiHariIni && $absensiHariIni->waktu_pulang)
-            <div class="mt-auto flex items-center gap-3 bg-blue-50 border border-blue-100 text-[#1e3a6e] font-bold px-5 py-3.5 rounded-xl text-sm">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Sudah tercatat pukul {{ Carbon::parse($absensiHariIni->waktu_pulang)->format('H:i') }} WITA
-            </div>
-            @else
             @php
                 $isCutiTugasApproved = $absensiHariIni && in_array($absensiHariIni->status, ['cuti', 'tugas', 'sakit', 'izin']) && $absensiHariIni->status_pengajuan === 'approved';
             @endphp
@@ -229,8 +193,8 @@
                     @endif
                 </button>
             </form>
-            @endif
         </div>
+        @endif
 
     </div>
     {{-- Opsi Cuti & Tugas --}}
@@ -473,157 +437,122 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 @endif
 
-/* ── GPS State & Jitter Detection ── */
+@if(session('success'))
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: '{{ session('success') }}',
+        confirmButtonText: 'Tutup',
+        confirmButtonColor: '#1e3a6e',
+        customClass: {
+            popup: 'rounded-2xl shadow-2xl border border-slate-100',
+            title: 'text-xl font-black text-slate-800',
+            confirmButton: 'font-bold rounded-xl px-8 py-2.5 shadow-sm hover:shadow-md transition-all'
+        }
+    });
+});
+@endif
+
+@if(session('error'))
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: '{{ session('error') }}',
+        confirmButtonText: 'Tutup',
+        confirmButtonColor: '#1e3a6e',
+        customClass: {
+            popup: 'rounded-2xl shadow-2xl border border-slate-100',
+            title: 'text-xl font-black text-slate-800',
+            confirmButton: 'font-bold rounded-xl px-8 py-2.5 shadow-sm hover:shadow-md transition-all'
+        }
+    });
+});
+@endif
+
+@if($errors->any())
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'error',
+        title: 'Terjadi Kesalahan!',
+        html: '<ul class="text-left list-disc ml-4 text-slate-600">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+        confirmButtonText: 'Tutup',
+        confirmButtonColor: '#1e3a6e',
+        customClass: {
+            popup: 'rounded-2xl shadow-2xl border border-slate-100',
+            title: 'text-xl font-black text-slate-800',
+            confirmButton: 'font-bold rounded-xl px-8 py-2.5 shadow-sm hover:shadow-md transition-all'
+        }
+    });
+});
+@endif
+
+/* ── Gunakan GPS Global State ── */
 let gpsLat = null;
 let gpsLng = null;
 let gpsAcc = null;
 let gpsTimestamp = null;
 let gpsReady = false;
-let watchId = null;
-let gpsSamples = [];
-const REQUIRED_SAMPLES = 3;
-
 let gpsErrorTitle = 'GPS Belum Siap';
 let gpsErrorMsg = 'Sistem masih memuat lokasi GPS Anda. Pastikan izin lokasi aktif dan tunggu sebentar...';
 
-function updateGpsStatus(ok, msg) {
-    const el   = document.getElementById('gps-status');
-    const spin = document.getElementById('gps-spinner');
-    const txt  = document.getElementById('gps-text');
-    txt.textContent = msg;
-    spin.classList.add('hidden');
-    el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm';
-    el.classList.add(ok ? '!bg-green-500/80' : '!bg-red-500/80');
-
-    if (!ok) {
-        if (msg.includes('Fake GPS') || msg.includes('Palsu') || msg.includes('Jitter')) {
-            gpsErrorTitle = 'Peringatan Keamanan!';
-            gpsErrorMsg   = 'Sistem mendeteksi indikasi penggunaan Fake GPS / Lokasi Palsu (sinyal GPS statis tanpa getaran alami satelit). Harap matikan aplikasi Fake GPS untuk absensi.';
-        } else if (msg.includes('ditolak')) {
-            gpsErrorTitle = 'Izin Ditolak';
-            gpsErrorMsg   = 'Anda belum mengizinkan akses lokasi. Jika menekan peringatan lokasi tidak memunculkan notifikasi izin, harap ubah izin situs secara manual di pengaturan browser Anda (Izinkan Lokasi).';
-        } else {
-            gpsErrorTitle = 'GPS Gagal';
-            gpsErrorMsg   = msg;
-        }
-    }
-}
-
-/* ── Ambil GPS otomatis dengan Deteksi Jitter ── */
-function requestGPS() {
+function renderGpsStatus(state) {
     const el   = document.getElementById('gps-status');
     const spin = document.getElementById('gps-spinner');
     const txt  = document.getElementById('gps-text');
     
-    // Reset state
-    gpsReady = false;
-    gpsSamples = [];
-    if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
+    gpsLat = state.lat;
+    gpsLng = state.lng;
+    gpsAcc = state.acc;
+    gpsTimestamp = state.timestamp;
+    gpsReady = state.ready;
+    gpsErrorTitle = state.errorTitle;
+    gpsErrorMsg = state.errorMsg;
+
+    txt.textContent = state.ready ? state.errorMsg : (state.errorMsg || 'Mendeteksi lokasi GPS...');
+    
+    if (state.ready) {
+        spin.classList.add('hidden');
+        el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm !bg-green-500/80';
+    } else {
+        if (state.errorTitle === 'GPS Belum Siap' || state.errorTitle === '') {
+            spin.classList.remove('hidden');
+            el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm';
+        } else {
+            spin.classList.add('hidden');
+            el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm !bg-red-500/80';
+        }
     }
-
-    // Set UI to loading
-    el.className = 'bg-white/20 hover:bg-white/30 transition text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer shadow-sm';
-    txt.textContent = 'Memindai sinyal satelit GPS...';
-    spin.classList.remove('hidden');
-
-    if (!navigator.geolocation) {
-        updateGpsStatus(false, '❌ Browser tidak mendukung GPS');
-        return;
-    }
-
-    let sampleTimeout = null;
-
-    function evaluateSamples(isTimeout = false) {
-        if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-            watchId = null;
-        }
-        if (sampleTimeout) clearTimeout(sampleTimeout);
-
-        if (gpsSamples.length === 0) {
-            updateGpsStatus(false, 'Gagal memperoleh koordinat GPS yang akurat.');
-            return;
-        }
-
-        const latestPos = gpsSamples[gpsSamples.length - 1];
-        const acc = latestPos.coords.accuracy;
-
-        // 1. Basic Heuristics
-        const isRoundAccuracy = Number.isInteger(acc) && (acc % 10 === 0 || acc === 65);
-        const isMissingAltitude = (latestPos.coords.altitude === null || latestPos.coords.altitude === 0);
-        const isTooPerfectAccuracy = acc < 5;
-
-        if ((isRoundAccuracy && isMissingAltitude) || isTooPerfectAccuracy) {
-            updateGpsStatus(false, 'Terdeteksi penggunaan Aplikasi Fake GPS / Lokasi Palsu!');
-            return;
-        }
-
-        // 2. Deteksi Jitter (Getaran Alami Satelit GPS Fisik)
-        if (gpsSamples.length >= 3) {
-            const lats = gpsSamples.map(s => s.coords.latitude);
-            const lngs = gpsSamples.map(s => s.coords.longitude);
-            const accs = gpsSamples.map(s => s.coords.accuracy);
-
-            const latDiff = Math.max(...lats) - Math.min(...lats);
-            const lngDiff = Math.max(...lngs) - Math.min(...lngs);
-            const accDiff = Math.max(...accs) - Math.min(...accs);
-
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            const timeSpan = (gpsSamples[gpsSamples.length - 1].timestamp - gpsSamples[0].timestamp);
-
-            // Pada perangkat HP asli, satelit fisik selalu menghasilkan getaran mikro desimal atau fluktuasi akurasi.
-            // Aplikasi Mock/Fake GPS di HP menginjeksi angka statis 100% kaku tanpa jitter sama sekali.
-            if (isMobile && timeSpan >= 1000 && latDiff === 0 && lngDiff === 0 && accDiff === 0) {
-                updateGpsStatus(false, 'Terdeteksi Lokasi Palsu (Sinyal GPS Statis Tanpa Jitter Satelit)!');
-                return;
-            }
-        }
-
-        gpsLat   = latestPos.coords.latitude;
-        gpsLng   = latestPos.coords.longitude;
-        gpsAcc   = latestPos.coords.accuracy;
-        gpsTimestamp = latestPos.timestamp;
-        gpsReady = true;
-        updateGpsStatus(true, 'Lokasi terverifikasi (akurasi ±' + Math.round(acc) + 'm)');
-    }
-
-    // Timeout pengaman (maksimal 15 detik untuk menyelesaikan sampling)
-    sampleTimeout = setTimeout(function() {
-        if (!gpsReady && gpsSamples.length > 0) {
-            evaluateSamples(true);
-        }
-    }, 15000);
-
-    watchId = navigator.geolocation.watchPosition(
-        function(pos) {
-            gpsSamples.push(pos);
-            const count = gpsSamples.length;
-
-            if (count < REQUIRED_SAMPLES) {
-                txt.textContent = 'Menguji keaslian sinyal GPS... (' + count + '/' + REQUIRED_SAMPLES + ')';
-            } else {
-                evaluateSamples();
-            }
-        },
-        function(err) {
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-            }
-            if (sampleTimeout) clearTimeout(sampleTimeout);
-
-            const msg = err.code === 1
-                ? 'Izin lokasi ditolak. Tekan untuk mengizinkan.'
-                : 'GPS tidak tersedia: ' + err.message;
-            updateGpsStatus(false, msg);
-        },
-        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
-    );
 }
 
-window.addEventListener('load', requestGPS);
+// Cek jika global gps state sudah ada nilainya (karena script background sudah berjalan)
+if (window.globalGpsState) {
+    renderGpsStatus(window.globalGpsState);
+}
+
+// Dengarkan update dari global background gps
+window.addEventListener('gps-updated', function(e) {
+    renderGpsStatus(e.detail);
+});
+
+// Fungsi onClick pada tombol GPS (opsional, untuk trigger manual jika diperlukan)
+function requestGPS() {
+    if (!window.globalGpsState) return;
+    
+    // Reset state and session storage
+    sessionStorage.removeItem('gps_samples');
+    sessionStorage.removeItem('gps_lat');
+    sessionStorage.removeItem('gps_lng');
+    sessionStorage.removeItem('gps_acc');
+    sessionStorage.removeItem('gps_ts');
+    
+    window.globalGpsState.ready = false;
+    window.globalGpsState.errorTitle = 'GPS Belum Siap';
+    window.globalGpsState.errorMsg = 'Sistem memulai ulang pemindaian GPS...';
+    renderGpsStatus(window.globalGpsState);
+}
+
 
 /* ── Submit dengan Konfirmasi (Sakit/Izin) ── */
 function confirmDatang(jenis) {

@@ -149,8 +149,14 @@ $dailyQuote = $quotes[date('z') % count($quotes)];
                         <span>Absen Sekolah</span>
                         <svg class="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-600 transition-colors hidden sm:inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </p>
-                    <h3 class="text-sm sm:text-lg font-bold truncate {{ ($absenSekolah && $absenSekolah->waktu_datang) ? 'text-emerald-600' : 'text-slate-800' }}">
-                        {{ ($absenSekolah && $absenSekolah->waktu_datang) ? 'Sudah Hadir' : 'Belum Hadir' }}
+                    <h3 class="text-sm sm:text-lg font-bold truncate {{ ($absenSekolah && ($absenSekolah->waktu_datang || $absenSekolah->waktu_pulang)) ? 'text-emerald-600' : 'text-slate-800' }}">
+                        @if($absenSekolah && $absenSekolah->waktu_pulang)
+                            Sudah Pulang
+                        @elseif($absenSekolah && $absenSekolah->waktu_datang)
+                            Sudah Hadir
+                        @else
+                            Belum Hadir
+                        @endif
                     </h3>
                 </div>
             </a>
