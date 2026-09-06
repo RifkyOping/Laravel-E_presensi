@@ -17,7 +17,7 @@ return new class extends Migration
         /** @var string|null $connection */
         $connection = config('webpush.database_connection');
         /** @var string $tableName */
-        $tableName = config('webpush.table_name');
+        $tableName = config('webpush.table_name') ?: 'push_subscriptions';
 
         Schema::connection($connection)->create($tableName, function (Blueprint $table) {
             $table->bigIncrements('id');
@@ -42,7 +42,7 @@ return new class extends Migration
         /** @var string|null $connection */
         $connection = config('webpush.database_connection');
         /** @var string $tableName */
-        $tableName = config('webpush.table_name');
+        $tableName = config('webpush.table_name') ?: 'push_subscriptions';
 
         Schema::connection($connection)->dropIfExists($tableName);
     }

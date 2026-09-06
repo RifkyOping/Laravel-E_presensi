@@ -46,6 +46,10 @@ class GuruPersetujuanAbsensiController extends Controller
             'is_notified'      => false,
         ]);
 
+        if ($pengajuan->user) {
+            $pengajuan->user->notify(new \App\Notifications\PengajuanAbsensiNotification('approved', $pengajuan->status));
+        }
+
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::parse($pengajuan->tanggal)->toDateString());
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::today()->toDateString());
 
@@ -72,6 +76,10 @@ class GuruPersetujuanAbsensiController extends Controller
             'alasan_ditolak'   => $request->alasan,
             'is_notified'      => false,
         ]);
+
+        if ($pengajuan->user) {
+            $pengajuan->user->notify(new \App\Notifications\PengajuanAbsensiNotification('rejected', $pengajuan->status));
+        }
 
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::parse($pengajuan->tanggal)->toDateString());
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::today()->toDateString());

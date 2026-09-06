@@ -230,6 +230,12 @@ class AbsensiSiswaController extends Controller
                 ]
             );
 
+            // Notify Teacher
+            $guru = \App\Models\User::find($request->guru_id);
+            if ($guru) {
+                $guru->notify(new \App\Notifications\PengajuanBaruNotification($user->name, $jenis));
+            }
+
             return back()->with('success', 'Pengajuan ' . ucfirst($jenis) . ' Anda sedang menunggu konfirmasi guru.');
         }
     }

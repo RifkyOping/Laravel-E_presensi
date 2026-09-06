@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         $connection = config('webpush.database_connection');
-        $table = config('webpush.table_name');
+        $table = config('webpush.table_name') ?: 'push_subscriptions';
 
         Schema::connection($connection)->table($table, function (Blueprint $blueprint): void {
             $blueprint->dropUnique(['endpoint']);
@@ -33,7 +33,7 @@ return new class extends Migration
     public function down(): void
     {
         $connection = config('webpush.database_connection');
-        $table = config('webpush.table_name');
+        $table = config('webpush.table_name') ?: 'push_subscriptions';
 
         Schema::connection($connection)->table($table, function (Blueprint $blueprint): void {
             $blueprint->dropUnique(['endpoint']);

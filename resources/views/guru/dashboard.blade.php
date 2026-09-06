@@ -94,6 +94,37 @@
                 if ('Notification' in window && Notification.permission !== 'granted') {
                     document.getElementById('btn-enable-notif').style.display = 'flex';
                 }
+
+                @if($pendingCount > 0 || $totalKelas > 0)
+                if (typeof Swal !== 'undefined' && !sessionStorage.getItem('dashboard_popup_shown')) {
+                    sessionStorage.setItem('dashboard_popup_shown', 'true');
+                    
+                    let htmlContent = '<div class="text-left mt-2 space-y-3">';
+                    @if($pendingCount > 0)
+                        htmlContent += '<div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm flex items-start gap-2"><svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Anda memiliki <strong>{{ $pendingCount }}</strong> pengajuan absen murid yang menunggu persetujuan.</span></div>';
+                    @endif
+                    @if($totalKelas > 0)
+                        htmlContent += '<div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-sm flex items-start gap-2"><svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>Anda memiliki <strong>{{ $totalKelas }}</strong> jadwal mengajar hari ini. Jangan lupa untuk mengisi presensi kelas!</span></div>';
+                    @endif
+                    htmlContent += '</div>';
+
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Tugas Hari Ini',
+                        html: htmlContent,
+                        showCancelButton: {{ $pendingCount > 0 ? 'true' : 'false' }},
+                        confirmButtonText: '{!! $pendingCount > 0 ? "Lihat Pengajuan" : "Siap, Laksanakan!" !!}',
+                        cancelButtonText: 'Tutup',
+                        confirmButtonColor: '#1e3a6e'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            @if($pendingCount > 0)
+                                window.location.href = "{{ route('guru.persetujuan-absensi') }}";
+                            @endif
+                        }
+                    });
+                }
+                @endif
             });
             function requestNotificationPermission() {
                 Notification.requestPermission().then(function(permission) {

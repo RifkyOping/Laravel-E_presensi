@@ -272,7 +272,7 @@
                 </div>
             </div>
             <div class="flex gap-2 w-full">
-                <button onclick="downloadPDFQR()" class="w-full justify-center bg-[#1e3a6e] hover:bg-[#162d57] text-white text-[11px] font-bold py-2.5 px-3 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                <button onclick="downloadJPGQR()" class="w-full justify-center bg-[#1e3a6e] hover:bg-[#162d57] text-white text-[11px] font-bold py-2.5 px-3 rounded-lg transition flex items-center gap-1.5 shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Download
                 </button>
@@ -743,8 +743,8 @@ function submitAbsen(type) {
     document.getElementById('form-' + type).submit();
 }
 
-/* ── QR Code PDF Download ── */
-function downloadPDFQR() {
+/* ── QR Code JPG Download ── */
+function downloadJPGQR() {
     const svg = document.querySelector('#qr-code-container svg');
     if (!svg) return alert('QR Code tidak ditemukan');
     
@@ -783,19 +783,16 @@ function downloadPDFQR() {
     `;
     document.body.appendChild(wrapper);
     
-    const opt = {
-        margin:       0,
-        filename:     'QR_Code_Absensi_{{ Auth::user()->nomor_induk }}.pdf',
-        image:        { type: 'jpeg', quality: 1 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
-    };
-    
-    // Generate and cleanup
-    html2pdf().set(opt).from(wrapper.querySelector('#pdf-wrapper')).save().then(() => {
+    // Generate JPG using html2canvas
+    html2canvas(wrapper.querySelector('#pdf-wrapper'), { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const link = document.createElement('a');
+        link.download = 'QR_Code_Absensi_{{ Auth::user()->nomor_induk }}.jpg';
+        link.href = imgData;
+        link.click();
         document.body.removeChild(wrapper);
     });
 }
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </x-app-layout>

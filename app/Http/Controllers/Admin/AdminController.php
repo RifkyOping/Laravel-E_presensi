@@ -1350,6 +1350,9 @@ class AdminController extends Controller
                 'status_pengajuan' => 'approved',
                 'is_notified' => false,
             ]);
+            if ($model->user) {
+                $model->user->notify(new \App\Notifications\PengajuanAbsensiNotification('approved', $model->status));
+            }
             \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::parse($model->tanggal)->toDateString());
             \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::today()->toDateString());
         } else {
@@ -1359,6 +1362,9 @@ class AdminController extends Controller
                 'status_pengajuan' => 'approved',
                 'is_notified' => false,
             ]);
+            if ($model->user) {
+                $model->user->notify(new \App\Notifications\PengajuanAbsensiNotification('approved', $model->status));
+            }
             \Illuminate\Support\Facades\Cache::forget('guru_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::parse($model->tanggal)->toDateString());
             \Illuminate\Support\Facades\Cache::forget('guru_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::today()->toDateString());
 
@@ -1408,6 +1414,10 @@ class AdminController extends Controller
             'alasan_ditolak' => $request->alasan,
             'is_notified' => false,
         ]);
+
+        if ($model->user) {
+            $model->user->notify(new \App\Notifications\PengajuanAbsensiNotification('rejected', $model->status));
+        }
         
         if ($type === 'murid') {
             \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $model->user_id . '_' . \Carbon\Carbon::parse($model->tanggal)->toDateString());

@@ -67,6 +67,8 @@
             
             // Suara Bip untuk feedback
             const beepAudio = new Audio('https://www.soundjay.com/buttons/sounds/beep-07a.mp3'); 
+            const successAudio = new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3');
+            const errorAudio = new Audio('https://www.soundjay.com/misc/sounds/fail-buzzer-01.mp3');
 
             function onScanSuccess(decodedText, decodedResult) {
                 if (isProcessing) return;
@@ -118,6 +120,12 @@
                         });
                     }
                     
+                    if (data.success) {
+                        successAudio.play().catch(e => console.log('Success audio play failed:', e));
+                    } else {
+                        errorAudio.play().catch(e => console.log('Error audio play failed:', e));
+                    }
+                    
                     // Jika sukses, ATAU jika mendapat response error logika dari server (seperti hari libur, sudah absen, dll)
                     if (data.success || status === 422 || status === 404 || status === 403) {
                         processedQRs.add(cacheKey);
@@ -132,6 +140,7 @@
                 .catch(error => {
                     console.error('Error:', error);
                     addLog(false, 'Terjadi kesalahan sistem saat memproses scan.', decodedText);
+                    errorAudio.play().catch(e => console.log('Error audio play failed:', e));
                     
                     setTimeout(() => {
                         isProcessing = false;
