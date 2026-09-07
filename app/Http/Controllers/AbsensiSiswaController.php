@@ -62,6 +62,16 @@ class AbsensiSiswaController extends Controller
             return compact('absensiHariIni', 'riwayat', 'sedangMasaSakitIzin', 'jenisMasaAktif', 'setting', 'semuaGuru');
         });
 
+        // Auto-cancel expired pending requests (tanggal_selesai < today)
+        AbsensiSiswa::where('user_id', $user->id)
+            ->where('status_pengajuan', 'pending')
+            ->whereDate('tanggal_selesai', '<', $today)
+            ->update([
+                'status_pengajuan' => 'rejected',
+                'alasan_ditolak'   => 'Dibatalkan otomatis oleh sistem karena tanggal pengajuan telah lewat dan belum disetujui guru.',
+                'is_notified'      => false,
+            ]);
+
         // Check for unread approval/rejection notifications
         $notif = AbsensiSiswa::where('user_id', $user->id)
             ->where('is_notified', false)
@@ -230,10 +240,19 @@ class AbsensiSiswaController extends Controller
                 ]
             );
 
+            // Clear Teacher's cache so they see the new request immediately
+            $todayStr = \Carbon\Carbon::today()->toDateString();
+            \Illuminate\Support\Facades\Cache::forget('guru_dashboard_' . $request->guru_id . '_' . $todayStr);
+            \Illuminate\Support\Facades\Cache::forget('guru_persetujuan_' . $request->guru_id);
+
             // Notify Teacher
             $guru = \App\Models\User::find($request->guru_id);
             if ($guru) {
-                $guru->notify(new \App\Notifications\PengajuanBaruNotification($user->name, $jenis));
+                try {
+                    $guru->notify(new \App\Notifications\PengajuanBaruNotification($user->name, $jenis));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('WebPush Error (New Request): ' . $e->getMessage());
+                }
             }
 
             return back()->with('success', 'Pengajuan ' . ucfirst($jenis) . ' Anda sedang menunggu konfirmasi guru.');

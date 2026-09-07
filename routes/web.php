@@ -61,6 +61,42 @@ Route::get('/dashboard', function () {
 
 // Dashboard Murid
 Route::get('/murid/dashboard', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+    $today = \Carbon\Carbon::today();
+
+    // 1. Auto-cancel expired pending requests
+    \App\Models\AbsensiSiswa::where('user_id', $user->id)
+        ->where('status_pengajuan', 'pending')
+        ->whereDate('tanggal_selesai', '<', $today)
+        ->update([
+            'status_pengajuan' => 'rejected',
+            'alasan_ditolak'   => 'Dibatalkan otomatis oleh sistem karena tanggal pengajuan telah lewat dan belum disetujui guru.',
+            'is_notified'      => false,
+        ]);
+
+    // 2. Check for unread approval/rejection notifications
+    $notif = \App\Models\AbsensiSiswa::where('user_id', $user->id)
+        ->where('is_notified', false)
+        ->whereNotNull('status_pengajuan')
+        ->where('status_pengajuan', '!=', 'pending')
+        ->orderByDesc('tanggal')
+        ->first();
+
+    if ($notif) {
+        $isApproved = $notif->status_pengajuan === 'approved';
+        session()->now('popup_notification', [
+            'title' => $isApproved ? 'Pengajuan Disetujui!' : 'Pengajuan Ditolak',
+            'text' => $isApproved
+                ? 'Pengajuan izin/sakit Anda telah disetujui.'
+                : 'Pengajuan izin/sakit Anda ditolak.' . ($notif->alasan_ditolak ? '<br><br><strong>Alasan:</strong> ' . e($notif->alasan_ditolak) : ''),
+            'icon' => $isApproved ? 'success' : 'warning'
+        ]);
+
+        \App\Models\AbsensiSiswa::where('user_id', $user->id)
+            ->where('is_notified', false)
+            ->update(['is_notified' => true]);
+    }
+
     return view('siswa.dashboard');
 })->middleware(['auth', 'verified'])->name('murid.dashboard');
 

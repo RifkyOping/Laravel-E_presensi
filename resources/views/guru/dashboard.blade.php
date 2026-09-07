@@ -95,10 +95,9 @@
                     document.getElementById('btn-enable-notif').style.display = 'flex';
                 }
 
-                @if($pendingCount > 0 || $totalKelas > 0)
-                if (typeof Swal !== 'undefined' && !sessionStorage.getItem('dashboard_popup_shown')) {
-                    sessionStorage.setItem('dashboard_popup_shown', 'true');
-                    
+                @if(($pendingCount > 0 || $totalKelas > 0) && !session('dashboard_popup_shown'))
+                @php session(['dashboard_popup_shown' => true]); @endphp
+                if (typeof Swal !== 'undefined') {
                     let htmlContent = '<div class="text-left mt-2 space-y-3">';
                     @if($pendingCount > 0)
                         htmlContent += '<div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm flex items-start gap-2"><svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Anda memiliki <strong>{{ $pendingCount }}</strong> pengajuan absen murid yang menunggu persetujuan.</span></div>';

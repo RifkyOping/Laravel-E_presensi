@@ -195,6 +195,7 @@
                             </div>
                         </div>
 
+
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="app-label">Latitude <span class="text-red-500">*</span></label>

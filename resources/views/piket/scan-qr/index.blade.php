@@ -26,7 +26,14 @@
                         </div>
                     </div>
 
-                    <div id="reader-container" class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative min-h-[300px] flex items-center justify-center">
+                    <div class="mb-4 flex justify-center" id="start-btn-container">
+                        <button id="btn-start-scan" class="bg-[#1e3a6e] hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-colors flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Mulai Scan
+                        </button>
+                    </div>
+
+                    <div id="reader-container" class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative min-h-[300px] flex items-center justify-center hidden">
                         <div id="reader" style="width: 100%;"></div>
                     </div>
                 </div>
@@ -64,11 +71,52 @@
             const processedQRs = new Set();
 
             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-            
-            // Suara Bip untuk feedback
-            const beepAudio = new Audio('https://www.soundjay.com/buttons/sounds/beep-07a.mp3'); 
-            const successAudio = new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3');
-            const errorAudio = new Audio('https://www.soundjay.com/misc/sounds/fail-buzzer-01.mp3');
+            // Suara sintesis Web Audio API (Tidak butuh URL eksternal)
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioCtx = new AudioContext();
+
+            function playTone(freq, type, duration, startTime) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, startTime);
+                
+                // Volume diperbesar ke 1.0
+                gain.gain.setValueAtTime(1.0, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            }
+
+            const beepAudio = {
+                play: () => {
+                    playTone(880, 'square', 0.15, audioCtx.currentTime); // Lebih keras dan jelas
+                    return Promise.resolve();
+                },
+                pause: () => {},
+                currentTime: 0
+            };
+
+            const successAudio = {
+                play: () => {
+                    const t = audioCtx.currentTime;
+                    playTone(523.25, 'triangle', 0.15, t);      // Nada 1
+                    playTone(659.25, 'triangle', 0.3, t + 0.15); // Nada 2
+                    return Promise.resolve();
+                }
+            };
+
+            const errorAudio = {
+                play: () => {
+                    playTone(150, 'sawtooth', 0.3, audioCtx.currentTime);
+                    playTone(155, 'sawtooth', 0.3, audioCtx.currentTime);
+                    return Promise.resolve();
+                }
+            };
 
             function onScanSuccess(decodedText, decodedResult) {
                 if (isProcessing) return;
@@ -153,37 +201,45 @@
                 // Diabaikan saja karena failure ini terus berjalan selama mencari QR
             }
 
-            // Meminta izin kamera dan memulai scanning
-            Html5Qrcode.getCameras().then(devices => {
-                if (devices && devices.length) {
-                    let cameraId = devices[0].id;
-                    // Pilih kamera belakang jika memungkinkan
-                    for(let i=0; i<devices.length; i++) {
-                        if (devices[i].label.toLowerCase().includes('back') || devices[i].label.toLowerCase().includes('environment')) {
-                            cameraId = devices[i].id;
-                            break;
-                        }
-                    }
+            // Meminta izin kamera dan memulai scanning ketika tombol ditekan
+            document.getElementById('btn-start-scan').addEventListener('click', function() {
+                // Mainkan suara dummy sekilas untuk membuka "Audio Context" browser
+                beepAudio.play().then(() => { beepAudio.pause(); beepAudio.currentTime = 0; }).catch(e => console.log(e));
+                
+                document.getElementById('start-btn-container').style.display = 'none';
+                document.getElementById('reader-container').classList.remove('hidden');
 
-                    html5QrCode.start(
-                        cameraId, 
-                        config, 
-                        onScanSuccess, 
-                        onScanFailure
-                    )
-                    .then(() => {
-                        isScanning = true;
-                    })
-                    .catch(err => {
-                        console.error('Gagal memulai scanner:', err);
-                        alert("Gagal mengakses kamera. Pastikan Anda memberikan izin kamera.");
-                    });
-                } else {
-                    alert("Tidak ada kamera yang terdeteksi di perangkat ini.");
-                }
-            }).catch(err => {
-                console.error(err);
-                alert("Kesalahan saat mengecek ketersediaan kamera: " + err);
+                Html5Qrcode.getCameras().then(devices => {
+                    if (devices && devices.length) {
+                        let cameraId = devices[0].id;
+                        // Pilih kamera belakang jika memungkinkan
+                        for(let i=0; i<devices.length; i++) {
+                            if (devices[i].label.toLowerCase().includes('back') || devices[i].label.toLowerCase().includes('environment')) {
+                                cameraId = devices[i].id;
+                                break;
+                            }
+                        }
+
+                        html5QrCode.start(
+                            cameraId, 
+                            config, 
+                            onScanSuccess, 
+                            onScanFailure
+                        )
+                        .then(() => {
+                            isScanning = true;
+                        })
+                        .catch(err => {
+                            console.error('Gagal memulai scanner:', err);
+                            alert("Gagal mengakses kamera. Pastikan Anda memberikan izin kamera.");
+                        });
+                    } else {
+                        alert("Tidak ada kamera yang terdeteksi di perangkat ini.");
+                    }
+                }).catch(err => {
+                    console.error(err);
+                    alert("Kesalahan saat mengecek ketersediaan kamera: " + err);
+                });
             });
 
             // Helper untuk menambahkan log ke UI

@@ -47,7 +47,11 @@ class GuruPersetujuanAbsensiController extends Controller
         ]);
 
         if ($pengajuan->user) {
-            $pengajuan->user->notify(new \App\Notifications\PengajuanAbsensiNotification('approved', $pengajuan->status));
+            try {
+                $pengajuan->user->notify(new \App\Notifications\PengajuanAbsensiNotification('approved', $pengajuan->status));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('WebPush Error (Approve): ' . $e->getMessage());
+            }
         }
 
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::parse($pengajuan->tanggal)->toDateString());
@@ -78,7 +82,11 @@ class GuruPersetujuanAbsensiController extends Controller
         ]);
 
         if ($pengajuan->user) {
-            $pengajuan->user->notify(new \App\Notifications\PengajuanAbsensiNotification('rejected', $pengajuan->status));
+            try {
+                $pengajuan->user->notify(new \App\Notifications\PengajuanAbsensiNotification('rejected', $pengajuan->status));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('WebPush Error (Reject): ' . $e->getMessage());
+            }
         }
 
         \Illuminate\Support\Facades\Cache::forget('siswa_absensi_index_' . $pengajuan->user_id . '_' . \Carbon\Carbon::parse($pengajuan->tanggal)->toDateString());

@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
         // Langkah 3: Cek kunci perangkat — ambil fresh dari DB agar pasti akurat
         $freshDeviceId = DB::table('users')->where('id', $user->id)->value('device_id');
 
-        if (!empty($freshDeviceId) && $user->role !== 'admin') {
+        if (!empty($freshDeviceId) && $user->role !== 'admin' && !$user->is_piket_rpp) {
             // Akun sudah terikat ke perangkat tertentu.
             // Jika cookie di browser ini BERBEDA atau TIDAK ADA → TOLAK LOGIN
             if ($cookieDeviceId !== $freshDeviceId) {
@@ -71,8 +71,11 @@ class AuthenticatedSessionController extends Controller
             // Parameter: nama, nilai, menit, path, domain, secure, httpOnly
             $cookie = cookie('device_uuid', $newDeviceId, 60 * 24 * 365 * 10, '/', null, false, false);
         } else {
-            // Perbarui masa berlaku cookie agar tidak kedaluwarsa
-            $cookie = cookie('device_uuid', $freshDeviceId, 60 * 24 * 365 * 10, '/', null, false, false);
+            // Perbarui masa berlaku cookie agar tidak kedaluwarsa,
+            // HANYA JIKA cookie saat ini cocok dengan DB (bukan login hasil bypass).
+            if ($cookieDeviceId === $freshDeviceId) {
+                $cookie = cookie('device_uuid', $freshDeviceId, 60 * 24 * 365 * 10, '/', null, false, false);
+            }
         }
 
         // Update session token (untuk SingleSessionMiddleware)
@@ -90,7 +93,7 @@ class AuthenticatedSessionController extends Controller
             default      => redirect()->route('murid.dashboard'),
         };
 
-        return $response->withCookie($cookie);
+        return $cookie ? $response->withCookie($cookie) : $response;
     }
 
     /**

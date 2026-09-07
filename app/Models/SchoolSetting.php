@@ -23,6 +23,7 @@ class SchoolSetting extends Model
         'batas_pulang_cepat',
         'status_absen',
         'blok_jadwal_aktif',
+        'blokir_fake_gps',
     ];
 
     protected $casts = [
@@ -50,6 +51,7 @@ class SchoolSetting extends Model
             'batas_pulang_cepat' => '15:00:00',
             'status_absen' => 'auto',
             'blok_jadwal_aktif' => 'A',
+            'blokir_fake_gps' => true,
         ]);
     }
 

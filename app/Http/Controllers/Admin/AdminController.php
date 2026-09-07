@@ -1160,6 +1160,7 @@ class AdminController extends Controller
             'nama_sekolah' => $request->nama_sekolah,
             'tahun_ajaran' => $request->tahun_ajaran,
             'status_absen' => $request->status_absen,
+            'blokir_fake_gps' => $request->has('blokir_fake_gps'),
         ]);
 
         foreach ($request->jadwal as $hari => $data) {
