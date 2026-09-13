@@ -425,6 +425,125 @@
                 transform: translateX(0);
             }
         }
+
+        /* ── Custom SweetAlert2 ── */
+        .swal-popup-custom {
+            border-radius: 24px !important;
+            padding: 2rem 2rem 1.5rem !important;
+            box-shadow: 0 32px 64px rgba(0,0,0,.18) !important;
+            font-family: 'Inter', sans-serif !important;
+            border: 1px solid #f1f5f9 !important;
+            overflow: hidden !important;
+        }
+
+        .swal-success-popup .swal2-icon.swal2-success {
+            border-color: #1e3a6e !important;
+            color: #1e3a6e !important;
+        }
+
+        .swal-success-popup .swal2-success-ring {
+            border-color: rgba(30,58,110,.2) !important;
+        }
+
+        .swal-success-popup .swal2-success-line-long,
+        .swal-success-popup .swal2-success-line-tip {
+            background-color: #1e3a6e !important;
+        }
+
+        .swal-success-popup::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            border-radius: 24px 24px 0 0;
+            background: linear-gradient(90deg, #1e3a6e, #2d5099, #3b63c0);
+        }
+
+        .swal-title-custom {
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            color: #0f172a !important;
+            margin-bottom: .25rem !important;
+        }
+
+        .swal-text-custom {
+            font-size: .875rem !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
+            line-height: 1.6 !important;
+        }
+
+        .swal-progress-bar {
+            background: linear-gradient(90deg, #1e3a6e, #2d5099) !important;
+            height: 4px !important;
+        }
+
+        .swal2-timer-progress-bar-container {
+            height: 4px !important;
+            bottom: 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .swal-actions-custom {
+            gap: .75rem !important;
+            margin-top: 1.25rem !important;
+        }
+
+        .swal-btn-primary {
+            background: linear-gradient(135deg, #1e3a6e 0%, #2d5099 100%) !important;
+            color: #fff !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: .65rem 1.5rem !important;
+            font-weight: 700 !important;
+            font-size: .875rem !important;
+            cursor: pointer !important;
+            transition: all .2s !important;
+            box-shadow: 0 4px 12px rgba(30,58,110,.3) !important;
+        }
+
+        .swal-btn-primary:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 18px rgba(30,58,110,.4) !important;
+        }
+
+        .swal-btn-danger {
+            background: #ef4444 !important;
+            color: #fff !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: .65rem 1.5rem !important;
+            font-weight: 700 !important;
+            font-size: .875rem !important;
+            cursor: pointer !important;
+            transition: all .2s !important;
+            box-shadow: 0 4px 12px rgba(239,68,68,.3) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: .4rem !important;
+        }
+
+        .swal-btn-danger:hover {
+            background: #dc2626 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 18px rgba(239,68,68,.4) !important;
+        }
+
+        .swal-btn-cancel {
+            background: #f1f5f9 !important;
+            color: #475569 !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            padding: .65rem 1.5rem !important;
+            font-weight: 700 !important;
+            font-size: .875rem !important;
+            cursor: pointer !important;
+            transition: all .2s !important;
+        }
+
+        .swal-btn-cancel:hover {
+            background: #e2e8f0 !important;
+        }
     </style>
 </head>
 
@@ -1102,6 +1221,17 @@
                 loader.style.opacity = '1';
             }
         });
+
+        // Sembunyikan loader jika halaman dipulihkan dari bfcache (tombol back)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                const loader = document.getElementById('global-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }
+        });
     </script>
 
     {{-- Script Pull to Refresh --}}
@@ -1420,6 +1550,19 @@
             navigator.geolocation.watchPosition(
                 function(pos) {
                     const acc = pos.coords.accuracy;
+                    
+                    // Frontend Fake GPS Validation
+                    if (window.blokirFakeGps) {
+                        const isRoundAccuracy = (Math.floor(acc) === acc && (acc % 10 === 0 || acc === 65));
+                        if (isRoundAccuracy || acc < 5) {
+                            window.globalGpsState.ready = false;
+                            window.globalGpsState.errorTitle = 'Peringatan Fake GPS';
+                            window.globalGpsState.errorMsg = 'Sistem mendeteksi penggunaan lokasi palsu/Fake GPS. Harap matikan aplikasi Fake GPS Anda.';
+                            window.dispatchEvent(new CustomEvent('gps-updated', { detail: window.globalGpsState }));
+                            return;
+                        }
+                    }
+
                     window.globalGpsState.lat = pos.coords.latitude;
                     window.globalGpsState.lng = pos.coords.longitude;
                     window.globalGpsState.acc = acc;

@@ -8,6 +8,16 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    @if (session('error'))
+        <div class="mb-4 flex items-center gap-2 text-red-600 font-semibold text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
+
     <form id="form-login" method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
 
@@ -86,9 +96,16 @@
 
         <!-- Tombol Login -->
         <div class="pt-6 space-y-4">
-            <button type="submit"
-                class="w-full flex justify-center items-center bg-gradient-to-r from-[#24417c] to-blue-600 text-white font-bold text-lg px-6 py-3.5 rounded-xl border border-blue-400 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group">
-                <span class="relative z-10">{{ __('Masuk Sekarang') }}</span>
+            <button id="btn-login" type="submit"
+                class="w-full flex justify-center items-center bg-gradient-to-r from-[#24417c] to-blue-600 text-white font-bold text-lg px-6 py-3.5 rounded-xl border border-blue-400 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none">
+                <span id="btn-login-text" class="relative z-10">{{ __('Masuk Sekarang') }}</span>
+                <span id="btn-login-loading" class="relative z-10 hidden items-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Memverifikasi...
+                </span>
                 <div
                     class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out pointer-events-none">
                 </div>
@@ -108,17 +125,18 @@
     </form>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const datalist = document.getElementById('saved_nomor_induk');
-            const form = document.getElementById('form-login');
+        document.addEventListener('DOMContentLoaded', function () {
+            const datalist   = document.getElementById('saved_nomor_induk');
+            const form       = document.getElementById('form-login');
             const inputNomor = document.getElementById('nomor_induk');
+            const btnLogin   = document.getElementById('btn-login');
+            const btnText    = document.getElementById('btn-login-text');
+            const btnLoading = document.getElementById('btn-login-loading');
 
-            // 1. Muat riwayat NIS/NIP/NISN yang tersimpan
+            // ── 1. Muat riwayat NIS/NIP/NISN yang tersimpan ──────────────────
             let savedLogins = [];
             try {
                 savedLogins = JSON.parse(localStorage.getItem('riwayat_login_nomor') || '[]');
-                
-                // Tampilkan ke datalist
                 savedLogins.forEach(nomor => {
                     let option = document.createElement('option');
                     option.value = nomor;
@@ -128,28 +146,27 @@
                 console.error('Local storage error:', e);
             }
 
-            // 2. Simpan input saat tombol Masuk (submit) ditekan
+            // ── 2. Saat form di-submit ────────────────────────────────────────
             if (form) {
-                form.addEventListener('submit', function() {
+                form.addEventListener('submit', function (e) {
+                    // Simpan riwayat nomor induk ke localStorage
                     try {
                         const currentVal = inputNomor.value.trim();
                         if (currentVal) {
-                            // Hapus jika sudah ada (agar nanti bisa ditaruh di urutan pertama)
                             savedLogins = savedLogins.filter(n => n !== currentVal);
-                            
-                            // Tambahkan di awal
                             savedLogins.unshift(currentVal);
-                            
-                            // Batasi maksimal 5 nomor saja yang disimpan
-                            if (savedLogins.length > 5) {
-                                savedLogins = savedLogins.slice(0, 5);
-                            }
-                            
+                            if (savedLogins.length > 5) savedLogins = savedLogins.slice(0, 5);
                             localStorage.setItem('riwayat_login_nomor', JSON.stringify(savedLogins));
                         }
                     } catch (e) {
                         console.error('Error saving login history:', e);
                     }
+
+                    // Tampilkan loading state
+                    btnText.classList.add('hidden');
+                    btnLoading.classList.remove('hidden');
+                    btnLoading.classList.add('flex');
+                    btnLogin.disabled = true;
                 });
             }
         });

@@ -110,6 +110,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+    // WebAuthn
+    Route::get('/webauthn/register',           [\App\Http\Controllers\Auth\WebAuthnController::class, 'registerPage'])->name('webauthn.register');
+    Route::get('/webauthn/register/options',   [\App\Http\Controllers\Auth\WebAuthnController::class, 'registerOptions'])->name('webauthn.register.options');
+    Route::post('/webauthn/register/verify',   [\App\Http\Controllers\Auth\WebAuthnController::class, 'registerVerify'])->name('webauthn.register.verify');
+    Route::get('/webauthn/authenticate',       [\App\Http\Controllers\Auth\WebAuthnController::class, 'authenticatePage'])->name('webauthn.authenticate');
+    Route::get('/webauthn/authenticate/options', [\App\Http\Controllers\Auth\WebAuthnController::class, 'authenticateOptions'])->name('webauthn.authenticate.options');
+    Route::post('/webauthn/authenticate/verify', [\App\Http\Controllers\Auth\WebAuthnController::class, 'authenticateVerify'])->name('webauthn.authenticate.verify');
+
     // Murid - Absensi
     Route::get('/absensi', [AbsensiSiswaController::class, 'index'])->name('absensi');
     Route::post('/absensi/datang', [AbsensiSiswaController::class, 'absenDatang'])->name('absensi.datang');
@@ -241,10 +249,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Monitoring
     Route::get('/absensi-guru', [AdminController::class, 'absensiGuru'])->name('absensi-guru');
     Route::get('/absensi-guru/export', [AdminController::class, 'exportAbsensiGuru'])->name('absensi-guru.export');
+    Route::post('/absensi-guru/store', [AdminController::class, 'storeAbsensiGuru'])->name('absensi-guru.store');
+    Route::get('/absensi-guru/{absensi}/edit', [AdminController::class, 'editAbsensiGuru'])->name('absensi-guru.edit');
+    Route::put('/absensi-guru/{absensi}', [AdminController::class, 'updateAbsensiGuru'])->name('absensi-guru.update');
+    Route::delete('/absensi-guru/{absensi}', [AdminController::class, 'destroyAbsensiGuru'])->name('absensi-guru.destroy');
     Route::get('/aktivitas-guru', [AdminController::class, 'aktivitasGuru'])->name('aktivitas-guru');
     Route::get('/aktivitas-guru/export', [AdminController::class, 'exportAktivitasGuru'])->name('aktivitas-guru.export');
     Route::get('/absensi-siswa', [AdminController::class, 'absensiSiswa'])->name('absensi-siswa');
     Route::get('/absensi-siswa/export', [AdminController::class, 'exportAbsensiSiswa'])->name('absensi-siswa.export');
+    Route::post('/absensi-siswa/store', [AdminController::class, 'storeAbsensiSiswa'])->name('absensi-siswa.store');
+    Route::get('/absensi-siswa/{absensi}/edit', [AdminController::class, 'editAbsensiSiswa'])->name('absensi-siswa.edit');
+    Route::put('/absensi-siswa/{absensi}', [AdminController::class, 'updateAbsensiSiswa'])->name('absensi-siswa.update');
+    Route::delete('/absensi-siswa/{absensi}', [AdminController::class, 'destroyAbsensiSiswa'])->name('absensi-siswa.destroy');
 
     // Rekap Absensi Kelas (absensi siswa yang diinput guru)
     Route::get('/rekap-absensi-kelas', [AdminController::class, 'rekapAbsensiKelas'])->name('rekap-absensi-kelas');

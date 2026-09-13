@@ -240,7 +240,12 @@
                         {{ strtoupper(substr($s->name, 0, 1)) }}
                     </div>
                     <p class="font-semibold text-slate-700 text-sm truncate flex-1">{{ $s->name }}</p>
-                    <span class="app-badge b-slate">Belum</span>
+                    <button type="button"
+                        onclick="openCreateSiswa({{ $s->id }}, '{{ addslashes($s->name) }}', '{{ $tanggal->format('Y-m-d') }}')"
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#1e3a6e] text-xs font-bold border border-blue-100 transition-colors flex-shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Absen Manual
+                    </button>
                 </div>
                 @empty
                 <p class="px-5 py-8 text-center text-[#1e3a6e] font-semibold text-sm">Semua murid sudah absen!</p>
@@ -259,7 +264,7 @@
             <table class="w-full app-tbl">
                 <thead><tr>
                     <th class="text-center">Tanggal</th><th class="text-left">Nama</th><th class="text-center">Waktu Datang</th>
-                    <th class="text-center">Waktu Pulang</th><th class="text-center">Status</th>
+                    <th class="text-center">Waktu Pulang</th><th class="text-center">Status</th><th class="text-center">Aksi</th>
                 </tr></thead>
                 <tbody>
                     @forelse($riwayat as $r)
@@ -300,9 +305,29 @@
                                 @endif
                             </div>
                         </td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button type="button"
+                                    onclick="openEditSiswa({{ $r->id }})"
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#1e3a6e] text-xs font-bold border border-blue-100 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Edit
+                                </button>
+                                <form method="POST" action="{{ route('admin.absensi-siswa.destroy', $r->id) }}" class="form-hapus-siswa" id="form-hapus-siswa-{{ $r->id }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button"
+                                        onclick="hapusAbsensiSiswa({{ $r->id }})"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold border border-red-100 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="text-center py-8 text-slate-400">Belum ada riwayat absensi murid.</td></tr>
+                    <tr><td colspan="6" class="text-center py-8 text-slate-400">Belum ada riwayat absensi murid.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -313,9 +338,192 @@
     </div>
 
 </div>
+
+{{-- ── MODAL EDIT ABSENSI SISWA ── --}}
+<div id="modal-edit-siswa"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+     style="background:rgba(15,23,42,.55);backdrop-filter:blur(6px);display:none">
+    <div class="bg-white rounded-3xl shadow-[0_32px_64px_rgba(0,0,0,.22)] w-full max-w-md
+                transform transition-all duration-300 scale-95 opacity-0"
+         id="modal-edit-siswa-card">
+
+        {{-- Gradient Header --}}
+        <div class="px-6 py-5 rounded-t-3xl flex items-center justify-between"
+             style="background:linear-gradient(135deg,#1e3a6e 0%,#2d5099 100%)">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-sm leading-tight">Edit Absensi Murid</h3>
+                    <p id="modal-siswa-nama" class="text-blue-200 text-xs mt-0.5 font-medium"></p>
+                </div>
+            </div>
+            <button onclick="closeEditSiswa()"
+                class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        {{-- Form Body --}}
+        <form id="form-edit-siswa" method="POST" action="" class="p-6 space-y-4">
+            @csrf
+            @method('PUT')
+            <input type="hidden" id="edit-siswa-id" value="">
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Waktu Datang</label>
+                    <div class="flex gap-1.5">
+                        <input type="time" id="edit-siswa-datang" name="waktu_datang" class="app-input flex-1 min-w-0 rounded-xl">
+                        <button type="button" onclick="document.getElementById('edit-siswa-datang').value=''"
+                            title="Kosongkan"
+                            class="flex-shrink-0 w-8 h-[42px] flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all text-xs">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Waktu Pulang</label>
+                    <div class="flex gap-1.5">
+                        <input type="time" id="edit-siswa-pulang" name="waktu_pulang" class="app-input flex-1 min-w-0 rounded-xl">
+                        <button type="button" onclick="document.getElementById('edit-siswa-pulang').value=''"
+                            title="Kosongkan"
+                            class="flex-shrink-0 w-8 h-[42px] flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-all text-xs">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Status Kehadiran</label>
+                <select id="edit-siswa-status" name="status" class="app-input w-full rounded-xl">
+                    <option value="">— Kosong / Belum Absen —</option>
+                    <option value="hadir">Hadir</option>
+                    <option value="izin">Izin</option>
+                    <option value="sakit">Sakit</option>
+                    <option value="alpa">Alpa</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Kategori</label>
+                <select id="edit-siswa-kategori" name="kategori" class="app-input w-full rounded-xl">
+                    <option value="">— Tidak Ada —</option>
+                    <option value="tepat_waktu">Tepat Waktu</option>
+                    <option value="terlambat">Terlambat</option>
+                    <option value="bolos">Bolos</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Keterangan</label>
+                <textarea id="edit-siswa-keterangan" name="keterangan" rows="2"
+                    class="app-input w-full resize-none rounded-xl" placeholder="(opsional)"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeEditSiswa()"
+                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                    style="background:linear-gradient(135deg,#1e3a6e 0%,#2d5099 100%)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 </x-app-layout>
 
+{{-- ── MODAL BUAT ABSENSI SISWA (MANUAL) ── --}}
+<div id="modal-create-siswa"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+     style="background:rgba(15,23,42,.55);backdrop-filter:blur(6px);display:none">
+    <div class="bg-white rounded-3xl shadow-[0_32px_64px_rgba(0,0,0,.22)] w-full max-w-md
+                transform transition-all duration-300 scale-95 opacity-0"
+         id="modal-create-siswa-card">
+
+        {{-- Gradient Header --}}
+        <div class="px-6 py-5 rounded-t-3xl flex items-center justify-between"
+             style="background:linear-gradient(135deg,#1e3a6e 0%,#2d5099 100%)">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-sm leading-tight">Absen Manual Murid</h3>
+                    <p id="modal-create-siswa-nama" class="text-blue-200 text-xs mt-0.5 font-medium"></p>
+                </div>
+            </div>
+            <button onclick="closeCreateSiswa()"
+                class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        {{-- Form Body --}}
+        <form id="form-create-siswa" method="POST" action="{{ route('admin.absensi-siswa.store') }}" class="p-6 space-y-4">
+            @csrf
+            <input type="hidden" id="create-siswa-user-id" name="user_id" value="">
+            <input type="hidden" id="create-siswa-tanggal" name="tanggal" value="">
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Waktu Datang</label>
+                    <input type="time" id="create-siswa-datang" name="waktu_datang" class="app-input w-full rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Waktu Pulang</label>
+                    <input type="time" id="create-siswa-pulang" name="waktu_pulang" class="app-input w-full rounded-xl">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Status Kehadiran <span class="text-red-400">*</span></label>
+                <select id="create-siswa-status" name="status" class="app-input w-full rounded-xl" required>
+                    <option value="">— Pilih Status —</option>
+                    <option value="hadir">Hadir</option>
+                    <option value="izin">Izin</option>
+                    <option value="sakit">Sakit</option>
+                    <option value="alpa">Alpa</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-1.5">Keterangan</label>
+                <textarea id="create-siswa-keterangan" name="keterangan" rows="2"
+                    class="app-input w-full resize-none rounded-xl" placeholder="(opsional)"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeCreateSiswa()"
+                    class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                    style="background:linear-gradient(135deg,#1e3a6e 0%,#2d5099 100%)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    Simpan Absensi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // ── Filter & Fetch ──
     let searchTimeout;
     function debounceFetch() {
         clearTimeout(searchTimeout);
@@ -377,4 +585,139 @@
             });
         }
     });
+
+    // ── Modal Create Siswa (Absen Manual) ──
+    function openCreateSiswa(userId, nama, tanggal) {
+        document.getElementById('create-siswa-user-id').value = userId;
+        document.getElementById('create-siswa-tanggal').value = tanggal;
+        document.getElementById('modal-create-siswa-nama').textContent = nama + ' · ' + tanggal;
+        document.getElementById('create-siswa-datang').value = '';
+        document.getElementById('create-siswa-pulang').value = '';
+        document.getElementById('create-siswa-status').value = '';
+        document.getElementById('create-siswa-keterangan').value = '';
+        const overlay = document.getElementById('modal-create-siswa');
+        const card = document.getElementById('modal-create-siswa-card');
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => {
+            card.classList.remove('scale-95','opacity-0');
+            card.classList.add('scale-100','opacity-100');
+        });
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCreateSiswa() {
+        const overlay = document.getElementById('modal-create-siswa');
+        const card = document.getElementById('modal-create-siswa-card');
+        card.classList.remove('scale-100','opacity-100');
+        card.classList.add('scale-95','opacity-0');
+        setTimeout(() => { overlay.style.display = 'none'; }, 250);
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('modal-create-siswa').addEventListener('click', function(e) {
+        if (e.target === this) closeCreateSiswa();
+    });
+
+    // ── Modal Edit Siswa ──
+    function openEditSiswa(id) {
+        fetch(`/admin/absensi-siswa/${id}/edit`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('edit-siswa-id').value = data.id;
+            document.getElementById('modal-siswa-nama').textContent = data.nama + ' · ' + data.tanggal;
+            document.getElementById('edit-siswa-datang').value  = data.waktu_datang  ?? '';
+            document.getElementById('edit-siswa-pulang').value  = data.waktu_pulang  ?? '';
+            document.getElementById('edit-siswa-status').value  = data.status        ?? 'hadir';
+            document.getElementById('edit-siswa-kategori').value = data.kategori     ?? '';
+            document.getElementById('edit-siswa-keterangan').value = data.keterangan ?? '';
+
+            document.getElementById('form-edit-siswa').action = `/admin/absensi-siswa/${data.id}`;
+            const overlay = document.getElementById('modal-edit-siswa');
+            const card = document.getElementById('modal-edit-siswa-card');
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+                card.classList.remove('scale-95','opacity-0');
+                card.classList.add('scale-100','opacity-100');
+            });
+            document.body.style.overflow = 'hidden';
+        })
+        .catch(() => Swal.fire('Error', 'Gagal memuat data absensi.', 'error'));
+    }
+
+    function closeEditSiswa() {
+        const overlay = document.getElementById('modal-edit-siswa');
+        const card = document.getElementById('modal-edit-siswa-card');
+        card.classList.remove('scale-100','opacity-100');
+        card.classList.add('scale-95','opacity-0');
+        setTimeout(() => { overlay.style.display = 'none'; }, 250);
+        document.body.style.overflow = '';
+    }
+
+    // Tutup modal jika klik backdrop
+    document.getElementById('modal-edit-siswa').addEventListener('click', function(e) {
+        if (e.target === this) closeEditSiswa();
+    });
+
+    // ── Hapus Absensi Siswa ──
+    function hapusAbsensiSiswa(id) {
+        Swal.fire({
+            title: 'Hapus Absensi?',
+            text: 'Data yang dihapus tidak dapat dikembalikan.',
+            icon: 'warning',
+            iconColor: '#ef4444',
+            showCancelButton: true,
+            confirmButtonText: '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            buttonsStyling: false,
+            customClass: {
+                popup: 'swal-popup-custom',
+                title: 'swal-title-custom',
+                htmlContainer: 'swal-text-custom',
+                confirmButton: 'swal-btn-danger',
+                cancelButton: 'swal-btn-cancel',
+                actions: 'swal-actions-custom',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('form-hapus-siswa-' + id).submit();
+            }
+        });
+    }
+
+    // ── Notifikasi session ──
+    @if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil Disimpan!',
+        text: '{{ session('success') }}',
+        timer: 3500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        toast: false,
+        buttonsStyling: false,
+        customClass: {
+            popup: 'swal-popup-custom swal-success-popup',
+            title: 'swal-title-custom',
+            htmlContainer: 'swal-text-custom',
+            timerProgressBar: 'swal-progress-bar',
+        },
+    });
+    @endif
+    @if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Terjadi Kesalahan',
+        text: '{{ session('error') }}',
+        buttonsStyling: false,
+        customClass: {
+            popup: 'swal-popup-custom',
+            title: 'swal-title-custom',
+            htmlContainer: 'swal-text-custom',
+            confirmButton: 'swal-btn-primary',
+        },
+    });
+    @endif
 </script>

@@ -497,26 +497,43 @@
                         tableContainer.innerHTML = newTable.innerHTML;
                     }
 
-                    // Update form pencarian agar filter kelas muncul/hilang sesuai tab
+                    // Update form pencarian: HANYA perbarui dropdown kelas (jika ada perubahan tab),
+                    // JANGAN timpa seluruh form karena akan menghapus teks yang sedang diketik user.
                     const newForm = doc.getElementById('searchForm');
                     const oldForm = document.getElementById('searchForm');
                     if (newForm && oldForm) {
-                        // Simpan state fokus dan kursor input pencarian
-                        const oldSearchInput = oldForm.querySelector('#searchInput');
-                        const isFocused = document.activeElement === oldSearchInput;
-                        const selectionStart = oldSearchInput ? oldSearchInput.selectionStart : null;
-                        const selectionEnd = oldSearchInput ? oldSearchInput.selectionEnd : null;
+                        // Simpan nilai input search yang sedang aktif
+                        const currentSearchValue = oldForm.querySelector('#searchInput')?.value ?? '';
 
-                        // Perbarui isi form
-                        oldForm.innerHTML = newForm.innerHTML;
+                        // Hanya update dropdown kelas jika ada perbedaan opsi (akibat pindah tab)
+                        const newSelect = newForm.querySelector('select[name="kelas_filter"]');
+                        const oldSelect = oldForm.querySelector('select[name="kelas_filter"]');
 
-                        // Kembalikan fokus jika sebelumnya sedang mengetik
-                        const newSearchInput = oldForm.querySelector('#searchInput');
-                        if (newSearchInput && isFocused) {
-                            newSearchInput.focus();
-                            try {
-                                newSearchInput.setSelectionRange(selectionStart, selectionEnd);
-                            } catch (e) {} // Abaikan jika tipe input tidak mendukung selectionRange
+                        if (newSelect && !oldSelect) {
+                            // Tambahkan dropdown kelas yang baru muncul
+                            const searchInput = oldForm.querySelector('#searchInput');
+                            if (searchInput) {
+                                oldForm.insertBefore(newSelect.cloneNode(true), searchInput);
+                            }
+                        } else if (!newSelect && oldSelect) {
+                            // Hapus dropdown kelas yang sudah tidak relevan
+                            oldSelect.remove();
+                        } else if (newSelect && oldSelect) {
+                            // Update isi dropdown kelas jika berbeda
+                            if (newSelect.innerHTML !== oldSelect.innerHTML) {
+                                oldSelect.innerHTML = newSelect.innerHTML;
+                            }
+                        }
+
+                        // Kembalikan nilai input search agar ketikan tidak terhapus
+                        const activeSearch = oldForm.querySelector('#searchInput');
+                        if (activeSearch && activeSearch.value !== currentSearchValue) {
+                            activeSearch.value = currentSearchValue;
+                        }
+
+                        // Pastikan input tetap fokus
+                        if (document.activeElement?.id === 'searchInput') {
+                            activeSearch?.focus();
                         }
                     }
 

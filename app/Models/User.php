@@ -27,6 +27,8 @@ class User extends Authenticatable
         'role',
         'session_token',
         'device_id',
+        'webauthn_public_key',
+        'webauthn_sign_count',
     ];
 
     /**  

@@ -230,6 +230,16 @@
                             </div>
                         </div>
 
+                        <div class="pt-3 pb-1 border-t border-slate-100 mt-4">
+                            <label class="app-label mb-2">Fitur Keamanan</label>
+                            <label class="relative inline-flex items-center cursor-pointer group">
+                                <input type="checkbox" name="blokir_fake_gps" value="1" class="sr-only peer" {{ $setting->blokir_fake_gps ? 'checked' : '' }}>
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1e3a6e] group-hover:bg-slate-300 peer-checked:group-hover:bg-blue-800"></div>
+                                <span class="ml-3 text-sm font-bold text-slate-700">Blokir Fake GPS / Lokasi Palsu</span>
+                            </label>
+                            <p class="text-[11px] text-slate-500 mt-1">Jika dinonaktifkan, siswa dan guru dapat menggunakan aplikasi mock location (Fake GPS) untuk absen.</p>
+                        </div>
+
                         {{-- Tombol ambil lokasi saat ini --}}
                         <div class="pt-1">
                             <button type="button" onclick="gunakanLokasiSaatIni()"

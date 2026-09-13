@@ -146,20 +146,22 @@ class AbsensiGuruController extends Controller
             $lng = (float) $request->longitude;
 
             // --- Server-side Fake GPS & Timestamp Validation ---
-            if ($request->filled('timestamp')) {
-                $clientTimestamp = (int) $request->input('timestamp'); // in milliseconds
-                $gpsTime = Carbon::createFromTimestampMs($clientTimestamp);
-                if (now()->diffInSeconds($gpsTime) > 300) { // Lebih dari 5 menit
-                    return back()->with('error', 'Waktu lokasi tidak valid atau kadaluarsa. Silakan refresh dan coba lagi.');
+            if ($setting->blokir_fake_gps) {
+                if ($request->filled('timestamp')) {
+                    $clientTimestamp = (int) $request->input('timestamp'); // in milliseconds
+                    $gpsTime = Carbon::createFromTimestampMs($clientTimestamp);
+                    if (now()->diffInSeconds($gpsTime) > 300) { // Lebih dari 5 menit
+                        return back()->with('error', 'Waktu lokasi tidak valid atau kadaluarsa. Silakan refresh dan coba lagi.');
+                    }
                 }
-            }
 
-            if ($request->filled('accuracy')) {
-                $acc = (float) $request->input('accuracy');
+                if ($request->filled('accuracy')) {
+                    $acc = (float) $request->input('accuracy');
 
-                $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
-                if ($isRoundAccuracy || $acc < 5) {
-                    return back()->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
+                    $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
+                    if ($isRoundAccuracy || $acc < 5) {
+                        return back()->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
+                    }
                 }
             }
 
@@ -277,20 +279,22 @@ class AbsensiGuruController extends Controller
         $lng = (float) $request->longitude;
 
         // --- Server-side Fake GPS & Timestamp Validation ---
-        if ($request->filled('timestamp')) {
-            $clientTimestamp = (int) $request->input('timestamp'); // in milliseconds
-            $gpsTime = Carbon::createFromTimestampMs($clientTimestamp);
-            if (now()->diffInSeconds($gpsTime) > 300) { // Lebih dari 5 menit
-                return back()->with('error', 'Waktu lokasi tidak valid atau kadaluarsa. Silakan refresh dan coba lagi.');
+        if ($setting->blokir_fake_gps) {
+            if ($request->filled('timestamp')) {
+                $clientTimestamp = (int) $request->input('timestamp'); // in milliseconds
+                $gpsTime = Carbon::createFromTimestampMs($clientTimestamp);
+                if (now()->diffInSeconds($gpsTime) > 300) { // Lebih dari 5 menit
+                    return back()->with('error', 'Waktu lokasi tidak valid atau kadaluarsa. Silakan refresh dan coba lagi.');
+                }
             }
-        }
 
-        if ($request->filled('accuracy')) {
-            $acc = (float) $request->input('accuracy');
+            if ($request->filled('accuracy')) {
+                $acc = (float) $request->input('accuracy');
 
-            $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
-            if ($isRoundAccuracy || $acc < 5) {
-                return back()->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
+                $isRoundAccuracy = floor($acc) == $acc && ($acc % 10 === 0 || $acc == 65);
+                if ($isRoundAccuracy || $acc < 5) {
+                    return back()->with('error', 'Terdeteksi manipulasi lokasi (Fake GPS) dari server.');
+                }
             }
         }
 
