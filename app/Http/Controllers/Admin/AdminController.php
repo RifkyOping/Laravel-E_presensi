@@ -215,7 +215,7 @@ class AdminController extends Controller
             'name'        => 'required|string|max:255',
             'email'       => 'nullable|email|unique:users,email',
             'password'    => 'required|min:6|confirmed',
-            'role'        => 'required|in:murid,guru,admin,pengawas',
+            'role'        => 'required|in:murid,guru,staf,admin,pengawas',
         ];
 
         if ($request->role === 'murid') {
@@ -464,7 +464,7 @@ class AdminController extends Controller
                     continue;
                 }
 
-                if (!in_array($role, ['murid', 'guru', 'admin', 'pengawas'])) {
+                if (!in_array($role, ['murid', 'guru', 'staf', 'admin', 'pengawas'])) {
                     $gagalRows[] = [
                         'baris' => $rowNum,
                         'nama' => $name,
@@ -561,7 +561,7 @@ class AdminController extends Controller
         $rules = [
             'name'        => 'required|string|max:255',
             'email'       => 'nullable|email|unique:users,email,' . $user->id,
-            'role'        => 'required|in:murid,guru,admin,pengawas',
+            'role'        => 'required|in:murid,guru,staf,admin,pengawas',
             'password'    => 'nullable|min:6|confirmed',
         ];
 
@@ -706,7 +706,7 @@ class AdminController extends Controller
             'users.*.nomor_induk' => 'nullable|string|max:255',
             'users.*.nis' => 'nullable|string|max:255',
             'users.*.email' => 'nullable|email',
-            'users.*.role' => 'required|in:murid,guru,admin,pengawas',
+            'users.*.role' => 'required|in:murid,guru,staf,admin,pengawas',
             'users.*.kelas_id' => 'nullable|exists:kelas,id',
             'users.*.jenis_kelamin' => 'nullable|in:L,P',
             'users.*.tempat_lahir' => 'nullable|string|max:100',

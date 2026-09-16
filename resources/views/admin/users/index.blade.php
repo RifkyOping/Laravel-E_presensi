@@ -141,7 +141,7 @@
                 style="display: none;">
                 {{-- Tabs --}}
                 <div class="flex flex-wrap gap-2">
-                    @foreach (['semua' => 'Semua', 'murid' => 'Murid', 'guru' => 'Guru', 'pengawas' => 'Pengawas', 'admin' => 'Admin'] as $key => $label)
+                    @foreach (['semua' => 'Semua', 'murid' => 'Murid', 'guru' => 'Guru', 'staf' => 'Staf', 'pengawas' => 'Pengawas', 'admin' => 'Admin'] as $key => $label)
                         <a href="{{ route('admin.users', ['tab' => $key, 'search' => request('search')]) }}"
                             data-tab="{{ $key }}"
                             class="role-tab px-4 py-1.5 rounded-lg font-semibold text-sm border transition duration-200
@@ -305,6 +305,7 @@
                                         $rc = match ($user->role) {
                                             'admin' => 'bg-red-50 text-red-700 border-red-200',
                                             'guru' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                            'staf' => 'bg-violet-50 text-violet-700 border-violet-200',
                                             'pengawas' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                             default => 'bg-slate-100 text-slate-600 border-slate-200',
                                         };

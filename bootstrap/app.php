@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin'          => \App\Http\Middleware\AdminMiddleware::class,
             'pengawas'       => \App\Http\Middleware\PengawasMiddleware::class,
+            'staf'           => \App\Http\Middleware\StafMiddleware::class,
             'single.session' => \App\Http\Middleware\SingleSessionMiddleware::class,
         ]);
 

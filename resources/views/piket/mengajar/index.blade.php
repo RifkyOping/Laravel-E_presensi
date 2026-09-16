@@ -127,7 +127,7 @@
                             <svg class="w-3.5 h-3.5 text-blue-500 cursor-pointer flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="showPhotoModal('{{ Storage::url($item->foto_verifikasi) }}', '{{ addslashes($item->user->name) }}')"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             @endif
                         </div>
-                        <div class="text-[10px] text-slate-500 mt-0.5 truncate">{{ $item->kelas }} · Jam {{ $item->jam_ke }}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5 truncate">{{ $item->kelas }} · Mapel {{ $item->jam_ke }}</div>
                     </div>
                     <div class="w-[60px] flex-shrink-0 flex justify-center">
                         @if($item->verified_at)

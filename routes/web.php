@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\MataPelajaranController;
 use App\Http\Controllers\Admin\AdminJadwalMengajarController;
 use App\Http\Controllers\Admin\IndikatorLiterasiController as AdminIndikatorController;
 use App\Http\Controllers\Pengawas\PengawasController;
+use App\Http\Controllers\Staf\StafController;
 use App\Http\Controllers\Piket\PiketSholatController;
 use App\Http\Controllers\Piket\PiketMengajarController;
 use App\Http\Controllers\BukuManualController;
@@ -55,6 +56,9 @@ Route::get('/dashboard', function () {
     }
     if ($user->role === 'pengawas') {
         return redirect()->route('pengawas.dashboard');
+    }
+    if ($user->role === 'staf') {
+        return redirect()->route('staf.dashboard');
     }
     return redirect()->route('murid.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -301,6 +305,23 @@ Route::middleware(['auth', 'pengawas'])->prefix('pengawas')->name('pengawas.')->
     Route::get('/absensi-guru', [PengawasController::class, 'absensiGuru'])->name('absensi-guru');
     Route::get('/aktivitas-guru', [PengawasController::class, 'aktivitasGuru'])->name('aktivitas-guru');
     Route::get('/absensi-siswa', [PengawasController::class, 'absensiSiswa'])->name('absensi-siswa');
+});
+
+// ──────────────────────────────────────────
+// STAF ROUTES
+// ──────────────────────────────────────────
+Route::middleware(['auth', 'staf'])->prefix('staf')->name('staf.')->group(function () {
+    Route::get('/dashboard', [StafController::class, 'dashboard'])->name('dashboard');
+
+    // Staf - Scan QR Absen Siswa
+    Route::get('/scan-qr', [\App\Http\Controllers\Piket\ScanQrController::class, 'index'])->name('scan-qr');
+    Route::post('/scan-qr/process', [\App\Http\Controllers\Piket\ScanQrController::class, 'processScan'])->name('scan-qr.process');
+
+    // Staf - Verifikasi Aktivitas Mengajar
+    Route::get('/verifikasi', [\App\Http\Controllers\Piket\PiketMengajarController::class, 'index'])->name('verifikasi.index');
+    Route::get('/verifikasi/{aktivitas}', [\App\Http\Controllers\Piket\PiketMengajarController::class, 'verifikasi'])->name('verifikasi.show');
+    Route::put('/verifikasi/{aktivitas}', [\App\Http\Controllers\Piket\PiketMengajarController::class, 'storeVerifikasi'])->name('verifikasi.store');
+    Route::delete('/verifikasi/{aktivitas}', [\App\Http\Controllers\Piket\PiketMengajarController::class, 'hapusVerifikasi'])->name('verifikasi.hapus');
 });
 
 // ──────────────────────────────────────────

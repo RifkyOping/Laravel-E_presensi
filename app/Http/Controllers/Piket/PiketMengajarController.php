@@ -78,7 +78,11 @@ class PiketMengajarController extends Controller
             'verified_at'       => now(),
         ]);
 
-        return redirect()->route('piket.mengajar.index')
+        $indexRoute = Auth::user()->role === 'staf'
+            ? route('staf.verifikasi.index')
+            : route('piket.mengajar.index');
+
+        return redirect($indexRoute)
             ->with('success', 'Verifikasi berhasil disimpan untuk ' . $aktivitas->user->name . '.');
     }
 
@@ -96,7 +100,11 @@ class PiketMengajarController extends Controller
             'verified_at'       => null,
         ]);
 
-        return back()->with('success', 'Verifikasi berhasil dihapus.');
+        $backRoute = Auth::user()->role === 'staf'
+            ? route('staf.verifikasi.index')
+            : route('piket.mengajar.index');
+
+        return redirect($backRoute)->with('success', 'Verifikasi berhasil dihapus.');
     }
 
     // ─────────────────────────────────────────────────

@@ -54,6 +54,7 @@
                                 class="w-full border border-slate-200 focus:border-[#1e3a6e] focus:ring-2 focus:ring-[#1e3a6e]/10 rounded-xl px-4 py-2.5 text-slate-800 font-medium focus:outline-none transition text-sm bg-white">
                             <option value="murid"     {{ old('role',$user->role)==='murid'     ?'selected':'' }}>Murid</option>
                             <option value="guru"      {{ old('role',$user->role)==='guru'      ?'selected':'' }}>Guru</option>
+                            <option value="staf"      {{ old('role',$user->role)==='staf'      ?'selected':'' }}>Staf</option>
                             <option value="pengawas"  {{ old('role',$user->role)==='pengawas'  ?'selected':'' }}>Pengawas</option>
                             <option value="admin"     {{ old('role',$user->role)==='admin'     ?'selected':'' }}>Admin</option>
                         </select>
@@ -177,18 +178,6 @@
                         <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Piket Sholat</span>
                         <span class="text-xs text-slate-400">(Dapat menginput absen sholat murid)</span>
                     </div>
-                </label>
-                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
-                    <input type="checkbox" name="is_piket_absen_qr" value="1"
-                           {{ old('is_piket_absen_qr', $user->guruProfile?->is_piket_absen_qr) ? 'checked' : '' }}
-                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
-                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Piket Scan Absen QR</span>
-                </label>
-                <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
-                    <input type="checkbox" name="is_piket_mengajar" value="1"
-                           {{ old('is_piket_mengajar', $user->guruProfile?->is_piket_mengajar) ? 'checked' : '' }}
-                           class="w-5 h-5 text-[#1e3a6e] border-slate-300 rounded focus:ring-[#1e3a6e]">
-                    <span class="text-sm font-semibold text-slate-700 group-hover:text-blue-600 transition">Petugas Verifikasi Aktivitas Mengajar</span>
                 </label>
                 <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50/30 cursor-pointer transition group">
                     <input type="checkbox" name="is_piket_rpp" value="1"

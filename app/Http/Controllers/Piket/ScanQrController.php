@@ -16,7 +16,7 @@ class ScanQrController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->role !== 'guru') {
+        if (!in_array(auth()->user()->role, ['guru', 'staf'])) {
             abort(403, 'Anda tidak memiliki akses ke fitur Scan Absen QR.');
         }
         
@@ -42,7 +42,7 @@ class ScanQrController extends Controller
      */
     public function processScan(Request $request)
     {
-        if (auth()->user()->role !== 'guru') {
+        if (!in_array(auth()->user()->role, ['guru', 'staf'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki akses untuk fitur ini.'

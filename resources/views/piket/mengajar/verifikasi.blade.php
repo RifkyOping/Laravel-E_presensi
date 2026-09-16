@@ -65,7 +65,18 @@
         </div>
 
         {{-- Form Verifikasi --}}
-        <form method="POST" action="{{ route('piket.mengajar.store-verifikasi', $aktivitas->id) }}"
+        @php
+            $storeRoute = Auth::user()->role === 'staf'
+                ? route('staf.verifikasi.store', $aktivitas->id)
+                : route('piket.mengajar.store-verifikasi', $aktivitas->id);
+            $indexRoute = Auth::user()->role === 'staf'
+                ? route('staf.verifikasi.index')
+                : route('piket.mengajar.index');
+            $hapusRoute = Auth::user()->role === 'staf'
+                ? route('staf.verifikasi.hapus', $aktivitas->id)
+                : route('piket.mengajar.hapus-verifikasi', $aktivitas->id);
+        @endphp
+        <form method="POST" action="{{ $storeRoute }}"
             enctype="multipart/form-data" id="form-verifikasi" class="app-card p-6 space-y-6">
             @csrf
             @method('PUT')
@@ -225,7 +236,7 @@
                     </svg>
                     {{ $aktivitas->verified_at ? 'Perbarui' : 'Simpan' }}
                 </button>
-                <a href="{{ route('piket.mengajar.index') }}" class="btn-outline py-2.5 px-5">
+                <a href="{{ $indexRoute }}" class="btn-outline py-2.5 px-5">
                     Batal
                 </a>
                 @if($aktivitas->verified_at)
@@ -242,7 +253,7 @@
         </form>
 
         @if($aktivitas->verified_at)
-            <form id="delete-form" method="POST" action="{{ route('kurikulum.hapus-verifikasi', $aktivitas->id) }}"
+            <form id="delete-form" method="POST" action="{{ $hapusRoute }}"
                 class="hidden">
                 @csrf @method('DELETE')
             </form>

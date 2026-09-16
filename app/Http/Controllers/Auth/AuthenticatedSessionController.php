@@ -90,6 +90,7 @@ class AuthenticatedSessionController extends Controller
             'guru'       => redirect()->route('guru.dashboard'),
             'pengawas'   => redirect()->route('pengawas.dashboard'),
             'kurikulum'  => redirect()->route('kurikulum.dashboard'),
+            'staf'       => redirect()->route('staf.dashboard'),
             default      => redirect()->route('murid.dashboard'),
         };
 
