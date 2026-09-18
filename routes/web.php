@@ -245,10 +245,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Monitoring
     Route::get('/absensi-guru', [AdminController::class, 'absensiGuru'])->name('absensi-guru');
     Route::get('/absensi-guru/export', [AdminController::class, 'exportAbsensiGuru'])->name('absensi-guru.export');
+    Route::post('/absensi-guru/store', [AdminController::class, 'storeAbsensiGuru'])->name('absensi-guru.store');
+    Route::get('/absensi-guru/{absensi}/edit', [AdminController::class, 'editAbsensiGuru'])->name('absensi-guru.edit');
+    Route::put('/absensi-guru/{absensi}', [AdminController::class, 'updateAbsensiGuru'])->name('absensi-guru.update');
+    Route::delete('/absensi-guru/{absensi}', [AdminController::class, 'destroyAbsensiGuru'])->name('absensi-guru.destroy');
     Route::get('/aktivitas-guru', [AdminController::class, 'aktivitasGuru'])->name('aktivitas-guru');
     Route::get('/aktivitas-guru/export', [AdminController::class, 'exportAktivitasGuru'])->name('aktivitas-guru.export');
     Route::get('/absensi-siswa', [AdminController::class, 'absensiSiswa'])->name('absensi-siswa');
     Route::get('/absensi-siswa/export', [AdminController::class, 'exportAbsensiSiswa'])->name('absensi-siswa.export');
+    Route::post('/absensi-siswa/store', [AdminController::class, 'storeAbsensiSiswa'])->name('absensi-siswa.store');
+    Route::get('/absensi-siswa/{absensi}/edit', [AdminController::class, 'editAbsensiSiswa'])->name('absensi-siswa.edit');
+    Route::put('/absensi-siswa/{absensi}', [AdminController::class, 'updateAbsensiSiswa'])->name('absensi-siswa.update');
+    Route::delete('/absensi-siswa/{absensi}', [AdminController::class, 'destroyAbsensiSiswa'])->name('absensi-siswa.destroy');
 
     // Rekap Absensi Kelas (absensi siswa yang diinput guru)
     Route::get('/rekap-absensi-kelas', [AdminController::class, 'rekapAbsensiKelas'])->name('rekap-absensi-kelas');

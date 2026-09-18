@@ -1310,6 +1310,157 @@ class AdminController extends Controller
         ]);
     }
 
+
+    // ──────────────────────────────────────────
+    //  ABSENSI MANUAL SISWA (oleh ADMIN)
+    // ──────────────────────────────────────────
+
+    public function storeAbsensiSiswa(Request $request)
+    {
+        $request->validate([
+            'user_id'      => 'required|exists:users,id',
+            'tanggal'      => 'required|date',
+            'waktu_datang' => 'nullable|date_format:H:i',
+            'waktu_pulang' => 'nullable|date_format:H:i',
+            'status'       => 'required|in:hadir,izin,sakit,alpa',
+            'keterangan'   => 'nullable|string|max:500',
+        ], [
+            'user_id.required'  => 'Murid wajib dipilih.',
+            'user_id.exists'    => 'Murid tidak ditemukan.',
+            'tanggal.required'  => 'Tanggal wajib diisi.',
+            'status.required'   => 'Status kehadiran wajib dipilih.',
+            'status.in'         => 'Status tidak valid.',
+        ]);
+
+        $alreadyExists = AbsensiSiswa::where('user_id', $request->user_id)
+            ->whereDate('tanggal', $request->tanggal)
+            ->exists();
+
+        if ($alreadyExists) {
+            return redirect()->back()->with('error', 'Absensi murid pada tanggal tersebut sudah ada. Gunakan tombol Edit untuk mengubahnya.');
+        }
+
+        AbsensiSiswa::create([
+            'user_id'      => $request->user_id,
+            'tanggal'      => $request->tanggal,
+            'waktu_datang' => $request->waktu_datang ? $request->waktu_datang . ':00' : null,
+            'waktu_pulang' => $request->waktu_pulang ? $request->waktu_pulang . ':00' : null,
+            'status'       => $request->status,
+            'keterangan'   => $request->keterangan,
+        ]);
+
+        return redirect()->back()->with('success', 'Absensi murid berhasil ditambahkan secara manual.');
+    }
+
+    public function editAbsensiSiswa(AbsensiSiswa $absensi)
+    {
+        $siswaList = User::where('role', 'murid')->orderBy('name')->get();
+        return view('admin.absensi-siswa-edit', compact('absensi', 'siswaList'));
+    }
+
+    public function updateAbsensiSiswa(Request $request, AbsensiSiswa $absensi)
+    {
+        $request->validate([
+            'waktu_datang' => 'nullable|date_format:H:i',
+            'waktu_pulang' => 'nullable|date_format:H:i',
+            'status'       => 'required|in:hadir,izin,sakit,alpa',
+            'keterangan'   => 'nullable|string|max:500',
+        ]);
+
+        $absensi->update([
+            'waktu_datang' => $request->waktu_datang ? $request->waktu_datang . ':00' : null,
+            'waktu_pulang' => $request->waktu_pulang ? $request->waktu_pulang . ':00' : null,
+            'status'       => $request->status,
+            'keterangan'   => $request->keterangan,
+        ]);
+
+        return redirect()->back()->with('success', 'Data absensi murid berhasil diperbarui.');
+    }
+
+    public function destroyAbsensiSiswa(AbsensiSiswa $absensi)
+    {
+        $nama = $absensi->user->name ?? 'Murid';
+        $absensi->delete();
+
+        return redirect()->back()->with('success', "Data absensi {$nama} berhasil dihapus.");
+    }
+
+    // ──────────────────────────────────────────
+    //  ABSENSI MANUAL GURU (oleh ADMIN)
+    // ──────────────────────────────────────────
+
+    public function storeAbsensiGuru(Request $request)
+    {
+        $request->validate([
+            'user_id'      => 'required|exists:users,id',
+            'tanggal'      => 'required|date',
+            'waktu_datang' => 'nullable|date_format:H:i',
+            'waktu_pulang' => 'nullable|date_format:H:i',
+            'status'       => 'required|in:hadir,izin,sakit,alpa,cuti,tugas',
+            'keterangan'   => 'nullable|string|max:500',
+        ], [
+            'user_id.required'  => 'Guru wajib dipilih.',
+            'user_id.exists'    => 'Guru tidak ditemukan.',
+            'tanggal.required'  => 'Tanggal wajib diisi.',
+            'status.required'   => 'Status kehadiran wajib dipilih.',
+            'status.in'         => 'Status tidak valid.',
+        ]);
+
+        $alreadyExists = AbsensiGuru::where('user_id', $request->user_id)
+            ->whereDate('tanggal', $request->tanggal)
+            ->exists();
+
+        if ($alreadyExists) {
+            return redirect()->back()->with('error', 'Absensi guru pada tanggal tersebut sudah ada. Gunakan tombol Edit untuk mengubahnya.');
+        }
+
+        AbsensiGuru::create([
+            'user_id'      => $request->user_id,
+            'tanggal'      => $request->tanggal,
+            'waktu_datang' => $request->waktu_datang ? $request->waktu_datang . ':00' : null,
+            'waktu_pulang' => $request->waktu_pulang ? $request->waktu_pulang . ':00' : null,
+            'status'       => $request->status,
+            'keterangan'   => $request->keterangan,
+        ]);
+
+        return redirect()->back()->with('success', 'Absensi guru berhasil ditambahkan secara manual.');
+    }
+
+    public function editAbsensiGuru(AbsensiGuru $absensi)
+    {
+        $guruList = User::where('role', 'guru')->orderBy('name')->get();
+        return view('admin.absensi-guru-edit', compact('absensi', 'guruList'));
+    }
+
+    public function updateAbsensiGuru(Request $request, AbsensiGuru $absensi)
+    {
+        $request->validate([
+            'waktu_datang' => 'nullable|date_format:H:i',
+            'waktu_pulang' => 'nullable|date_format:H:i',
+            'status'       => 'required|in:hadir,izin,sakit,alpa,cuti,tugas',
+            'keterangan'   => 'nullable|string|max:500',
+            'kategori'     => 'nullable|string|max:100',
+        ]);
+
+        $absensi->update([
+            'waktu_datang' => $request->waktu_datang ? $request->waktu_datang . ':00' : null,
+            'waktu_pulang' => $request->waktu_pulang ? $request->waktu_pulang . ':00' : null,
+            'status'       => $request->status ?: null,
+            'keterangan'   => $request->keterangan,
+            'kategori'     => $request->kategori ?: null,
+        ]);
+
+        return redirect()->back()->with('success', 'Data absensi guru berhasil diperbarui.');
+    }
+
+    public function destroyAbsensiGuru(AbsensiGuru $absensi)
+    {
+        $nama = $absensi->user->name ?? 'Guru';
+        $absensi->delete();
+
+        return redirect()->back()->with('success', "Data absensi {$nama} berhasil dihapus.");
+    }
+
     // ──────────────────────────────────────────
     //  PERSETUJUAN IZIN / SAKIT (ADMIN)
     // ──────────────────────────────────────────

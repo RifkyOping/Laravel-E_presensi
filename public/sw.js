@@ -1,4 +1,4 @@
-const CACHE_NAME = 'e-presensi-cache-v1';
+const CACHE_NAME = 'e-presensi-cache-v2';
 const OFFLINE_URL = '/offline';
 
 const urlsToCache = [
@@ -47,23 +47,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            return cache.match(OFFLINE_URL);
-          });
-        })
-    );
-  } else {
-    event.respondWith(
-      caches.match(event.request)
-        .then((response) => {
-          return response || fetch(event.request);
-        })
-    );
-  }
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        // Optional: Update cache dynamically here if needed
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((response) => {
+          if (response) {
+            return response;
+          }
+          if (event.request.mode === 'navigate') {
+            return caches.match(OFFLINE_URL);
+          }
+        });
+      })
+  );
 });
 
 self.addEventListener('push', function (event) {

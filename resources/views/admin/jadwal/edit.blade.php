@@ -149,8 +149,7 @@
                                                         x-model="item.mata_pelajaran"
                                                         class="w-full text-sm border-slate-300 rounded-lg focus:border-[#1e3a6e] focus:ring-[#1e3a6e]">
                                                         <option value="">Mapel</option>
-                                                        @foreach($mapels as $mapel) <option value="{{$mapel}}">
-                                                        {{$mapel}}</option> @endforeach
+                                                        @foreach($mapels as $mapel) <option value="{{$mapel}}">{{$mapel}}</option> @endforeach
                                                     </select>
                                                 </td>
                                                 <td class="p-2" colspan="1">

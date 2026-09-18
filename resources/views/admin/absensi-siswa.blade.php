@@ -240,7 +240,11 @@
                         {{ strtoupper(substr($s->name, 0, 1)) }}
                     </div>
                     <p class="font-semibold text-slate-700 text-sm truncate flex-1">{{ $s->name }}</p>
-                    <span class="app-badge b-slate">Belum</span>
+                    <button type="button"
+                        onclick="openCreateSiswa({{ $s->id }}, '{{ addslashes($s->name) }}', '{{ $tanggal->format('Y-m-d') }}')"
+                        class="app-badge b-blue cursor-pointer hover:bg-blue-100 transition">
+                        + Absenkan
+                    </button>
                 </div>
                 @empty
                 <p class="px-5 py-8 text-center text-[#1e3a6e] font-semibold text-sm">Semua murid sudah absen!</p>
@@ -251,15 +255,21 @@
 
     {{-- Riwayat Absensi Murid --}}
     <div id="riwayat-container" class="app-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100">
-            <h3 class="font-bold text-slate-800">Riwayat Absensi Murid</h3>
-            <p class="text-xs text-slate-400 mt-0.5">{{ $riwayat->total() }} record ditemukan</p>
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 class="font-bold text-slate-800">Riwayat Absensi Murid</h3>
+                <p class="text-xs text-slate-400 mt-0.5">{{ $riwayat->total() }} record ditemukan</p>
+            </div>
+            <button type="button" onclick="openCreateSiswaFree()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1e3a6e] text-white text-xs font-bold rounded-lg hover:bg-[#162d57] transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Tambah Manual
+            </button>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full app-tbl">
                 <thead><tr>
                     <th class="text-center">Tanggal</th><th class="text-left">Nama</th><th class="text-center">Waktu Datang</th>
-                    <th class="text-center">Waktu Pulang</th><th class="text-center">Status</th>
+                    <th class="text-center">Waktu Pulang</th><th class="text-center">Status</th><th class="text-center">Aksi</th>
                 </tr></thead>
                 <tbody>
                     @forelse($riwayat as $r)
@@ -300,9 +310,26 @@
                                 @endif
                             </div>
                         </td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center gap-1">
+                                <button type="button"
+                                    onclick="openEditSiswa({{ $r->id }}, '{{ addslashes($r->user->name) }}', '{{ $r->tanggal->format('Y-m-d') }}', '{{ $r->waktu_datang ? substr($r->waktu_datang,0,5) : '' }}', '{{ $r->waktu_pulang ? substr($r->waktu_pulang,0,5) : '' }}', '{{ $r->status }}', '{{ addslashes($r->keterangan ?? '') }}')"
+                                    class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 transition text-[0.6rem] font-bold">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Edit
+                                </button>
+                                <form method="POST" action="{{ route('admin.absensi-siswa.destroy', $r->id) }}" onsubmit="return confirm('Hapus data absensi {{ $r->user->name }}?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition text-[0.6rem] font-bold">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="text-center py-8 text-slate-400">Belum ada riwayat absensi murid.</td></tr>
+                    <tr><td colspan="6" class="text-center py-8 text-slate-400">Belum ada riwayat absensi murid.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -315,7 +342,145 @@
 </div>
 </x-app-layout>
 
+{{-- ── MODAL BUAT ABSENSI SISWA (MANUAL) ── --}}
+<div id="modal-create-siswa" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none!important" onclick="if(event.target===this)closeCreateSiswa()">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="bg-gradient-to-r from-[#1e3a6e] to-[#2d5099] rounded-t-2xl px-6 py-4">
+            <h3 class="text-white font-black text-base">Absensi Manual Murid</h3>
+            <p id="modal-create-siswa-nama" class="text-blue-200 text-xs mt-0.5 font-medium"></p>
+        </div>
+        <form id="form-create-siswa" method="POST" action="{{ route('admin.absensi-siswa.store') }}" class="p-6 space-y-4">
+            @csrf
+            <input type="hidden" name="user_id" id="create-siswa-user-id">
+            <div id="create-siswa-select-wrap">
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Murid</label>
+                <select name="user_id" id="create-siswa-select" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30">
+                    <option value="">— Pilih Murid —</option>
+                    @foreach($semuaSiswa as $sw)
+                    <option value="{{ $sw->id }}">{{ $sw->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Tanggal</label>
+                <input type="date" name="tanggal" id="create-siswa-tanggal" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30" required>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Jam Datang</label>
+                    <input type="time" name="waktu_datang" id="create-siswa-datang" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Jam Pulang</label>
+                    <input type="time" name="waktu_pulang" id="create-siswa-pulang" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Status Kehadiran</label>
+                <select name="status" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30" required>
+                    <option value="hadir">Hadir</option>
+                    <option value="izin">Izin</option>
+                    <option value="sakit">Sakit</option>
+                    <option value="alpa">Alpa</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Keterangan <span class="font-normal text-slate-400">(opsional)</span></label>
+                <textarea name="keterangan" rows="2" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/30 resize-none" placeholder="Tambahkan keterangan..."></textarea>
+            </div>
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeCreateSiswa()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Batal</button>
+                <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-[#1e3a6e] text-white font-bold text-sm hover:bg-[#162d57] transition shadow-sm">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ── MODAL EDIT ABSENSI SISWA ── --}}
+<div id="modal-edit-siswa" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none!important" onclick="if(event.target===this)closeEditSiswa()">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="bg-gradient-to-r from-[#1e3a6e] to-[#2d5099] rounded-t-2xl px-6 py-4">
+            <h3 class="text-white font-black text-base">Edit Absensi Murid</h3>
+            <p id="modal-edit-siswa-nama" class="text-blue-200 text-xs mt-0.5 font-medium"></p>
+        </div>
+        <form id="form-edit-siswa" method="POST" action="" class="p-6 space-y-4">
+            @csrf @method('PUT')
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Jam Datang</label>
+                    <input type="time" name="waktu_datang" id="edit-siswa-datang" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Jam Pulang</label>
+                    <input type="time" name="waktu_pulang" id="edit-siswa-pulang" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Status Kehadiran</label>
+                <select name="status" id="edit-siswa-status" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30" required>
+                    <option value="hadir">Hadir</option>
+                    <option value="izin">Izin</option>
+                    <option value="sakit">Sakit</option>
+                    <option value="alpa">Alpa</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Keterangan <span class="font-normal text-slate-400">(opsional)</span></label>
+                <textarea name="keterangan" id="edit-siswa-ket" rows="2" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 resize-none"></textarea>
+            </div>
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeEditSiswa()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Batal</button>
+                <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-[#1e3a6e] text-white font-bold text-sm hover:bg-[#162d57] transition shadow-sm">Perbarui</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <script>
+    // ── Modal Create Siswa ──
+    function openCreateSiswa(userId, nama, tanggal) {
+        document.getElementById('create-siswa-user-id').value = userId;
+        document.getElementById('create-siswa-select').value = userId;
+        document.getElementById('create-siswa-select-wrap').style.display = 'none';
+        document.getElementById('create-siswa-tanggal').value = tanggal;
+        document.getElementById('modal-create-siswa-nama').textContent = nama + ' · ' + tanggal;
+        showModal('modal-create-siswa');
+    }
+    function openCreateSiswaFree() {
+        document.getElementById('create-siswa-user-id').value = '';
+        document.getElementById('create-siswa-select').value = '';
+        document.getElementById('create-siswa-select-wrap').style.display = 'block';
+        document.getElementById('create-siswa-select').onchange = function() {
+            document.getElementById('create-siswa-user-id').value = this.value;
+        };
+        document.getElementById('create-siswa-tanggal').value = '';
+        document.getElementById('modal-create-siswa-nama').textContent = 'Pilih murid & tanggal di bawah';
+        document.getElementById('form-create-siswa').onsubmit = function() {
+            document.getElementById('create-siswa-user-id').value = document.getElementById('create-siswa-select').value;
+        };
+        showModal('modal-create-siswa');
+    }
+    function closeCreateSiswa() { hideModal('modal-create-siswa'); }
+
+    // ── Modal Edit Siswa ──
+    function openEditSiswa(id, nama, tanggal, datang, pulang, status, ket) {
+        document.getElementById('modal-edit-siswa-nama').textContent = nama + ' · ' + tanggal;
+        document.getElementById('form-edit-siswa').action = '/admin/absensi-siswa/' + id;
+        document.getElementById('edit-siswa-datang').value = datang;
+        document.getElementById('edit-siswa-pulang').value = pulang;
+        document.getElementById('edit-siswa-status').value = status;
+        document.getElementById('edit-siswa-ket').value = ket;
+        showModal('modal-edit-siswa');
+    }
+    function closeEditSiswa() { hideModal('modal-edit-siswa'); }
+
+    function showModal(id) { document.getElementById(id).style.removeProperty('display'); }
+    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // ── AJAX Fetch ──
     let searchTimeout;
     function debounceFetch() {
         clearTimeout(searchTimeout);
@@ -327,27 +492,21 @@
         const search = document.getElementById('filter-search').value;
         const kelas_id = document.getElementById('filter-kelas').value;
         const url = new URL(window.location.href);
-        
         if (tanggal) url.searchParams.set('tanggal', tanggal);
-        
         if (search) url.searchParams.set('search', search);
         else url.searchParams.delete('search');
-
         if (kelas_id) url.searchParams.set('kelas_id', kelas_id);
         else url.searchParams.delete('kelas_id');
-
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.text())
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            
             const els = ['welcome-strip', 'chart-container', 'lists-container', 'riwayat-container'];
             els.forEach(id => {
                 const newEl = doc.getElementById(id);
                 if (newEl) document.getElementById(id).innerHTML = newEl.innerHTML;
             });
-            
             window.history.pushState({}, '', url);
         });
     }
@@ -357,15 +516,12 @@
         if (paginationLink) {
             e.preventDefault();
             const url = new URL(paginationLink.href);
-            
             const tanggal = document.getElementById('filter-tanggal').value;
             const search = document.getElementById('filter-search').value;
             const kelas_id = document.getElementById('filter-kelas').value;
-            
             if (tanggal) url.searchParams.set('tanggal', tanggal);
             if (search) url.searchParams.set('search', search);
             if (kelas_id) url.searchParams.set('kelas_id', kelas_id);
-            
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(res => res.text())
             .then(html => {
