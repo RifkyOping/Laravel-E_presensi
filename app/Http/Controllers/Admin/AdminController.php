@@ -1049,6 +1049,35 @@ class AdminController extends Controller
         ]);
     }
 
+    public function updateAktivitasGuru(Request $request, AbsensiMengajar $aktivitas)
+    {
+        $request->validate([
+            'mata_pelajaran' => 'required|string|max:255',
+            'kelas'          => 'required|string|max:50',
+            'jam_ke'         => 'required|string|max:50',
+            'jam_mulai'      => 'nullable|date_format:H:i',
+            'jam_selesai'    => 'nullable|date_format:H:i',
+        ]);
+
+        $aktivitas->update([
+            'mata_pelajaran' => $request->mata_pelajaran,
+            'kelas'          => $request->kelas,
+            'jam_ke'         => $request->jam_ke,
+            'jam_mulai'      => $request->jam_mulai ? (strlen($request->jam_mulai) == 5 ? $request->jam_mulai . ':00' : $request->jam_mulai) : null,
+            'jam_selesai'    => $request->jam_selesai ? (strlen($request->jam_selesai) == 5 ? $request->jam_selesai . ':00' : $request->jam_selesai) : null,
+        ]);
+
+        return redirect()->route('admin.aktivitas-guru')->with('success', 'Data aktivitas mengajar berhasil diperbarui.');
+    }
+
+    public function destroyAktivitasGuru(AbsensiMengajar $aktivitas)
+    {
+        $nama = $aktivitas->user->name ?? 'Guru';
+        $aktivitas->delete();
+
+        return redirect()->back()->with('success', "Data aktivitas mengajar {$nama} berhasil dihapus.");
+    }
+
     // ──────────────────────────────────────────
     //  REKAP ABSENSI KELAS (diinput oleh Guru)
     // ──────────────────────────────────────────

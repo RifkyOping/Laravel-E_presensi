@@ -251,6 +251,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/absensi-guru/{absensi}', [AdminController::class, 'destroyAbsensiGuru'])->name('absensi-guru.destroy');
     Route::get('/aktivitas-guru', [AdminController::class, 'aktivitasGuru'])->name('aktivitas-guru');
     Route::get('/aktivitas-guru/export', [AdminController::class, 'exportAktivitasGuru'])->name('aktivitas-guru.export');
+    Route::put('/aktivitas-guru/{aktivitas}', [AdminController::class, 'updateAktivitasGuru'])->name('aktivitas-guru.update');
+    Route::delete('/aktivitas-guru/{aktivitas}', [AdminController::class, 'destroyAktivitasGuru'])->name('aktivitas-guru.destroy');
     Route::get('/absensi-siswa', [AdminController::class, 'absensiSiswa'])->name('absensi-siswa');
     Route::get('/absensi-siswa/export', [AdminController::class, 'exportAbsensiSiswa'])->name('absensi-siswa.export');
     Route::post('/absensi-siswa/store', [AdminController::class, 'storeAbsensiSiswa'])->name('absensi-siswa.store');

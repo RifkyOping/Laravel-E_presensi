@@ -168,6 +168,9 @@
                             <th
                                 class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
                                 Waktu</th>
+                            <th
+                                class="py-2 md:py-3.5 px-2 md:px-5 font-black text-slate-400 uppercase tracking-wider text-center">
+                                Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
@@ -214,10 +217,28 @@
                                             {{ Carbon::parse($item->jam_selesai)->format('H:i') }}</span>
                                     @endif
                                 </td>
+
+                                {{-- Aksi --}}
+                                <td class="py-2 md:py-3.5 px-2 md:px-5 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <button type="button"
+                                            onclick="openEditAktivitas({{ $item->id }}, '{{ addslashes($item->user->name) }}', '{{ $item->tanggal }}', '{{ addslashes($item->mata_pelajaran) }}', '{{ addslashes($item->kelas) }}', '{{ $item->jam_ke }}', '{{ $item->jam_mulai ? substr($item->jam_mulai,0,5) : '' }}', '{{ $item->jam_selesai ? substr($item->jam_selesai,0,5) : '' }}')"
+                                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 transition text-[0.6rem] md:text-xs font-bold">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            Edit
+                                        </button>
+                                        <button type="button"
+                                            onclick="openDeleteAktivitas('{{ route('admin.aktivitas-guru.destroy', $item->id) }}', '{{ addslashes($item->user->name) }}')"
+                                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition text-[0.6rem] md:text-xs font-bold">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-12 md:py-16 text-center">
+                                <td colspan="6" class="py-12 md:py-16 text-center">
                                     <div class="flex flex-col items-center gap-3">
                                         <div
                                             class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
@@ -243,7 +264,103 @@
     </div>
 </x-app-layout>
 
+{{-- ── MODAL KONFIRMASI HAPUS AKTIVITAS ── --}}
+<div id="modal-delete-aktivitas" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none!important">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDeleteAktivitas()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+        <div class="bg-gradient-to-r from-red-600 to-red-500 rounded-t-2xl px-6 py-4">
+            <h3 class="text-white font-black text-base">Konfirmasi Hapus</h3>
+            <p class="text-red-100 text-xs mt-0.5">Tindakan ini tidak dapat dibatalkan</p>
+        </div>
+        <div class="p-6">
+            <div class="flex items-start gap-3 mb-5">
+                <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800">Hapus data aktivitas mengajar?</p>
+                    <p id="delete-aktivitas-nama" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+            </div>
+            <form id="form-delete-aktivitas" method="POST" action="">
+                @csrf @method('DELETE')
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeDeleteAktivitas()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Batal</button>
+                    <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 transition shadow-sm">Ya, Hapus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- ── MODAL EDIT AKTIVITAS GURU ── --}}
+<div id="modal-edit-aktivitas" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none!important" onclick="if(event.target===this)closeEditAktivitas()">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="bg-gradient-to-r from-[#1e3a6e] to-[#2d5099] rounded-t-2xl px-6 py-4">
+            <h3 class="text-white font-black text-base">Edit Aktivitas Mengajar</h3>
+            <p id="modal-edit-aktivitas-nama" class="text-blue-200 text-xs mt-0.5 font-medium"></p>
+        </div>
+        <form id="form-edit-aktivitas" method="POST" action="" class="p-6 space-y-4">
+            @csrf @method('PUT')
+            
+            <div class="grid grid-cols-2 gap-3">
+                <div class="col-span-2">
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Mata Pelajaran</label>
+                    <input type="text" name="mata_pelajaran" id="edit-aktivitas-mapel" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Kelas</label>
+                    <input type="text" name="kelas" id="edit-aktivitas-kelas" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Mapel Ke-</label>
+                    <input type="text" name="jam_ke" id="edit-aktivitas-jamke" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Jam Mulai</label>
+                    <input type="time" name="jam_mulai" id="edit-aktivitas-mulai" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-wider mb-1.5">Jam Selesai</label>
+                    <input type="time" name="jam_selesai" id="edit-aktivitas-selesai" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30">
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeEditAktivitas()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Batal</button>
+                <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-[#1e3a6e] text-white font-bold text-sm hover:bg-[#162d57] transition shadow-sm">Perbarui</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    function openDeleteAktivitas(url, nama) {
+        document.getElementById('delete-aktivitas-nama').textContent = 'Guru: ' + nama;
+        document.getElementById('form-delete-aktivitas').action = url;
+        document.getElementById('modal-delete-aktivitas').style.removeProperty('display');
+    }
+
+    function closeDeleteAktivitas() {
+        document.getElementById('modal-delete-aktivitas').style.display = 'none';
+    }
+
+    function openEditAktivitas(id, nama, tanggal, mapel, kelas, jamke, mulai, selesai) {
+        document.getElementById('modal-edit-aktivitas-nama').textContent = nama + ' · ' + tanggal;
+        document.getElementById('form-edit-aktivitas').action = '/admin/aktivitas-guru/' + id;
+        document.getElementById('edit-aktivitas-mapel').value = mapel;
+        document.getElementById('edit-aktivitas-kelas').value = kelas;
+        document.getElementById('edit-aktivitas-jamke').value = jamke;
+        document.getElementById('edit-aktivitas-mulai').value = mulai;
+        document.getElementById('edit-aktivitas-selesai').value = selesai;
+        document.getElementById('modal-edit-aktivitas').style.removeProperty('display');
+    }
+    
+    function closeEditAktivitas() {
+        document.getElementById('modal-edit-aktivitas').style.display = 'none';
+    }
+
     function fetchData() {
         const tanggal = document.getElementById('filter-tanggal').value;
         const guruId = document.getElementById('filter-guru').value;

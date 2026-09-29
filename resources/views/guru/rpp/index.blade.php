@@ -9,6 +9,171 @@
         $pageSubtitle = 'Kelola RPP untuk setiap kelas yang Anda ajar';
     @endphp
 
+    {{-- File Viewer Modal --}}
+    <div
+        x-data="{
+            open: false,
+            fileUrl: '',
+            fileName: '',
+            fileType: '',
+            isLocal: false,
+            openViewer(url, name, local = false) {
+                this.fileUrl = url;
+                this.fileName = name || 'Dokumen RPP';
+                const ext = (name || url).split('.').pop().toLowerCase();
+                this.fileType = ext;
+                this.isLocal = local;
+                this.open = true;
+                document.body.style.overflow = 'hidden';
+            },
+            closeViewer() {
+                this.open = false;
+                this.fileUrl = '';
+                this.fileName = '';
+                this.isLocal = false;
+                document.body.style.overflow = '';
+            },
+            get viewerSrc() {
+                if (!this.fileUrl) return '';
+                if (this.isLocal) {
+                    if (this.fileType === 'pdf') return this.fileUrl;
+                    return ''; // Cannot preview local doc/docx natively
+                }
+
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                
+                // Construct absolute URL safely
+                let absoluteUrl = this.fileUrl;
+                if (!absoluteUrl.startsWith('http') && !absoluteUrl.startsWith('blob:')) {
+                    absoluteUrl = window.location.origin + (absoluteUrl.startsWith('/') ? '' : '/') + absoluteUrl;
+                }
+
+                // If it's doc/docx, always use Google Docs Viewer (unless local dev environment without internet, but assuming public/internet access)
+                if (this.fileType === 'doc' || this.fileType === 'docx') {
+                    return 'https://docs.google.com/gview?url=' + encodeURIComponent(absoluteUrl) + '&embedded=true';
+                }
+
+                // If it's PDF on mobile, use Google Docs Viewer to prevent browser downloading/redirecting
+                if (this.fileType === 'pdf') {
+                    if (isMobile && !isLocalHost) {
+                        return 'https://docs.google.com/gview?url=' + encodeURIComponent(absoluteUrl) + '&embedded=true';
+                    }
+                    return this.fileUrl; // Native iframe for Desktop
+                }
+                
+                return '';
+            }
+        }"
+        @open-rpp-viewer.window="openViewer($event.detail.url, $event.detail.name, $event.detail.isLocal)"
+        @keydown.escape.window="open && closeViewer()"
+        id="rpp-viewer-root"
+    >
+        {{-- Modal Backdrop --}}
+        <div
+            x-show="open"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style="display:none;"
+            @click.self="closeViewer()"
+        >
+            {{-- Overlay --}}
+            <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"></div>
+
+            {{-- Modal Panel --}}
+            <div
+                x-show="open"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col"
+                style="height: 90vh; display:none;"
+            >
+                {{-- Modal Header --}}
+                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-9 h-9 rounded-xl bg-[#1e3a6e]/10 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-[#1e3a6e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Preview Dokumen RPP</p>
+                            <p x-text="fileName" class="font-bold text-slate-800 text-sm truncate max-w-xs sm:max-w-lg"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        {{-- Download button for server files --}}
+                        <a
+                            x-show="!isLocal"
+                            :href="fileUrl"
+                            download
+                            class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Unduh
+                        </a>
+                        <button @click="closeViewer()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition text-slate-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Modal Body --}}
+                <div class="flex-1 overflow-hidden rounded-b-2xl bg-slate-100 relative">
+
+                    {{-- PDF Viewer Native (Desktop or Local Blob) --}}
+                    <template x-if="fileType === 'pdf' && (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || isLocal || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')">
+                        <iframe
+                            :src="fileUrl"
+                            class="w-full h-full border-0 rounded-b-2xl block"
+                            title="Preview PDF"
+                        ></iframe>
+                    </template>
+
+                    {{-- Google Docs Viewer for PDF (Mobile Server) and DOC/DOCX --}}
+                    <template x-if="(!isLocal) && (fileType === 'doc' || fileType === 'docx' || (fileType === 'pdf' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'))">
+                        <div class="w-full h-full flex flex-col">
+                            <iframe
+                                :src="viewerSrc"
+                                class="w-full h-full flex-1 border-0 rounded-b-2xl block"
+                                title="Preview Dokumen Server"
+                            ></iframe>
+                        </div>
+                    </template>
+
+                    {{-- DOC/DOCX local (not yet uploaded) → cannot preview --}}
+                    <template x-if="(fileType === 'doc' || fileType === 'docx') && isLocal">
+                        <div class="w-full h-full flex flex-col items-center justify-center text-center p-8">
+                            <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h3 class="font-black text-slate-700 text-lg mb-2">Preview Tidak Tersedia</h3>
+                            <p class="text-slate-500 text-sm max-w-sm">File Word (<span x-text="'.' + fileType" class="font-bold text-slate-600"></span>) tidak dapat di-preview sebelum diunggah. Silakan upload terlebih dahulu untuk melihat isinya.</p>
+                            <div class="mt-4 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                                <p class="text-xs font-semibold text-amber-700">💡 Tip: Konversi ke PDF agar bisa di-preview langsung</p>
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
+            </div>
+        </div>
+
     <div class="space-y-6">
 
         {{-- Header --}}
@@ -111,9 +276,10 @@
                                             class="inline-flex ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold border {{ $statusData[1] }}">{{ $statusData[0] }}</span>
                                     </div>
                                     @if ($slot['file'])
-                                        <a href="{{ Storage::url($slot['file']) }}" target="_blank"
+                                        <button type="button"
+                                            onclick="openRppViewer('{{ Storage::url($slot['file']) }}', '{{ basename($slot['file']) }}', false)"
                                             class="text-xs font-semibold text-[#1e3a6e] hover:underline bg-[#1e3a6e]/5 px-2.5 py-1 rounded-md">Lihat
-                                            File</a>
+                                            File</button>
                                     @endif
                                 </div>
                                 <div class="text-[11px] text-slate-500 font-semibold mb-3">
@@ -127,7 +293,7 @@
                                     </div>
                                 @endif
 
-                                <div x-data="{ fileName: '', fileUrl: '' }">
+                                <div x-data="{ fileName: '', fileUrl: '', localExt: '' }">
                                     @if (in_array($slot['status'], ['pending', 'disetujui']))
                                         <div class="flex flex-col gap-2">
                                             <div
@@ -149,7 +315,8 @@
                                                 <span class="text-[11px] text-slate-600 font-medium">File baru: <span
                                                         x-text="fileName"
                                                         class="text-slate-800 font-bold"></span></span>
-                                                <a x-show="fileUrl" :href="fileUrl" target="_blank"
+                                                <button type="button" x-show="fileUrl"
+                                                    @click="openRppViewer(fileUrl, fileName, true)"
                                                     class="inline-flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#1e3a6e] bg-[#1e3a6e]/10 hover:bg-[#1e3a6e]/20 px-3 py-1.5 rounded-lg transition w-max">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
@@ -160,12 +327,12 @@
                                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                     Lihat File
-                                                </a>
+                                                </button>
                                             </div>
                                             <input type="file" x-ref="fileInput"
                                                 name="rpp_files[{{ $slot['tingkat'] }}|{{ $slot['jurusan'] }}|{{ $slot['target_periode'] }}]"
                                                 accept=".pdf,.doc,.docx" class="hidden"
-                                                @change="if($event.target.files[0]) { fileName = $event.target.files[0].name; fileUrl = URL.createObjectURL($event.target.files[0]) }">
+                                                @change="if($event.target.files[0]) { fileName = $event.target.files[0].name; fileUrl = URL.createObjectURL($event.target.files[0]); localExt = $event.target.files[0].name.split('.').pop().toLowerCase() }">
                                         </div>
                                     @else
                                         <div class="flex flex-col gap-2">
@@ -177,7 +344,8 @@
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                                     Pilih File
                                                 </button>
-                                                <a x-show="fileUrl" style="display: none;" :href="fileUrl" target="_blank"
+                                                <button type="button" x-show="fileUrl" style="display: none;"
+                                                    @click="openRppViewer(fileUrl, fileName, true)"
                                                     class="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#1e3a6e] bg-[#1e3a6e]/10 hover:bg-[#1e3a6e]/20 px-3 py-2 rounded-xl transition">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
@@ -188,7 +356,7 @@
                                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                     Lihat File
-                                                </a>
+                                                </button>
                                             </div>
                                             <input type="file" x-ref="newFileInput"
                                                 name="rpp_files[{{ $slot['tingkat'] }}|{{ $slot['jurusan'] }}|{{ $slot['target_periode'] }}]"
@@ -273,7 +441,8 @@
                                     </td>
                                     <td class="px-6 py-5 whitespace-nowrap text-center">
                                         @if ($slot['file'])
-                                            <a href="{{ Storage::url($slot['file']) }}" target="_blank"
+                                            <button type="button"
+                                                onclick="openRppViewer('{{ Storage::url($slot['file']) }}', '{{ basename($slot['file']) }}', false)"
                                                 class="inline-flex items-center gap-1.5 text-xs font-bold text-[#1e3a6e] hover:underline bg-[#1e3a6e]/5 hover:bg-[#1e3a6e]/10 px-3 py-2 rounded-xl transition">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -284,13 +453,13 @@
                                                         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                 </svg>
                                                 Lihat File
-                                            </a>
+                                            </button>
                                         @else
                                             <span
                                                 class="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-5" x-data="{ fileName: '', fileUrl: '' }">
+                                    <td class="px-6 py-5" x-data="{ fileName: '', fileUrl: '', localExt: '' }">
                                         @if (in_array($slot['status'], ['pending', 'disetujui']))
                                             <div class="flex flex-col gap-1.5">
                                                 <div class="flex items-center gap-3">
@@ -312,7 +481,8 @@
                                                     <span class="text-[11px] text-slate-600 font-medium">File baru:
                                                         <span x-text="fileName"
                                                             class="text-slate-800 font-bold"></span></span>
-                                                    <a x-show="fileUrl" :href="fileUrl" target="_blank"
+                                                    <button type="button" x-show="fileUrl"
+                                                        @click="openRppViewer(fileUrl, fileName, true)"
                                                         class="inline-flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#1e3a6e] bg-[#1e3a6e]/10 hover:bg-[#1e3a6e]/20 px-3 py-1.5 rounded-lg transition w-max">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
@@ -324,7 +494,7 @@
                                                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                         </svg>
                                                         Lihat File
-                                                    </a>
+                                                    </button>
                                                 </div>
                                                 <input type="file" x-ref="fileInput"
                                                     name="rpp_files[{{ $slot['tingkat'] }}|{{ $slot['jurusan'] }}|{{ $slot['target_periode'] }}]"
@@ -341,7 +511,8 @@
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                                         Pilih File
                                                     </button>
-                                                    <a x-show="fileUrl" style="display: none;" :href="fileUrl" target="_blank"
+                                                    <button type="button" x-show="fileUrl" style="display: none;"
+                                                        @click="openRppViewer(fileUrl, fileName, true)"
                                                         class="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#1e3a6e] bg-[#1e3a6e]/10 hover:bg-[#1e3a6e]/20 px-3 py-2 rounded-xl transition">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
@@ -352,8 +523,9 @@
                                                                 stroke-width="2"
                                                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                         </svg>
+
                                                         Lihat File
-                                                    </a>
+                                                    </button>
                                                 </div>
                                                 <input type="file" x-ref="newFileInput"
                                                     name="rpp_files[{{ $slot['tingkat'] }}|{{ $slot['jurusan'] }}|{{ $slot['target_periode'] }}]"
@@ -377,7 +549,18 @@
                         </button>
                     </div>
                 </form>
-            @endif
+                @endif
         </div>
     </div>
+    </div>{{-- close #rpp-viewer-root --}}
+
+    <script>
+        // Global bridge: called by onclick attributes (outside Alpine scope)
+        // dispatches a custom event that the Alpine root component listens to
+        function openRppViewer(url, name, isLocal) {
+            window.dispatchEvent(new CustomEvent('open-rpp-viewer', {
+                detail: { url, name, isLocal }
+            }));
+        }
+    </script>
 </x-app-layout>

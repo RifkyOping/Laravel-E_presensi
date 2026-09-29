@@ -95,10 +95,10 @@
 
                             @if($p->file_bukti)
                             <div>
-                                <a href="{{ asset('storage/' . $p->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1.5 text-[#1e3a6e] hover:text-[#2d5099] font-bold text-xs bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors border border-blue-100 w-fit">
+                                <button type="button" onclick="openPreviewModal('{{ asset('storage/' . $p->file_bukti) }}', '{{ $p->user->name ?? 'User' }}')" class="inline-flex items-center gap-1.5 text-[#1e3a6e] hover:text-[#2d5099] font-bold text-xs bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors border border-blue-100 w-fit cursor-pointer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     Lihat File Bukti
-                                </a>
+                                </button>
                             </div>
                             @endif
                         </div>
@@ -176,10 +176,10 @@
                             <td class="max-w-xs truncate" title="{{ $p->keterangan }}">{{ $p->keterangan ?? '-' }}</td>
                             <td class="text-center">
                                 @if($p->file_bukti)
-                                    <a href="{{ asset('storage/' . $p->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition">
+                                    <button type="button" onclick="openPreviewModal('{{ asset('storage/' . $p->file_bukti) }}', '{{ $p->user->name ?? 'User' }}')" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition cursor-pointer bg-transparent border-none p-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                         Lihat Bukti
-                                    </a>
+                                    </button>
                                 @else
                                     <span class="text-slate-400 italic text-xs">Tidak ada</span>
                                 @endif
@@ -256,10 +256,10 @@
 
                             @if($p->file_bukti)
                             <div>
-                                <a href="{{ asset('storage/' . $p->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1.5 text-[#1e3a6e] hover:text-[#2d5099] font-bold text-xs bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors border border-blue-100 w-fit">
+                                <button type="button" onclick="openPreviewModal('{{ asset('storage/' . $p->file_bukti) }}', '{{ $p->user->name ?? 'User' }}')" class="inline-flex items-center gap-1.5 text-[#1e3a6e] hover:text-[#2d5099] font-bold text-xs bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors border border-blue-100 w-fit cursor-pointer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     Lihat File Bukti
-                                </a>
+                                </button>
                             </div>
                             @endif
                         </div>
@@ -332,10 +332,10 @@
                             <td class="max-w-xs truncate" title="{{ $p->keterangan }}">{{ $p->keterangan ?? '-' }}</td>
                             <td class="text-center">
                                 @if($p->file_bukti)
-                                    <a href="{{ asset('storage/' . $p->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition">
+                                    <button type="button" onclick="openPreviewModal('{{ asset('storage/' . $p->file_bukti) }}', '{{ $p->user->name ?? 'User' }}')" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition cursor-pointer bg-transparent border-none p-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                         Lihat Bukti
-                                    </a>
+                                    </button>
                                 @else
                                     <span class="text-slate-400 italic text-xs">Tidak ada</span>
                                 @endif
@@ -415,10 +415,10 @@
                                 <td class="px-4 py-3 max-w-xs truncate" title="{{ $r->keterangan }}">{{ $r->keterangan ?? '-' }}</td>
                                 <td class="px-4 py-3 text-center">
                                     @if($r->file_bukti)
-                                        <a href="{{ asset('storage/' . $r->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition whitespace-nowrap">
+                                        <button type="button" onclick="openPreviewModal('{{ asset('storage/' . $r->file_bukti) }}', '{{ $r->user->name ?? 'User' }}')" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition whitespace-nowrap cursor-pointer bg-transparent border-none p-0">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                             Lihat
-                                        </a>
+                                        </button>
                                     @else
                                         <span class="text-slate-400 italic text-xs">Tidak ada</span>
                                     @endif
@@ -472,10 +472,10 @@
                                 <td class="px-4 py-3 max-w-xs truncate" title="{{ $r->keterangan }}">{{ $r->keterangan ?? '-' }}</td>
                                 <td class="px-4 py-3 text-center">
                                     @if($r->file_bukti)
-                                        <a href="{{ asset('storage/' . $r->file_bukti) }}" target="_blank" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition whitespace-nowrap">
+                                        <button type="button" onclick="openPreviewModal('{{ asset('storage/' . $r->file_bukti) }}', '{{ $r->user->name ?? 'User' }}')" class="inline-flex items-center gap-1 text-[#1e3a6e] hover:text-[#2d5099] font-semibold text-xs transition whitespace-nowrap cursor-pointer bg-transparent border-none p-0">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                             Lihat
-                                        </a>
+                                        </button>
                                     @else
                                         <span class="text-slate-400 italic text-xs">Tidak ada</span>
                                     @endif
@@ -497,8 +497,246 @@
             </div>
         </div>
 
+    {{-- Preview Modal --}}
+    <div id="previewModal" class="fixed inset-0 z-[9999] hidden" aria-modal="true" role="dialog">
+        {{-- Backdrop --}}
+        <div id="previewBackdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" onclick="closePreviewModal()"></div>
+        
+        {{-- Modal Content --}}
+        <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-6 md:p-10 pointer-events-none">
+            <div id="previewContent" class="relative bg-white rounded-2xl shadow-2xl border border-slate-200/60 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto transform scale-95 opacity-0 transition-all duration-300">
+                
+                {{-- Modal Header --}}
+                <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex-shrink-0">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1e3a6e] to-[#2d5099] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="text-sm font-bold text-slate-800 truncate">Preview Bukti</h3>
+                            <p id="previewUserName" class="text-[0.65rem] text-slate-500 font-semibold truncate"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <a id="previewDownloadBtn" href="#" download class="inline-flex items-center gap-1.5 bg-[#1e3a6e] hover:bg-[#2d5099] text-white px-3.5 py-2 rounded-xl font-bold text-xs transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download
+                        </a>
+                        <button type="button" onclick="closePreviewModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all duration-200" title="Tutup">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Modal Body --}}
+                <div id="previewBody" class="flex-1 overflow-auto bg-slate-50/50 flex items-center justify-center min-h-[300px] relative">
+                    {{-- Loading Spinner --}}
+                    <div id="previewLoading" class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                        <div class="w-10 h-10 border-3 border-slate-200 border-t-[#1e3a6e] rounded-full animate-spin"></div>
+                        <p class="text-xs text-slate-500 font-semibold">Memuat preview...</p>
+                    </div>
+                    {{-- Preview Container --}}
+                    <div id="previewContainer" class="w-full h-full hidden"></div>
+                </div>
+
+                {{-- Modal Footer --}}
+                <div class="px-5 py-3 border-t border-slate-100 bg-white flex items-center justify-center flex-shrink-0">
+                    <a id="previewOpenNew" href="#" target="_blank" class="inline-flex items-center gap-1 text-[0.65rem] text-slate-500 hover:text-[#1e3a6e] font-semibold transition">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Buka di tab baru
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #previewModal.show #previewBackdrop {
+            opacity: 1;
+        }
+        #previewModal.show #previewContent {
+            transform: scale(1);
+            opacity: 1;
+        }
+        #previewContainer img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            border-radius: 0.5rem;
+        }
+        #previewContainer iframe {
+            width: 100%;
+            height: 70vh;
+            border: none;
+        }
+        .preview-unsupported {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+            gap: 1rem;
+        }
+        .preview-unsupported .icon-wrap {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-unsupported .icon-wrap svg {
+            width: 1.75rem;
+            height: 1.75rem;
+            color: #94a3b8;
+        }
+        .preview-unsupported h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        .preview-unsupported p {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            max-width: 280px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        .border-3 {
+            border-width: 3px;
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function getFileExtension(url) {
+            try {
+                const pathname = new URL(url, window.location.origin).pathname;
+                const ext = pathname.split('.').pop().toLowerCase();
+                return ext;
+            } catch {
+                return '';
+            }
+        }
+
+        function getFileName(url) {
+            try {
+                const pathname = new URL(url, window.location.origin).pathname;
+                return pathname.split('/').pop();
+            } catch {
+                return 'file';
+            }
+        }
+
+        function openPreviewModal(fileUrl, userName) {
+            const modal = document.getElementById('previewModal');
+            const loading = document.getElementById('previewLoading');
+            const container = document.getElementById('previewContainer');
+            const downloadBtn = document.getElementById('previewDownloadBtn');
+            const openNewBtn = document.getElementById('previewOpenNew');
+            const userNameEl = document.getElementById('previewUserName');
+
+            // Reset state
+            loading.classList.remove('hidden');
+            container.classList.add('hidden');
+            container.innerHTML = '';
+
+            // Set metadata
+            const fileName = getFileName(fileUrl);
+            const ext = getFileExtension(fileUrl);
+            downloadBtn.href = fileUrl;
+            downloadBtn.setAttribute('download', fileName);
+            openNewBtn.href = fileUrl;
+            userNameEl.textContent = 'Bukti dari: ' + userName;
+
+            // Show modal
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    modal.classList.add('show');
+                });
+            });
+
+            // Determine preview type
+            const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+            const pdfExts = ['pdf'];
+
+            if (imageExts.includes(ext)) {
+                const img = new Image();
+                img.onload = function() {
+                    loading.classList.add('hidden');
+                    container.classList.remove('hidden');
+                    container.style.padding = '1.5rem';
+                    container.appendChild(img);
+                };
+                img.onerror = function() {
+                    showUnsupported(container, loading, fileName);
+                };
+                img.src = fileUrl;
+                img.alt = 'Bukti - ' + userName;
+            } else if (pdfExts.includes(ext)) {
+                const iframe = document.createElement('iframe');
+                iframe.src = fileUrl;
+                iframe.onload = function() {
+                    loading.classList.add('hidden');
+                    container.classList.remove('hidden');
+                };
+                container.style.padding = '0';
+                container.appendChild(iframe);
+                // Fallback timeout for PDFs
+                setTimeout(() => {
+                    loading.classList.add('hidden');
+                    container.classList.remove('hidden');
+                }, 2000);
+            } else {
+                showUnsupported(container, loading, fileName);
+            }
+        }
+
+        function showUnsupported(container, loading, fileName) {
+            loading.classList.add('hidden');
+            container.classList.remove('hidden');
+            container.style.padding = '0';
+            container.innerHTML = `
+                <div class="preview-unsupported">
+                    <div class="icon-wrap">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <h4>Preview tidak tersedia</h4>
+                    <p>File <strong>${fileName}</strong> tidak dapat ditampilkan secara langsung. Silakan download untuk melihat file.</p>
+                </div>
+            `;
+        }
+
+        function closePreviewModal() {
+            const modal = document.getElementById('previewModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('previewContainer').innerHTML = '';
+            }, 300);
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('previewModal');
+                if (!modal.classList.contains('hidden')) {
+                    closePreviewModal();
+                }
+            }
+        });
+
         function confirmReject(button) {
             Swal.fire({
                 title: 'Tolak Pengajuan?',
